@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const app = express();
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 // ===== CONFIGURACIÓN GENERAL =====
 app.use(cors());
@@ -11,6 +12,35 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== CONFIGURACIÓN DE BASE DE DATOS =====
+// Determinar la ruta correcta al certificado
+const certPath = path.join(__dirname, 'certs', 'isrgrootx1.pem');
+
+// Verificar si el certificado existe
+let sslConfig = {};
+try {
+    if (fs.existsSync(certPath)) {
+        console.log('✅ Certificado encontrado en:', certPath);
+        sslConfig = {
+            ca: fs.readFileSync(certPath),
+            rejectUnauthorized: true,
+            minVersion: 'TLSv1.2'
+        };
+    } else {
+        console.warn('⚠️ Certificado no encontrado en:', certPath);
+        // Listar archivos en el directorio para debug
+        try {
+            const files = fs.readdirSync(path.join(__dirname, 'certs'));
+            console.log('Archivos en carpeta certs:', files);
+        } catch (e) {
+            console.log('No se pudo leer carpeta certs');
+        }
+        sslConfig = { rejectUnauthorized: false };
+    }
+} catch (error) {
+    console.error('❌ Error al cargar certificado:', error.message);
+    sslConfig = { rejectUnauthorized: false };
+}
+
 const dbConfig = {
     host: 'gateway01.us-east-1.prod.aws.tidbcloud.com',
     user: '2kMd2TkhjVzTXcf.root',
@@ -18,11 +48,35 @@ const dbConfig = {
     database: 'sistema_autoscolin',
     port: 4000,
     multipleStatements: true,
-    ssl: {
-        ca: fs.readFileSync('certs/isrgrootx1.pem'),
-        rejectUnauthorized: true
-    }
+    ssl: sslConfig,
+    // Configuración adicional para estabilidad
+    connectTimeout: 30000,
+    acquireTimeout: 30000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
 };
+
+// Función para probar la conexión al iniciar
+async function testDBConnection() {
+    let connection;
+    try {
+        console.log('🔄 Probando conexión a TiDB...');
+        connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute('SELECT 1+1 as test');
+        console.log('✅ Conexión exitosa a TiDB');
+        await connection.end();
+        return true;
+    } catch (error) {
+        console.error('❌ Error conectando a TiDB:');
+        console.error('   Código:', error.code);
+        console.error('   Mensaje:', error.message);
+        if (connection) await connection.end();
+        return false;
+    }
+}
+
+// Probar conexión al iniciar
+testDBConnection();
 
 // ===== CRUD-CATALOGOS =====
 // Obtener todos los roles
@@ -4968,3 +5022,4 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
