@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Autos Colin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <link rel="stylesheet" href="/css/style_menu.css">
+</head>
+
+<body>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo"> 🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar / Menú -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li class="active">
+                        <a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle">
+                            <i class="fas fa-folder"></i> Archivos 
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="mantenimiento_vendedores.html">Mantenimiento de Vendedores</a></li>
+                            <li><a href="mantenimiento_proveedores.html">Mantenimiento de Provedores</a></li>
+                            <li><a href="mantenimiento_catalogos.html">Mantenimiento de Catalogos</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown"><a href="reporte_financiero.html" class="dropdown-toggle"><i class="fas fa-lock"></i> Cierres</a>
+                    </li>
+
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li>
+                        <a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a>
+                    </li>
+
+                </ul>   
+                <button class="salir" onclick="location.href='index.html'">
+                    <i class="fas fa-sign-out"></i> Salir
+                </button>
+            </div>       
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <header>
+                <h1>Panel de Control</h1>
+                <p>Bienvenido al sistema de gestión de Autos Colin</p>
+            </header>
+
+            <!-- Tarjetas de funciones -->
+            <div class="grid">
+                <div class="card" onclick="location.href='facturación.html'"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Facturación</div>
+                <div class="card" onclick="location.href='planes_ventas.html'"><i class="fas fa-cash-register" aria-hidden="true"></i> Recibos</div>
+                <div class="card" onclick="location.href='inventario.html'"><i class="fas fa-car" aria-hidden="true"></i> Inventario</div>
+                <div class="card" onclick="location.href='cuentasxcobrar.html'"><i class="fas fa-money-bill-wave" aria-hidden="true"></i> Cuentas X Cobrar</div>
+                <div class="card" onclick="location.href='clientes.html'"><i class="fas fa-users" aria-hidden="true"></i> Clientes </div>
+                <div class="card" onclick="location.href='certificado_garantia.html'"><i class="fas fa-award" aria-hidden="true"></i> Certificado</div>
+                <div class="card" onclick="location.href='plan_venta.html'"><i class="fas fa-calendar-alt"></i> Plan Venta</div>
+                <div class="card"><i class="fas fa-coins" aria-hidden="true"></i> Respaldos</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/funcion_movil.js"></script>
+    <script src="cargar_usuario.js"></script>
+
+    <script>
+        // Botón de salir
+        const salirBtn = document.querySelector('.salir');
+        salirBtn.addEventListener('click', () => {
+            if (confirm('¿Está seguro que desea salir del sistema?')) {
+                alert('Saliendo del sistema...');
+            }
+        });
+    </script>
+</body>
+</html>

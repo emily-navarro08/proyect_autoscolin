@@ -1,0 +1,197 @@
+/* Estilos para el menú de administración */
+        /* Contenido principal */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            background: url("/img/logo.jpg") center / cover no-repeat;
+        }
+
+        .main-content header {
+            margin-bottom: 30px;
+        }
+
+        .main-content h1 {
+            font-size: 28px;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        .main-content p {
+            color: #7f8c8d;
+        }
+
+        /* Grid de tarjetas */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: rgba(228, 236, 255, 0.714);
+            border: 1px solid #ddd;
+            padding: 10px 5px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 190px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #4dabf7;
+        }
+
+        .card i {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        /* Botón menú móvil */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Responsividad */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+            
+            .card {
+                min-height: 150px;
+                padding: 20px 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Header reorganizado para móvil */
+            .main-header {
+                padding: 15px 15px 70px;
+                justify-content: center;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .main-header img {
+                width: 90px;
+            }
+            
+            .usuario {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            /* Overlay para fondo oscuro */
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+            
+            /* Ajustes del contenedor principal */
+            .container {
+                flex-direction: column;
+            }
+            
+            .main-content {
+                padding: 20px;
+                width: 100%;
+            }
+            
+            .main-content h1 {
+                font-size: 24px;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .card {
+                min-height: 140px;
+                padding: 15px 10px;
+            }
+            
+            .card i {
+                font-size: 2rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .card {
+                min-height: 120px;
+                padding: 15px 5px;
+                font-size: 14px;
+            }
+            
+            .card i {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+        }

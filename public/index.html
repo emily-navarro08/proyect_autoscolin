@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Sistema de Inicio de Sesión</title>    
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/img/icon-192.png">
+    <link rel="stylesheet" href="/css/style_index.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+    <!-- Apple Meta Tags -->
+    <meta name="theme-color" content="#0A4DA6">     
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="/img/icon-192.png" alt="Logo de la aplicación: Autos Colin." />
+            <h1>Bienvenido</h1>
+            <p>Ingresa tus credenciales para acceder</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Usuario</label>
+                <input type="email" id="email" placeholder=" 👤 Usuario" required>
+                <div class="error-message" id="email-error">Ingresa un usuario válido</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder=" 🔒CONTRASEÑA" required>
+                <span class="password-toggle" id="togglePassword">👁️</span>
+                <div id="general-error" class="general-error"></div>
+                <div class="error-message" id="password-error">La contraseña debe tener al menos 6 caracteres</div>
+            </div>
+            
+            <div class="remember-forgot">
+                <div class="forgot-password">
+                    <a href="#" onclick="abrirModalRecuperacion()">¿Olvidaste tu contraseña?</a>
+                </div>
+            </div>
+            
+            <button type="submit" class="login-button">Ingresar</button>
+
+        </form>
+    </div>
+
+    <!-- Modal de Recuperación de Contraseña -->
+    <div id="modalRecuperacion" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Paso 1: Solicitar email -->
+            <div id="paso1Recuperacion">
+                <h2>Recuperar Contraseña</h2>
+                <p>Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+                
+                <form id="formSolicitarRecuperacion">
+                    <div class="form-group">
+                        <label for="emailRecuperacion">Correo Electrónico</label>
+                        <input type="email" id="emailRecuperacion" placeholder=" 📧 EMAIL" required>
+                        <div class="error-message" id="email-recuperacion-error"></div>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-cancel" onclick="cerrarModalRecuperacion()"><i class="fas fa-ban"></i></button>
+                        <button type="submit" class="btn-save"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Paso 2: Confirmación -->
+            <div id="paso2Recuperacion" style="display: none;">
+                <h3>✅ Enlace Enviado</h3>
+                <p>Correo existente, hemos enviado un enlace de recuperación.</p>
+                <p>Revisa tu bandeja de entrada y sigue las instrucciones.</p>
+                
+                <div class="modal-buttons" style="justify-content: center;">
+                    <button type="button" class="btn-save" onclick="cerrarModalRecuperacion()"><i class="fa-solid fa-check-circle"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Instalar PWA -->
+    <div id="pwa-install-modal" class="pwa-modal">
+    <div class="pwa-modal-content">
+        <span class="close-modal">&times;</span>
+        
+        <div class="modal-body">
+        <div class="pwa-icon">
+            <img src="/img/icon-192.png" alt="App Icon" id="pwa-app-icon">
+        </div>
+        
+        <h3 id="pwa-modal-title">¡Instala la App!</h3>
+        <p id="pwa-modal-description">Disfruta de una mejor experiencia instalando nuestra aplicación en tu dispositivo.</p>
+        
+        <div class="instructions" id="pwa-instructions">
+            <div class="instruction-item android-instructions">
+            <strong>📱 En Android/Chrome:</strong>
+            <p>Haz clic en "Instalar" o en el menú (⋮) → "Instalar app"</p>
+            </div>
+            <div class="instruction-item ios-instructions">
+            <strong>🍎 En iPhone/iPad:</strong>
+            <p>Toca <span class="ios-share">⎋</span> → "Añadir a pantalla de inicio"</p>
+            </div>
+            <div class="instruction-item desktop-instructions">
+            <strong>💻 En Computadora:</strong>
+            <p>Haz clic en el ícono de instalación <span class="install-icon">⬇</span> en la barra de direcciones</p>
+            </div>
+        </div>
+        
+        <div class="pwa-modal-buttons">
+            <button id="install-button" class="btn-install">
+            <span class="btn-icon">📲</span> Instalar App
+            </button>
+            <button id="later-button" class="btn-later">
+            <span class="btn-icon">⏰</span> Recordarme más tarde
+            </button>
+            <button id="dont-show-button" class="btn-dismiss">
+            <span class="btn-icon">❌</span> No mostrar de nuevo
+            </button>
+        </div>
+        </div>
+    </div>
+    </div>    
+
+    <script>
+         document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('loginForm');
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+
+            // 👁️ Toggle de visibilidad
+            togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+            });
+
+            // ✅ Validación y lógica de inicio de sesión
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value; // Cambié de 'user' a 'email'
+                const password = document.getElementById('password').value;
+                let isValid = true;
+
+                // Ocultar errores anteriores
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Validar email
+                if (!email || !email.includes('@')) {
+                    document.getElementById('email-error').style.display = 'block';
+                    document.getElementById('email-error').textContent = 'Ingresa un correo válido';
+                    isValid = false;
+                }
+
+                // Validar password
+                if (password.length < 6) {
+                    document.getElementById('password-error').style.display = 'block';
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            correo: email, 
+                            contrasena: password 
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        document.getElementById('general-error').textContent = errorData.error || 'Error en el inicio de sesión';
+                        document.getElementById('general-error').style.display = 'block';
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const { nombre, rol, id_persona, username } = data;
+
+                    // Guardar datos en sessionStorage
+                    sessionStorage.setItem('usuarioId', id_persona);
+                    sessionStorage.setItem('usuarioNombre', nombre);
+                    sessionStorage.setItem('usuarioRol', rol);
+                    sessionStorage.setItem('usuarioUsername', username);
+                    sessionStorage.setItem('usuarioEmail', email);
+
+                    // Redirigir según el rol
+                    const rolLower = rol.toLowerCase();
+                    switch (true) {
+                        case rolLower.includes('gerente'):
+                            window.location.href = '/menu_admi.html';
+                            break;
+                        case rolLower.includes('vendedor'):
+                            window.location.href = '/menu_colaborador.html';
+                            break;
+                        default:
+                            alert('Rol no reconocido: ' + rol);
+                            window.location.href = '/index.html';
+                    }
+                } catch (error) {
+                    console.error('Error en el inicio de sesión:', error);
+                    document.getElementById('general-error').textContent = 'Error en el inicio de sesión. Por favor, intenta nuevamente.';
+                    document.getElementById('general-error').style.display = 'block';
+                }
+            });
+
+            // Limpiar errores al escribir
+            document.getElementById('email').addEventListener('input', function () {
+            document.getElementById('email-error').style.display = 'none';
+            });
+
+            document.getElementById('password').addEventListener('input', function () {
+            document.getElementById('password-error').style.display = 'none';
+            });
+        });
+
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/service-worker.js")
+                .then(() => console.log("Service Worker registrado"))
+                .catch(err => console.log("Error SW:", err));
+        }
+
+        // Variables globales
+        let deferredPrompt = null;
+        let isModalShowing = false;
+        let pwaCheckInterval = null;
+
+        // Detectar dispositivo y navegador
+        function detectPlatform() {
+        const ua = navigator.userAgent;
+        const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+        const isAndroid = /Android/.test(ua);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+        const isChrome = /Chrome/.test(ua) && !/Edg/.test(ua);
+        const isEdge = /Edg/.test(ua);
+        const isDesktop = !isIOS && !isAndroid;
+        
+        return { isIOS, isAndroid, isSafari, isChrome, isEdge, isDesktop };
+        }
+
+        // Verificar si ya está instalada
+        function isPWAInstalled() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true ||
+                document.referrer.includes('android-app://') ||
+                window.location.protocol === 'file:';
+        }
+
+        // Verificar si se puede instalar
+        function canInstallPWA() {
+        if (isPWAInstalled()) {
+            console.log('PWA ya está instalada');
+            return false;
+        }
+        
+        const platform = detectPlatform();
+        
+        // Para Chrome/Edge (soporte nativo)
+        if ((platform.isChrome || platform.isEdge) && platform.isAndroid) {
+            return true;
+        }
+        
+        // Para Safari iOS
+        if (platform.isIOS && platform.isSafari) {
+            return true;
+        }
+        
+        // Para escritorio con soporte
+        if (platform.isDesktop && ('BeforeInstallPromptEvent' in window)) {
+            return true;
+        }
+        
+        return false;
+        }
+
+        // Mostrar instrucciones según plataforma
+        function showPlatformInstructions() {
+        const platform = detectPlatform();
+        const instructions = document.getElementById('pwa-instructions');
+        
+        // Ocultar todas las instrucciones primero
+        document.querySelectorAll('.instruction-item').forEach(item => {
+            item.style.display = 'none';
+        });
+        
+        // Mostrar solo las relevantes
+        if (platform.isIOS) {
+            document.querySelector('.ios-instructions').style.display = 'block';
+            document.querySelector('.android-instructions').style.display = 'none';
+            document.querySelector('.desktop-instructions').style.display = 'none';
+        } else if (platform.isAndroid) {
+            document.querySelector('.ios-instructions').style.display = 'none';
+            document.querySelector('.android-instructions').style.display = 'block';
+            document.querySelector('.desktop-instructions').style.display = 'none';
+        } else {
+            document.querySelector('.ios-instructions').style.display = 'none';
+            document.querySelector('.android-instructions').style.display = 'none';
+            document.querySelector('.desktop-instructions').style.display = 'block';
+        }
+        }
+
+        // Mostrar modal
+        function showInstallModal() {
+        if (isModalShowing) return;
+        
+        const modal = document.getElementById('pwa-install-modal');
+        if (!modal) return;
+        
+        // Mostrar instrucciones según plataforma
+        showPlatformInstructions();
+        
+        // Configurar texto según plataforma
+        const platform = detectPlatform();
+        const title = document.getElementById('pwa-modal-title');
+        const description = document.getElementById('pwa-modal-description');
+        const installButton = document.getElementById('install-button');
+        
+        if (platform.isIOS) {
+            title.textContent = 'Añadir a Pantalla de Inicio';
+            description.textContent = 'Accede rápidamente desde tu pantalla de inicio como una app nativa.';
+            installButton.innerHTML = '<span class="btn-icon">＋</span> Añadir a Inicio';
+        } else {
+            title.textContent = '¡Instala nuestra App!';
+            description.textContent = 'Disfruta de una nueva experiencia instalando nuestra aplicación.';
+            installButton.innerHTML = '<span class="btn-icon">📲</span> Instalar App';
+        }
+        
+        // Mostrar modal con animación
+        modal.style.display = 'flex';
+        isModalShowing = true;
+        
+        // Guardar que se mostró hoy
+        const today = new Date().toDateString();
+        localStorage.setItem('pwaLastShown', today);
+        localStorage.setItem('pwaModalShown', 'true');
+        
+        // Configurar para cerrar con Escape
+        document.addEventListener('keydown', closeOnEscape);
+        }
+
+        // Cerrar modal
+        function closeInstallModal() {
+        const modal = document.getElementById('pwa-install-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            isModalShowing = false;
+            document.removeEventListener('keydown', closeOnEscape);
+        }
+        }
+
+        // Cerrar con tecla Escape
+        function closeOnEscape(e) {
+        if (e.key === 'Escape') {
+            closeInstallModal();
+        }
+        }
+
+        // Instalar PWA
+        async function installPWA() {
+        if (deferredPrompt) {
+            try {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('Usuario aceptó la instalación');
+                showToast('¡App instalada correctamente!');
+                localStorage.setItem('pwaInstalled', 'true');
+            } else {
+                console.log('Usuario rechazó la instalación');
+                showToast('Instalación cancelada');
+            }
+            
+            deferredPrompt = null;
+            } catch (error) {
+            console.error('Error durante la instalación:', error);
+            showIOSInstructions();
+            }
+        } else {
+            showIOSInstructions();
+        }
+        
+        closeInstallModal();
+        }
+
+        // Instrucciones para iOS
+        function showIOSInstructions() {
+        const platform = detectPlatform();
+        
+        if (platform.isIOS) {
+            const instructions = `
+            Para instalar en iPhone/iPad:
+            
+            1. Toca el botón de compartir <span style="font-size: 20px">⎋</span>
+            2. Desplázate hacia abajo
+            3. Selecciona "Añadir a pantalla de inicio"
+            4. Toca "Añadir" en la esquina superior derecha
+            
+            ¡Y listo! La app aparecerá en tu pantalla de inicio.
+            `;
+            
+            if (confirm(instructions.replace(/<[^>]*>/g, ''))) {
+            // Podrías redirigir a una página con instrucciones detalladas
+            window.open('/pwa-instructions.html', '_blank');
+            }
+        } else if (platform.isAndroid) {
+            showToast('Busca "Instalar app" en el menú de Chrome');
+        }
+        }
+
+        // Mostrar notificación toast
+        function showToast(message) {
+        // Crear toast si no existe
+        let toast = document.getElementById('pwa-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'pwa-toast';
+            toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 100000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            `;
+            document.body.appendChild(toast);
+        }
+        
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+            toast.textContent = '';
+            }, 300);
+        }, 3000);
+        }
+
+        // Verificar si el usuario ha rechazado permanentemente
+        function hasUserDismissed() {
+        const dismissed = localStorage.getItem('pwaModalDismissed');
+        if (!dismissed) return false;
+        
+        // Si fue hace más de 30 días, resetear
+        const dismissDate = new Date(dismissed);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        if (dismissDate < thirtyDaysAgo) {
+            localStorage.removeItem('pwaModalDismissed');
+            return false;
+        }
+        
+        return true;
+        }
+
+        // Inicializar todo cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+        console.log('Inicializando PWA Install Modal...');
+        
+        // Obtener referencias a los elementos
+        const modal = document.getElementById('pwa-install-modal');
+        if (!modal) {
+            console.error('Modal PWA no encontrado en el DOM');
+            return;
+        }
+        
+        // Configurar event listeners de los botones
+        document.getElementById('install-button')?.addEventListener('click', installPWA);
+        
+        document.getElementById('later-button')?.addEventListener('click', () => {
+            closeInstallModal();
+            // Mostrar de nuevo en 3 días
+            const tenSeconds = 10 * 1000;
+            setTimeout(() => {
+            localStorage.removeItem('pwaModalShown');
+            }, tenSeconds);
+        });
+        
+        document.getElementById('dont-show-button')?.addEventListener('click', () => {
+            closeInstallModal();
+            localStorage.setItem('pwaModalDismissed', new Date().toISOString());
+            showToast('No te mostraremos más el mensaje de instalación');
+        });
+        
+        document.querySelector('.close-modal')?.addEventListener('click', closeInstallModal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+            closeInstallModal();
+            }
+        });
+        
+        // Verificar condiciones para mostrar automáticamente
+        function checkAndShowModal() {
+            if (isPWAInstalled()) {
+            console.log('PWA ya instalada, no mostrar modal');
+            return;
+            }
+            
+            if (!canInstallPWA()) {
+            console.log('Navegador no soporta instalación PWA');
+            return;
+            }
+            
+            if (hasUserDismissed()) {
+            console.log('Usuario ha descartado el modal permanentemente');
+            return;
+            }
+            
+            // Esperar a que el usuario interactúe con la página
+            const minTimeOnPage = 8; // segundos
+            let timeOnPage = 0;
+            
+            clearInterval(pwaCheckInterval);
+            pwaCheckInterval = setInterval(() => {
+            timeOnPage++;
+            
+            if (timeOnPage >= minTimeOnPage && !isModalShowing) {
+                clearInterval(pwaCheckInterval);
+                showInstallModal();
+            }
+            
+            // Limpiar después de 30 segundos
+            if (timeOnPage >= 30) {
+                clearInterval(pwaCheckInterval);
+            }
+            }, 1000);
+        }
+        
+        // Iniciar verificación después de un breve delay
+        setTimeout(checkAndShowModal, 1000);
+        });
+
+        // Event listeners globales
+        window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('Evento beforeinstallprompt capturado');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Mostrar botón de instalación en la interfaz si quieres
+        document.getElementById('install-button').style.display = 'block';
+        });
+
+        window.addEventListener('appinstalled', () => {
+        console.log('PWA instalada exitosamente');
+        closeInstallModal();
+        localStorage.setItem('pwaInstalled', 'true');
+        showToast('¡App instalada correctamente!');
+        
+        // Opcional: redirigir o mostrar mensaje de bienvenida
+        setTimeout(() => {
+            if (window.confirm('¿Deseas abrir la aplicación instalada?')) {
+            window.location.reload();
+            }
+        }, 1000);
+        });
+
+        // Detectar cambios en la visibilidad de la página
+        document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && !isModalShowing) {
+            // Podrías verificar de nuevo si mostrar el modal
+            // cuando el usuario regresa a la pestaña
+        }
+        });
+
+        // Inicializar cuando la página termine de cargar
+        window.addEventListener('load', () => {
+        console.log('Página cargada, PWA check activado');
+        
+        // Si ya está instalada, ocultar cualquier modal
+        if (isPWAInstalled()) {
+            closeInstallModal();
+        }
+        });
+    </script>
+</body>
+</html>

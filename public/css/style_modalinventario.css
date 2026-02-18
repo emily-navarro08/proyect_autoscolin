@@ -1,0 +1,498 @@
+                /* HEADER MEJORADO */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .header-title {
+            color: #2c3e50;
+            font-size: 26px;
+            margin-bottom: 5px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .header-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        .info-value {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.3s;
+            min-height: 40px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        .info-value:focus {
+            border-color: #3498db;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .exchange-rate-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .exchange-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 180px;
+        }
+        
+        /* LAYOUT PRINCIPAL */
+        .three-column-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .column {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* SECCIONES COMUNES */
+        .section-title {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .card-title {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        /* SECCIÓN DE PRECIOS */
+        .pricing-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .price-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .price-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .price-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .price-input-wrapper {
+            flex: 1;
+            min-width: 150px;
+            position: relative;
+        }
+        
+        .price-input {
+            width: 100%;
+            padding: 10px 10px 10px 30px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border 0.3s;
+            min-height: 40px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        .price-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #2c3e50;
+            pointer-events: none;
+        }
+        
+        /* SECCIÓN DE OBSERVACIONES */
+        .observations-section {
+            margin-top: 15px;
+        }
+        
+        .observations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .observation-item {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .observation-input {
+            flex: 2;
+            min-width: 200px;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 38px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        .observation-amount {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 10px 8px 30px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            position: relative;
+            min-height: 38px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        /* TOTALES */
+        .investment-total {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f0fff4;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* TABLA DE DETALLES DEL VEHÍCULO */
+        .vehicle-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .vehicle-details td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+            font-weight: bold;
+            background-color: #f0f8ff;
+            width: 20%;
+        }
+        
+        .vehicle-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            min-height: 38px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        /* SECCIÓN DE PROVEEDOR */
+        .supplier-details {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: 1px solid #cce7ff;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-grids {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .detail-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Input centrado */
+        .full-width .detail-input {
+            text-align: center;
+            max-width: 250px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .detail-items {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .detail-label {
+            text-align: left;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .detail-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.3s;
+            min-height: 40px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        
+        /* BOTONES */
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: none;
+            min-width: 140px;
+        }
+        
+        .btn-confirm {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-confirm:hover {
+            background-color: #219955;
+        }
+        
+        .btn-cancel {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #c0392b;
+        }
+        
+        .add-observation-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .add-observation-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            min-height: 38px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        /* RESPONSIVIDAD */
+        @media (max-width: 1200px) {
+            .three-column-layout {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+            }
+            
+            .header-info-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header-title {
+                font-size: 22px;
+            }
+            
+            .exchange-rate-container {
+                justify-content: flex-start;
+            }
+            
+            .price-input-group {
+                flex-direction: column;
+            }
+            
+            .price-input-wrapper {
+                min-width: 100%;
+            }
+            
+            .vehicle-details td {
+                display: block;
+                width: 100%;
+                border: none;
+                border-bottom: 1px solid #ddd;
+                background-color: #f0f8ff;
+                padding-top: 12px;
+            }
+            
+            .vehicle-details tr:last-child td {
+                border-bottom: none;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                justify-content: center;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .three-column-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .observation-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .observation-input, .observation-amount {
+                min-width: 100%;
+            }
+        }

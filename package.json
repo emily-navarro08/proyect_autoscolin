@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.0.0",
+    "mime": "^4.1.0",
+    "mysql2": "^3.16.1"
+  }
+}

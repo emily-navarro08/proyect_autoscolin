@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Fuentes e íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado de Garantía - Autos Colin SRL</title>
+    <style>
+        /* Contenedor principal de la aplicación */
+        .main-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0 ;
+        }
+        
+        /* Encabezado de la página */
+        .page-header {
+            text-align: center;
+            margin-bottom: clamp(1.5rem, 4vw, 2rem);
+            padding: clamp(20px, 4vw, 30px);
+            border-bottom: 2px solid #1a5276;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .page-header h1 {
+            color: #1a5276;
+            margin-bottom: 10px;
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+        
+        .subtitle {
+            color: #7b7d7d;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: clamp(12px, 2vw, 16px);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .alert-success {
+            background-color: #d5f4e6;
+            color: #145a32;
+            border: 1px solid #a3e4d7;
+        }
+        
+        .alert-error {
+            background-color: #fadbd8;
+            color: #922b21;
+            border: 1px solid #f5b7b1;
+        }
+        
+        /* Contenedor de la aplicación - LAYOUT RESPONSIVE */
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(1.5rem, 4vw, 2.5rem);
+            width: 100%;
+        }
+        
+        /* MEDIA QUERIES PARA EL LAYOUT */
+        @media (min-width: 992px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+                gap: clamp(1rem, 3vw, 1rem);
+            }
+            
+            .preview-section {
+                position: sticky;
+                top: 5px;
+                max-height: calc(150vh - 100px);
+                overflow-y: auto;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1.1fr 1fr;
+            }
+        }
+        
+        /* Secciones del formulario */
+        .form-section, .preview-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: clamp(20px, 3vw, 30px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+        }
+        
+        /* Estilos del formulario */
+        .section-title {
+            color: #1a5276;
+            margin-bottom: clamp(15px, 3vw, 20px);
+            padding-bottom: 12px;
+            border-bottom: 2px solid #eaeaea;
+            font-size: clamp(1.2rem, 3vw, 1.2rem);
+        }
+        
+        .form-group {
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: clamp(10px, 1.8vw, 12px) clamp(12px, 2vw, 16px);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #1a5276;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 82, 118, 0.1);
+        }
+        
+        /* Buscador responsivo */
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: clamp(20px, 3vw, 25px);
+        }
+        
+        @media (min-width: 576px) {
+            .search-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .search-container input {
+                flex: 1;
+            }
+        }
+        
+        /* Botones responsivos */
+        .btn {
+            padding: clamp(10px, 1.8vw, 12px) clamp(16px, 3vw, 24px);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            white-space: nowrap;
+            min-height: 44px; /* Para mejor touch en móviles */
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1a5276, #154360);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #154360, #0d2c40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(26, 82, 118, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #7b7d7d, #616a6b);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #616a6b, #515a5a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(123, 125, 125, 0.3);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #0dc98e, #059669);
+            color: white;
+        }
+        
+        .btn-print:hover {
+            background: linear-gradient(135deg, #229954, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(123, 125, 125, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #616a6b, #515a5a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(123, 125, 125, 0.3);
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, #28b463, #229954);
+            color: white;
+        }
+        
+        .btn-search:hover {
+            background: linear-gradient(135deg, #229954, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 180, 99, 0.3);
+        }
+        
+        /* Grid de características responsivo */
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(12px, 2vw, 20px);
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .characteristics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        
+        @media (min-width: 1200px) {
+            .characteristics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Acciones del formulario */
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 15px);
+            margin-top: 30px;
+        }
+        
+        @media (min-width: 576px) {
+            .form-actions {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .form-actions .btn {
+                flex: 1;
+                min-width: 140px;
+            }
+        }
+        
+        /* Certificado responsivo */
+        .certificate {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.5;
+            color: #000;
+            font-size: clamp(0.85rem, 1vw, 0.85rem);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background-image: url(/img/icon-192.png);
+            background-repeat: no-repeat;
+            background-position: top center;
+            background-size: 150px 150px;
+            padding: clamp(10px, 3vw, 10px);
+        }
+        
+        .certificate-header {
+            text-align: center;
+            margin-bottom: clamp(10px, 3vw, 10px);
+            padding-top: 150px;
+        }
+        
+        .certificate-header h2 {
+            text-decoration: underline;
+            font-size: clamp(1.4rem, 3.5vw, 1.4rem);
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+        
+        .underline {
+            text-decoration: underline;
+        }
+        
+        .company-name {
+            font-weight: bold;
+            font-size: clamp(1rem, 2vw, 1rem);
+        }
+        
+        .data-table {
+            width: 90%;
+            min-width: 500px;
+            border-collapse: collapse;
+            margin: clamp(10px, 3vw, 15px) 0;
+            font-size: clamp(0.8rem, 1.6vw, 0.8rem);
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #000;
+            padding: clamp(3px, 1.2vw, 5px);
+            text-align: center;
+        }
+        
+        .data-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .client-info {
+            margin: clamp(15px, 3vw, 20px) 0;
+            padding: clamp(12px, 2vw, 15px);
+            border: 1px dashed #ccc;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+        }
+        
+        .signature-section {
+            margin-top: clamp(25px, 4vw, 40px);
+            text-align: center;
+            padding-top: clamp(20px, 3vw, 30px);
+            border-top: 1px solid #000;
+        }
+        
+        @media (min-width: 768px) {
+            .signature-section {
+                text-align: right;
+            }
+        }
+        
+        .date {
+            margin-top: clamp(20px, 3vw, 30px);
+            font-weight: bold;
+        }
+        
+        .empty-field {
+            display: inline-block;
+            min-width: clamp(100px, 15vw, 200px);
+            border-bottom: 1px solid #000;
+            margin: 0 5px;
+        }
+        
+        /* Ajustes específicos para móviles muy pequeños */
+        @media (max-width: 400px) {
+            .page-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .data-table {
+                min-width: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 !important;
+            }
+            
+            .page-header {
+                margin: 0 0 1rem 0;
+                border-radius: 0;
+                padding: 15px;
+                width: 100%;
+            }
+            
+            .app-container {
+                gap: 0;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .form-section, .preview-section {
+                width: 100vw !important;
+                margin-left: -20px;
+                margin-right: -20px;
+                padding: 20px;
+                border-radius: 0;
+                box-shadow: none;
+                box-sizing: border-box;
+                position: relative;
+                left: 0;
+                right: 0;
+            }
+            
+            #garantiaForm {
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .form-group input, 
+            .form-group select,
+            .search-container input {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .characteristics-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                width: 100%;
+            }
+            
+            .form-actions {
+                width: 100%;
+            }
+            
+            .form-actions .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .certificate {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .data-table {
+                min-width: 100%;
+            }
+            
+            * {
+                max-width: 100% !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 0;
+            }
+            
+            .app-container {
+                grid-template-columns: 1fr;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            .form-section, .preview-section {
+                width: 100vw;
+                margin-left: calc(-50vw + 50%);
+                margin-right: calc(-50vw + 50%);
+                padding: 15px;
+            }
+            
+            .form-section > *, 
+            .preview-section > * {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+        
+        /* Para impresión */
+        @media print {
+            .form-section, .search-container, .form-actions, 
+            .page-header .subtitle, .alert {
+                display: none !important;
+            }
+            
+            .preview-section {
+                box-shadow: none !important;
+                padding: 0 !important;
+                max-height: none !important;
+            }
+            
+            .certificate {
+                font-size: 12pt !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo"> 🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar / Menú -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Facturación</span>
+                        </a>
+                        <a href="#" class="sidebar-btn">
+                            <i class="fas fa-cash-register"></i>
+                            <span>Recibos</span>
+                        </a>
+                        <a href="inventario.html" class="sidebar-btn">
+                            <i class="fas fa-car"></i>
+                            <span>Inventario</span>
+                        </a>
+                        <a href="clientes.html" class="sidebar-btn">
+                            <i class="fas fa-users"></i>
+                            <span>Clientes</span>
+                        </a>
+                        <a href="certificado_garantia.html" class="sidebar-btn active">
+                            <i class="fas fa-award"></i>
+                            <span>Certificado</span>
+                        </a>
+                        <a href="plan_venta.html" class="sidebar-btn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Plan Venta</span>
+                        </a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Cuentas x Cobrar</span>
+                        </a>
+                        <a href="index.html" class="sidebar-salirbtn">
+                            <i class="fas fa-sign-out"></i>
+                            <span>Salir</span>
+                        </a>
+                    </div>
+                </div>
+            </div>            
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <!-- Contenedor principal de la aplicación -->
+            <div class="main-container">
+                <div class="page-header">
+                    <h1>Certificado de Garantía - Autos Colin SRL</h1>
+                    <p class="subtitle">Sistema de generación de certificados de garantía para vehículos usados</p>
+                </div>
+                
+                <div class="alert" id="messageAlert"></div>
+                
+                <div class="app-container">
+                    <section class="form-section">
+                        <h2 class="section-title">Datos del Cliente y Vehículo</h2>
+                        
+                        <div class="search-container">
+                            <input type="text" id="searchCedula" placeholder="Buscar cliente por cédula">
+                            <button class="btn btn-search" id="searchBtn">Buscar</button>
+                        </div>
+                        
+                        <form id="garantiaForm">
+                            <div class="form-group">
+                                <label for="nombreCliente">Nombre del Cliente *</label>
+                                <input type="text" id="nombreCliente" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cedula">Cédula *</label>
+                                <input type="text" id="cedula" required>
+                            </div>
+                            
+                            <h3 class="section-title" style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); margin-top: 30px;">Características del Vehículo</h3>
+                            
+                            <div class="characteristics-grid">
+                                <div class="form-group">
+                                    <label for="marca">Marca *</label>
+                                    <input type="text" id="marca" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="modelo">Modelo *</label>
+                                    <input type="text" id="modelo" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="estilo">Estilo</label>
+                                    <input type="text" id="estilo">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="traccion">Tracción</label>
+                                    <input type="text" id="traccion">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="color">Color</label>
+                                    <input type="text" id="color">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="motor">Motor</label>
+                                    <input type="text" id="motor">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="chasis">Chasis</label>
+                                    <input type="text" id="chasis">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="transmision">Transmisión</label>
+                                    <input type="text" id="transmision">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="combustible">Combustible</label>
+                                    <input type="text" id="combustible">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="carroceria">Carrocería</label>
+                                    <input type="text" id="carroceria">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Kilometraje">Kilometraje</label>
+                                    <input type="text" id="kilometraje">
+                                </div> 
+
+                                <div class="form-group">
+                                    <label for="placa">Placa *</label>
+                                    <input type="text" id="placa" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cc">C.C.</label>
+                                    <input type="text" id="cc">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cilindrados">Cilindrados</label>
+                                    <input type="text" id="cilindrados">
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="clearBtn">Limpiar Formulario</button>
+                                <button type="submit" class="btn btn-primary">Generar Certificado</button>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <section class="preview-section">
+                        <h2 class="section-title">Vista Previa del Certificado</h2>
+                        <div id="certificatePreview" class="certificate">
+                            <!-- Ejemplo de estructura del certificado -->
+                            <div class="certificate-header">
+                                <h2>CERTIFICADO DE GARANTÍA</h2>
+                                <div class="company-name">AUTOS COLIN S.R.L.</div>
+                            </div>
+                            
+                            <table class="data-table">
+                                <tr>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Placa</th>
+                                </tr>
+                                <tr>
+                                    <td id="previewMarca">-</td>
+                                    <td id="previewModelo">-</td>
+                                    <td id="previewPlaca">-</td>
+                                </tr>
+                            </table>
+                            
+                            <div class="client-info">
+                                <p><strong>Cliente:</strong> <span id="previewCliente">[Nombre del cliente]</span></p>
+                                <p><strong>Cédula:</strong> <span id="previewCedula">[Número de cédula]</span></p>
+                            </div>
+                            
+                            <div class="date">
+                                <p>Fecha: ____________________</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions" style="margin-top: 20px;">
+                            <button class="btn btn-print" id="printBtn" disabled>Imprimir Certificado</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="funcion_movil.js"></script>
+    <script src="certificado.js"></script>
+    <script src="cargar_usuario.js"></script>
+</body>
+</html>

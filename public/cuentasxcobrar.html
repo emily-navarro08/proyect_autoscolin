@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas por Cobrar - Autos Colín</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <link rel="stylesheet" href="/css/style_plan_venta.css">
+    <link rel="stylesheet" href="/css/style_modal.css">
+    <link rel="stylesheet" href="/css/style_plan.css">
+    <link rel="stylesheet" href="/css/calculo_prestamo.css">
+    <style>
+        .cxc-container {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cxc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .cxc-header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .cxc-header h1 i {
+            color: #3498db;
+            margin-right: 10px;
+        }
+
+        .cxc-header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .cxc-filters {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .cxc-table {
+            width: 100%;
+            border-collapse: separate !important;
+            border-spacing: 0;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 12px !important;
+        }
+
+        .cxc-table th {
+            background-color: #2c3e50 !important;
+            color: white !important;
+            padding: 12px 5px !important;
+            text-align: center !important;
+            font-weight: 600 !important;
+        }
+
+        .cxc-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cxc-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Loading state */
+        .loading-row td {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .spinner-inline {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border: 3px solid #ddd;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Estados */
+        .estado-pagado {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .estado-pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .estado-atrasado {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .btn-cobrar {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-cobrar:hover { background-color: #219a52; }
+
+        .btn-ver-detalle {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-ver-detalle:hover { background-color: #2980b9; }
+
+        .btn-exportar {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-exportar:hover { background-color: #7d3c98; }
+
+        .btn-recargar {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-recargar:hover { background-color: #1a252f; }
+
+        /* Notificación toast */
+        .toast-notif {
+            position: fixed;
+            top: 20px; right: 20px;
+            padding: 13px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .88rem;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn .3s ease;
+            max-width: 360px;
+        }
+        .toast-notif.success { background: #27ae60; }
+        .toast-notif.error   { background: #e74c3c; }
+        .toast-notif.warning { background: #f39c12; }
+        .toast-notif.info    { background: #3498db; }
+        @keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+
+        /* Factura */
+        .factura-container {
+            background: white;
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #ddd;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .factura-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .factura-header img { max-width: 120px; margin-bottom: 10px; }
+
+        .factura-header h1 {
+            margin: 5px 0;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .factura-header h3 {
+            margin: 5px 0;
+            color: #34495e;
+            font-size: 18px;
+        }
+
+        .factura-empresa { margin: 10px 0; font-size: 12px; line-height: 1.5; }
+
+        .factura-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .factura-info-left, .factura-info-right { font-size: 12px; }
+
+        .factura-cliente {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .factura-detalle {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .factura-detalle th {
+            background: #2c3e50;
+            color: white;
+            padding: 8px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .factura-detalle td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .factura-monto-letras {
+            margin: 15px 0;
+            padding: 10px;
+            border-top: 1px dashed #333;
+            border-bottom: 1px dashed #333;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .factura-firma { margin-top: 30px; text-align: center; }
+        .factura-firma p { margin: 5px 0; font-size: 11px; }
+        .factura-firma .linea-firma {
+            width: 200px;
+            border-top: 1px solid #333;
+            margin: 10px auto;
+        }
+
+        .factura-gracias {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .factura-tabla-intereses {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+
+        .factura-tabla-intereses td {
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .factura-tabla-intereses .label {
+            background: #f8f9fa;
+            font-weight: bold;
+            width: 50%;
+        }
+
+        @media print {
+            .modal-overlay { position: absolute; background: white; }
+            .modal-content { box-shadow: none; max-height: none; }
+            .modal-actions { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    <div class="overlay" id="overlay"></div>
+
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo">🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
+                        <a href="#" class="sidebar-btn"><i class="fas fa-cash-register"></i><span>Recibos</span></a>
+                        <a href="inventario.html" class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
+                        <a href="clientes.html" class="sidebar-btn"><i class="fas fa-users"></i><span>Clientes</span></a>
+                        <a href="certificado_garantia.html" class="sidebar-btn"><i class="fas fa-award"></i><span>Certificado</span></a>
+                        <a href="plan_venta.html" class="sidebar-btn"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
+                        <a href="cuentas_cobrar.html" class="sidebar-btn active"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
+                        <a href="index.html" class="sidebar-salirbtn"><i class="fas fa-sign-out"></i><span>Salir</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="cxc-container">
+                <div class="cxc-header">
+                    <h1><i class="fas fa-hand-holding-usd"></i> Cuentas por Cobrar</h1>
+                </div>
+
+                <!-- Filtros -->
+                <div class="cxc-filters">
+                    <div class="filter-grid">
+                        <div class="form-group">
+                            <label>Plan Venta:</label>
+                            <input type="text" id="filtroPlan" placeholder="N° Plan" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Cliente:</label>
+                            <input type="text" id="filtroCliente" placeholder="Nombre o cédula" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado:</label>
+                            <select id="filtroEstado" class="form-control">
+                                <option value="">Todos</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="pagado">Pagado</option>
+                                <option value="atrasado">Atrasado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; text-align: right;">
+                        <button onclick="aplicarFiltros()" class="btn-ver-detalle">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <button onclick="limpiarFiltros()" class="btn-cobrar" style="background-color: #95a5a6;">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <table class="cxc-table">
+                    <thead>
+                        <tr>
+                            <th>Plan</th>
+                            <th>Cliente</th>
+                            <th>Vehículo</th>
+                            <th>Cuota #</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Monto Cuota</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Días Atraso</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuentasCuerpo">
+                        <tr class="loading-row">
+                            <td colspan="10">
+                                <span class="spinner-inline"></span> Cargando cuentas...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal registrar pago -->
+    <div id="modalPagoCuota" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>REGISTRAR PAGO DE CUOTA</h2>
+                <button class="close-modal" onclick="cerrarModalPago()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="detalleCuotaPago" style="background:#f8f9fa;padding:10px;margin-bottom:15px;border-radius:4px;font-size:13px;"></div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Forma de Pago:</label>
+                        <select id="pagoForma" class="form-control">
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>N° Documento:</label>
+                        <input type="text" id="pagoDocumento" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Monto a Pagar (₡):</label>
+                        <input type="number" id="pagoMonto" class="form-control" step="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Pago:</label>
+                        <input type="date" id="pagoFecha" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Realizado por:</label>
+                        <input type="text" id="pagoRealizadoPor" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-btn btn-grabar" onclick="procesarPagoCuota()">
+                        <i class="fas fa-save"></i> Procesar Pago
+                    </button>
+                    <button class="modal-btn btn-cancelar" onclick="cerrarModalPago()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal factura -->
+    <div id="modalFacturaPago" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:800px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice"></i> FACTURA DE PAGO</h2>
+                <button class="close-modal" onclick="cerrarModalFactura()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="facturaPagoBody"></div>
+            <div class="modal-actions" style="justify-content:center;">
+                <button class="modal-btn" onclick="imprimirFactura()" style="background-color:#3498db;">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button class="modal-btn btn-cancelar" onclick="cerrarModalFactura()">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="funcion_cuentaxcobrar.js"></script>
+    <script src="cargar_usuario.js"></script>
+</body>
+</html>

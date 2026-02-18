@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <style>
+.main-content {
+    flex: 1;
+    padding: 30px;
+    width: calc(100% - 250px);
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Panel de clientes - Mejorado */
+.panel {
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    border: 1px solid #eef2f7;
+}
+
+.panel h2 {
+    color: #1a202c;
+    margin-bottom: 25px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.panel h2 i {
+    color: #4299e1;
+}
+
+/* Tabla de clientes - Mejorada */
+.table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 25px;
+    border: 1px solid #e2e8f0;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+}
+
+th, td {
+    font-size: 12px !important;
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+
+th {
+    background-color: #2c3e50 !important;
+    color: white !important;
+    padding: 12px 5px !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    border: 1px solid #3a506b !important;
+}
+
+th:first-child {
+    border-top-left-radius: 10px;
+}
+
+th:last-child {
+    border-top-right-radius: 10px;
+}
+
+tr {
+    transition: all 0.2s ease;
+}
+
+tr:hover {
+    background-color: #f7fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Botones de acción en la tabla - Mejorados */
+.acciones-tabla {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.acciones-tabla button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.acciones-tabla button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.acciones-tabla button:active {
+    transform: translateY(0);
+}
+
+.btn-ver {
+    background: linear-gradient(to right, #3182ce, #4299e1);
+    color: white;
+}
+
+.btn-ver:hover {
+    background: linear-gradient(to right, #2c75c1, #3182ce);
+}
+
+.btn-info-venta {
+    background: linear-gradient(to right, #805ad5, #9f7aea);
+    color: white;
+}
+
+.btn-info-venta:hover {
+    background: linear-gradient(to right, #724bc1, #805ad5);
+}
+
+.btn-costo-venta {
+    background: linear-gradient(to right, #d69e2e, #ecc94b);
+    color: #1a202c;
+}
+
+.btn-costo-venta:hover {
+    background: linear-gradient(to right, #c68a1f, #d69e2e);
+}
+
+.btn-info-extra {
+    background: linear-gradient(to right, #718096, #a0aec0);
+    color: white;
+}
+
+.btn-info-extra:hover {
+    background: linear-gradient(to right, #636c7e, #718096);
+}
+
+/* Botones de acción principal - Mejorados */
+.acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid #edf2f7;
+}
+
+.acciones button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 160px;
+    justify-content: center;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.acciones button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.acciones button:active {
+    transform: translateY(0);
+}
+
+.btn-agregar {
+    background: linear-gradient(to right, #2d3748, #4a5568);
+    color: white;
+    border: 1px solid #2d3748;
+}
+
+.btn-agregar:hover {
+    background: linear-gradient(to right, #2d3748, #3c4555);
+}
+
+.btn-anular {
+    background: linear-gradient(to right, #e53e3e, #fc8181);
+    color: white;
+}
+
+.btn-anular:hover {
+    background: linear-gradient(to right, #c53030, #e53e3e);
+}
+
+.btn-modificar {
+    background: linear-gradient(to right, #d69e2e, #ecc94b);
+    color: #1a202c;
+}
+
+.btn-modificar:hover {
+    background: linear-gradient(to right, #b7791f, #d69e2e);
+}
+
+.btn-pasarj {
+    background: linear-gradient(to right, #3182ce, #63b3ed);
+    color: white;
+}
+
+.btn-pasarj:hover {
+    background: linear-gradient(to right, #2c75c1, #4299e1);
+}
+
+.btn-imprimir {
+    background: linear-gradient(to right, #718096, #a0aec0);
+    color: white;
+}
+
+.btn-imprimir:hover {
+    background: linear-gradient(to right, #636c7e, #718096);
+}
+
+.btn-listar {
+    background: linear-gradient(to right, #805ad5, #b794f4);
+    color: white;
+}
+
+.btn-listar:hover {
+    background: linear-gradient(to right, #724bc1, #9f7aea);
+}
+
+/* Filtros - Mejorados */
+.filter-container {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 220px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.filter-group input, .filter-group select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #2d3748;
+}
+
+.filter-group input:focus, .filter-group select:focus {
+    border-color: #4299e1;
+    outline: none;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Modal - Mejorado */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: white;
+    width: 92%;
+    max-width: 900px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(to right, #3182ce, #4299e1);
+    color: white;
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: white;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 30px;
+    background-color: #f8fafc;
+}
+
+.modal-footer {
+    padding: 24px 30px;
+    background-color: #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Estilos para datos en modal - Mejorados */
+.view-data {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.data-section {
+    margin-bottom: 30px;
+}
+
+.data-section:last-child {
+    margin-bottom: 0;
+}
+
+.data-section h3 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.data-section h3 i {
+    color: #4299e1;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.data-row {
+    display: flex;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #edf2f7;
+    align-items: flex-start;
+}
+
+.data-row:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.data-label {
+    font-weight: 600;
+    width: 200px;
+    color: #4a5568;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+}
+
+.data-value {
+    flex: 1;
+    color: #2d3748;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Formularios en modal - Mejorados */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #2d3748;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #4299e1;
+    outline: none;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+/* Botones del modal - Mejorados */
+.btn {
+    padding: 14px 28px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: linear-gradient(to right, #718096, #a0aec0);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(to right, #636c7e, #718096);
+}
+
+.btn-success {
+    background: linear-gradient(to right, #38a169, #68d391);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(to right, #2f855a, #38a169);
+}
+
+/* Efectos de estado */
+input:disabled, select:disabled, textarea:disabled {
+    background-color: #edf2f7;
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+/* Responsive - Mejorado */
+@media (max-width: 1200px) {
+    .acciones button {
+        min-width: 140px;
+    }
+    
+    .data-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .acciones {
+        justify-content: flex-start;
+    }
+
+    .acciones button {
+        flex: 0 1 calc(50% - 8px);
+        min-width: auto;
+    }
+    
+    .data-label {
+        width: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 20px 15px;
+    }
+
+    .panel {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .acciones {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .acciones button {
+        width: 100%;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    th, td {
+        padding: 14px 16px;
+    }
+
+    .data-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-row {
+        flex-direction: column;
+        gap: 8px;
+        padding-bottom: 12px;
+    }
+
+    .data-label {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 96%;
+        max-height: 85vh;
+    }
+    
+    .modal-header, .modal-body, .modal-footer {
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel h2 {
+        font-size: 1.4rem;
+    }
+    
+    .acciones-tabla {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .acciones-tabla button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 98%;
+        border-radius: 8px;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo"> 🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar / Menú -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Facturación</span>
+                        </a>
+                        <a href="#" class="sidebar-btn">
+                            <i class="fas fa-cash-register"></i>
+                            <span>Recibos</span>
+                        </a>
+                        <a href="inventario.html" class="sidebar-btn">
+                            <i class="fas fa-car"></i>
+                            <span>Inventario</span>
+                        </a>
+                        <a href="clientes.html" class="sidebar-btn active">
+                            <i class="fas fa-users"></i>
+                            <span>Clientes</span>
+                        </a>
+                        <a href="certificado_garantia.html" class="sidebar-btn">
+                            <i class="fas fa-award"></i>
+                            <span>Certificado</span>
+                        </a>
+                        <a href="plan_venta.html" class="sidebar-btn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Plan Venta</span>
+                        </a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Cuentas x Cobrar</span>
+                        </a>
+                        <a href="index.html" class="sidebar-salirbtn">
+                            <i class="fas fa-sign-out"></i>
+                            <span>Salir</span>
+                        </a>
+                    </div>
+                </div>
+            </div>            
+        </div>
+
+        <!-- Contenido principal - Clientes -->
+        <div class="main-content">
+            <!-- Contenedor de clientes -->
+            <div class="panel">
+                <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+                
+                <!-- Filtros de búsqueda -->
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-identificacion">Identificación:</label>
+                            <input type="text" id="filter-identificacion" placeholder="Buscar por identificación...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-nombre">Nombre:</label>
+                            <input type="text" id="filter-nombre" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-tipo">Tipo de Cliente:</label>
+                            <select id="filter-tipo">
+                                <option value="">Todos</option>
+                                <option value="1">Cliente Facturación</option>
+                                <option value="2">Cliente Inscripción</option>
+                                <option value="3">Cliente Ambos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-estado">Estado:</label>
+                            <select id="filter-estado">
+                                <option value="">Todos</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row" style="margin-top: 15px;">
+                        <div class="filter-group">
+                            <button class="btn btn-secondary" id="btn-limpiar-filtros">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabla de clientes -->
+                <div class="table-container">
+                    <table id="tabla-clientes">
+                        <thead>
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Nombre Cliente</th>
+                                <th>Teléfono 1</th>
+                                <th>Teléfono 2</th>
+                                <th>Email</th>
+                                <th>Tipo de cliente</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Botones de acción principal -->
+                <div class="acciones">
+                    <button class="btn-agregar" id="btn-agregar">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button> 
+                    <button class="btn-anular" id="btn-anular">
+                        <i class="fas fa-ban"></i> Anular
+                    </button>
+                    <button class="btn-modificar" id="btn-modificar">
+                        <i class="fas fa-edit"></i> Modificar
+                    </button>
+                    <button class="btn-pasarj" id="btn-pasarj">
+                        <i class="fas fa-file-export"></i> Pasar J
+                    </button>
+                    <button class="btn-imprimir" id="btn-imprimir">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="btn-listar" id="btn-listar">
+                        <i class="fas fa-list"></i> Listar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar/Modificar Cliente -->
+    <div class="modal" id="modal-cliente">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-cliente"><i class="fas fa-user-plus"></i> Nuevo Cliente</h2>
+                <button class="close-btn" id="close-modal-cliente">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-cliente">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-tipo-documento">Tipo Documento:</label>
+                            <select id="cliente-tipo-documento" name="tipo_documento" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Cedúla_Física">Cedúla Física</option>
+                                <option value="Cedúla_Jurídica">Cedúla Jurídica</option>
+                                <option value="DIMEX">DIMEX</option>
+                                <option value="NITE">NITE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-identificacion">Identificación:</label>
+                            <input type="text" id="cliente-identificacion" name="identificacion" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cliente-nombre">Nombre Completo:</label>
+                        <input type="text" id="cliente-nombre" name="nombre_completo" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-nacionalidad">Nacionalidad:</label>
+                            <input type="text" id="cliente-nacionalidad" name="nacionalidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-estado-civil">Estado Civil:</label>
+                            <select id="cliente-estado-civil" name="id_estado_civil">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-ocupacion">Ocupación:</label>
+                            <input type="text" id="cliente-ocupacion" name="ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-telefono">Teléfono Principal:</label>
+                            <input type="text" id="cliente-telefono" name="telefono_principal">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-telefono-sec">Teléfono Secundario:</label>
+                            <input type="text" id="cliente-telefono-sec" name="telefono_secundario">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-email">Email:</label>
+                            <input type="email" id="cliente-email" name="email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cliente-direccion">Dirección:</label>
+                        <textarea id="cliente-direccion" name="direccion"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-tipo-rol">Tipo de Cliente:</label>
+                            <select id="cliente-tipo-rol" name="tipo_cliente" required>
+                                <option value="">Seleccionar</option>
+                                <option value="1">Cliente Facturación</option>
+                                <option value="2">Cliente Inscripción</option>
+                                <option value="3">Cliente Ambos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-observacion">Observación:</label>
+                            <textarea id="cliente-observacion" name="observacion"></textarea>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="cliente-id" name="id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-cliente">Cancelar</button>
+                <button class="btn btn-success" id="save-btn-cliente">Guardar Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Datos del Cliente -->
+    <div class="modal" id="modal-ver-cliente">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header" style="background: linear-gradient(to right, #2c3e50, #3498db);">
+                <h2><i class="fas fa-user-circle"></i> DATOS COMPLETOS DEL CLIENTE</h2>
+                <button class="close-btn" id="close-modal-ver-cliente">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0; background-color: #f0f2f5;">
+                <div class="factura-container" style="margin: 0; border-radius: 0;">
+                    <div class="factura-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 30px;">
+                        <div class="factura-title" style="color: white; font-size: 1.5rem;">
+                            <i class="fas fa-id-card"></i> EXPEDIENTE DE CLIENTE
+                        </div>
+                        <div class="factura-fecha" style="color: rgba(255,255,255,0.9);">
+                            <i class="far fa-calendar-alt"></i> Fecha de consulta: <span id="fechaConsultaCliente"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="factura-columns" style="padding: 25px; gap: 25px;">
+                        <!-- Columna izquierda - Información Personal -->
+                        <div class="factura-col" style="flex: 1;">
+                            <fieldset style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 25px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                <legend style="background: #4a5568; color: white; padding: 8px 20px; border-radius: 25px; font-weight: 600; letter-spacing: 0.5px;">
+                                    <i class="fas fa-user"></i> INFORMACIÓN PERSONAL
+                                </legend>
+                                <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-id-card"></i> Tipo Documento:</label>
+                                        <strong style="color: #2d3748; font-size: 1rem;" id="ver-tipo-documento">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-passport"></i> Identificación:</label>
+                                        <strong style="color: #2d3748; font-size: 1rem;" id="ver-identificacion">-</strong>
+                                    </div>
+                                    <div style="grid-column: span 2; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px;">
+                                        <label style="display: block; color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 5px;"><i class="fas fa-user-tag"></i> Nombre Completo:</label>
+                                        <strong style="color: white; font-size: 1.3rem; letter-spacing: 0.5px;" id="ver-nombre-completo">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-globe"></i> Nacionalidad:</label>
+                                        <strong style="color: #2d3748;" id="ver-nacionalidad">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-heart"></i> Estado Civil:</label>
+                                        <strong style="color: #2d3748;" id="ver-estado-civil">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-briefcase"></i> Ocupación:</label>
+                                        <strong style="color: #2d3748;" id="ver-ocupacion">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-phone"></i> Teléfono Principal:</label>
+                                        <strong style="color: #2d3748;" id="ver-telefono">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-phone-alt"></i> Teléfono Secundario:</label>
+                                        <strong style="color: #2d3748;" id="ver-telefono-sec">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-envelope"></i> Email:</label>
+                                        <strong style="color: #2d3748; word-break: break-all;" id="ver-email">-</strong>
+                                    </div>
+                                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+                                        <label style="display: block; color: #4a5568; font-size: 0.85rem; margin-bottom: 5px;"><i class="fas fa-map-marker-alt"></i> Dirección:</label>
+                                        <strong style="color: #2d3748;" id="ver-direccion">-</strong>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                <legend style="background: #48bb78; color: white; padding: 8px 20px; border-radius: 25px; font-weight: 600;">
+                                    <i class="fas fa-tag"></i> TIPO DE CLIENTE Y ESTADO
+                                </legend>
+                                <div style="display: flex; gap: 30px; align-items: center; justify-content: center; padding: 15px;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 0.9rem; color: #718096; margin-bottom: 8px;">Tipo de Cliente</div>
+                                        <div style="background: #e2e8f0; padding: 12px 25px; border-radius: 30px; font-weight: 700; color: #2d3748; font-size: 1.1rem;" id="ver-tipo-cliente">-</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 0.9rem; color: #718096; margin-bottom: 8px;">Estado</div>
+                                        <div style="background: #f0fff4; padding: 12px 25px; border-radius: 30px; font-weight: 700; color: #38a169; border: 2px solid #9ae6b4;" id="ver-estado-cliente">ACTIVO</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 0.9rem; color: #718096; margin-bottom: 8px;">Fecha Registro</div>
+                                        <div style="background: #e2e8f0; padding: 12px 25px; border-radius: 30px; font-weight: 700; color: #2d3748;" id="ver-fecha-registro">-</div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!-- Columna derecha - Información Financiera y Comercial -->
+                        <div class="factura-col" style="flex: 1;">
+                            <fieldset style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 25px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                <legend style="background: #f59e0b; color: white; padding: 8px 20px; border-radius: 25px; font-weight: 600;">
+                                    <i class="fas fa-chart-line"></i> INFORMACIÓN FINANCIERA
+                                </legend>
+                                
+                                <!-- Tarjetas de resumen financiero -->
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
+                                        <i class="fas fa-shopping-cart" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
+                                        <div style="font-size: 0.85rem; opacity: 0.9;">Total Compras</div>
+                                        <div style="font-size: 1.4rem; font-weight: 700;" id="ver-total-compras">₡0</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
+                                        <i class="fas fa-hand-holding-usd" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
+                                        <div style="font-size: 0.85rem; opacity: 0.9;">Crédito Total</div>
+                                        <div style="font-size: 1.4rem; font-weight: 700;" id="ver-credito-total">₡0</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
+                                        <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
+                                        <div style="font-size: 0.85rem; opacity: 0.9;">Pagado</div>
+                                        <div style="font-size: 1.4rem; font-weight: 700;" id="ver-total-pagado">₡0</div>
+                                    </div>
+                                    <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 12px; text-align: center; color: white;">
+                                        <i class="fas fa-clock" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
+                                        <div style="font-size: 0.85rem; opacity: 0.9;">Saldo Pendiente</div>
+                                        <div style="font-size: 1.4rem; font-weight: 700;" id="ver-saldo-pendiente">₡0</div>
+                                    </div>
+                                </div>
+
+                                <!-- Historial de Compras -->
+                                <div style="margin-top: 20px;">
+                                    <h4 style="color: #2d3748; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-history" style="color: #f59e0b;"></i> HISTORIAL DE COMPRAS
+                                    </h4>
+                                    <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+                                        <table style="font-size: 12px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Plan Venta</th>
+                                                    <th>Vehículo</th>
+                                                    <th>Fecha</th>
+                                                    <th>Monto</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ver-historial-compras">
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center; color: #718096;">No hay compras registradas</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                <legend style="background: #ed64a6; color: white; padding: 8px 20px; border-radius: 25px; font-weight: 600;">
+                                    <i class="fas fa-sticky-note"></i> OBSERVACIONES
+                                </legend>
+                                <div style="background: #fff9e6; padding: 20px; border-radius: 8px; border-left: 4px solid #ed64a6; min-height: 100px;" id="ver-observaciones">
+                                    Sin observaciones
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción del modal -->
+                    <div class="modal-footer" style="background: white; border-top: 2px solid #e2e8f0; padding: 20px 30px; display: flex; justify-content: flex-end; gap: 15px;">
+                        <button class="btn btn-secondary" onclick="cerrarModalVerCliente()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                        <button class="btn btn-success" onclick="imprimirDatosCliente()">
+                            <i class="fas fa-print"></i> Imprimir Ficha
+                        </button>
+                        <button class="btn" style="background: linear-gradient(to right, #4a5568, #718096); color: white;" onclick="exportarDatosCliente()">
+                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Información de Venta -->
+    <div class="modal" id="modal-info-venta">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-car"></i> Información de Venta</h2>
+                <button class="close-btn" id="close-modal-info-venta">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="view-data">
+                    <div class="data-section">
+                        <h3><i class="fas fa-car"></i> Características del Vehículo</h3>
+                        <div class="data-grid">
+                            <div class="data-row">
+                                <div class="data-label">Marca:</div>
+                                <div class="data-value" id="info-marca">Toyota</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Modelo:</div>
+                                <div class="data-value" id="info-modelo">2023</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Color:</div>
+                                <div class="data-value" id="info-color">Rojo</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Placa:</div>
+                                <div class="data-value" id="info-placa">ABC123</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Chasis:</div>
+                                <div class="data-value" id="info-chasis">JTEBU11F88K123456</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Motor:</div>
+                                <div class="data-value" id="info-motor">2AZ1234567</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Combustible:</div>
+                                <div class="data-value" id="info-combustible">Gasolina</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Transmisión:</div>
+                                <div class="data-value" id="info-transmision">Automática</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-money-bill-wave"></i> Información Financiera</h3>
+                        <div class="data-grid">
+                            <div class="data-row">
+                                <div class="data-label">Precio Costo:</div>
+                                <div class="data-value" id="info-precio-costo">₡8,500,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Precio Venta:</div>
+                                <div class="data-value" id="info-precio-venta">₡10,200,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Utilidad:</div>
+                                <div class="data-value" id="info-utilidad" style="color: #27ae60; font-weight: bold;">₡1,700,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Porcentaje Utilidad:</div>
+                                <div class="data-value" id="info-porcentaje-utilidad" style="color: #27ae60; font-weight: bold;">20%</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Fecha Venta:</div>
+                                <div class="data-value" id="info-fecha-venta">15/10/2023</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Vendedor:</div>
+                                <div class="data-value" id="info-vendedor">Juan Pérez</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-user"></i> Información del Cliente</h3>
+                        <div class="data-grid">
+                            <div class="data-row">
+                                <div class="data-label">Cliente Facturación:</div>
+                                <div class="data-value" id="info-cliente-facturacion">Marvin Miguel Muñoz Loaiza</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Cliente Inscripción:</div>
+                                <div class="data-value" id="info-cliente-inscripcion">Kevin Alberto Pérez Astúa</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Cédula:</div>
+                                <div class="data-value" id="info-cedula-cliente">305130999</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-btn-info-venta">Cerrar</button>
+                <button class="btn btn-success" id="print-btn-info-venta">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Costo y Venta -->
+    <div class="modal" id="modal-costo-venta">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Información de Costos y Ventas</h2>
+                <button class="close-btn" id="close-modal-costo-venta">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="view-data">
+                    <div class="data-section">
+                        <h3><i class="fas fa-calculator"></i> Resumen Financiero</h3>
+                        <div class="data-grid">
+                            <div class="data-row">
+                                <div class="data-label">Total Factura:</div>
+                                <div class="data-value" id="costo-total-factura">₡10,200,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Plazo de Crédito:</div>
+                                <div class="data-value" id="costo-plazo">36 meses</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Prima:</div>
+                                <div class="data-value" id="costo-prima">₡2,550,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Comisión:</div>
+                                <div class="data-value" id="costo-comision">₡204,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Saldo Pendiente:</div>
+                                <div class="data-value" id="costo-saldo">₡7,650,000</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Cuota Mensual:</div>
+                                <div class="data-value" id="costo-cuota">₡212,500</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Fecha Primer Pago:</div>
+                                <div class="data-value" id="costo-primer-pago">15/11/2023</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-credit-card"></i> Formas de Pago</h3>
+                        <div class="data-grid">
+                            <div class="data-row">
+                                <div class="data-label">Tipo de Venta:</div>
+                                <div class="data-value" id="costo-tipo-venta">Crédito</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Forma de Pago:</div>
+                                <div class="data-value" id="costo-forma-pago">Financiamiento Bancario</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Entidad Financiera:</div>
+                                <div class="data-value" id="costo-entidad">Banco Nacional</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Interés Nominal:</div>
+                                <div class="data-value" id="costo-interes">12.5%</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Interés Moratorio:</div>
+                                <div class="data-value" id="costo-interes-moratorio">2.5%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-list"></i> Detalle de Pagos</h3>
+                        <div class="table-container" style="margin-top: 15px;">
+                            <table id="tabla-detalle-pagos">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Forma</th>
+                                        <th>N° Documento</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>15/10/2023</td>
+                                        <td>₡2,550,000</td>
+                                        <td>Transferencia</td>
+                                        <td>TRF-001234</td>
+                                        <td>Pagado</td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/11/2023</td>
+                                        <td>₡212,500</td>
+                                        <td>Débito Automático</td>
+                                        <td>DA-001</td>
+                                        <td>Programado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-sticky-note"></i> Observaciones</h3>
+                        <div class="data-row">
+                            <div class="data-label">Observaciones:</div>
+                            <div class="data-value" id="costo-observaciones">
+                                Cliente con excelente historial crediticio. Pago puntual de primas anteriores. 
+                                Se recomienda seguimiento mensual para asegurar cumplimiento de pagos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-btn-costo-venta">Cerrar</button>
+                <button class="btn btn-success" id="print-btn-costo-venta">
+                    <i class="fas fa-print"></i> Imprimir Detalle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="cargar_usuario.js"></script>
+    <script>
+        // Datos de ejemplo
+        const catalogoEstadosCivil = [
+            { id: 1, nombre: "Soltero", estado: "ACTIVO" },
+            { id: 2, nombre: "Casado", estado: "ACTIVO" },
+            { id: 3, nombre: "Divorciado", estado: "ACTIVO" },
+            { id: 4, nombre: "Viudo", estado: "ACTIVO" },
+            { id: 5, nombre: "Unión Libre", estado: "ACTIVO" }
+        ];
+
+        const rolesData = [
+            { id: 1, nombre: "Cliente Facturación", descripcion: "Cliente para facturación" },
+            { id: 2, nombre: "Cliente Inscripción", descripcion: "Cliente para inscripción" },
+            { id: 3, nombre: "Cliente Ambos", descripcion: "Cliente para facturación e inscripción" },
+            { id: 4, nombre: "Proveedor", descripcion: "Proveedor de vehículos" },
+            { id: 5, nombre: "Vendedor", descripcion: "Colaborador vendedor" },
+            { id: 6, nombre: "Gerente", descripcion: "Administrador y gerente" }
+        ];
+
+        // Datos de clientes (personas con rol de cliente)
+        let personasData = [
+            {
+                id: 1,
+                tipo_documento: "Cédula",
+                identificacion: "305130999",
+                nombre_completo: "MARVIN MIGUEL MUÑOZ LOAIZA",
+                nacionalidad: "Costarricense",
+                id_estado_civil: 2,
+                ocupacion: "Ingeniero",
+                direccion: "San José, Barrio Escalante",
+                telefono_principal: "12345678",
+                telefono_secundario: "87654321",
+                email: "marvin@email.com",
+                observacion: "Cliente frecuente",
+                fecha_registro: "2023-01-15 10:30:00",
+                estado: "ACTIVO"
+            },
+            {
+                id: 2,
+                tipo_documento: "Cédula",
+                identificacion: "305000838",
+                nombre_completo: "KEVIN ALBERTO PEREZ ASTUA",
+                nacionalidad: "Costarricense",
+                id_estado_civil: 1,
+                ocupacion: "Arquitecto",
+                direccion: "Heredia, San Francisco",
+                telefono_principal: "45678901",
+                telefono_secundario: "10987654",
+                email: "kevin@email.com",
+                observacion: "",
+                fecha_registro: "2023-02-20 14:15:00",
+                estado: "ACTIVO"
+            },
+            {
+                id: 3,
+                tipo_documento: "Cédula",
+                identificacion: "305120777",
+                nombre_completo: "MARÍA JOSÉ RODRÍGUEZ LÓPEZ",
+                nacionalidad: "Costarricense",
+                id_estado_civil: 3,
+                ocupacion: "Doctora",
+                direccion: "Alajuela, Centro",
+                telefono_principal: "78901234",
+                telefono_secundario: "43210987",
+                email: "maria@email.com",
+                observacion: "Prefiere contacto por WhatsApp",
+                fecha_registro: "2023-03-10 09:00:00",
+                estado: "ACTIVO"
+            },
+            {
+                id: 4,
+                tipo_documento: "Cédula",
+                identificacion: "305110666",
+                nombre_completo: "CARLOS ALBERTO SÁNCHEZ MÉNDEZ",
+                nacionalidad: "Costarricense",
+                id_estado_civil: 2,
+                ocupacion: "Empresario",
+                direccion: "Cartago, Paraíso",
+                telefono_principal: "14725836",
+                telefono_secundario: "36925814",
+                email: "carlos@email.com",
+                observacion: "Cliente preferencial",
+                fecha_registro: "2023-04-05 11:20:00",
+                estado: "ACTIVO"
+            },
+            {
+                id: 5,
+                tipo_documento: "Pasaporte",
+                identificacion: "P1234567",
+                nombre_completo: "JOHN DOE SMITH",
+                nacionalidad: "Estadounidense",
+                id_estado_civil: 1,
+                ocupacion: "Consultor",
+                direccion: "Escazú, San Rafael",
+                telefono_principal: "25836914",
+                telefono_secundario: "",
+                email: "john@email.com",
+                observacion: "Residente temporal",
+                fecha_registro: "2023-05-12 16:45:00",
+                estado: "INACTIVO"
+            }
+        ];
+
+        // Datos de personas_roles (clientes)
+        let personasRolesData = [
+            { id: 1, id_persona: 1, id_rol: 1, fecha_asignacion: "2023-01-15 10:35:00", estado: "ACTIVO" },
+            { id: 2, id_persona: 2, id_rol: 2, fecha_asignacion: "2023-02-20 14:20:00", estado: "ACTIVO" },
+            { id: 3, id_persona: 3, id_rol: 1, fecha_asignacion: "2023-03-10 09:05:00", estado: "ACTIVO" },
+            { id: 4, id_persona: 4, id_rol: 3, fecha_asignacion: "2023-04-05 11:25:00", estado: "ACTIVO" },
+            { id: 5, id_persona: 5, id_rol: 1, fecha_asignacion: "2023-05-12 16:50:00", estado: "INACTIVO" }
+        ];
+
+        // Datos de ventas
+        let ventasData = [
+            {
+                id: 1,
+                codigo_venta: "VTA-001",
+                id_vehiculo: 1,
+                id_cliente_facturacion: 1,
+                id_cliente_inscripcion: 2,
+                id_vendedor: 6, // Suponiendo que ID 6 es un vendedor
+                nombre_notario: "Lic. Ana Rodríguez",
+                fecha_venta: "2023-10-15 14:30:00",
+                fecha_cancelacion: null,
+                pv_purdi: "PV-2023-001",
+                observaciones_venta: "Venta financiada a 36 meses"
+            }
+        ];
+
+        // Datos de vehículos
+        let vehiculosData = [
+            {
+                id: 1,
+                id_proveedor: 1,
+                chasis: "JTEBU11F88K123456",
+                motor: "2AZ1234567",
+                placa: "ABC123",
+                id_marca: 1, // Toyota
+                modelo: 2023,
+                id_color: 1, // Rojo
+                id_combustible: 1, // Gasolina
+                id_transmision: 1, // Automática
+                estilo: "Sedán",
+                traccion: "Delantera",
+                carroceria: "Sedán 4 puertas",
+                c_c: 2400.00,
+                cilindros: 4,
+                kilometraje_actual: 15.50,
+                kilometraje_anterior: 0,
+                fecha_ingreso: "2023-10-01",
+                pv: "PV-001",
+                estado: "VENDIDO",
+                observaciones: "Vehículo nuevo, 0km"
+            }
+        ];
+
+        // Datos de costos de vehículo
+        let costosVehiculoData = [
+            {
+                id: 1,
+                id_vehiculo: 1,
+                precio_compra: 8500000.00,
+                precio_traspaso: 50000.00,
+                costo: 50000.00,
+                prima: 0,
+                comision: 204000.00,
+                total_inversion: 8550000.00,
+                precio_costo: 8550000.00,
+                precio_publico: 10200000.00,
+                precio_descuento: 10200000.00,
+                prima_financiamiento: 2550000.00,
+                cuota_financiamiento: 212500.00,
+                saldo: 7650000.00,
+                moneda: "CRC",
+                tipo_cambio_compra: 1.00,
+                fecha_calculo: "2023-10-10",
+                observacion: ""
+            }
+        ];
+
+        // Variables globales
+        let currentClienteId = 0;
+        let currentVentaId = 0;
+        let currentVehiculoId = 0;
+
+        // Función para formatear número como moneda
+        function formatearMoneda(valor) {
+            return new Intl.NumberFormat('es-CR', {
+                style: 'currency',
+                currency: 'CRC',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(valor);
+        }
+
+        // Función para obtener rol de cliente por ID de persona
+        function obtenerRolCliente(idPersona) {
+            const rolesCliente = personasRolesData.filter(pr => 
+                pr.id_persona === idPersona && 
+                [1, 2, 3].includes(pr.id_rol) && 
+                pr.estado === 'ACTIVO'
+            );
+            
+            if (rolesCliente.length === 0) return 'Sin rol';
+            
+            const rol = rolesData.find(r => r.id === rolesCliente[0].id_rol);
+            return rol ? rol.nombre : 'Desconocido';
+        }
+
+        // Función para obtener tipo de cliente (ID rol)
+        function obtenerTipoCliente(idPersona) {
+            const rolCliente = personasRolesData.find(pr => 
+                pr.id_persona === idPersona && 
+                [1, 2, 3].includes(pr.id_rol) && 
+                pr.estado === 'ACTIVO'
+            );
+            
+            return rolCliente ? rolCliente.id_rol : null;
+        }
+
+        // Función para cargar tabla de clientes
+        function cargarTablaClientes(filtros = {}) {
+            const tbody = document.querySelector('#tabla-clientes tbody');
+            tbody.innerHTML = '';
+            
+            // Obtener IDs de clientes (roles 1, 2, 3)
+            const clientesIds = personasRolesData
+                .filter(pr => [1, 2, 3].includes(pr.id_rol))
+                .map(pr => pr.id_persona);
+            
+            // Filtrar personas que son clientes
+            let clientes = personasData.filter(p => clientesIds.includes(p.id));
+            
+            // Aplicar filtros
+            if (filtros.identificacion) {
+                const busqueda = filtros.identificacion.toLowerCase();
+                clientes = clientes.filter(p => 
+                    p.identificacion.toLowerCase().includes(busqueda)
+                );
+            }
+            
+            if (filtros.nombre) {
+                const busqueda = filtros.nombre.toLowerCase();
+                clientes = clientes.filter(p => 
+                    p.nombre_completo.toLowerCase().includes(busqueda)
+                );
+            }
+            
+            if (filtros.tipo) {
+                const tipo = parseInt(filtros.tipo);
+                clientes = clientes.filter(p => {
+                    const tipoCliente = obtenerTipoCliente(p.id);
+                    return tipoCliente === tipo;
+                });
+            }
+            
+            if (filtros.estado) {
+                clientes = clientes.filter(p => 
+                    p.estado === filtros.estado
+                );
+            }
+            
+            // Mostrar clientes
+            clientes.forEach(cliente => {
+                const tipoCliente = obtenerRolCliente(cliente.id);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cliente.identificacion}</td>
+                    <td>${cliente.nombre_completo}</td>
+                    <td>${cliente.telefono_principal || '-'}</td>
+                    <td>${cliente.telefono_secundario || '-'}</td>
+                    <td>${cliente.email || '-'}</td>
+                    <td>${tipoCliente}</td>
+                    <td>
+                        <span class="badge" style="background-color: ${cliente.estado === 'ACTIVO' ? '#d1fae5' : '#fee2e2'}; color: #065f46; padding: 5px 10px; border-radius: 3px;">
+                            ${cliente.estado === 'ACTIVO' ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="acciones-tabla">
+                            <button class="btn-ver" data-id="${cliente.id}">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                            <button class="btn-info-venta" data-id="${cliente.id}">
+                                <i class="fas fa-file-alt"></i> Inf.Venta
+                            </button>
+                            <button class="btn-costo-venta" data-id="${cliente.id}">
+                                <i class="fas fa-file-alt"></i> Costo y Venta
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Añadir eventos a los botones de acción
+            document.querySelectorAll('.btn-ver').forEach(btn => {
+                btn.addEventListener('click', () => verCliente(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-info-venta').forEach(btn => {
+                btn.addEventListener('click', () => mostrarInfoVenta(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-costo-venta').forEach(btn => {
+                btn.addEventListener('click', () => mostrarCostoVenta(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-info-extra').forEach(btn => {
+                btn.addEventListener('click', () => mostrarInfoAdicional(parseInt(btn.dataset.id)));
+            });
+        }
+
+        function cerrarModalVerCliente() {
+            document.getElementById('modal-ver-cliente').classList.remove('active');
+        }
+
+        // Función mejorada para ver cliente (reemplazar la función anterior)
+        function verCliente(id) {
+            const cliente = personasData.find(p => p.id === id);
+            if (!cliente) return;
+            
+            // Obtener tipo de cliente
+            const tipoCliente = obtenerRolCliente(id);
+            const tipoClienteId = obtenerTipoCliente(id);
+            
+            // Obtener nombre de estado civil
+            const estadoCivil = catalogoEstadosCivil.find(ec => ec.id === cliente.id_estado_civil);
+            
+            // Calcular información financiera
+            const infoFinanciera = calcularInfoFinancieraCliente(id);
+            
+            // Llenar información personal
+            document.getElementById('ver-tipo-documento').textContent = cliente.tipo_documento || 'No especificado';
+            document.getElementById('ver-identificacion').textContent = cliente.identificacion;
+            document.getElementById('ver-nombre-completo').textContent = cliente.nombre_completo;
+            document.getElementById('ver-nacionalidad').textContent = cliente.nacionalidad || 'No especificada';
+            document.getElementById('ver-estado-civil').textContent = estadoCivil ? estadoCivil.nombre : 'No especificado';
+            document.getElementById('ver-ocupacion').textContent = cliente.ocupacion || 'No especificada';
+            document.getElementById('ver-telefono').textContent = cliente.telefono_principal || 'No registrado';
+            document.getElementById('ver-telefono-sec').textContent = cliente.telefono_secundario || 'No registrado';
+            document.getElementById('ver-email').textContent = cliente.email || 'No registrado';
+            document.getElementById('ver-direccion').textContent = cliente.direccion || 'No registrada';
+            
+            // Información de tipo y estado
+            document.getElementById('ver-tipo-cliente').textContent = tipoCliente;
+            document.getElementById('ver-estado-cliente').innerHTML = cliente.estado === 'ACTIVO' ? 
+                '<span style="color: #38a169;">● ACTIVO</span>' : 
+                '<span style="color: #e53e3e;">○ INACTIVO</span>';
+            
+            const fechaRegistro = new Date(cliente.fecha_registro);
+            document.getElementById('ver-fecha-registro').textContent = fechaRegistro.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Información financiera
+            document.getElementById('ver-total-compras').textContent = formatearMoneda(infoFinanciera.totalCompras);
+            document.getElementById('ver-credito-total').textContent = formatearMoneda(infoFinanciera.creditoTotal);
+            document.getElementById('ver-total-pagado').textContent = formatearMoneda(infoFinanciera.totalPagado);
+            document.getElementById('ver-saldo-pendiente').textContent = formatearMoneda(infoFinanciera.saldoPendiente);
+            
+            // Historial de compras
+            const historialCompras = document.getElementById('ver-historial-compras');
+            historialCompras.innerHTML = '';
+            
+            if (infoFinanciera.compras.length > 0) {
+                infoFinanciera.compras.forEach(compra => {
+                    const row = document.createElement('tr');
+                    const fecha = new Date(compra.fecha_venta);
+                    row.innerHTML = `
+                        <td>${compra.codigo_venta}</td>
+                        <td>${compra.vehiculo}</td>
+                        <td>${fecha.toLocaleDateString('es-ES')}</td>
+                        <td>${formatearMoneda(compra.monto)}</td>
+                        <td>
+                            <span class="badge" style="background-color: ${compra.estado === 'COMPLETADO' ? '#c6f6d5' : '#feebc8'}; 
+                                color: ${compra.estado === 'COMPLETADO' ? '#22543d' : '#744210'}; padding: 3px 10px; border-radius: 15px;">
+                                ${compra.estado}
+                            </span>
+                        </td>
+                    `;
+                    historialCompras.appendChild(row);
+                });
+            } else {
+                historialCompras.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #718096; padding: 30px;">No hay compras registradas para este cliente</td></tr>';
+            }
+            
+            // Observaciones
+            document.getElementById('ver-observaciones').textContent = cliente.observacion || 'Sin observaciones registradas';
+            
+            // Fecha de consulta
+            const ahora = new Date();
+            document.getElementById('fechaConsultaCliente').textContent = ahora.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Mostrar modal
+            document.getElementById('modal-ver-cliente').classList.add('active');
+        }
+
+        // Función para calcular información financiera del cliente
+        function calcularInfoFinancieraCliente(idCliente) {
+            // Buscar ventas del cliente
+            const ventasCliente = ventasData.filter(v => 
+                v.id_cliente_facturacion === idCliente || 
+                v.id_cliente_inscripcion === idCliente
+            );
+            
+            let totalCompras = 0;
+            let creditoTotal = 0;
+            let totalPagado = 0;
+            let compras = [];
+            
+            ventasCliente.forEach(venta => {
+                // Buscar costos del vehículo
+                const costo = costosVehiculoData.find(c => c.id_vehiculo === venta.id_vehiculo);
+                if (costo) {
+                    totalCompras += costo.precio_publico;
+                    
+                    // Si tiene saldo, es crédito
+                    if (costo.saldo > 0) {
+                        creditoTotal += costo.saldo;
+                    }
+                    
+                    // Calcular pagado (precio_publico - saldo)
+                    const pagado = costo.precio_publico - costo.saldo;
+                    totalPagado += pagado;
+                }
+                
+                // Buscar vehículo
+                const vehiculo = vehiculosData.find(v => v.id === venta.id_vehiculo);
+                const marca = obtenerMarca(vehiculo?.id_marca);
+                
+                compras.push({
+                    codigo_venta: venta.codigo_venta,
+                    vehiculo: vehiculo ? `${marca} ${vehiculo.estilo || ''} ${vehiculo.modelo}`.trim() : 'Vehículo no encontrado',
+                    fecha_venta: venta.fecha_venta,
+                    monto: costo?.precio_publico || 0,
+                    estado: costo?.saldo > 0 ? 'PENDIENTE' : 'COMPLETADO'
+                });
+            });
+            
+            // Ordenar compras por fecha (más reciente primero)
+            compras.sort((a, b) => new Date(b.fecha_venta) - new Date(a.fecha_venta));
+            
+            return {
+                totalCompras,
+                creditoTotal,
+                totalPagado,
+                saldoPendiente: creditoTotal,
+                compras
+            };
+        }
+        
+        // Función para imprimir ficha del cliente
+        function imprimirDatosCliente() {
+            const contenido = document.getElementById('modal-ver-cliente').querySelector('.factura-container').cloneNode(true);
+            
+            // Crear ventana de impresión
+            const ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write(`
+                <html>
+                    <head>
+                        <title>Ficha de Cliente - Autos Colín</title>
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 30px; }
+                            .factura-container { max-width: 1200px; margin: 0 auto; }
+                            fieldset { border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+                            legend { font-weight: bold; padding: 5px 15px; background: #f0f0f0; border-radius: 20px; }
+                            .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+                            .badge { display: inline-block; padding: 3px 10px; border-radius: 15px; }
+                            @media print {
+                                body { padding: 0; }
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${contenido.outerHTML}
+                        <div style="text-align: center; margin-top: 30px; color: #666;" class="no-print">
+                            <button onclick="window.print()" style="padding: 10px 30px; background: #4a5568; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-print"></i> Imprimir
+                            </button>
+                            <button onclick="window.close()" style="padding: 10px 30px; background: #718096; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                                <i class="fas fa-times"></i> Cerrar
+                            </button>
+                        </div>
+                    </body>
+                </html>
+            `);
+            ventanaImpresion.document.close();
+        }        
+
+        // Función para mostrar modal de información de venta
+        function mostrarInfoVenta(idCliente) {
+            // Buscar ventas relacionadas con este cliente
+            const venta = ventasData.find(v => 
+                v.id_cliente_facturacion === idCliente || 
+                v.id_cliente_inscripcion === idCliente
+            );
+            
+            if (!venta) {
+                alert('Este cliente no tiene ventas registradas.');
+                return;
+            }
+            
+            // Buscar vehículo relacionado
+            const vehiculo = vehiculosData.find(v => v.id === venta.id_vehiculo);
+            const costoVehiculo = costosVehiculoData.find(c => c.id_vehiculo === venta.id_vehiculo);
+            
+            if (!vehiculo || !costoVehiculo) {
+                alert('Información incompleta para mostrar detalles de venta.');
+                return;
+            }
+            
+            // Actualizar información en el modal
+            document.getElementById('info-marca').textContent = obtenerMarca(vehiculo.id_marca);
+            document.getElementById('info-modelo').textContent = vehiculo.modelo;
+            document.getElementById('info-color').textContent = obtenerColor(vehiculo.id_color);
+            document.getElementById('info-placa').textContent = vehiculo.placa;
+            document.getElementById('info-chasis').textContent = vehiculo.chasis;
+            document.getElementById('info-motor').textContent = vehiculo.motor;
+            document.getElementById('info-combustible').textContent = obtenerCombustible(vehiculo.id_combustible);
+            document.getElementById('info-transmision').textContent = obtenerTransmision(vehiculo.id_transmision);
+            
+            document.getElementById('info-precio-costo').textContent = formatearMoneda(costoVehiculo.precio_costo);
+            document.getElementById('info-precio-venta').textContent = formatearMoneda(costoVehiculo.precio_publico);
+            
+            const utilidad = costoVehiculo.precio_publico - costoVehiculo.precio_costo;
+            const porcentajeUtilidad = (utilidad / costoVehiculo.precio_costo * 100).toFixed(2);
+            
+            document.getElementById('info-utilidad').textContent = formatearMoneda(utilidad);
+            document.getElementById('info-porcentaje-utilidad').textContent = `${porcentajeUtilidad}%`;
+            
+            const fechaVenta = new Date(venta.fecha_venta);
+            document.getElementById('info-fecha-venta').textContent = fechaVenta.toLocaleDateString('es-ES');
+            
+            // Buscar información de clientes
+            const clienteFacturacion = personasData.find(p => p.id === venta.id_cliente_facturacion);
+            const clienteInscripcion = venta.id_cliente_inscripcion ? 
+                personasData.find(p => p.id === venta.id_cliente_inscripcion) : null;
+            
+            document.getElementById('info-cliente-facturacion').textContent = clienteFacturacion ? clienteFacturacion.nombre_completo : 'No especificado';
+            document.getElementById('info-cliente-inscripcion').textContent = clienteInscripcion ? clienteInscripcion.nombre_completo : 'No aplica';
+            document.getElementById('info-cedula-cliente').textContent = clienteFacturacion ? clienteFacturacion.identificacion : 'No especificado';
+            
+            // Mostrar vendedor
+            const vendedor = personasData.find(p => p.id === venta.id_vendedor);
+            document.getElementById('info-vendedor').textContent = vendedor ? vendedor.nombre_completo : 'No especificado';
+            
+            // Mostrar modal
+            document.getElementById('modal-info-venta').classList.add('active');
+        }
+
+        // Actualizar la función para mostrar costo y venta con información financiera completa
+        function mostrarCostoVenta(idCliente) {
+            // Buscar ventas relacionadas con este cliente
+            const venta = ventasData.find(v => 
+                v.id_cliente_facturacion === idCliente || 
+                v.id_cliente_inscripcion === idCliente
+            );
+            
+            if (!venta) {
+                alert('Este cliente no tiene ventas registradas.');
+                return;
+            }
+            
+            const costoVehiculo = costosVehiculoData.find(c => c.id_vehiculo === venta.id_vehiculo);
+            
+            if (!costoVehiculo) {
+                alert('Información incompleta para mostrar detalles de costos.');
+                return;
+            }
+            
+            // Actualizar información en el modal
+            document.getElementById('costo-total-factura').textContent = formatearMoneda(costoVehiculo.precio_publico);
+            
+            // Calcular plazo (asumiendo 36 meses si hay financiamiento)
+            const plazo = costoVehiculo.saldo > 0 ? 36 : 0;
+            document.getElementById('costo-plazo').textContent = plazo > 0 ? `${plazo} meses` : 'Contado';
+            
+            document.getElementById('costo-prima').textContent = formatearMoneda(costoVehiculo.prima_financiamiento);
+            document.getElementById('costo-comision').textContent = formatearMoneda(costoVehiculo.comision);
+            document.getElementById('costo-saldo').textContent = formatearMoneda(costoVehiculo.saldo);
+            document.getElementById('costo-cuota').textContent = formatearMoneda(costoVehiculo.cuota_financiamiento);
+            
+            // Fecha primer pago (30 días después de la venta)
+            const fechaVenta = new Date(venta.fecha_venta);
+            fechaVenta.setDate(fechaVenta.getDate() + 30);
+            document.getElementById('costo-primer-pago').textContent = fechaVenta.toLocaleDateString('es-ES');
+            
+            // Información de formas de pago
+            document.getElementById('costo-tipo-venta').textContent = costoVehiculo.saldo > 0 ? 'Crédito' : 'Contado';
+            document.getElementById('costo-forma-pago').textContent = costoVehiculo.saldo > 0 ? 'Financiamiento Bancario' : 'Efectivo/Transferencia';
+            document.getElementById('costo-entidad').textContent = 'Banco Nacional';
+            document.getElementById('costo-interes').textContent = '12.5%';
+            document.getElementById('costo-interes-moratorio').textContent = '2.5%';
+            
+            // Generar detalle de pagos
+            const tbodyPagos = document.querySelector('#tabla-detalle-pagos tbody');
+            tbodyPagos.innerHTML = '';
+            
+            // Pago de prima
+            if (costoVehiculo.prima_financiamiento > 0) {
+                const rowPrima = document.createElement('tr');
+                rowPrima.innerHTML = `
+                    <td>${new Date(venta.fecha_venta).toLocaleDateString('es-ES')}</td>
+                    <td>${formatearMoneda(costoVehiculo.prima_financiamiento)}</td>
+                    <td>Transferencia</td>
+                    <td>TRF-${Math.floor(Math.random() * 10000)}</td>
+                    <td><span style="color: #38a169; font-weight: 600;">Pagado</span></td>
+                `;
+                tbodyPagos.appendChild(rowPrima);
+            }
+            
+            // Cuotas proyectadas
+            if (costoVehiculo.saldo > 0) {
+                for (let i = 1; i <= 3; i++) {
+                    const fechaPago = new Date(venta.fecha_venta);
+                    fechaPago.setMonth(fechaPago.getMonth() + i);
+                    
+                    const rowCuota = document.createElement('tr');
+                    rowCuota.innerHTML = `
+                        <td>${fechaPago.toLocaleDateString('es-ES')}</td>
+                        <td>${formatearMoneda(costoVehiculo.cuota_financiamiento)}</td>
+                        <td>Débito Automático</td>
+                        <td>DA-${String(i).padStart(3, '0')}</td>
+                        <td><span style="color: #d69e2e; font-weight: 600;">Programado</span></td>
+                    `;
+                    tbodyPagos.appendChild(rowCuota);
+                }
+            }
+            
+            document.getElementById('costo-observaciones').textContent = venta.observaciones_venta || 'Sin observaciones';
+            
+            // Mostrar modal
+            document.getElementById('modal-costo-venta').classList.add('active');
+        }
+
+        // Función para mostrar modal de información adicional
+        function mostrarInfoAdicional(idCliente) {
+            // Buscar ventas relacionadas con este cliente
+            const venta = ventasData.find(v => 
+                v.id_cliente_facturacion === idCliente || 
+                v.id_cliente_inscripcion === idCliente
+            );
+            
+            if (!venta) {
+                alert('Este cliente no tiene ventas registradas.');
+                return;
+            }
+            
+            // Mostrar modal
+            document.getElementById('modal-info-adicional').classList.add('active');
+        }
+
+        // Función para mostrar modal de agregar cliente
+        function mostrarAgregarCliente() {
+            currentClienteId = 0;
+            
+            // Configurar modal
+            document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-user-plus"></i> Nuevo Cliente`;
+            document.getElementById('form-cliente').reset();
+            document.getElementById('cliente-id').value = 0;
+            
+            // Mostrar modal
+            document.getElementById('modal-cliente').classList.add('active');
+        }
+
+        // Función para guardar cliente
+        function guardarCliente() {
+            const id = parseInt(document.getElementById('cliente-id').value);
+            const tipoDocumento = document.getElementById('cliente-tipo-documento').value;
+            const identificacion = document.getElementById('cliente-identificacion').value.trim();
+            const nombreCompleto = document.getElementById('cliente-nombre').value.trim();
+            const tipoCliente = document.getElementById('cliente-tipo-rol').value;
+            
+            // Validaciones básicas
+            if (!tipoDocumento || !identificacion || !nombreCompleto || !tipoCliente) {
+                alert('Los campos Tipo Documento, Identificación, Nombre Completo y Tipo de Cliente son requeridos');
+                return;
+            }
+            
+            // Verificar identificación única (excepto para el mismo registro)
+            if (personasData.some(p => p.identificacion === identificacion && p.id !== id)) {
+                alert('La identificación ya está registrada');
+                return;
+            }
+            
+            const clienteData = {
+                tipo_documento: tipoDocumento,
+                identificacion: identificacion,
+                nombre_completo: nombreCompleto,
+                nacionalidad: document.getElementById('cliente-nacionalidad').value.trim() || null,
+                id_estado_civil: document.getElementById('cliente-estado-civil').value ? 
+                    parseInt(document.getElementById('cliente-estado-civil').value) : null,
+                ocupacion: document.getElementById('cliente-ocupacion').value.trim() || null,
+                direccion: document.getElementById('cliente-direccion').value.trim() || null,
+                telefono_principal: document.getElementById('cliente-telefono').value.trim() || null,
+                telefono_secundario: document.getElementById('cliente-telefono-sec').value.trim() || null,
+                email: document.getElementById('cliente-email').value.trim() || null,
+                observacion: document.getElementById('cliente-observacion').value.trim() || null,
+                estado: 'ACTIVO'
+            };
+            
+            if (id === 0) {
+                // Crear nueva persona
+                const nuevoId = personasData.length > 0 ? 
+                    Math.max(...personasData.map(p => p.id)) + 1 : 1;
+                
+                clienteData.id = nuevoId;
+                clienteData.fecha_registro = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                personasData.push(clienteData);
+                
+                // Asignar rol de cliente
+                const nuevoRolId = personasRolesData.length > 0 ? 
+                    Math.max(...personasRolesData.map(pr => pr.id)) + 1 : 1;
+                
+                personasRolesData.push({
+                    id: nuevoRolId,
+                    id_persona: nuevoId,
+                    id_rol: parseInt(tipoCliente),
+                    fecha_asignacion: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    estado: 'ACTIVO'
+                });
+                
+                alert('Cliente creado correctamente');
+            } else {
+                // Actualizar persona existente
+                const index = personasData.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    // Mantener ID y fecha_registro
+                    clienteData.id = id;
+                    clienteData.fecha_registro = personasData[index].fecha_registro;
+                    personasData[index] = clienteData;
+                    
+                    // Actualizar rol
+                    const rolIndex = personasRolesData.findIndex(pr => 
+                        pr.id_persona === id && [1, 2, 3].includes(pr.id_rol)
+                    );
+                    if (rolIndex !== -1) {
+                        personasRolesData[rolIndex].id_rol = parseInt(tipoCliente);
+                    }
+                }
+                
+                alert('Cliente actualizado correctamente');
+            }
+            
+            // Recargar tabla y cerrar modal
+            cargarTablaClientes();
+            document.getElementById('modal-cliente').classList.remove('active');
+        }
+
+        // Función para anular cliente
+        function anularCliente() {
+            const identificacion = prompt('Ingrese la identificación del cliente a anular:');
+            if (!identificacion) return;
+            
+            const cliente = personasData.find(p => p.identificacion === identificacion);
+            if (!cliente) {
+                alert('Cliente no encontrado');
+                return;
+            }
+            
+            if (confirm(`¿Está seguro de anular al cliente ${cliente.nombre_completo}?`)) {
+                // Cambiar estado a INACTIVO
+                cliente.estado = 'INACTIVO';
+                
+                // También desactivar roles de cliente
+                personasRolesData
+                    .filter(pr => pr.id_persona === cliente.id && [1, 2, 3].includes(pr.id_rol))
+                    .forEach(pr => pr.estado = 'INACTIVO');
+                
+                // Recargar tabla
+                cargarTablaClientes();
+                alert('Cliente anulado correctamente');
+            }
+        }
+
+        // Función para modificar cliente
+        function modificarCliente() {
+            const identificacion = prompt('Ingrese la identificación del cliente a modificar:');
+            if (!identificacion) return;
+            
+            const cliente = personasData.find(p => p.identificacion === identificacion);
+            if (!cliente) {
+                alert('Cliente no encontrado');
+                return;
+            }
+            
+            currentClienteId = cliente.id;
+            const tipoCliente = obtenerTipoCliente(cliente.id);
+            
+            // Configurar modal
+            document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-edit"></i> Modificar Cliente`;
+            
+            // Cargar datos en formulario
+            document.getElementById('cliente-id').value = cliente.id;
+            document.getElementById('cliente-tipo-documento').value = cliente.tipo_documento;
+            document.getElementById('cliente-identificacion').value = cliente.identificacion;
+            document.getElementById('cliente-nombre').value = cliente.nombre_completo;
+            document.getElementById('cliente-nacionalidad').value = cliente.nacionalidad || '';
+            document.getElementById('cliente-estado-civil').value = cliente.id_estado_civil || '';
+            document.getElementById('cliente-ocupacion').value = cliente.ocupacion || '';
+            document.getElementById('cliente-direccion').value = cliente.direccion || '';
+            document.getElementById('cliente-telefono').value = cliente.telefono_principal || '';
+            document.getElementById('cliente-telefono-sec').value = cliente.telefono_secundario || '';
+            document.getElementById('cliente-email').value = cliente.email || '';
+            document.getElementById('cliente-observacion').value = cliente.observacion || '';
+            document.getElementById('cliente-tipo-rol').value = tipoCliente || '';
+            
+            // Mostrar modal
+            document.getElementById('modal-cliente').classList.add('active');
+        }
+
+        // Función para cargar catálogos en selects
+        function cargarCatalogosEnSelects() {
+            // Cargar estados civiles
+            const selectEstadoCivil = document.getElementById('cliente-estado-civil');
+            selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>';
+            catalogoEstadosCivil.forEach(ec => {
+                const option = document.createElement('option');
+                option.value = ec.id;
+                option.textContent = ec.nombre;
+                selectEstadoCivil.appendChild(option);
+            });
+        }
+
+        // Funciones auxiliares para obtener nombres de catálogos
+        function obtenerMarca(id) {
+            const marcas = [
+                { id: 1, nombre: "Toyota" },
+                { id: 2, nombre: "Ford" },
+                { id: 3, nombre: "Honda" },
+                { id: 4, nombre: "Hyundai" },
+                { id: 5, nombre: "Mazda" },
+                { id: 6, nombre: "Kia" }
+            ];
+            const marca = marcas.find(m => m.id === id);
+            return marca ? marca.nombre : 'Desconocida';
+        }
+
+        function obtenerColor(id) {
+            const colores = [
+                { id: 1, nombre: "Rojo" },
+                { id: 2, nombre: "Azul" },
+                { id: 3, nombre: "Verde" },
+                { id: 4, nombre: "Negro" },
+                { id: 5, nombre: "Blanco" },
+                { id: 6, nombre: "Gris" }
+            ];
+            const color = colores.find(c => c.id === id);
+            return color ? color.nombre : 'Desconocido';
+        }
+
+        function obtenerCombustible(id) {
+            const combustibles = [
+                { id: 1, nombre: "Gasolina" },
+                { id: 2, nombre: "Diésel" },
+                { id: 3, nombre: "Eléctrico" },
+                { id: 4, nombre: "Híbrido" }
+            ];
+            const combustible = combustibles.find(c => c.id === id);
+            return combustible ? combustible.nombre : 'Desconocido';
+        }
+
+        function obtenerTransmision(id) {
+            const transmisiones = [
+                { id: 1, nombre: "Automática" },
+                { id: 2, nombre: "Manual" },
+                { id: 3, nombre: "CVT" }
+            ];
+            const transmision = transmisiones.find(t => t.id === id);
+            return transmision ? transmision.nombre : 'Desconocida';
+        }
+
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar catálogos en selects
+            cargarCatalogosEnSelects();
+            
+            // Cargar datos iniciales
+            cargarTablaClientes();
+            
+            // Funcionalidad para el menú móvil
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // Botones de acción principal
+            document.getElementById('btn-agregar').addEventListener('click', mostrarAgregarCliente);
+            document.getElementById('btn-anular').addEventListener('click', anularCliente);
+            document.getElementById('btn-modificar').addEventListener('click', modificarCliente);
+            document.getElementById('btn-pasarj').addEventListener('click', () => {
+                alert('Función "Pasar J" - En desarrollo');
+            });
+            document.getElementById('btn-imprimir').addEventListener('click', () => {
+                alert('Imprimiendo lista de clientes...');
+            });
+            document.getElementById('btn-listar').addEventListener('click', () => {
+                cargarTablaClientes();
+                alert('Lista de clientes actualizada');
+            });
+            
+            // Filtros
+            const filterIdentificacion = document.getElementById('filter-identificacion');
+            const filterNombre = document.getElementById('filter-nombre');
+            const filterTipo = document.getElementById('filter-tipo');
+            const filterEstado = document.getElementById('filter-estado');
+            
+            const aplicarFiltros = () => {
+                const filtros = {
+                    identificacion: filterIdentificacion.value,
+                    nombre: filterNombre.value,
+                    tipo: filterTipo.value,
+                    estado: filterEstado.value
+                };
+                cargarTablaClientes(filtros);
+            };
+            
+            filterIdentificacion.addEventListener('input', aplicarFiltros);
+            filterNombre.addEventListener('input', aplicarFiltros);
+            filterTipo.addEventListener('change', aplicarFiltros);
+            filterEstado.addEventListener('change', aplicarFiltros);
+            
+            document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
+                filterIdentificacion.value = '';
+                filterNombre.value = '';
+                filterTipo.value = '';
+                filterEstado.value = '';
+                cargarTablaClientes();
+            });
+            
+            // Botones del modal de cliente
+            document.getElementById('close-modal-cliente').addEventListener('click', () => {
+                document.getElementById('modal-cliente').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-cliente').addEventListener('click', () => {
+                document.getElementById('modal-cliente').classList.remove('active');
+            });
+            
+            document.getElementById('save-btn-cliente').addEventListener('click', guardarCliente);
+            
+            // Botones del modal de información de venta
+            document.getElementById('close-modal-info-venta').addEventListener('click', () => {
+                document.getElementById('modal-info-venta').classList.remove('active');
+            });
+            
+            document.getElementById('close-btn-info-venta').addEventListener('click', () => {
+                document.getElementById('modal-info-venta').classList.remove('active');
+            });
+            
+            document.getElementById('print-btn-info-venta').addEventListener('click', () => {
+                alert('Imprimiendo información de venta...');
+            });
+            
+            // Botones del modal de costo y venta
+            document.getElementById('close-modal-costo-venta').addEventListener('click', () => {
+                document.getElementById('modal-costo-venta').classList.remove('active');
+            });
+            
+            document.getElementById('close-btn-costo-venta').addEventListener('click', () => {
+                document.getElementById('modal-costo-venta').classList.remove('active');
+            });
+            
+            document.getElementById('print-btn-costo-venta').addEventListener('click', () => {
+                alert('Imprimiendo detalle de costos y venta...');
+            });
+            
+            // Botones del modal de información adicional
+            document.getElementById('close-modal-info-adicional').addEventListener('click', () => {
+                document.getElementById('modal-info-adicional').classList.remove('active');
+            });
+            
+            document.getElementById('close-btn-info-adicional').addEventListener('click', () => {
+                document.getElementById('modal-info-adicional').classList.remove('active');
+            });
+            
+            document.getElementById('export-btn-info-adicional').addEventListener('click', () => {
+                alert('Exportando reporte de información adicional...');
+            });
+            
+            // Cerrar modales al hacer clic fuera
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Botones del sidebar
+            const sidebarButtons = document.querySelectorAll('.sidebar-btn');
+            sidebarButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Quitar clase active de todos los botones
+                    sidebarButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Agregar clase active al botón clickeado
+                    this.classList.add('active');
+                    
+                    // Cerrar menú en móviles si está abierto
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+
+            // Cerrar modal de ver cliente
+            document.getElementById('close-modal-ver-cliente').addEventListener('click', cerrarModalVerCliente);
+            
+            // También cerrar al hacer clic fuera
+            document.getElementById('modal-ver-cliente').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cerrarModalVerCliente();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

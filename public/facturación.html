@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas Pendientes de Aprobación - Autos Colín</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <style>
+        .fac-container {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .fac-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .fac-header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .fac-header h1 i {
+            color: #3498db;
+            margin-right: 10px;
+        }       
+
+        .logo {
+            font-size: 40px;
+            background: white;
+            color: #2c3e50;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fac-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        /* Filtros */
+        .filters-section {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-filter {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-filter-primary {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-filter-primary:hover {
+            background: #34495e;
+        }
+
+        .btn-filter-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-filter-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        /* Tabla de Ventas */
+        .ventas-section {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ventas-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-venta {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f2f5;
+            color: #2c3e50;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-venta i {
+            font-size: 16px;
+        }
+
+        .tab-venta:hover {
+            background: #e0e4e9;
+        }
+
+        .tab-venta.active {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .tab-venta .badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        .table-container {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr.selected {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+        }
+
+        .estado-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .monto-alto {
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        .monto-medio {
+            font-weight: 600;
+            color: #f39c12;
+        }
+
+        .acciones-cell {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: #f0f2f5;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-icon.approve:hover {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-icon.reject:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-icon.view:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Detalle de Venta */
+        .detalle-venta {
+            margin-top: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: none;
+        }
+
+        .detalle-venta.show {
+            display: block;
+            overflow: auto;
+        }
+
+        .detalle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .detalle-titulo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .detalle-titulo i {
+            color: #3498db;
+            margin-right: 10px;
+        }
+
+        .detalle-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detalle-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .detalle-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detalle-row {
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .detalle-label {
+            width: 120px;
+            color: #7f8c8d;
+        }
+
+        .detalle-value {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            table-layout: fixed;
+            min-width: 0;
+        }
+
+        .items-table th {
+            background: #e0e4e9;
+            color: #2c3e50;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .items-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .items-table input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Opciones de venta */
+        .venta-opciones {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .opcion-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opcion-item label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .opcion-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .opcion-item input[type="number"] {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .descuento-global {
+            background: #e8f4f8;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .modal-icon.approve {
+            color: #27ae60;
+        }
+
+        .modal-icon.reject {
+            color: #e74c3c;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.approve {
+            background: #27ae60;
+            color: white;
+        }
+
+        .modal-btn.reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            padding: 15px 30px;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info i {
+            color: #3498db;
+            font-size: 18px;
+        }
+
+        .badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .fac-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo"> 🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar / Menú -->
+        <div class="sidebar" id="sidebar">
+           <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn  active">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Facturación</span>
+                        </a>
+                        <a href="#" class="sidebar-btn">
+                            <i class="fas fa-cash-register"></i>
+                            <span>Recibos</span>
+                        </a>
+                        <a href="inventario.html" class="sidebar-btn">
+                            <i class="fas fa-car"></i>
+                            <span>Inventario</span>
+                        </a>
+                        <a href="clientes.html" class="sidebar-btn">
+                            <i class="fas fa-users"></i>
+                            <span>Clientes</span>
+                        </a>
+                        <a href="certificado_garantia.html" class="sidebar-btn">
+                            <i class="fas fa-award"></i>
+                            <span>Certificado</span>
+                        </a>
+                        <a href="plan_venta.html" class="sidebar-btn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Plan Venta</span>
+                        </a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Cuentas x Cobrar</span>
+                        </a>
+                        <a href="index.html" class="sidebar-salirbtn">
+                            <i class="fas fa-sign-out"></i>
+                            <span>Salir</span>
+                        </a>
+                    </div>
+                </div>
+            </div>         
+        </div>
+
+        <!-- Contenido principal - Cuentas por Cobrar -->
+        <div class="main-content">
+            <div class="fac-container">
+                <div class="fac-header">
+                    <h1><i class="fas fa-car"></i> Ventas Pendientes de Aprobación (FACTURACIÓN)</h1>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label>Buscar</label>
+                            <input type="text" id="filtroBuscar" placeholder="Cliente, vehículo, plan...">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-filter btn-filter-primary" onclick="aplicarFiltros()">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <button class="btn-filter btn-filter-secondary" onclick="limpiarFiltros()">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Ventas -->
+                    <div class="ventas-tabs">
+                        <button class="tab-venta" onclick="cambiarTab('contado', this)">
+                            <i class="fas fa-money-bill-wave"></i> Contado
+                        </button>
+                        <button class="tab-venta" onclick="cambiarTab('credito', this)">
+                            <i class="fas fa-credit-card"></i> Crédito
+                        </button>
+                        <button class="tab-venta" onclick="cambiarTab('efectivo', this)">
+                            <i class="fas fa-money-bill"></i> Efectivo
+                        </button>
+                        <button class="tab-venta" onclick="cambiarTab('tarjeta', this)">
+                            <i class="fas fa-credit-card"></i> Tarjeta
+                        </button>
+                        <button class="tab-venta active" onclick="cambiarTab('todas', this)">
+                            <i class="fas fa-list"></i> Todas
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th># Plan</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Vehículo</th>
+                                    <th>Vendedor</th>
+                                    <th>Monto Total</th>
+                                    <th>Tipo Pago</th>
+                                    <th>Plazo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaVentasBody">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Detalle de Venta -->
+                    <div class="detalle-venta" id="detalleVenta">
+                        <div class="detalle-header">
+                            <div class="detalle-titulo">
+                                <i class="fas fa-file-invoice"></i> Detalle de Venta - Plan <span id="detalleNumPlan"></span>
+                            </div>
+                            <button class="btn-icon" onclick="cerrarDetalle()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Opciones de venta -->
+                        <div class="venta-opciones">
+                            <div class="opcion-item">
+                                <label>
+                                    <input type="checkbox" id="exonerarVenta" onchange="calcularTotales()"> Exonerar Venta (0% IVA)
+                                </label>
+                            </div>
+                            <div class="opcion-item descuento-global">
+                                <label>Descuento Global:</label>
+                                <input type="number" id="descuentoGlobal" value="0" min="0" max="100" step="0.1" onchange="calcularTotales()">
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="detalle-grid">
+                            <div class="detalle-card">
+                                <h4><i class="fas fa-user"></i> Datos del Cliente</h4>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Nombre:</span>
+                                    <span class="detalle-value" id="detalleCliente"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Cédula:</span>
+                                    <span class="detalle-value" id="detalleCedula"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Teléfono:</span>
+                                    <span class="detalle-value" id="detalleTelefono"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Email:</span>
+                                    <span class="detalle-value" id="detalleEmail"></span>
+                                </div>
+                            </div>
+                            <div class="detalle-card">
+                                <h4><i class="fas fa-car"></i> Datos del Vehículo</h4>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Vehículo:</span>
+                                    <span class="detalle-value" id="detalleVehiculo"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Placa:</span>
+                                    <span class="detalle-value" id="detallePlaca"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Año:</span>
+                                    <span class="detalle-value" id="detalleAnio"></span>
+                                </div>
+                                <div class="detalle-row">
+                                    <span class="detalle-label">Color:</span>
+                                    <span class="detalle-value" id="detalleColor"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detalle-card">
+                            <h4><i class="fas fa-shopping-cart"></i> Detalle de la Venta</h4>
+                            <table class="items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio</th>
+                                        <th>% Descuento</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalleItems">
+                                    <!-- Items dinámicos -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right;"><strong>Subtotal:</strong></td>
+                                        <td id="detalleSubtotal"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right;"><strong>Descuento Global:</strong></td>
+                                        <td id="detalleDescuentoGlobal"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right;"><strong>Impuestos (13%):</strong></td>
+                                        <td id="detalleImpuestos"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
+                                        <td id="detalleTotal"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div style="display: flex; gap: 10px; margin: 15px 0; justify-content: flex-end;">
+                                <button class="btn-icon" onclick="agregarItem()" style="width: auto; padding: 8px 15px; background: #27ae60; color: white; gap: 5px;">
+                                    <i class="fas fa-plus"></i> Agregar Item
+                                </button>
+                                <button class="btn-icon" onclick="eliminarUltimoItem()" style="width: auto; padding: 8px 15px; background: #e74c3c; color: white; gap: 5px;">
+                                    <i class="fas fa-trash"></i> Quitar Último
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                            <button class="btn-filter btn-filter-primary" onclick="aprobarVenta()">
+                                <i class="fas fa-check-circle"></i> Aprobar Venta
+                            </button>
+                            <button class="btn-filter" style="background: #e74c3c; color: white;" onclick="rechazarVenta()">
+                                <i class="fas fa-times-circle"></i> Rechazar Venta
+                            </button>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+    <!-- Modal de Aprobación -->
+    <div class="modal-overlay" id="modalAprobacion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon approve">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Confirmar Aprobación</h2>
+                <p style="color: #7f8c8d;">¿Está seguro de aprobar esta venta?</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn approve" onclick="confirmarAprobacion()">
+                    <i class="fas fa-check"></i> Sí, Aprobar
+                </button>
+                <button class="modal-btn cancel" onclick="cerrarModalAprobacion()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Rechazo -->
+    <div class="modal-overlay" id="modalRechazo">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon reject">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2>Confirmar Rechazo</h2>
+                <p style="color: #7f8c8d;">¿Está seguro de rechazar esta venta?</p>
+                <textarea style="width: 100%; margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Motivo del rechazo (opcional)" rows="3"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn reject" onclick="confirmarRechazo()">
+                    <i class="fas fa-times"></i> Sí, Rechazar
+                </button>
+                <button class="modal-btn cancel" onclick="cerrarModalRechazo()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script src="cargar_usuario.js"></script>
+<script>
+    // ===== VARIABLES GLOBALES =====
+    let ventasPendientes = [];
+    let ventasFiltradas = [];
+    let ventaSeleccionada = null;
+    let tabActual = 'todas';
+    let clientes = [];
+    let vehiculos = [];
+    let vendedores = [];
+
+    // ===== INICIALIZACIÓN =====
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarUsuario();
+        cargarCatalogos();
+        cargarVentasPendientes();
+        
+        // Activar el tab "Todas"
+        document.querySelectorAll('.tab-venta').forEach(t => t.classList.remove('active'));
+        document.querySelector('.tab-venta:last-child').classList.add('active');
+        
+        // Configurar menú móvil
+        document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+        document.getElementById('overlay').addEventListener('click', toggleMenu);
+        
+        // Cerrar modales con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModalAprobacion();
+                cerrarModalRechazo();
+                cerrarDetalle();
+            }
+        });
+
+        // Cerrar modales al hacer clic fuera
+        document.getElementById('modalAprobacion').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalAprobacion();
+        });
+        
+        document.getElementById('modalRechazo').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalRechazo();
+        });
+    });
+
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function cargarUsuario() {
+        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        document.getElementById('usuarioInfo').innerHTML = ` 🖥️ ${usuario.nombre || 'Invitado'} - ${usuario.rol || 'USUARIO'}`;
+    }
+
+    // ===== CARGA DE CATÁLOGOS =====
+    async function cargarCatalogos() {
+        try {
+            // Cargar vendedores
+            const vendedoresRes = await fetch('/api/vendedores');
+            const vendedoresData = await vendedoresRes.json();
+            vendedores = vendedoresData.vendedores || [];
+            
+            // Cargar clientes (personas con rol de cliente)
+            const clientesRes = await fetch('/api/personas-con-roles');
+            clientes = await clientesRes.json();
+            
+            // Cargar vehículos disponibles
+            const vehiculosRes = await fetch('/api/vehiculos');
+            vehiculos = await vehiculosRes.json();
+            
+        } catch (error) {
+            console.error('Error cargando catálogos:', error);
+        }
+    }
+
+    // ===== CARGA DE VENTAS PENDIENTES =====
+    async function cargarVentasPendientes() {
+        try {
+            const response = await fetch('/api/ventas/pendientes');
+            ventasPendientes = await response.json();
+            ventasFiltradas = [...ventasPendientes];
+            renderizarTabla();
+            actualizarContadores();
+        } catch (error) {
+            mostrarError('No se pudieron cargar las ventas pendientes');
+        }
+    }
+
+    // ===== FUNCIONES DE UTILIDAD =====
+    function formatearNumero(num) {
+        const n = Number(num);
+        if (!isFinite(n)) {
+            return '₡ 0.00';
+        }
+        return '₡ ' + new Intl.NumberFormat('es-CR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(n);
+    }
+
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return '';
+        const fecha = new Date(fechaStr);
+        return fecha.toLocaleDateString('es-CR');
+    }
+
+    function normalizarTexto(s) {
+        return (s || '').toString().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function mostrarError(mensaje) {
+        const tbody = document.getElementById('tablaVentasBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 50px; color: #e74c3c;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>${mensaje}</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    // ===== RENDERIZADO DE TABLA =====
+    function renderizarTabla() {
+        const tbody = document.getElementById('tablaVentasBody');
+        tbody.innerHTML = '';
+
+        let ventasAMostrar = ventasFiltradas.filter(venta => 
+            venta.ESTADO_VENTA === 'PENDIENTE DE FACTURAR'
+        );
+
+        ventasAMostrar.forEach(venta => {
+            // Filtrar por tab si no es 'todas'
+            if (tabActual !== 'todas') {
+                const tipoPago = venta.FORMAS_PAGO?.[0]?.TIPO_VENTA?.toLowerCase() || '';
+                if (!tipoPago.includes(tabActual.toLowerCase())) {
+                    return;
+                }
+            }
+
+            const fecha = formatearFecha(venta.FECHA_VENTA);
+            const montoTotal = calcularMontoTotal(venta);
+            const tipoPago = venta.FORMAS_PAGO?.[0]?.TIPO_VENTA || 'CONTADO';
+            const plazo = venta.FORMAS_PAGO?.[0]?.PLAZO_MESES || 0;
+
+            const row = document.createElement('tr');
+            row.onclick = () => verDetalleVenta(venta.ID_VENTA);
+            row.innerHTML = `
+                <td><strong>${venta.CODIGO_VENTA || 'S/N'}</strong></td>
+                <td>${fecha}</td>
+                <td>${venta.CLIENTE_NOMBRE || 'N/A'}</td>
+                <td>${venta.VEHICULO_DESCRIPCION || 'N/A'} - ${venta.PLACA || 'S/N'}</td>
+                <td>${venta.VENDEDOR_NOMBRE || 'N/A'}</td>
+                <td class="${montoTotal > 10000000 ? 'monto-alto' : montoTotal > 5000000 ? 'monto-medio' : ''}">${formatearNumero(montoTotal)}</td>
+                <td>${tipoPago}</td>
+                <td>${plazo > 0 ? plazo + ' meses' : 'Contado'}</td>
+                <td class="acciones-cell" onclick="event.stopPropagation()">
+                    <button class="btn-icon view" onclick="verDetalleVenta(${venta.ID_VENTA})" title="Ver detalles">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-icon approve" onclick="aprobarVenta(${venta.ID_VENTA})" title="Aprobar venta">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-icon reject" onclick="rechazarVenta(${venta.ID_VENTA})" title="Rechazar venta">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (tbody.children.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 50px; color: #7f8c8d;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>No hay ventas pendientes de facturar</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function calcularMontoTotal(venta) {
+        // Esto debería venir de la BD, pero por ahora calculamos
+        let total = 0;
+        if (venta.FORMAS_PAGO && venta.FORMAS_PAGO.length > 0) {
+            const fp = venta.FORMAS_PAGO[0] || {};
+            const prima = parseFloat(String(fp.PRIMA || '').replace(/[^0-9.-]+/g, '')) || 0;
+            const saldo = parseFloat(String(fp.SALDO || '').replace(/[^0-9.-]+/g, '')) || 0;
+            total = prima + saldo;
+        }
+        return total;
+    }
+
+    function actualizarContadores() {
+        const contado = ventasPendientes.filter(v => 
+            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
+            v.FORMAS_PAGO?.[0]?.TIPO_VENTA === 'CONTADO'
+        ).length;
+        
+        const credito = ventasPendientes.filter(v => 
+            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
+            v.FORMAS_PAGO?.[0]?.TIPO_VENTA === 'CRÉDITO'
+        ).length;
+        
+        const efectivo = ventasPendientes.filter(v => 
+            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
+            v.FORMAS_PAGO?.[0]?.FORMA_PAGO?.toLowerCase().includes('efectivo')
+        ).length;
+        
+        const tarjeta = ventasPendientes.filter(v => 
+            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
+            v.FORMAS_PAGO?.[0]?.FORMA_PAGO?.toLowerCase().includes('tarjeta')
+        ).length;
+
+        const tabs = document.querySelectorAll('.tab-venta');
+        if (tabs[0]) tabs[0].innerHTML = `<i class="fas fa-money-bill-wave"></i> Contado <span class="badge">${contado}</span>`;
+        if (tabs[1]) tabs[1].innerHTML = `<i class="fas fa-credit-card"></i> Crédito <span class="badge">${credito}</span>`;
+        if (tabs[2]) tabs[2].innerHTML = `<i class="fas fa-money-bill"></i> Efectivo <span class="badge">${efectivo}</span>`;
+        if (tabs[3]) tabs[3].innerHTML = `<i class="fas fa-credit-card"></i> Tarjeta <span class="badge">${tarjeta}</span>`;
+        if (tabs[4]) tabs[4].innerHTML = `<i class="fas fa-list"></i> Todas`;
+    }
+
+    // ===== VER DETALLE DE VENTA =====
+    async function verDetalleVenta(id) {
+        try {
+            const response = await fetch(`/api/ventas/${id}/completo`);
+            ventaSeleccionada = await response.json();
+            
+            if (!ventaSeleccionada) return;
+
+            // Llenar datos del detalle
+            document.getElementById('detalleNumPlan').textContent = ventaSeleccionada.CODIGO_VENTA || 'S/N';
+            document.getElementById('detalleCliente').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.NOMBRE_COMPLETO || 'N/A';
+            document.getElementById('detalleCedula').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.IDENTIFICACION || 'N/A';
+            document.getElementById('detalleTelefono').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.TELEFONO_PRINCIPAL || 'N/A';
+            document.getElementById('detalleEmail').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.EMAIL || 'N/A';
+            
+            document.getElementById('detalleVehiculo').textContent = ventaSeleccionada.VEHICULO?.marca_nombre + ' ' + ventaSeleccionada.VEHICULO?.ESTILO || 'N/A';
+            document.getElementById('detallePlaca').textContent = ventaSeleccionada.VEHICULO?.PLACA || 'N/A';
+            document.getElementById('detalleAnio').textContent = ventaSeleccionada.VEHICULO?.MODELO || 'N/A';
+            document.getElementById('detalleColor').textContent = ventaSeleccionada.VEHICULO?.color_nombre || 'N/A';
+
+            // Resetear opciones
+            document.getElementById('exonerarVenta').checked = false;
+            document.getElementById('descuentoGlobal').value = 0;
+
+            // Crear items de la venta (vehículo + extras)
+            const items = [];
+            
+            // Item del vehículo
+            items.push({
+                codigo: 'VEH-' + ventaSeleccionada.ID_VEHICULO,
+                descripcion: `${ventaSeleccionada.VEHICULO?.marca_nombre} ${ventaSeleccionada.VEHICULO?.ESTILO} ${ventaSeleccionada.VEHICULO?.MODELO}`,
+                cantidad: 1,
+                precio: ventaSeleccionada.VEHICULO?.PRECIO_VENTA || 0,
+                descuento: 0,
+                total: ventaSeleccionada.VEHICULO?.PRECIO_VENTA || 0
+            });
+            
+            // Items de extras si existen
+            if (ventaSeleccionada.EXTRAS && ventaSeleccionada.EXTRAS.length > 0) {
+                ventaSeleccionada.EXTRAS.forEach((extra, index) => {
+                    items.push({
+                        codigo: 'EXT-' + (index + 1),
+                        descripcion: extra.EXTRAS_DETALLE || 'Extra',
+                        cantidad: 1,
+                        precio: extra.PRECIO || 0,
+                        descuento: 0,
+                        total: extra.PRECIO || 0
+                    });
+                });
+            }
+
+            ventaSeleccionada.items = items;
+            refrescarTablaItems();
+
+            document.getElementById('detalleVenta').classList.add('show');
+            
+        } catch (error) {
+            console.error('Error cargando detalle de venta:', error);
+            alert('Error al cargar el detalle de la venta');
+        }
+    }
+
+    // ===== FUNCIONES PARA ITEMS =====
+    function agregarItem() {
+        if (!ventaSeleccionada) return;
+        
+        const nuevoItem = {
+            codigo: `ITEM-${ventaSeleccionada.items.length + 1}`,
+            descripcion: "Nuevo producto",
+            cantidad: 1,
+            precio: 0,
+            descuento: 0,
+            total: 0
+        };
+        
+        ventaSeleccionada.items.push(nuevoItem);
+        refrescarTablaItems();
+    }
+
+    function eliminarUltimoItem() {
+        if (!ventaSeleccionada || ventaSeleccionada.items.length <= 1) {
+            alert('Debe haber al menos un item en la venta');
+            return;
+        }
+        
+        ventaSeleccionada.items.pop();
+        refrescarTablaItems();
+    }
+
+    function refrescarTablaItems() {
+        const itemsBody = document.getElementById('detalleItems');
+        itemsBody.innerHTML = '';
+        
+        ventaSeleccionada.items.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" value="${item.codigo}" placeholder="Código" onchange="actualizarItemCampo(${index}, 'codigo', this.value)"></td>
+                <td><input type="text" value="${item.descripcion}" placeholder="Descripción" onchange="actualizarItemCampo(${index}, 'descripcion', this.value)"></td>
+                <td><input type="number" value="${item.cantidad}" min="1" onchange="actualizarItem(${index}, 'cantidad', this.value)"></td>
+                <td><input type="number" value="${item.precio}" min="0" step="1000" onchange="actualizarItem(${index}, 'precio', this.value)"></td>
+                <td><input type="number" value="${item.descuento}" min="0" max="100" step="0.1" onchange="actualizarItem(${index}, 'descuento', this.value)"></td>
+                <td id="itemTotal${index}">${formatearNumero(item.total)}</td>
+            `;
+            itemsBody.appendChild(row);
+        });
+
+        calcularTotales();
+    }
+
+    function actualizarItemCampo(index, campo, valor) {
+        if (!ventaSeleccionada) return;
+        ventaSeleccionada.items[index][campo] = valor;
+    }
+
+    function actualizarItem(index, campo, valor) {
+        if (!ventaSeleccionada) return;
+        
+        ventaSeleccionada.items[index][campo] = parseFloat(valor) || 0;
+        
+        // Recalcular total del item
+        const item = ventaSeleccionada.items[index];
+        const subtotalItem = item.cantidad * item.precio;
+        const descuentoItem = subtotalItem * (item.descuento / 100);
+        item.total = subtotalItem - descuentoItem;
+        
+        document.getElementById(`itemTotal${index}`).textContent = formatearNumero(item.total);
+        calcularTotales();
+    }
+
+    function calcularTotales() {
+        if (!ventaSeleccionada) return;
+
+        let subtotal = 0;
+        ventaSeleccionada.items.forEach(item => {
+            subtotal += item.total;
+        });
+
+        const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
+        const descuentoMonto = subtotal * (descuentoGlobal / 100);
+        const subtotalConDescuento = subtotal - descuentoMonto;
+
+        const exonerar = document.getElementById('exonerarVenta').checked;
+        const impuestos = exonerar ? 0 : subtotalConDescuento * 0.13;
+        
+        const total = subtotalConDescuento + impuestos;
+
+        document.getElementById('detalleSubtotal').textContent = formatearNumero(subtotal);
+        document.getElementById('detalleDescuentoGlobal').textContent = formatearNumero(descuentoMonto);
+        document.getElementById('detalleImpuestos').textContent = formatearNumero(impuestos);
+        document.getElementById('detalleTotal').textContent = formatearNumero(total);
+        
+        ventaSeleccionada.monto_total = total;
+    }
+
+    function cerrarDetalle() {
+        document.getElementById('detalleVenta').classList.remove('show');
+        ventaSeleccionada = null;
+    }
+
+    // ===== APROBAR VENTA =====
+    function aprobarVenta(id) {
+        ventaSeleccionada = ventasPendientes.find(v => v.ID_VENTA === id);
+        if (!ventaSeleccionada) return;
+        
+        document.getElementById('modalAprobacion').style.display = 'flex';
+    }
+
+    async function confirmarAprobacion() {
+        if (!ventaSeleccionada) return;
+        
+        try {
+            const response = await fetch(`/api/ventas/${ventaSeleccionada.ID_VENTA}/aprobar`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    estado: 'YA FUE FACTURADA',
+                    observaciones: 'Venta aprobada desde facturación'
+                })
+            });
+
+            if (response.ok) {
+                // Actualizar estado local
+                ventaSeleccionada.ESTADO_VENTA = 'YA FUE FACTURADA';
+                
+                // Recargar ventas pendientes
+                await cargarVentasPendientes();
+                
+                cerrarDetalle();
+                mostrarNotificacion('Venta aprobada exitosamente', 'success');
+            } else {
+                mostrarNotificacion('Error al aprobar la venta', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al aprobar la venta', 'error');
+        }
+        
+        cerrarModalAprobacion();
+    }
+
+    function cerrarModalAprobacion() {
+        document.getElementById('modalAprobacion').style.display = 'none';
+    }
+
+    // ===== RECHAZAR VENTA =====
+    function rechazarVenta(id) {
+        ventaSeleccionada = ventasPendientes.find(v => v.ID_VENTA === id);
+        if (!ventaSeleccionada) return;
+        
+        document.getElementById('modalRechazo').style.display = 'flex';
+    }
+
+    async function confirmarRechazo() {
+        if (!ventaSeleccionada) return;
+        
+        const motivo = document.querySelector('#modalRechazo textarea').value;
+        
+        try {
+            const response = await fetch(`/api/ventas/${ventaSeleccionada.ID_VENTA}/rechazar`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    estado: 'PLAN YA FUE ANULADO',
+                    motivo: motivo
+                })
+            });
+
+            if (response.ok) {
+                // Actualizar estado local
+                ventaSeleccionada.ESTADO_VENTA = 'PLAN YA FUE ANULADO';
+                
+                // Recargar ventas pendientes
+                await cargarVentasPendientes();
+                
+                cerrarDetalle();
+                mostrarNotificacion('Venta rechazada', 'warning');
+            } else {
+                mostrarNotificacion('Error al rechazar la venta', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al rechazar la venta', 'error');
+        }
+        
+        cerrarModalRechazo();
+    }
+
+    function cerrarModalRechazo() {
+        document.getElementById('modalRechazo').style.display = 'none';
+        document.querySelector('#modalRechazo textarea').value = '';
+    }
+
+    // ===== FILTROS =====
+    function aplicarFiltros() {
+        const buscar = normalizarTexto(document.getElementById('filtroBuscar').value);
+
+        ventasFiltradas = ventasPendientes.filter(venta => {
+            let cumple = true;
+            
+            if (buscar) {
+                const busquedaStr = normalizarTexto(
+                    `${venta.CODIGO_VENTA || ''} ${venta.CLIENTE_NOMBRE || ''} ${venta.VEHICULO_DESCRIPCION || ''} ${venta.PLACA || ''}`
+                );
+                if (!busquedaStr.includes(buscar)) cumple = false;
+            }
+            
+            return cumple;
+        });
+        
+        renderizarTabla();
+    }
+
+    function limpiarFiltros() {
+        document.getElementById('filtroBuscar').value = '';
+        ventasFiltradas = [...ventasPendientes];
+        renderizarTabla();
+    }
+
+    function cambiarTab(tab, element) {
+        tabActual = tab;
+
+        document.querySelectorAll('.tab-venta').forEach(t => t.classList.remove('active'));
+        element.classList.add('active');
+        
+        renderizarTabla();
+    }
+
+    // ===== NOTIFICACIONES =====
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        `;
+        
+        const colores = {
+            success: '#27ae60',
+            error: '#e74c3c',
+            warning: '#f39c12',
+            info: '#3498db'
+        };
+        
+        notificacion.style.backgroundColor = colores[tipo] || colores.info;
+        notificacion.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${mensaje}`;
+        
+        document.body.appendChild(notificacion);
+        
+        setTimeout(() => notificacion.remove(), 3000);
+    }
+
+    // Agregar estilo para animación
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

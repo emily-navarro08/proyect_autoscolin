@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Catálogos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/Style_mantenimiento.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-database"></i> Sistema de Gestión de Catálogos</h1>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="bancos">
+                    <i class="fas fa-university"></i> Bancos
+                </button>
+                <button class="tab-btn" data-tab="estados-civil">
+                    <i class="fas fa-heart"></i> Estados Civil
+                </button>
+                <button class="tab-btn" data-tab="marcas">
+                    <i class="fas fa-tags"></i> Marcas
+                </button>
+                <button class="tab-btn" data-tab="colores">
+                    <i class="fas fa-palette"></i> Colores
+                </button>
+                <button class="tab-btn" data-tab="combustibles">
+                    <i class="fas fa-gas-pump"></i> Combustibles
+                </button>
+                <button class="tab-btn" data-tab="transmisiones">
+                    <i class="fas fa-cogs"></i> Transmisiones
+                </button>
+            </div>
+
+            <!-- Tab Bancos -->
+            <div class="tab-content active" id="bancos">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-university"></i> Catálogo de Bancos</h2>
+                    <button class="btn btn-primary" id="add-banco">
+                        <i class="fas fa-plus"></i> Nuevo Banco
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-bancos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Estados Civil -->
+            <div class="tab-content" id="estados-civil">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-heart"></i> Catálogo de Estados Civil</h2>
+                    <button class="btn btn-primary" id="add-estado-civil">
+                        <i class="fas fa-plus"></i> Nuevo Estado Civil
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-estados-civil">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Marcas -->
+            <div class="tab-content" id="marcas">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-tags"></i> Catálogo de Marcas</h2>
+                    <button class="btn btn-primary" id="add-marca">
+                        <i class="fas fa-plus"></i> Nueva Marca
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-marcas">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Colores -->
+            <div class="tab-content" id="colores">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-palette"></i> Catálogo de Colores</h2>
+                    <button class="btn btn-primary" id="add-color">
+                        <i class="fas fa-plus"></i> Nuevo Color
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-colores">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Combustibles -->
+            <div class="tab-content" id="combustibles">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-gas-pump"></i> Catálogo de Combustibles</h2>
+                    <button class="btn btn-primary" id="add-combustible">
+                        <i class="fas fa-plus"></i> Nuevo Combustible
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-combustibles">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Transmisiones -->
+            <div class="tab-content" id="transmisiones">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-cogs"></i> Catálogo de Transmisiones</h2>
+                    <button class="btn btn-primary" id="add-transmision">
+                        <i class="fas fa-plus"></i> Nueva Transmisión
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table id="tabla-transmisiones">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver/crear/editar -->
+    <div class="modal" id="data-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-eye"></i> Ver Datos</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="view-data-container" class="view-data">
+                    <!-- Datos en modo vista -->
+                </div>
+                <form id="data-form" style="display: none;">
+                    <!-- Formulario en modo edición/creación -->
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado:</label>
+                        <div class="state-toggle">
+                            <span id="estado-label">ACTIVO</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="estado-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <input type="hidden" id="estado" name="estado" value="ACTIVO">
+                    </div>
+                    <input type="hidden" id="id" name="id">
+                    <input type="hidden" id="catalogo" name="catalogo">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                <button class="btn btn-success" id="save-btn" style="display: none;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // URLs base de las APIs
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Mapeo de catálogos a endpoints - CORREGIDO
+        const API_ENDPOINTS = {
+            'bancos': `${API_BASE_URL}/bancos`,
+            'estados-civil': `${API_BASE_URL}/estados-civil`,  // CON GUÍÓN
+            'marcas': `${API_BASE_URL}/marcas`,
+            'colores': `${API_BASE_URL}/colores`,
+            'combustibles': `${API_BASE_URL}/combustibles`,
+            'transmisiones': `${API_BASE_URL}/transmisiones`
+        };
+
+        // Variables globales - CON LOS MISMOS NOMBRES QUE API_ENDPOINTS
+        let currentCatalogo = '';
+        let currentId = 0;
+
+        // Funciones de utilidad
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = mensaje;
+            notification.className = `notification show ${tipo}`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function getCatalogoNombre(catalogo) {
+            const nombres = {
+                'bancos': 'Banco',
+                'estados-civil': 'Estado Civil',
+                'marcas': 'Marca',
+                'colores': 'Color',
+                'combustibles': 'Combustible',
+                'transmisiones': 'Transmisión'
+            };
+            return nombres[catalogo] || 'Registro';
+        }
+
+        // ============================================
+        // FUNCIONES DE API
+        // ============================================
+
+        async function cargarDatosAPI(catalogo) {
+            try {
+                const endpoint = API_ENDPOINTS[catalogo];
+                if (!endpoint) {
+                    throw new Error(`Endpoint no configurado para ${catalogo}`);
+                }
+                
+                console.log(`Cargando ${catalogo} desde: ${endpoint}`);
+                
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const datos = await response.json();
+                console.log(`${catalogo} cargados:`, datos.length, 'registros');
+                
+                // Actualizar tabla
+                actualizarTabla(catalogo, datos);
+                return datos;
+            } catch (error) {
+                console.error(`Error al cargar ${catalogo}:`, error);
+                mostrarNotificacion(`Error al cargar ${getCatalogoNombre(catalogo).toLowerCase()}s`, 'error');
+                return [];
+            }
+        }
+
+        async function obtenerRegistroPorId(catalogo, id) {
+            try {
+                const endpoint = `${API_ENDPOINTS[catalogo]}/${id}`;
+                console.log(`Obteniendo registro ${id} desde: ${endpoint}`);
+                
+                const response = await fetch(endpoint);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const registro = await response.json();
+                console.log('Registro recibido:', registro);
+                return registro;
+            } catch (error) {
+                console.error(`Error al obtener registro ${id} de ${catalogo}:`, error);
+                mostrarNotificacion('Error al cargar el registro', 'error');
+                return null;
+            }
+        }
+
+        async function crearRegistroAPI(catalogo, datos) {
+            try {
+                const response = await fetch(API_ENDPOINTS[catalogo], {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const resultado = await response.json();
+                mostrarNotificacion(`${getCatalogoNombre(catalogo)} creado exitosamente`, 'success');
+                return resultado;
+            } catch (error) {
+                console.error(`Error al crear registro en ${catalogo}:`, error);
+                mostrarNotificacion(error.message || 'Error al crear el registro', 'error');
+                throw error;
+            }
+        }
+
+        async function actualizarRegistroAPI(catalogo, id, datos) {
+            try {
+                const response = await fetch(`${API_ENDPOINTS[catalogo]}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const resultado = await response.json();
+                mostrarNotificacion(`${getCatalogoNombre(catalogo)} actualizado exitosamente`, 'success');
+                return resultado;
+            } catch (error) {
+                console.error(`Error al actualizar registro ${id} en ${catalogo}:`, error);
+                mostrarNotificacion(error.message || 'Error al actualizar el registro', 'error');
+                throw error;
+            }
+        }
+
+        // ============================================
+        // FUNCIONES DE INTERFAZ - CORREGIDAS
+        // ============================================
+
+        function actualizarTabla(catalogo, datos) {
+            // Mapeo de nombres de catálogo a IDs de tabla HTML
+            const tablaMap = {
+                'bancos': 'tabla-bancos',
+                'estados-civil': 'tabla-estados-civil',
+                'marcas': 'tabla-marcas',
+                'colores': 'tabla-colores',
+                'combustibles': 'tabla-combustibles',
+                'transmisiones': 'tabla-transmisiones'
+            };
+            
+            const tablaId = tablaMap[catalogo];
+            if (!tablaId) {
+                console.error(`No se encontró tabla para el catálogo: ${catalogo}`);
+                return;
+            }
+            
+            const tbody = document.querySelector(`#${tablaId} tbody`);
+            
+            if (!tbody) {
+                console.error(`No se encontró la tabla con ID: ${tablaId}`);
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (!datos || datos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-database" style="font-size: 2rem; color: #bdc3c7;"></i>
+                            <h3>No hay registros</h3>
+                            <button class="btn btn-primary btn-sm mt-2" onclick="crearNuevo('${catalogo}')">
+                                <i class="fas fa-plus"></i> Crear primer registro
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            datos.forEach(item => {
+                // Extraer ID, nombre y estado del registro
+                let id, nombre, estado;
+                
+                if (item.ID_BANCO !== undefined) {
+                    id = item.ID_BANCO;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else if (item.ID_ESTADO_CIVIL !== undefined) {
+                    id = item.ID_ESTADO_CIVIL;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else if (item.ID_MARCA !== undefined) {
+                    id = item.ID_MARCA;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else if (item.ID_COLOR !== undefined) {
+                    id = item.ID_COLOR;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else if (item.ID_COMBUSTIBLE !== undefined) {
+                    id = item.ID_COMBUSTIBLE;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else if (item.ID_TRANSMISION !== undefined) {
+                    id = item.ID_TRANSMISION;
+                    nombre = item.NOMBRE;
+                    estado = item.ESTADO;
+                } else {
+                    // Fallback
+                    id = item.id || item.ID || 'N/A';
+                    nombre = item.nombre || item.NOMBRE || 'Sin nombre';
+                    estado = item.estado || item.ESTADO || 'ACTIVO';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${nombre}</td>
+                    <td>
+                        <span class="status-badge ${estado === 'ACTIVO' ? 'status-active' : 'status-inactive'}">
+                            ${estado}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="btn btn-warning btn-edit" data-id="${id}" data-catalogo="${catalogo}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Añadir eventos usando event delegation
+            setTimeout(() => {
+                document.querySelectorAll(`#${tablaId} .btn-edit`).forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const catalogoBtn = btn.dataset.catalogo;
+                        const idBtn = parseInt(btn.dataset.id);
+                        console.log(`Editando: ${catalogoBtn}, ID: ${idBtn}`);
+                        await editarDatos(catalogoBtn, idBtn);
+                    });
+                });
+                
+                document.querySelectorAll(`#${tablaId} .btn-delete`).forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const catalogoBtn = btn.dataset.catalogo;
+                        const idBtn = parseInt(btn.dataset.id);
+                        console.log(`Eliminando: ${catalogoBtn}, ID: ${idBtn}`);
+                        await eliminarRegistroAPI(catalogoBtn, idBtn);
+                    });
+                });
+            }, 100);
+        }
+
+        async function editarDatos(catalogo, id) {
+            try {
+                console.log(`Editando: ${catalogo}, ID: ${id}`);
+                
+                // Mostrar indicador de carga
+                document.getElementById('modal-title').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cargando...`;
+                
+                // Mostrar modal inmediatamente para feedback
+                document.getElementById('data-modal').classList.add('active');
+                
+                // Obtener datos del registro
+                const registro = await obtenerRegistroPorId(catalogo, id);
+                if (!registro) {
+                    mostrarNotificacion('No se pudo cargar el registro', 'error');
+                    document.getElementById('data-modal').classList.remove('active');
+                    return;
+                }
+                
+                currentCatalogo = catalogo;
+                currentId = id;
+                
+                // Configurar modal para modo edición
+                document.getElementById('modal-title').innerHTML = `<i class="fas fa-edit"></i> Editar ${getCatalogoNombre(catalogo)}`;
+                document.getElementById('view-data-container').style.display = 'none';
+                document.getElementById('data-form').style.display = 'block';
+                document.getElementById('save-btn').style.display = 'inline-flex';
+                
+                // Extraer datos del registro
+                let nombre = registro.NOMBRE || registro.nombre || '';
+                let estado = registro.ESTADO || registro.estado || 'ACTIVO';
+                
+                // Cargar datos en el formulario
+                document.getElementById('id').value = id;
+                document.getElementById('nombre').value = nombre;
+                document.getElementById('catalogo').value = catalogo;
+                
+                // Configurar el toggle de estado
+                const estadoToggle = document.getElementById('estado-toggle');
+                const estadoHidden = document.getElementById('estado');
+                const estadoLabel = document.getElementById('estado-label');
+                
+                if (estado === 'ACTIVO') {
+                    estadoToggle.checked = true;
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoToggle.checked = false;
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+                
+            } catch (error) {
+                console.error('Error en editarDatos:', error);
+                mostrarNotificacion(`Error: ${error.message}`, 'error');
+                document.getElementById('data-modal').classList.remove('active');
+            }
+        }
+
+        function crearNuevo(catalogo) {
+            currentCatalogo = catalogo;
+            currentId = 0;
+            
+            // Configurar modal para modo creación
+            document.getElementById('modal-title').innerHTML = `<i class="fas fa-plus"></i> Nuevo ${getCatalogoNombre(catalogo)}`;
+            document.getElementById('view-data-container').style.display = 'none';
+            document.getElementById('data-form').style.display = 'block';
+            document.getElementById('save-btn').style.display = 'inline-flex';
+            
+            // Limpiar formulario
+            document.getElementById('data-form').reset();
+            document.getElementById('id').value = 0;
+            document.getElementById('catalogo').value = catalogo;
+            document.getElementById('estado-toggle').checked = true;
+            document.getElementById('estado').value = 'ACTIVO';
+            document.getElementById('estado-label').textContent = 'ACTIVO';
+            
+            // Mostrar modal
+            document.getElementById('data-modal').classList.add('active');
+        }
+
+        async function guardarDatos() {
+            const id = parseInt(document.getElementById('id').value);
+            const nombre = document.getElementById('nombre').value.trim();
+            const estado = document.getElementById('estado').value;
+            const catalogo = document.getElementById('catalogo').value;
+            
+            // Validación básica
+            if (!nombre) {
+                mostrarNotificacion('El nombre es requerido', 'error');
+                return;
+            }
+            
+            try {
+                const datos = {
+                    NOMBRE: nombre,
+                    ESTADO: estado
+                };
+                
+                if (id === 0) {
+                    // Crear nuevo registro
+                    await crearRegistroAPI(catalogo, datos);
+                } else {
+                    // Actualizar registro existente
+                    await actualizarRegistroAPI(catalogo, id, datos);
+                }
+                
+                // Recargar datos del catálogo
+                await cargarDatosAPI(catalogo);
+                
+                // Cerrar modal
+                document.getElementById('data-modal').classList.remove('active');
+                
+            } catch (error) {
+                // El error ya fue mostrado en las funciones de API
+                console.error('Error en guardarDatos:', error);
+            }
+        }
+
+        // ============================================
+        // INICIALIZACIÓN DE LA PÁGINA
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('=== INICIANDO SISTEMA DE CATÁLOGOS ===');
+            
+            // Mapeo de IDs de pestaña a nombres de catálogo
+            const tabToCatalogo = {
+                'bancos': 'bancos',
+                'estados-civil': 'estados-civil',
+                'marcas': 'marcas',
+                'colores': 'colores',
+                'combustibles': 'combustibles',
+                'transmisiones': 'transmisiones'
+            };
+            
+            // Cargar datos iniciales
+            try {
+                mostrarNotificacion('Cargando catálogos...', 'info');
+                
+                // Cargar todos los catálogos
+                await Promise.all([
+                    cargarDatosAPI('bancos'),
+                    cargarDatosAPI('estados-civil'),
+                    cargarDatosAPI('marcas'),
+                    cargarDatosAPI('colores'),
+                    cargarDatosAPI('combustibles'),
+                    cargarDatosAPI('transmisiones')
+                ]);
+                
+                mostrarNotificacion('Catálogos cargados exitosamente', 'success');
+            } catch (error) {
+                console.error('Error al inicializar catálogos:', error);
+                mostrarNotificacion('Error al cargar algunos catálogos', 'error');
+            }
+            
+            // Manejar cambio de pestañas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Quitar clase active de todas las pestañas y contenidos
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Añadir clase active a la pestaña seleccionada
+                    btn.classList.add('active');
+                    
+                    // Mostrar el contenido correspondiente
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Obtener el nombre del catálogo
+                    const catalogo = tabToCatalogo[tabId];
+                    console.log(`Pestaña cambiada: ${tabId} -> ${catalogo}`);
+                });
+            });
+            
+            // Botones para agregar nuevos registros
+            const botonesAgregar = {
+                'add-banco': 'bancos',
+                'add-estado-civil': 'estados-civil',
+                'add-marca': 'marcas',
+                'add-color': 'colores',
+                'add-combustible': 'combustibles',
+                'add-transmision': 'transmisiones'
+            };
+            
+            Object.entries(botonesAgregar).forEach(([botonId, catalogo]) => {
+                const boton = document.getElementById(botonId);
+                if (boton) {
+                    boton.addEventListener('click', () => crearNuevo(catalogo));
+                }
+            });
+            
+            // Manejar el toggle de estado
+            document.getElementById('estado-toggle').addEventListener('change', function() {
+                const estadoHidden = document.getElementById('estado');
+                const estadoLabel = document.getElementById('estado-label');
+                
+                if (this.checked) {
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+            });
+            
+            // Botones del modal
+            document.getElementById('close-modal').addEventListener('click', () => {
+                document.getElementById('data-modal').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn').addEventListener('click', () => {
+                document.getElementById('data-modal').classList.remove('active');
+            });
+            
+            document.getElementById('save-btn').addEventListener('click', guardarDatos);
+            
+            // Cerrar modal al hacer clic fuera del contenido
+            document.getElementById('data-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // ============================================
+        // FUNCIONES DE DEPURACIÓN (para consola)
+        // ============================================
+
+        window.verificarAPIs = async function() {
+            console.log('=== VERIFICANDO APIS ===');
+            
+            const catalogos = ['bancos', 'estados-civil', 'marcas', 'colores', 'combustibles', 'transmisiones'];
+            
+            for (const catalogo of catalogos) {
+                console.log(`\n--- ${getCatalogoNombre(catalogo).toUpperCase()} ---`);
+                const endpoint = API_ENDPOINTS[catalogo];
+                
+                try {
+                    const response = await fetch(endpoint);
+                    console.log(`URL: ${endpoint}`);
+                    console.log(`Status: ${response.status} ${response.statusText}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`Registros: ${data.length}`);
+                        if (data.length > 0) {
+                            console.log('Primer registro:', data[0]);
+                        }
+                    }
+                } catch (error) {
+                    console.log(`ERROR: ${error.message}`);
+                }
+            }
+        };
+
+        window.probarEditar = async function(catalogo = 'estados-civil', id = 1) {
+            console.log(`Probando editar ${catalogo} ID ${id}`);
+            await editarDatos(catalogo, id);
+        };
+    </script>
+</body>
+</html>

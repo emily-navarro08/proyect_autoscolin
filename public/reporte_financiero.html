@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Financiero - Autos Colin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 28px;
+            color: #3498db;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .period-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .period-filter select, .period-filter button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .period-filter button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .period-filter button:hover {
+            background-color: #2980b9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 1100px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #eaeaea;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title i {
+            color: #3498db;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .data-table th {
+            background-color: #ecf0f1;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #ddd;
+        }
+        
+        .data-table td {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .data-table input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .total-row {
+            background-color: #e8f4fc;
+            font-weight: 600;
+        }
+        
+        .amount-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .amount-cell input {
+            text-align: right;
+        }
+        
+        .summary-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        
+        .positive {
+            color: #27ae60;
+        }
+        
+        .negative {
+            color: #e74c3c;
+        }
+        
+        .add-expense-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .add-expense-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .db-connection {
+            background-color: #fff8e1;
+            border: 1px dashed #ffc107;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .db-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .connected {
+            color: #27ae60;
+        }
+        
+        .disconnected {
+            color: #e74c3c;
+        }
+        
+        .sync-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .sync-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+        
+        .highlight {
+            background-color: #fffde7;
+        }
+        
+        .editable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .editable:hover {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-car"></i>
+                <h1>CONTROL FINANCIERO - AUTOS COLIN</h1>
+            </div>
+            <div class="period-filter">
+                <select id="period-select">
+                    <option value="annual">Anual</option>
+                    <option value="january">Enero</option>
+                    <option value="february">Febrero</option>
+                    <option value="march">Marzo</option>
+                    <option value="april">Abril</option>
+                    <option value="may">Mayo</option>
+                    <option value="june">Junio</option>
+                    <option value="july" selected>Julio</option>
+                    <option value="august">Agosto</option>
+                    <option value="september">Septiembre</option>
+                    <option value="october">Octubre</option>
+                    <option value="november">Noviembre</option>
+                    <option value="december">Diciembre</option>
+                </select>
+                <button id="filter-btn">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="left-column">
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-money-bill-wave"></i> PLATA INICIAL Y GASTOS</span>
+                    </h2>
+                    
+                    <div class="summary-box">
+                        <div class="summary-item">
+                            <span>Plata Inicial:</span>
+                            <span id="initial-amount" class="amount-cell editable" contenteditable="true">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Gastos:</span>
+                            <span id="total-expenses" class="amount-cell">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Saldo Disponible:</span>
+                            <span id="available-balance" class="amount-cell">0</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="section-title">
+                        <span><i class="fas fa-list"></i> RESUMEN DE GASTOS</span>
+                    </h3>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="10%">#</th>
+                                <th width="60%">Concepto</th>
+                                <th width="30%">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-table">
+                            <!-- Los gastos se cargarán dinámicamente -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2">TOTAL GASTOS</td>
+                                <td id="expenses-total" class="amount-cell">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <button id="add-expense" class="add-expense-btn">
+                        <i class="fas fa-plus-circle"></i> Agregar Nuevo Gasto
+                    </button>
+                    
+                    <div class="db-connection">
+                        <div class="db-status">
+                            <i class="fas fa-database connected"></i>
+                            <span>Conexión a base de datos de vehículos: <strong class="connected">ACTIVA</strong></span>
+                        </div>
+                        <button class="sync-btn" id="sync-vehicles">
+                            <i class="fas fa-sync-alt"></i> Sincronizar Vehículos
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-car"></i> VEHÍCULOS COMPRADOS</span>
+                    </h2>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="10%">#</th>
+                                <th width="50%">Vehículo</th>
+                                <th width="40%">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchased-vehicles">
+                            <!-- Los vehículos comprados se cargarán desde la BD -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2">TOTAL COMPRADO</td>
+                                <td id="purchased-total" class="amount-cell">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-chart-line"></i> PLATA TRABAJANDO</span>
+                    </h2>
+                    
+                    <div class="summary-box">
+                        <div class="summary-item">
+                            <span>Inventario Neto:</span>
+                            <span id="inventory-net" class="amount-cell editable" contenteditable="true">214235130</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Créditos:</span>
+                            <span id="credits" class="amount-cell editable" contenteditable="true">11450000</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Efectivo:</span>
+                            <span id="cash" class="amount-cell editable" contenteditable="true">400000</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total:</span>
+                            <span id="working-total" class="amount-cell">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-university"></i> PLATA BANCOS</span>
+                    </h2>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Cuenta</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>BCR Colones</td>
+                                <td class="amount-cell">
+                                    <input type="text" id="bcr-colones" value="119250000">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>BCR Dólares</td>
+                                <td class="amount-cell">
+                                    <input type="text" id="bcr-dollars" value="0">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>BAC Colones</td>
+                                <td class="amount-cell">
+                                    <input type="text" id="bac-colones" value="2646600">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>BAC Dólares</td>
+                                <td class="amount-cell">
+                                    <input type="text" id="bac-dollars" value="6120000">
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td>TOTAL PLATA BANCOS</td>
+                                <td id="banks-total" class="amount-cell">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-car-side"></i> VEHÍCULOS VENDIDOS</span>
+                    </h2>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="10%">#</th>
+                                <th width="50%">Vehículo</th>
+                                <th width="40%">Ganancia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sold-vehicles">
+                            <!-- Los vehículos vendidos se cargarán desde la BD -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2">TOTAL VENDIDO</td>
+                                <td id="sold-total" class="amount-cell">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <span><i class="fas fa-calculator"></i> RESULTADOS FINALES</span>
+                    </h2>
+                    
+                    <div class="summary-box highlight">
+                        <div class="summary-item">
+                            <span>Vehículos Comprados:</span>
+                            <span id="total-purchased" class="amount-cell">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Vehículos Vendidos:</span>
+                            <span id="total-sold" class="amount-cell">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Ganancia:</span>
+                            <span id="total-profit" class="amount-cell positive">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Gastos:</span>
+                            <span id="all-expenses" class="amount-cell negative">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>GANANCIA NETA:</span>
+                            <span id="net-profit" class="amount-cell positive">0</span>
+                        </div>
+                    </div>
+
+                    <!-- En el header del index.html, después del logo -->
+                    <div class="export-section" style="margin-left: auto;">
+                        <button id="export-excel-btn" style="padding: 10px 25px; background-color: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px;">
+                            <i class="fas fa-file-excel"></i> Exportar a Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Sistema de Control Financiero para Autos Colin</p>
+            <p>Los datos de vehículos se obtienen de la base de datos del sistema</p>
+        </footer>
+    </div>
+
+    <script>
+        // Datos iniciales de gastos (simulando los del Excel)
+        const initialExpenses = [
+            { id: 1, description: "ALQUILER", amount: 0 },
+            { id: 2, description: "ALQUILER", amount: 0 },
+            { id: 3, description: "TEL 1", amount: 0 },
+            { id: 4, description: "CEL 2", amount: 0 },
+            { id: 5, description: "CEL 3", amount: 0 },
+            { id: 6, description: "CEL 4", amount: 0 },
+            { id: 7, description: "CORRIENTE", amount: 0 },
+            { id: 8, description: "AGUA Y BASURA", amount: 0 },
+            { id: 9, description: "CABLE", amount: 0 },
+            { id: 10, description: "CRAUTOS", amount: 0 },
+            { id: 11, description: "INTERNET", amount: 0 },
+            { id: 12, description: "JARDIN", amount: 0 },
+            { id: 13, description: "SEGURO CARROS", amount: 0 },
+            { id: 14, description: "LIQUIDOS", amount: 0 },
+            { id: 15, description: "SELCA", amount: 0 },
+            { id: 16, description: "HERMANOS", amount: 0 },
+            { id: 17, description: "PAPI", amount: 0 },
+            { id: 18, description: "MANFRED", amount: 0 },
+            { id: 19, description: "NAZA", amount: 0 },
+            { id: 20, description: "TAVITO", amount: 0 },
+            { id: 21, description: "RAFITA", amount: 0 },
+            { id: 22, description: "PAGO DE CARRO", amount: 0 }
+        ];
+
+        // Datos simulados de vehículos comprados (desde base de datos)
+        const purchasedVehiclesDB = [
+            { id: 1, vehicle: "Toyota Corolla 2020", amount: 12500000 },
+            { id: 2, vehicle: "Honda Civic 2019", amount: 11000000 },
+            { id: 3, vehicle: "Mazda 3 2021", amount: 13500000 },
+            { id: 4, vehicle: "Hyundai Tucson 2022", amount: 18500000 }
+        ];
+
+        // Datos simulados de vehículos vendidos (desde base de datos)
+        const soldVehiclesDB = [
+            { id: 1, vehicle: "Toyota Corolla 2020", profit: 1500000 },
+            { id: 2, vehicle: "Honda Civic 2019", profit: 1200000 },
+            { id: 3, vehicle: "Mazda 3 2021", profit: 1800000 }
+        ];
+
+        // Variable para almacenar gastos actuales
+        let expenses = JSON.parse(JSON.stringify(initialExpenses));
+        let expenseCounter = expenses.length + 1;
+
+        // Función para formatear números con separadores de miles
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Función para convertir string a número (eliminar comas y caracteres no numéricos)
+        function parseNumber(str) {
+            if (!str) return 0;
+            const num = parseFloat(str.toString().replace(/[^0-9.-]+/g, ""));
+            return isNaN(num) ? 0 : num;
+        }
+
+        // Función para actualizar todos los cálculos
+        function updateCalculations() {
+            // Calcular total de gastos
+            let totalExpenses = 0;
+            expenses.forEach(expense => {
+                totalExpenses += parseNumber(expense.amount);
+            });
+            
+            document.getElementById('expenses-total').textContent = formatNumber(totalExpenses);
+            document.getElementById('total-expenses').textContent = formatNumber(totalExpenses);
+            document.getElementById('all-expenses').textContent = formatNumber(totalExpenses);
+            
+            // Calcular plata inicial y saldo disponible
+            const initialAmount = parseNumber(document.getElementById('initial-amount').textContent);
+            const availableBalance = initialAmount - totalExpenses;
+            document.getElementById('available-balance').textContent = formatNumber(availableBalance);
+            
+            // Calcular total de vehículos comprados
+            let totalPurchased = 0;
+            purchasedVehiclesDB.forEach(vehicle => {
+                totalPurchased += parseNumber(vehicle.amount);
+            });
+            document.getElementById('purchased-total').textContent = formatNumber(totalPurchased);
+            document.getElementById('total-purchased').textContent = formatNumber(totalPurchased);
+            
+            // Calcular total de vehículos vendidos
+            let totalSold = 0;
+            soldVehiclesDB.forEach(vehicle => {
+                totalSold += parseNumber(vehicle.profit);
+            });
+            document.getElementById('sold-total').textContent = formatNumber(totalSold);
+            document.getElementById('total-sold').textContent = formatNumber(totalSold);
+            
+            // Calcular total ganancia
+            const totalProfit = totalSold;
+            document.getElementById('total-profit').textContent = formatNumber(totalProfit);
+            
+            // Calcular ganancia neta
+            const netProfit = totalProfit - totalExpenses;
+            document.getElementById('net-profit').textContent = formatNumber(netProfit);
+            
+            // Calcular plata trabajando
+            const inventoryNet = parseNumber(document.getElementById('inventory-net').textContent);
+            const credits = parseNumber(document.getElementById('credits').textContent);
+            const cash = parseNumber(document.getElementById('cash').textContent);
+            const workingTotal = inventoryNet + credits + cash;
+            document.getElementById('working-total').textContent = formatNumber(workingTotal);
+            
+            // Calcular total bancos
+            const bcrColones = parseNumber(document.getElementById('bcr-colones').value);
+            const bcrDollars = parseNumber(document.getElementById('bcr-dollars').value);
+            const bacColones = parseNumber(document.getElementById('bac-colones').value);
+            const bacDollars = parseNumber(document.getElementById('bac-dollars').value);
+            const banksTotal = bcrColones + bcrDollars + bacColones + bacDollars;
+            document.getElementById('banks-total').textContent = formatNumber(banksTotal);
+        }
+
+        // Función para cargar gastos en la tabla
+        function loadExpenses() {
+            const expensesTable = document.getElementById('expenses-table');
+            expensesTable.innerHTML = '';
+            
+            expenses.forEach((expense, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${expense.id}</td>
+                    <td>
+                        <input type="text" class="expense-desc" value="${expense.description}" 
+                               data-id="${expense.id}" placeholder="Descripción del gasto">
+                    </td>
+                    <td class="amount-cell">
+                        <input type="text" class="expense-amount" value="${formatNumber(expense.amount)}" 
+                               data-id="${expense.id}" placeholder="0">
+                    </td>
+                `;
+                expensesTable.appendChild(row);
+            });
+            
+            // Agregar event listeners a los inputs de gastos
+            document.querySelectorAll('.expense-desc').forEach(input => {
+                input.addEventListener('change', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const expense = expenses.find(e => e.id === id);
+                    if (expense) {
+                        expense.description = this.value;
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.expense-amount').forEach(input => {
+                input.addEventListener('input', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const expense = expenses.find(e => e.id === id);
+                    if (expense) {
+                        // Permitir solo números y comas
+                        this.value = this.value.replace(/[^0-9,]/g, '');
+                        expense.amount = parseNumber(this.value);
+                        updateCalculations();
+                    }
+                });
+                
+                // Formatear al salir del campo
+                input.addEventListener('blur', function() {
+                    const num = parseNumber(this.value);
+                    this.value = formatNumber(num);
+                });
+            });
+        }
+
+        // Función para cargar vehículos comprados
+        function loadPurchasedVehicles() {
+            const purchasedTable = document.getElementById('purchased-vehicles');
+            purchasedTable.innerHTML = '';
+            
+            purchasedVehiclesDB.forEach((vehicle, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehicle.id}</td>
+                    <td>${vehicle.vehicle}</td>
+                    <td class="amount-cell">${formatNumber(vehicle.amount)}</td>
+                `;
+                purchasedTable.appendChild(row);
+            });
+        }
+
+        // Función para cargar vehículos vendidos
+        function loadSoldVehicles() {
+            const soldTable = document.getElementById('sold-vehicles');
+            soldTable.innerHTML = '';
+            
+            soldVehiclesDB.forEach((vehicle, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehicle.id}</td>
+                    <td>${vehicle.vehicle}</td>
+                    <td class="amount-cell positive">${formatNumber(vehicle.profit)}</td>
+                `;
+                soldTable.appendChild(row);
+            });
+        }
+
+        // Función para agregar nuevo gasto
+        function addNewExpense() {
+            const newExpense = {
+                id: expenseCounter++,
+                description: "NUEVO GASTO",
+                amount: 0
+            };
+            
+            expenses.push(newExpense);
+            loadExpenses();
+            updateCalculations();
+        }
+
+        // Función para sincronizar vehículos (simular conexión a BD)
+        function syncVehicles() {
+            // Simular actualización desde base de datos
+            alert("Sincronizando datos de vehículos con la base de datos...");
+            
+            // En una implementación real, aquí se haría una llamada AJAX a un servidor
+            // Por ahora, solo recargamos los datos simulados
+            loadPurchasedVehicles();
+            loadSoldVehicles();
+            updateCalculations();
+            
+            // Simular un pequeño retardo
+            setTimeout(() => {
+                alert("Datos de vehículos actualizados correctamente.");
+            }, 500);
+        }
+
+        // Función para aplicar filtro de período
+        function applyPeriodFilter() {
+            const period = document.getElementById('period-select').value;
+            let periodText = "";
+            
+            switch(period) {
+                case "annual":
+                    periodText = "Anual 2025";
+                    break;
+                case "july":
+                    periodText = "Julio 2025";
+                    break;
+                default:
+                    periodText = period.charAt(0).toUpperCase() + period.slice(1) + " 2025";
+            }
+            
+            document.querySelector('h1').textContent = `CONTROL FINANCIERO - AUTOS COLIN ${periodText}`;
+            
+            // En una implementación real, aquí se cargarían los datos del período seleccionado
+            alert(`Filtro aplicado: ${periodText}. En una implementación real, se cargarían los datos correspondientes al período seleccionado.`);
+        }
+
+        // Inicialización al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos iniciales
+            loadExpenses();
+            loadPurchasedVehicles();
+            loadSoldVehicles();
+            updateCalculations();
+            
+            // Configurar eventos
+            document.getElementById('add-expense').addEventListener('click', addNewExpense);
+            document.getElementById('sync-vehicles').addEventListener('click', syncVehicles);
+            document.getElementById('filter-btn').addEventListener('click', applyPeriodFilter);
+            
+            // Eventos para campos editables
+            document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                element.addEventListener('blur', function() {
+                    // Formatear número al salir del campo
+                    const num = parseNumber(this.textContent);
+                    this.textContent = formatNumber(num);
+                    updateCalculations();
+                });
+                
+                // Permitir solo números al editar
+                element.addEventListener('input', function() {
+                    this.textContent = this.textContent.replace(/[^0-9,]/g, '');
+                });
+            });
+            
+            // Eventos para inputs de bancos
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    // Permitir solo números y comas
+                    this.value = this.value.replace(/[^0-9,]/g, '');
+                    updateCalculations();
+                });
+                
+                // Formatear al salir del campo
+                input.addEventListener('blur', function() {
+                    const num = parseNumber(this.value);
+                    this.value = formatNumber(num);
+                });
+            });
+            
+            // Simular que la página se carga con datos del mes de Julio
+            document.getElementById('period-select').value = 'july';
+        });
+
+        // Función para exportar a Excel
+        function prepareExport() {
+            // Recopilar todos los datos del sistema
+            const exportData = {
+                period: document.getElementById('period-select').value,
+                initialAmount: parseNumber(document.getElementById('initial-amount').textContent),
+                expenses: expenses, // Array de gastos actual
+                inventoryNet: parseNumber(document.getElementById('inventory-net').textContent),
+                credits: parseNumber(document.getElementById('credits').textContent),
+                cash: parseNumber(document.getElementById('cash').textContent),
+                banks: {
+                    bcrColones: parseNumber(document.getElementById('bcr-colones').value),
+                    bcrDollars: parseNumber(document.getElementById('bcr-dollars').value),
+                    bacColones: parseNumber(document.getElementById('bac-colones').value),
+                    bacDollars: parseNumber(document.getElementById('bac-dollars').value)
+                },
+                // Datos de vehículos (simulados o reales)
+                vehiclesPurchased: purchasedVehiclesDB,
+                vehiclesSold: soldVehiclesDB,
+                // Cálculos
+                totals: {
+                    expenses: parseNumber(document.getElementById('expenses-total').textContent.replace(/,/g, '')),
+                    purchased: parseNumber(document.getElementById('purchased-total').textContent.replace(/,/g, '')),
+                    sold: parseNumber(document.getElementById('sold-total').textContent.replace(/,/g, '')),
+                    profit: parseNumber(document.getElementById('total-profit').textContent.replace(/,/g, '')),
+                    netProfit: parseNumber(document.getElementById('net-profit').textContent.replace(/,/g, ''))
+                }
+            };
+            
+            // Guardar en localStorage
+            localStorage.setItem('autosColinExportData', JSON.stringify(exportData));
+            
+            // Redirigir a la página de exportación
+            window.open('/public/export.html', '_blank');
+        }
+
+        // Agregar event listener al botón (en la inicialización)
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... código existente ...
+            
+            // Agregar botón de exportación si existe
+            const exportBtn = document.getElementById('export-excel-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', prepareExport);
+            }
+        });
+    </script>
+</body>
+</html>

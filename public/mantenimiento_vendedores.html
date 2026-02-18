@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Vendedores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_mantenimiento.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-users"></i> Sistema de Gestión de Vendedores</h1>
+            <p>Administración de personas, roles y usuarios del sistema</p>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="personas">
+                    <i class="fas fa-user"></i> Personas
+                </button>
+                <button class="tab-btn" data-tab="vendedores">
+                    <i class="fas fa-user-tie"></i> Vendedores
+                </button>
+                <button class="tab-btn" data-tab="usuarios">
+                    <i class="fas fa-user-shield"></i> Usuarios
+                </button>
+                <button class="tab-btn" data-tab="roles">
+                    <i class="fas fa-user-tag"></i> Roles
+                </button>
+            </div>
+
+            <!-- Tab Personas -->
+            <div class="tab-content active" id="personas">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-user"></i> Gestión de Personas</h2>
+                    <button class="btn btn-primary" id="add-persona">
+                        <i class="fas fa-plus"></i> Nueva Persona
+                    </button>
+                </div>
+                
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-nombre">Nombre:</label>
+                            <input type="text" id="filter-nombre" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-identificacion">Identificación:</label>
+                            <input type="text" id="filter-identificacion" placeholder="Buscar por identificación...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-estado">Estado:</label>
+                            <select id="filter-estado">
+                                <option value="">Todos</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" style="align-self: flex-end;">
+                            <button class="btn btn-secondary" id="btn-limpiar-filtros">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-personas">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Identificación</th>
+                                <th>Nombre Completo</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Vendedores -->
+            <div class="tab-content" id="vendedores">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-user-tie"></i> Vendedores Activos</h2>
+                    <div>
+                        <button class="btn btn-info" id="btn-asignar-rol">
+                            <i class="fas fa-user-tag"></i> Asignar Rol
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #3498db;">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-vendedores">0</h3>
+                            <p>Vendedores Activos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #27ae60;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="vendedores-con-usuario">0</h3>
+                            <p>Con Usuario</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #f39c12;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="ultimo-acceso">-</h3>
+                            <p>Último Acceso</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-vendedores">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Vendedor</th>
+                                <th>Usuario</th>
+                                <th>Último Acceso</th>
+                                <th>Intentos Fallidos</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Usuarios -->
+            <div class="tab-content" id="usuarios">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-user-shield"></i> Gestión de Usuarios</h2>
+                    <button class="btn btn-primary" id="add-usuario">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-usuarios">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Persona</th>
+                                <th>Último Acceso</th>
+                                <th>Intentos</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Roles -->
+            <div class="tab-content" id="roles">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-user-tag"></i> Gestión de Roles</h2>
+                    <button class="btn btn-primary" id="add-rol">
+                        <i class="fas fa-plus"></i> Nuevo Rol
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-roles">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Personas Asignadas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Personas -->
+    <div class="modal" id="modal-persona">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-persona"><i class="fas fa-user"></i> Ver Persona</h2>
+                <button class="close-btn" id="close-modal-persona">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="view-data-persona" class="view-data">
+                    <!-- Datos en modo vista -->
+                </div>
+                <form id="form-persona" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="persona-tipo-documento">Tipo Documento:</label>
+                            <select id="persona-tipo-documento" name="tipo_documento" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Cedúla_Física">Cedúla Física</option>
+                                <option value="Cedúla_Jurídica">Cedúla Jurídica</option>
+                                <option value="DIMEX">DIMEX</option>
+                                <option value="NITE">NITE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="persona-identificacion">Identificación:</label>
+                            <input type="text" id="persona-identificacion" name="identificacion" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persona-nombre">Nombre Completo:</label>
+                        <input type="text" id="persona-nombre" name="nombre_completo" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="persona-nacionalidad">Nacionalidad:</label>
+                            <input type="text" id="persona-nacionalidad" name="nacionalidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="persona-estado-civil">Estado Civil:</label>
+                            <select id="persona-estado-civil" name="id_estado_civil">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="persona-ocupacion">Ocupación:</label>
+                            <input type="text" id="persona-ocupacion" name="ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label for="persona-telefono">Teléfono Principal:</label>
+                            <input type="text" id="persona-telefono" name="telefono_principal">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="persona-telefono-sec">Teléfono Secundario:</label>
+                            <input type="text" id="persona-telefono-sec" name="telefono_secundario">
+                        </div>
+                        <div class="form-group">
+                            <label for="persona-email">Email:</label>
+                            <input type="email" id="persona-email" name="email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persona-direccion">Dirección:</label>
+                        <textarea id="persona-direccion" name="direccion"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persona-observacion">Observación:</label>
+                        <textarea id="persona-observacion" name="observacion"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persona-estado">Estado:</label>
+                        <div class="state-toggle">
+                            <span id="persona-estado-label">ACTIVO</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="persona-estado-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <input type="hidden" id="persona-estado" name="estado" value="ACTIVO">
+                    </div>
+                    
+                    <input type="hidden" id="persona-id" name="id">
+                </form>
+                
+                <!-- Sección de Roles Asignados -->
+                <div id="roles-asignados-section" style="display: none; margin-top: 30px;">
+                    <h3><i class="fas fa-user-tag"></i> Roles Asignados</h3>
+                    <div id="roles-asignados-container" class="roles-container">
+                        <!-- Los roles se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-persona">Cancelar</button>
+                <button class="btn btn-warning" id="edit-btn-persona">Editar</button>
+                <button class="btn btn-danger" id="delete-btn-persona">Desactivar</button>
+                <button class="btn btn-success" id="save-btn-persona" style="display: none;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Usuarios -->
+    <div class="modal" id="modal-usuario">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-usuario"><i class="fas fa-user-shield"></i> Ver Usuario</h2>
+                <button class="close-btn" id="close-modal-usuario">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="view-data-usuario" class="view-data">
+                    <!-- Datos en modo vista -->
+                </div>
+                <form id="form-usuario" style="display: none;">
+                    <div class="form-group">
+                        <label for="usuario-persona">Persona:</label>
+                        <select id="usuario-persona" name="id_persona" required>
+                            <option value="">Seleccionar Persona</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="usuario-username">Username:</label>
+                            <input type="text" id="usuario-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuario-password">Contraseña:</label>
+                            <input type="password" id="usuario-password" name="password">
+                            <small>Dejar en blanco para mantener la contraseña actual</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="usuario-estado">Estado:</label>
+                        <select id="usuario-estado" name="estado" required>
+                            <option value="ACTIVO">ACTIVO</option>
+                            <option value="INACTIVO">INACTIVO</option>
+                            <option value="BLOQUEADO">BLOQUEADO</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" id="usuario-id" name="id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-usuario">Cancelar</button>
+                <button class="btn btn-warning" id="edit-btn-usuario">Editar</button>
+                <button class="btn btn-danger" id="delete-btn-usuario">Desactivar</button>
+                <button class="btn btn-success" id="save-btn-usuario" style="display: none;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Asignar Rol -->
+    <div class="modal" id="modal-asignar-rol">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-tag"></i> Asignar Rol a Persona</h2>
+                <button class="close-btn" id="close-modal-asignar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-asignar-rol">
+                    <!-- Búsqueda por identificación -->
+                    <div class="form-group">
+                        <label for="buscar-identificacion">Buscar Persona por Identificación:</label>
+                        <div class="search-container">
+                            <input type="text" 
+                                id="buscar-identificacion" 
+                                class="search-input"
+                                placeholder="Escriba la cédula o identificación..."
+                                autocomplete="off">
+                            <button type="button" class="btn btn-info btn-sm" id="btn-buscar-persona">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                        <small class="text-muted">Escriba los primeros dígitos de la identificación</small>
+                    </div>
+                    
+                    <!-- Resultados de búsqueda -->
+                    <div id="resultados-busqueda" style="display: none; margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        <h4><i class="fas fa-users"></i> Resultados de búsqueda</h4>
+                        <div id="lista-personas" class="personas-lista">
+                            <!-- Aquí se mostrarán las personas encontradas -->
+                        </div>
+                    </div>
+                    
+                    <!-- Persona seleccionada (oculto inicialmente) -->
+                    <div id="persona-seleccionada-container" style="display: none;">
+                        <div class="selected-person-card">
+                            <h4><i class="fas fa-user-check"></i> Persona Seleccionada</h4>
+                            <div class="selected-person-info">
+                                <p><strong>Nombre:</strong> <span id="selected-persona-nombre"></span></p>
+                                <p><strong>Identificación:</strong> <span id="selected-persona-identificacion"></span></p>
+                                <p><strong>Email:</strong> <span id="selected-persona-email"></span></p>
+                                <button type="button" class="btn btn-sm btn-danger" id="btn-cambiar-persona">
+                                    <i class="fas fa-times"></i> Cambiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo oculto para ID de persona -->
+                    <input type="hidden" id="asignar-persona-id" name="id_persona">
+                    
+                    <!-- Selección de rol -->
+                    <div class="form-group">
+                        <label for="asignar-rol">Rol a Asignar:</label>
+                        <select id="asignar-rol" name="id_rol" class="form-select" required>
+                            <option value="">Seleccionar Rol</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div class="form-group">
+                        <label for="asignar-estado">Estado:</label>
+                        <div class="state-toggle">
+                            <span id="asignar-estado-label">ACTIVO</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="asignar-estado-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <input type="hidden" id="asignar-estado" name="estado" value="ACTIVO">
+                    </div>
+                    
+                    <!-- Información de roles actuales -->
+                    <div id="roles-actuales-container" style="display: none; margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                        <h5><i class="fas fa-info-circle"></i> Roles Actuales</h5>
+                        <div id="roles-actuales-lista"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-asignar">Cancelar</button>
+                <button class="btn btn-success" id="save-btn-asignar">Asignar Rol</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nuevo Rol -->
+    <div class="modal" id="modal-nuevo-rol">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-tag"></i> Nuevo Rol</h2>
+                <button class="close-btn" id="close-modal-rol">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-nuevo-rol">
+                    <div class="form-group">
+                        <label for="rol-nombre">Nombre del Rol:</label>
+                        <input type="text" id="rol-nombre" name="nombre" required 
+                            placeholder="Ej: Vendedor, Administrador, Cliente">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rol-descripcion">Descripción:</label>
+                        <textarea id="rol-descripcion" name="descripcion" 
+                                placeholder="Descripción del rol (opcional)" rows="3"></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="rol-id" name="id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-rol">Cancelar</button>
+                <button class="btn btn-success" id="save-btn-rol">Guardar Rol</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // URLs base de las APIs
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Variables globales
+        let currentTab = 'personas';
+        let currentPersonaId = 0;
+        let currentUsuarioId = 0;
+        let currentRolId = 0;
+        let isEditMode = false;
+        let isViewMode = false;
+        
+        // Datos en caché para mejor rendimiento
+        let catalogoEstadosCivil = [];
+        let rolesData = [];
+        let personasData = [];
+        let personasRolesData = [];
+        let usuariosData = [];
+
+        // FUNCIONES DE UTILIDAD
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = mensaje;
+            notification.className = `notification show ${tipo}`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatearFecha(fechaString) {
+            if (!fechaString) return '-';
+            try {
+                const fecha = new Date(fechaString);
+                return fecha.toLocaleString('es-ES');
+            } catch (error) {
+                return fechaString;
+            }
+        }
+
+        // FUNCIONES DE API
+        // Función genérica para hacer peticiones HTTP
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            try {
+                const config = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    config.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(endpoint, config);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                // Para DELETE que no retorna contenido
+                if (response.status === 204) {
+                    return { success: true };
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error en API request:', error);
+                throw error;
+            }
+        }
+
+        // Cargar catálogos
+        async function cargarCatalogos() {
+            try {
+                // Cargar estados civiles
+                catalogoEstadosCivil = await apiRequest(`${API_BASE_URL}/estados-civil`);
+                
+                // Cargar roles
+                rolesData = await apiRequest(`${API_BASE_URL}/roles`);
+                
+                // Cargar personas
+                personasData = await apiRequest(`${API_BASE_URL}/personas`);
+                
+                // Cargar relaciones personas-roles
+                personasRolesData = await apiRequest(`${API_BASE_URL}/personas-roles`);
+                
+                // Cargar usuarios
+                usuariosData = await apiRequest(`${API_BASE_URL}/usuarios`);
+                
+                return true;
+            } catch (error) {
+                console.error('Error al cargar catálogos:', error);
+                mostrarNotificacion('Error al cargar datos iniciales', 'error');
+                return false;
+            }
+        }
+
+        // Obtener una persona por ID
+        async function obtenerPersona(id) {
+            try {
+                return await apiRequest(`${API_BASE_URL}/personas/${id}`);
+            } catch (error) {
+                console.error('Error al obtener persona:', error);
+                mostrarNotificacion('Error al cargar persona', 'error');
+                return null;
+            }
+        }
+
+        // Obtener un usuario por ID
+        async function obtenerUsuario(id) {
+            try {
+                return await apiRequest(`${API_BASE_URL}/usuarios/${id}`);
+            } catch (error) {
+                console.error('Error al obtener usuario:', error);
+                mostrarNotificacion('Error al cargar usuario', 'error');
+                return null;
+            }
+        }
+
+        // Guardar persona (crear o actualizar)
+        async function guardarPersonaAPI(personaData, esNuevo = false) {
+            try {
+                const endpoint = `${API_BASE_URL}/personas`;
+                const method = esNuevo ? 'POST' : 'PUT';
+                const url = esNuevo ? endpoint : `${endpoint}/${personaData.ID_PERSONA}`;
+                
+                // Preparar datos para la API
+                const dataParaAPI = {
+                    TIPO_DOCUMENTO: personaData.tipo_documento,
+                    IDENTIFICACION: personaData.identificacion,
+                    NOMBRE_COMPLETO: personaData.nombre_completo,
+                    NACIONALIDAD: personaData.nacionalidad || null,
+                    ID_ESTADO_CIVIL: personaData.id_estado_civil || null,
+                    OCUPACION: personaData.ocupacion || null,
+                    DIRECCION: personaData.direccion || null,
+                    TELEFONO_PRINCIPAL: personaData.telefono_principal || null,
+                    TELEFONO_SECUNDARIO: personaData.telefono_secundario || null,
+                    EMAIL: personaData.email || null,
+                    OBSERVACION: personaData.observacion || null,
+                    ESTADO: personaData.estado
+                };
+                
+                if (!esNuevo) {
+                    dataParaAPI.ID_PERSONA = personaData.ID_PERSONA;
+                }
+                
+                const resultado = await apiRequest(url, method, dataParaAPI);
+                
+                // Recargar datos
+                await cargarCatalogos();
+                
+                return resultado;
+            } catch (error) {
+                console.error('Error al guardar persona:', error);
+                throw error;
+            }
+        }
+
+        // Guardar usuario (crear o actualizar)
+        async function guardarUsuarioAPI(usuarioData, esNuevo = false) {
+            try {
+                const endpoint = `${API_BASE_URL}/usuarios`;
+                const method = esNuevo ? 'POST' : 'PUT';
+                const url = esNuevo ? endpoint : `${endpoint}/${usuarioData.ID_USUARIO}`;
+                
+                // Preparar datos para la API
+                const dataParaAPI = {
+                    ID_PERSONA: usuarioData.id_persona,
+                    USERNAME: usuarioData.username,
+                    ESTADO: usuarioData.estado
+                };
+                
+                // Solo incluir contraseña si se proporciona
+                if (usuarioData.password) {
+                    dataParaAPI.PASSWORD = usuarioData.password;
+                }
+                
+                if (!esNuevo) {
+                    dataParaAPI.ID_USUARIO = usuarioData.ID_USUARIO;
+                }
+                
+                const resultado = await apiRequest(url, method, dataParaAPI);
+                
+                // Recargar datos
+                await cargarCatalogos();
+                
+                return resultado;
+            } catch (error) {
+                console.error('Error al guardar usuario:', error);
+                throw error;
+            }
+        }
+
+        // Asignar rol a persona
+        async function asignarRolAPI(asignacionData) {
+            try {
+                const resultado = await apiRequest(`${API_BASE_URL}/personas-roles`, 'POST', {
+                    ID_PERSONA: asignacionData.id_persona,
+                    ID_ROL: asignacionData.id_rol,
+                    ESTADO: asignacionData.estado
+                });
+                
+                // Recargar datos
+                await cargarCatalogos();
+                
+                return resultado;
+            } catch (error) {
+                console.error('Error al asignar rol:', error);
+                throw error;
+            }
+        }
+
+        // Cambiar estado de persona (desactivar)
+        async function cambiarEstadoPersonaAPI(id, nuevoEstado) {
+            try {
+                const persona = await obtenerPersona(id);
+                if (!persona) throw new Error('Persona no encontrada');
+                
+                persona.ESTADO = nuevoEstado;
+                
+                const resultado = await apiRequest(`${API_BASE_URL}/personas/${id}`, 'PUT', persona);
+                
+                // Recargar datos
+                await cargarCatalogos();
+                
+                return resultado;
+            } catch (error) {
+                console.error('Error al cambiar estado de persona:', error);
+                throw error;
+            }
+        }
+
+        // Cambiar estado de usuario (desactivar)
+        async function cambiarEstadoUsuarioAPI(id, nuevoEstado) {
+            try {
+                const usuario = await obtenerUsuario(id);
+                if (!usuario) throw new Error('Usuario no encontrado');
+                
+                usuario.ESTADO = nuevoEstado;
+                
+                const resultado = await apiRequest(`${API_BASE_URL}/usuarios/${id}`, 'PUT', usuario);
+                
+                // Recargar datos
+                await cargarCatalogos();
+                
+                return resultado;
+            } catch (error) {
+                console.error('Error al cambiar estado de usuario:', error);
+                throw error;
+            }
+        }
+
+        // FUNCIONES DE HELPER
+        function obtenerEstadoCivil(id) {
+            const estadoCivil = catalogoEstadosCivil.find(ec => ec.ID_ESTADO_CIVIL === id);
+            return estadoCivil ? estadoCivil.NOMBRE : 'No especificado';
+        }
+
+        function obtenerRolesPersona(idPersona) {
+            return personasRolesData
+                .filter(pr => pr.ID_PERSONA === idPersona && pr.ESTADO === 'ACTIVO')
+                .map(pr => {
+                    const rol = rolesData.find(r => r.ID_ROL === pr.ID_ROL);
+                    return rol ? rol.NOMBRE : 'Rol desconocido';
+                });
+        }
+
+        function obtenerUsuarioPersona(idPersona) {
+            return usuariosData.find(u => u.ID_PERSONA === idPersona && u.ESTADO === 'ACTIVO');
+        }
+
+        function obtenerPersonaById(id) {
+            return personasData.find(p => p.ID_PERSONA === id);
+        }
+
+        function obtenerNombrePersona(id) {
+            const persona = obtenerPersonaById(id);
+            return persona ? persona.NOMBRE_COMPLETO : 'Desconocido';
+        }
+
+        // FUNCIONES DE INTERFAZ
+        async function cargarTablaPersonas(filtros = {}) {
+            const tbody = document.querySelector('#tabla-personas tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            // Filtrar personas
+            let personasFiltradas = [...personasData];
+            
+            if (filtros.nombre) {
+                const busqueda = filtros.nombre.toLowerCase();
+                personasFiltradas = personasFiltradas.filter(p => 
+                    p.NOMBRE_COMPLETO && p.NOMBRE_COMPLETO.toLowerCase().includes(busqueda)
+                );
+            }
+            
+            if (filtros.identificacion) {
+                const busqueda = filtros.identificacion.toLowerCase();
+                personasFiltradas = personasFiltradas.filter(p => 
+                    p.IDENTIFICACION && p.IDENTIFICACION.toLowerCase().includes(busqueda)
+                );
+            }
+            
+            if (filtros.estado) {
+                personasFiltradas = personasFiltradas.filter(p => 
+                    p.ESTADO === filtros.estado
+                );
+            }
+            
+            if (personasFiltradas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-user-slash"></i>
+                            <h3>No hay personas registradas</h3>
+                            <p>Use el botón "Nueva Persona" para agregar una</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Mostrar personas
+            for (const persona of personasFiltradas) {
+                const roles = obtenerRolesPersona(persona.ID_PERSONA);
+                const usuario = obtenerUsuarioPersona(persona.ID_PERSONA);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${persona.ID_PERSONA}</td>
+                    <td>${persona.TIPO_DOCUMENTO}: ${persona.IDENTIFICACION}</td>
+                    <td>${persona.NOMBRE_COMPLETO}</td>
+                    <td>${persona.TELEFONO_PRINCIPAL || '-'}</td>
+                    <td>${persona.EMAIL || '-'}</td>
+                    <td>
+                        <div class="roles-container">
+                            ${roles.map(rol => 
+                                `<span class="role-badge ${rol === 'Vendedor' ? '' : 'inactive'}">${rol}</span>`
+                            ).join('')}
+                            ${roles.length === 0 ? '<span class="badge badge-warning">Sin roles</span>' : ''}
+                        </div>
+                    </td>
+                    <td><span class="status-badge ${persona.ESTADO === 'ACTIVO' ? 'status-active' : 'status-inactive'}">${persona.ESTADO}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-persona" data-id="${persona.ID_PERSONA}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-warning btn-edit-persona" data-id="${persona.ID_PERSONA}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        ${usuario ? '' : 
+                            `<button class="btn btn-info btn-crear-usuario" data-id="${persona.ID_PERSONA}">
+                                <i class="fas fa-user-plus"></i> Crear Usuario
+                            </button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(row);
+            }
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-persona').forEach(btn => {
+                btn.addEventListener('click', () => verPersona(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-edit-persona').forEach(btn => {
+                btn.addEventListener('click', () => editarPersona(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-crear-usuario').forEach(btn => {
+                btn.addEventListener('click', () => crearUsuarioParaPersona(parseInt(btn.dataset.id)));
+            });
+        }
+
+        async function cargarTablaVendedores() {
+            const tbody = document.querySelector('#tabla-vendedores tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            // Obtener todas las personas con rol de vendedor activo
+            const vendedoresIds = personasRolesData
+                .filter(pr => {
+                    const rol = rolesData.find(r => r.ID_ROL === pr.ID_ROL);
+                    return rol && rol.NOMBRE === 'Vendedor' && pr.ESTADO === 'ACTIVO';
+                })
+                .map(pr => pr.ID_PERSONA);
+            
+            const vendedores = personasData
+                .filter(p => vendedoresIds.includes(p.ID_PERSONA) && p.ESTADO === 'ACTIVO');
+            
+            // Actualizar estadísticas
+            document.getElementById('total-vendedores').textContent = vendedores.length;
+            
+            const vendedoresConUsuario = vendedores.filter(p => obtenerUsuarioPersona(p.ID_PERSONA)).length;
+            document.getElementById('vendedores-con-usuario').textContent = vendedoresConUsuario;
+            
+            // Obtener último acceso
+            let ultimoAcceso = null;
+            for (const persona of vendedores) {
+                const usuario = obtenerUsuarioPersona(persona.ID_PERSONA);
+                if (usuario && usuario.ULTIMO_ACCESO) {
+                    const fechaAcceso = new Date(usuario.ULTIMO_ACCESO);
+                    if (!ultimoAcceso || fechaAcceso > ultimoAcceso) {
+                        ultimoAcceso = fechaAcceso;
+                    }
+                }
+            }
+            
+            document.getElementById('ultimo-acceso').textContent = 
+                ultimoAcceso ? ultimoAcceso.toLocaleDateString('es-ES') : '-';
+            
+            if (vendedores.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>No hay vendedores activos</h3>
+                            <p>Asigne el rol "Vendedor" a una persona para verla aquí</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Mostrar vendedores
+            for (const persona of vendedores) {
+                const usuario = obtenerUsuarioPersona(persona.ID_PERSONA);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${persona.ID_PERSONA}</td>
+                    <td>${persona.NOMBRE_COMPLETO}<br><small>${persona.EMAIL || ''}</small></td>
+                    <td>${usuario ? usuario.USERNAME : 
+                        '<span class="badge badge-warning">Sin usuario</span>'}</td>
+                    <td>${usuario && usuario.ULTIMO_ACCESO ? 
+                        formatearFecha(usuario.ULTIMO_ACCESO) : 
+                        '<span class="badge badge-warning">Nunca</span>'}</td>
+                    <td>
+                        ${usuario ? 
+                            `<span class="${usuario.INTENTOS_FALLIDOS > 3 ? 'badge badge-danger' : 'badge badge-success'}">
+                                ${usuario.INTENTOS_FALLIDOS || 0}
+                            </span>` : 
+                            '-'
+                        }
+                    </td>
+                    <td>
+                        ${usuario ? 
+                            `<span class="status-badge ${usuario.ESTADO === 'ACTIVO' ? 'status-active' : 
+                                usuario.ESTADO === 'BLOQUEADO' ? 'status-blocked' : 'status-inactive'}">
+                                ${usuario.ESTADO}
+                            </span>` : 
+                            '<span class="badge badge-warning">Sin usuario</span>'
+                        }
+                    </td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-persona" data-id="${persona.ID_PERSONA}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${usuario ? 
+                            `<button class="btn btn-info btn-view-usuario" data-id="${usuario.ID_USUARIO}">
+                                <i class="fas fa-user-shield"></i>
+                            </button>` : 
+                            `<button class="btn btn-info btn-crear-usuario" data-id="${persona.ID_PERSONA}">
+                                <i class="fas fa-user-plus"></i> Crear
+                            </button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(row);
+            }
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-persona').forEach(btn => {
+                btn.addEventListener('click', () => verPersona(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-view-usuario').forEach(btn => {
+                btn.addEventListener('click', () => verUsuario(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-crear-usuario').forEach(btn => {
+                btn.addEventListener('click', () => crearUsuarioParaPersona(parseInt(btn.dataset.id)));
+            });
+        }
+
+        async function cargarTablaUsuarios() {
+            const tbody = document.querySelector('#tabla-usuarios tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (usuariosData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>No hay usuarios registrados</h3>
+                            <p>Cree usuarios para las personas que necesiten acceso al sistema</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Mostrar usuarios
+            for (const usuario of usuariosData) {
+                const persona = obtenerPersonaById(usuario.ID_PERSONA);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${usuario.ID_USUARIO}</td>
+                    <td>${usuario.USERNAME}</td>
+                    <td>${persona ? persona.NOMBRE_COMPLETO : 'Persona no encontrada'}</td>
+                    <td>${usuario.ULTIMO_ACCESO ? formatearFecha(usuario.ULTIMO_ACCESO) : 'Nunca'}</td>
+                    <td>
+                        <span class="${usuario.INTENTOS_FALLIDOS > 3 ? 'badge badge-danger' : 'badge badge-success'}">
+                            ${usuario.INTENTOS_FALLIDOS || 0}
+                        </span>
+                    </td>
+                    <td><span class="status-badge ${usuario.ESTADO === 'ACTIVO' ? 'status-active' : 
+                        usuario.ESTADO === 'BLOQUEADO' ? 'status-blocked' : 'status-inactive'}">
+                        ${usuario.ESTADO}
+                    </span></td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-usuario" data-id="${usuario.ID_USUARIO}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-warning btn-edit-usuario" data-id="${usuario.ID_USUARIO}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            }
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-usuario').forEach(btn => {
+                btn.addEventListener('click', () => verUsuario(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-edit-usuario').forEach(btn => {
+                btn.addEventListener('click', () => editarUsuario(parseInt(btn.dataset.id)));
+            });
+        }
+
+        async function cargarTablaRoles() {
+            const tbody = document.querySelector('#tabla-roles tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (rolesData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-user-tag"></i>
+                            <h3>No hay roles configurados</h3>
+                            <p>Use el botón "Nuevo Rol" para agregar uno</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Mostrar roles
+            for (const rol of rolesData) {
+                // Contar personas asignadas con este rol activo
+                const personasAsignadas = personasRolesData
+                    .filter(pr => pr.ID_ROL === rol.ID_ROL && pr.ESTADO === 'ACTIVO')
+                    .length;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rol.ID_ROL}</td>
+                    <td>${rol.NOMBRE}</td>
+                    <td>${rol.DESCRIPCION || '-'}</td>
+                    <td>${personasAsignadas} persona(s)</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-rol" data-id="${rol.ID_ROL}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-warning btn-edit-rol" data-id="${rol.ID_ROL}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            }
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-rol').forEach(btn => {
+                btn.addEventListener('click', () => verRol(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-edit-rol').forEach(btn => {
+                btn.addEventListener('click', () => editarRol(parseInt(btn.dataset.id)));
+            });
+        }
+
+        // FUNCIONES PARA MODALES
+        async function verPersona(id) {
+            try {
+                const persona = await obtenerPersona(id);
+                if (!persona) return;
+                
+                currentPersonaId = id;
+                isViewMode = true;
+                isEditMode = false;
+                
+                // Configurar modal
+                document.getElementById('modal-title-persona').innerHTML = `<i class="fas fa-user"></i> Ver Persona`;
+                document.getElementById('view-data-persona').style.display = 'block';
+                document.getElementById('form-persona').style.display = 'none';
+                document.getElementById('roles-asignados-section').style.display = 'block';
+                document.getElementById('edit-btn-persona').style.display = 'inline-flex';
+                document.getElementById('delete-btn-persona').style.display = 'inline-flex';
+                document.getElementById('save-btn-persona').style.display = 'none';
+                
+                // Mostrar datos
+                const container = document.getElementById('view-data-persona');
+                container.innerHTML = `
+                    <div class="data-section">
+                        <h3><i class="fas fa-id-card"></i> Información Personal</h3>
+                        <div class="data-row">
+                            <div class="data-label">ID:</div>
+                            <div class="data-value">${persona.ID_PERSONA}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Tipo Documento:</div>
+                            <div class="data-value">${persona.TIPO_DOCUMENTO}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Identificación:</div>
+                            <div class="data-value">${persona.IDENTIFICACION}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Nombre Completo:</div>
+                            <div class="data-value">${persona.NOMBRE_COMPLETO}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Nacionalidad:</div>
+                            <div class="data-value">${persona.NACIONALIDAD || '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Estado Civil:</div>
+                            <div class="data-value">${obtenerEstadoCivil(persona.ID_ESTADO_CIVIL)}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Ocupación:</div>
+                            <div class="data-value">${persona.OCUPACION || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-address-book"></i> Información de Contacto</h3>
+                        <div class="data-row">
+                            <div class="data-label">Dirección:</div>
+                            <div class="data-value">${persona.DIRECCION || '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Teléfono Principal:</div>
+                            <div class="data-value">${persona.TELEFONO_PRINCIPAL || '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Teléfono Secundario:</div>
+                            <div class="data-value">${persona.TELEFONO_SECUNDARIO || '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Email:</div>
+                            <div class="data-value">${persona.EMAIL || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-info-circle"></i> Información Adicional</h3>
+                        <div class="data-row">
+                            <div class="data-label">Observación:</div>
+                            <div class="data-value">${persona.OBSERVACION || '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Fecha Registro:</div>
+                            <div class="data-value">${formatearFecha(persona.FECHA_REGISTRO)}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Estado:</div>
+                            <div class="data-value">
+                                <span class="status-badge ${persona.ESTADO === 'ACTIVO' ? 'status-active' : 'status-inactive'}">
+                                    ${persona.ESTADO}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Mostrar roles asignados
+                const roles = obtenerRolesPersona(id);
+                const rolesContainer = document.getElementById('roles-asignados-container');
+                rolesContainer.innerHTML = '';
+                
+                if (roles.length > 0) {
+                    roles.forEach(rol => {
+                        const badge = document.createElement('span');
+                        badge.className = 'role-badge';
+                        badge.innerHTML = `<i class="fas fa-tag"></i> ${rol}`;
+                        rolesContainer.appendChild(badge);
+                    });
+                } else {
+                    rolesContainer.innerHTML = '<p>Esta persona no tiene roles asignados.</p>';
+                }
+                
+                // Mostrar modal
+                document.getElementById('modal-persona').classList.add('active');
+            } catch (error) {
+                console.error('Error al ver persona:', error);
+                mostrarNotificacion('Error al cargar la persona', 'error');
+            }
+        }
+
+        async function editarPersona(id) {
+            try {
+                const persona = await obtenerPersona(id);
+                if (!persona) return;
+                
+                currentPersonaId = id;
+                isViewMode = false;
+                isEditMode = true;
+                
+                // Configurar modal
+                document.getElementById('modal-title-persona').innerHTML = `<i class="fas fa-edit"></i> Editar Persona`;
+                document.getElementById('view-data-persona').style.display = 'none';
+                document.getElementById('form-persona').style.display = 'block';
+                document.getElementById('roles-asignados-section').style.display = 'none';
+                document.getElementById('edit-btn-persona').style.display = 'none';
+                document.getElementById('delete-btn-persona').style.display = 'inline-flex';
+                document.getElementById('save-btn-persona').style.display = 'inline-flex';
+                
+                // Cargar datos en formulario
+                document.getElementById('persona-id').value = persona.ID_PERSONA;
+                document.getElementById('persona-tipo-documento').value = persona.TIPO_DOCUMENTO;
+                document.getElementById('persona-identificacion').value = persona.IDENTIFICACION;
+                document.getElementById('persona-nombre').value = persona.NOMBRE_COMPLETO;
+                document.getElementById('persona-nacionalidad').value = persona.NACIONALIDAD || '';
+                document.getElementById('persona-estado-civil').value = persona.ID_ESTADO_CIVIL || '';
+                document.getElementById('persona-ocupacion').value = persona.OCUPACION || '';
+                document.getElementById('persona-direccion').value = persona.DIRECCION || '';
+                document.getElementById('persona-telefono').value = persona.TELEFONO_PRINCIPAL || '';
+                document.getElementById('persona-telefono-sec').value = persona.TELEFONO_SECUNDARIO || '';
+                document.getElementById('persona-email').value = persona.EMAIL || '';
+                document.getElementById('persona-observacion').value = persona.OBSERVACION || '';
+                
+                // Configurar estado
+                const estadoToggle = document.getElementById('persona-estado-toggle');
+                const estadoHidden = document.getElementById('persona-estado');
+                const estadoLabel = document.getElementById('persona-estado-label');
+                
+                if (persona.ESTADO === 'ACTIVO') {
+                    estadoToggle.checked = true;
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoToggle.checked = false;
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+                
+                // Mostrar modal
+                document.getElementById('modal-persona').classList.add('active');
+            } catch (error) {
+                console.error('Error al editar persona:', error);
+                mostrarNotificacion('Error al cargar la persona', 'error');
+            }
+        }
+
+        function crearNuevaPersona() {
+            currentPersonaId = 0;
+            isViewMode = false;
+            isEditMode = true;
+            
+            // Configurar modal
+            document.getElementById('modal-title-persona').innerHTML = `<i class="fas fa-plus"></i> Nueva Persona`;
+            document.getElementById('view-data-persona').style.display = 'none';
+            document.getElementById('form-persona').style.display = 'block';
+            document.getElementById('roles-asignados-section').style.display = 'none';
+            document.getElementById('edit-btn-persona').style.display = 'none';
+            document.getElementById('delete-btn-persona').style.display = 'none';
+            document.getElementById('save-btn-persona').style.display = 'inline-flex';
+            
+            // Limpiar formulario
+            document.getElementById('form-persona').reset();
+            document.getElementById('persona-id').value = 0;
+            
+            // Restablecer estado a ACTIVO
+            document.getElementById('persona-estado-toggle').checked = true;
+            document.getElementById('persona-estado').value = 'ACTIVO';
+            document.getElementById('persona-estado-label').textContent = 'ACTIVO';
+            
+            // Mostrar modal
+            document.getElementById('modal-persona').classList.add('active');
+        }
+
+        async function guardarPersona() {
+            const id = parseInt(document.getElementById('persona-id').value);
+            const tipoDocumento = document.getElementById('persona-tipo-documento').value;
+            const identificacion = document.getElementById('persona-identificacion').value.trim();
+            const nombreCompleto = document.getElementById('persona-nombre').value.trim();
+            const estado = document.getElementById('persona-estado').value;
+            
+            // Validaciones básicas
+            if (!tipoDocumento || !identificacion || !nombreCompleto) {
+                mostrarNotificacion('Los campos Tipo Documento, Identificación y Nombre Completo son requeridos', 'error');
+                return;
+            }
+            
+            try {
+                const personaData = {
+                    tipo_documento: tipoDocumento,
+                    identificacion: identificacion,
+                    nombre_completo: nombreCompleto,
+                    nacionalidad: document.getElementById('persona-nacionalidad').value.trim() || null,
+                    id_estado_civil: document.getElementById('persona-estado-civil').value ? 
+                        parseInt(document.getElementById('persona-estado-civil').value) : null,
+                    ocupacion: document.getElementById('persona-ocupacion').value.trim() || null,
+                    direccion: document.getElementById('persona-direccion').value.trim() || null,
+                    telefono_principal: document.getElementById('persona-telefono').value.trim() || null,
+                    telefono_secundario: document.getElementById('persona-telefono-sec').value.trim() || null,
+                    email: document.getElementById('persona-email').value.trim() || null,
+                    observacion: document.getElementById('persona-observacion').value.trim() || null,
+                    estado: estado
+                };
+                
+                if (id !== 0) {
+                    personaData.ID_PERSONA = id;
+                }
+                
+                const esNuevo = id === 0;
+                await guardarPersonaAPI(personaData, esNuevo);
+                
+                // Recargar tablas
+                await cargarTablaPersonas();
+                await cargarTablaVendedores();
+                await cargarTablaUsuarios();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-persona').classList.remove('active');
+                mostrarNotificacion(`Persona ${esNuevo ? 'creada' : 'actualizada'} correctamente`, 'success');
+            } catch (error) {
+                console.error('Error al guardar persona:', error);
+                mostrarNotificacion(error.message || 'Error al guardar persona', 'error');
+            }
+        }
+
+        async function eliminarPersona() {
+            if (!currentPersonaId) return;
+            
+            if (!confirm('¿Está seguro de que desea desactivar esta persona? No se eliminará, solo cambiará su estado a INACTIVO.')) {
+                return;
+            }
+            
+            try {
+                await cambiarEstadoPersonaAPI(currentPersonaId, 'INACTIVO');
+                
+                // Recargar tablas
+                await cargarTablaPersonas();
+                await cargarTablaVendedores();
+                await cargarTablaUsuarios();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-persona').classList.remove('active');
+                mostrarNotificacion('Persona desactivada correctamente', 'success');
+            } catch (error) {
+                console.error('Error al desactivar persona:', error);
+                mostrarNotificacion('Error al desactivar persona', 'error');
+            }
+        }
+
+        async function verUsuario(id) {
+            try {
+                const usuario = await obtenerUsuario(id);
+                if (!usuario) return;
+                
+                const persona = obtenerPersonaById(usuario.ID_PERSONA);
+                if (!persona) return;
+                
+                currentUsuarioId = id;
+                
+                // Configurar modal
+                document.getElementById('modal-title-usuario').innerHTML = `<i class="fas fa-user-shield"></i> Ver Usuario`;
+                document.getElementById('view-data-usuario').style.display = 'block';
+                document.getElementById('form-usuario').style.display = 'none';
+                document.getElementById('edit-btn-usuario').style.display = 'inline-flex';
+                document.getElementById('delete-btn-usuario').style.display = 'inline-flex';
+                document.getElementById('save-btn-usuario').style.display = 'none';
+                
+                // Mostrar datos
+                const container = document.getElementById('view-data-usuario');
+                container.innerHTML = `
+                    <div class="data-section">
+                        <h3><i class="fas fa-user"></i> Información del Usuario</h3>
+                        <div class="data-row">
+                            <div class="data-label">ID:</div>
+                            <div class="data-value">${usuario.ID_USUARIO}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Username:</div>
+                            <div class="data-value">${usuario.USERNAME}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Persona Asociada:</div>
+                            <div class="data-value">${persona.NOMBRE_COMPLETO} (${persona.IDENTIFICACION})</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-shield-alt"></i> Seguridad y Acceso</h3>
+                        <div class="data-row">
+                            <div class="data-label">Intentos Fallidos:</div>
+                            <div class="data-value">
+                                <span class="${usuario.INTENTOS_FALLIDOS > 3 ? 'badge badge-danger' : 'badge badge-success'}">
+                                    ${usuario.INTENTOS_FALLIDOS || 0}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Fecha Bloqueo:</div>
+                            <div class="data-value">${usuario.FECHA_BLOQUEO ? formatearFecha(usuario.FECHA_BLOQUEO) : '-'}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Último Acceso:</div>
+                            <div class="data-value">${usuario.ULTIMO_ACCESO ? formatearFecha(usuario.ULTIMO_ACCESO) : 'Nunca'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-info-circle"></i> Información Adicional</h3>
+                        <div class="data-row">
+                            <div class="data-label">Fecha Creación:</div>
+                            <div class="data-value">${formatearFecha(usuario.FECHA_CREACION)}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Estado:</div>
+                            <div class="data-value">
+                                <span class="status-badge ${usuario.ESTADO === 'ACTIVO' ? 'status-active' : 
+                                    usuario.ESTADO === 'BLOQUEADO' ? 'status-blocked' : 'status-inactive'}">
+                                    ${usuario.ESTADO}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Mostrar modal
+                document.getElementById('modal-usuario').classList.add('active');
+            } catch (error) {
+                console.error('Error al ver usuario:', error);
+                mostrarNotificacion('Error al cargar el usuario', 'error');
+            }
+        }
+
+        async function editarUsuario(id) {
+            try {
+                const usuario = await obtenerUsuario(id);
+                if (!usuario) return;
+                
+                currentUsuarioId = id;
+                
+                // Configurar modal
+                document.getElementById('modal-title-usuario').innerHTML = `<i class="fas fa-edit"></i> Editar Usuario`;
+                document.getElementById('view-data-usuario').style.display = 'none';
+                document.getElementById('form-usuario').style.display = 'block';
+                document.getElementById('edit-btn-usuario').style.display = 'none';
+                document.getElementById('delete-btn-usuario').style.display = 'inline-flex';
+                document.getElementById('save-btn-usuario').style.display = 'inline-flex';
+                
+                // Cargar datos en formulario
+                document.getElementById('usuario-id').value = usuario.ID_USUARIO;
+                document.getElementById('usuario-username').value = usuario.USERNAME;
+                document.getElementById('usuario-estado').value = usuario.ESTADO;
+                
+                // Cargar select de personas
+                const selectPersona = document.getElementById('usuario-persona');
+                selectPersona.innerHTML = '<option value="">Seleccionar Persona</option>';
+                
+                // Solo mostrar personas sin usuario o esta misma
+                personasData.forEach(persona => {
+                    const tieneUsuario = usuariosData.some(u => u.ID_PERSONA === persona.ID_PERSONA && u.ID_USUARIO !== id);
+                    if (!tieneUsuario || persona.ID_PERSONA === usuario.ID_PERSONA) {
+                        const option = document.createElement('option');
+                        option.value = persona.ID_PERSONA;
+                        option.textContent = `${persona.NOMBRE_COMPLETO} (${persona.IDENTIFICACION})`;
+                        if (persona.ID_PERSONA === usuario.ID_PERSONA) {
+                            option.selected = true;
+                        }
+                        selectPersona.appendChild(option);
+                    }
+                });
+                
+                // Mostrar modal
+                document.getElementById('modal-usuario').classList.add('active');
+            } catch (error) {
+                console.error('Error al editar usuario:', error);
+                mostrarNotificacion('Error al cargar el usuario', 'error');
+            }
+        }
+
+        async function crearUsuarioParaPersona(idPersona) {
+            const persona = obtenerPersonaById(idPersona);
+            if (!persona) return;
+            
+            // Verificar que no tenga usuario ya activo
+            if (obtenerUsuarioPersona(idPersona)) {
+                mostrarNotificacion('Esta persona ya tiene un usuario activo', 'error');
+                return;
+            }
+            
+            currentUsuarioId = 0;
+            
+            // Configurar modal
+            document.getElementById('modal-title-usuario').innerHTML = `<i class="fas fa-user-plus"></i> Crear Usuario`;
+            document.getElementById('view-data-usuario').style.display = 'none';
+            document.getElementById('form-usuario').style.display = 'block';
+            document.getElementById('edit-btn-usuario').style.display = 'none';
+            document.getElementById('delete-btn-usuario').style.display = 'none';
+            document.getElementById('save-btn-usuario').style.display = 'inline-flex';
+            
+            // Limpiar formulario
+            document.getElementById('form-usuario').reset();
+            document.getElementById('usuario-id').value = 0;
+            document.getElementById('usuario-estado').value = 'ACTIVO';
+            
+            // Generar username sugerido
+            const nombreUsuario = persona.NOMBRE_COMPLETO.toLowerCase()
+                .split(' ')[0]
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Eliminar acentos
+                .replace(/[^a-z0-9]/g, ''); // Solo letras y números
+            
+            document.getElementById('usuario-username').value = nombreUsuario;
+            
+            // Cargar select de personas
+            const selectPersona = document.getElementById('usuario-persona');
+            selectPersona.innerHTML = '<option value="">Seleccionar Persona</option>';
+            
+            // Solo mostrar personas sin usuario activo
+            personasData.forEach(p => {
+                if (!obtenerUsuarioPersona(p.ID_PERSONA)) {
+                    const option = document.createElement('option');
+                    option.value = p.ID_PERSONA;
+                    option.textContent = `${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})`;
+                    if (p.ID_PERSONA === idPersona) {
+                        option.selected = true;
+                    }
+                    selectPersona.appendChild(option);
+                }
+            });
+            
+            // Mostrar modal
+            document.getElementById('modal-usuario').classList.add('active');
+        }
+
+        async function guardarUsuario() {
+            const id = parseInt(document.getElementById('usuario-id').value);
+            const idPersona = parseInt(document.getElementById('usuario-persona').value);
+            const username = document.getElementById('usuario-username').value.trim();
+            const password = document.getElementById('usuario-password').value;
+            const estado = document.getElementById('usuario-estado').value;
+            
+            // Validaciones
+            if (!idPersona || !username) {
+                mostrarNotificacion('Los campos Persona y Username son requeridos', 'error');
+                return;
+            }
+            
+            try {
+                const usuarioData = {
+                    id_persona: idPersona,
+                    username: username,
+                    estado: estado
+                };
+                
+                // Solo incluir contraseña si se proporciona
+                if (password) {
+                    usuarioData.password = password;
+                }
+                
+                if (id !== 0) {
+                    usuarioData.ID_USUARIO = id;
+                }
+                
+                const esNuevo = id === 0;
+                await guardarUsuarioAPI(usuarioData, esNuevo);
+                
+                // Recargar tablas
+                await cargarTablaPersonas();
+                await cargarTablaVendedores();
+                await cargarTablaUsuarios();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-usuario').classList.remove('active');
+                mostrarNotificacion(`Usuario ${esNuevo ? 'creado' : 'actualizado'} correctamente`, 'success');
+            } catch (error) {
+                console.error('Error al guardar usuario:', error);
+                mostrarNotificacion(error.message || 'Error al guardar usuario', 'error');
+            }
+        }
+
+        async function eliminarUsuario() {
+            if (!currentUsuarioId) return;
+            
+            if (!confirm('¿Está seguro de que desea desactivar este usuario? No se eliminará, solo cambiará su estado a INACTIVO.')) {
+                return;
+            }
+            
+            try {
+                await cambiarEstadoUsuarioAPI(currentUsuarioId, 'INACTIVO');
+                
+                // Recargar tablas
+                await cargarTablaVendedores();
+                await cargarTablaUsuarios();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-usuario').classList.remove('active');
+                mostrarNotificacion('Usuario desactivado correctamente', 'success');
+            } catch (error) {
+                console.error('Error al desactivar usuario:', error);
+                mostrarNotificacion('Error al desactivar usuario', 'error');
+            }
+        }
+
+        async function mostrarModalAsignarRol() {
+            // Limpiar formulario
+            document.getElementById('form-asignar-rol').reset();
+            document.getElementById('asignar-estado-toggle').checked = true;
+            document.getElementById('asignar-estado').value = 'ACTIVO';
+            document.getElementById('asignar-estado-label').textContent = 'ACTIVO';
+            
+            // Ocultar secciones
+            document.getElementById('resultados-busqueda').style.display = 'none';
+            document.getElementById('persona-seleccionada-container').style.display = 'none';
+            document.getElementById('roles-actuales-container').style.display = 'none';
+            
+            // Limpiar campos
+            document.getElementById('asignar-persona-id').value = '';
+            document.getElementById('buscar-identificacion').value = '';
+            
+            // Cargar select de roles
+            const selectRol = document.getElementById('asignar-rol');
+            selectRol.innerHTML = '<option value="">Seleccionar Rol</option>';
+            
+            rolesData.forEach(rol => {
+                const option = document.createElement('option');
+                option.value = rol.ID_ROL;
+                option.textContent = rol.NOMBRE;
+                selectRol.appendChild(option);
+            });
+            
+            // Enfocar campo de búsqueda
+            setTimeout(() => {
+                document.getElementById('buscar-identificacion').focus();
+            }, 100);
+            
+            // Mostrar modal
+            document.getElementById('modal-asignar-rol').classList.add('active');
+        }
+
+        // Función para buscar personas por identificación
+        async function buscarPersonasPorIdentificacion(identificacion) {
+            try {
+                const busqueda = identificacion.trim().toLowerCase();
+                
+                if (busqueda.length < 2) {
+                    mostrarNotificacion('Escriba al menos 2 caracteres para buscar', 'warning');
+                    return [];
+                }
+                
+                // Filtrar personas activas que coincidan con la búsqueda
+                const personasFiltradas = personasData.filter(persona => 
+                    persona.ESTADO === 'ACTIVO' && 
+                    persona.IDENTIFICACION.toLowerCase().includes(busqueda)
+                );
+                
+                return personasFiltradas;
+                
+            } catch (error) {
+                console.error('Error en búsqueda de personas:', error);
+                return [];
+            }
+        }
+
+        // Función para mostrar resultados de búsqueda
+        function mostrarResultadosBusqueda(personas) {
+            const resultadosContainer = document.getElementById('resultados-busqueda');
+            const listaPersonas = document.getElementById('lista-personas');
+            
+            if (personas.length === 0) {
+                listaPersonas.innerHTML = '<p class="text-muted">No se encontraron personas con esa identificación.</p>';
+                resultadosContainer.style.display = 'block';
+                return;
+            }
+            
+            // Limitar resultados a 10
+            const resultadosLimitados = personas.slice(0, 10);
+            
+            listaPersonas.innerHTML = resultadosLimitados.map(persona => `
+                <div class="persona-resultado-item" data-id="${persona.ID_PERSONA}">
+                    <div class="persona-info">
+                        <strong>${persona.NOMBRE_COMPLETO}</strong>
+                        <br>
+                        <small><strong>Identificación:</strong> ${persona.IDENTIFICACION}</small>
+                        <br>
+                        <small><strong>Email:</strong> ${persona.EMAIL || 'No disponible'}</small>
+                        <br>
+                        <small><strong>Teléfono:</strong> ${persona.TELEFONO_PRINCIPAL || 'No disponible'}</small>
+                    </div>
+                    <button class="btn btn-sm btn-primary btn-seleccionar-persona" 
+                            data-id="${persona.ID_PERSONA}"
+                            data-nombre="${persona.NOMBRE_COMPLETO}"
+                            data-identificacion="${persona.IDENTIFICACION}"
+                            data-email="${persona.EMAIL || ''}">
+                        <i class="fas fa-check"></i> Seleccionar
+                    </button>
+                </div>
+            `).join('');
+            
+            resultadosContainer.style.display = 'block';
+            
+            // Añadir eventos a los botones de selección
+            document.querySelectorAll('.btn-seleccionar-persona').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    seleccionarPersona(
+                        parseInt(this.dataset.id),
+                        this.dataset.nombre,
+                        this.dataset.identificacion,
+                        this.dataset.email
+                    );
+                });
+            });
+        }
+
+        // Función para seleccionar una persona
+        function seleccionarPersona(id, nombre, identificacion, email) {
+            // Ocultar resultados de búsqueda
+            document.getElementById('resultados-busqueda').style.display = 'none';
+            
+            // Mostrar persona seleccionada
+            document.getElementById('persona-seleccionada-container').style.display = 'block';
+            
+            // Actualizar información
+            document.getElementById('selected-persona-nombre').textContent = nombre;
+            document.getElementById('selected-persona-identificacion').textContent = identificacion;
+            document.getElementById('selected-persona-email').textContent = email || 'No disponible';
+            
+            // Guardar ID en campo oculto
+            document.getElementById('asignar-persona-id').value = id;
+            
+            // Limpiar campo de búsqueda
+            document.getElementById('buscar-identificacion').value = '';
+            
+            // Cargar roles actuales de la persona
+            cargarRolesActualesPersona(id);
+            
+            // Enfocar el select de roles
+            setTimeout(() => {
+                document.getElementById('asignar-rol').focus();
+            }, 100);
+        }
+
+        // Función para cargar roles actuales de la persona
+        function cargarRolesActualesPersona(idPersona) {
+            const rolesContainer = document.getElementById('roles-actuales-container');
+            const rolesLista = document.getElementById('roles-actuales-lista');
+            
+            // Obtener roles asignados a la persona
+            const rolesAsignados = personasRolesData
+                .filter(pr => pr.ID_PERSONA === idPersona && pr.ESTADO === 'ACTIVO')
+                .map(pr => {
+                    const rol = rolesData.find(r => r.ID_ROL === pr.ID_ROL);
+                    return rol ? rol.NOMBRE : 'Rol desconocido';
+                });
+            
+            if (rolesAsignados.length === 0) {
+                rolesLista.innerHTML = '<p class="text-muted">Esta persona no tiene roles asignados actualmente.</p>';
+            } else {
+                rolesLista.innerHTML = `
+                    <ul class="roles-lista">
+                        ${rolesAsignados.map(rol => `<li><span class="badge badge-primary">${rol}</span></li>`).join('')}
+                    </ul>
+                    <p><small><strong>Total roles:</strong> ${rolesAsignados.length}</small></p>
+                `;
+            }
+            
+            rolesContainer.style.display = 'block';
+        }
+
+        // Función para permitir cambiar de persona
+        function permitirCambiarPersona() {
+            document.getElementById('persona-seleccionada-container').style.display = 'none';
+            document.getElementById('roles-actuales-container').style.display = 'none';
+            document.getElementById('asignar-persona-id').value = '';
+            document.getElementById('buscar-identificacion').value = '';
+            document.getElementById('asignar-rol').value = '';
+            
+            setTimeout(() => {
+                document.getElementById('buscar-identificacion').focus();
+            }, 100);
+        }
+
+        async function asignarRol() {
+            const idPersona = parseInt(document.getElementById('asignar-persona').value);
+            const idRol = parseInt(document.getElementById('asignar-rol').value);
+            const estado = document.getElementById('asignar-estado').value;
+            
+            // Validaciones
+            if (!idPersona || !idRol) {
+                mostrarNotificacion('Debe seleccionar una persona y un rol', 'error');
+                return;
+            }
+            
+            try {
+                const asignacionData = {
+                    id_persona: idPersona,
+                    id_rol: idRol,
+                    estado: estado
+                };
+                
+                await asignarRolAPI(asignacionData);
+                
+                // Recargar tablas
+                await cargarTablaPersonas();
+                await cargarTablaVendedores();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-asignar-rol').classList.remove('active');
+                mostrarNotificacion('Rol asignado correctamente', 'success');
+            } catch (error) {
+                console.error('Error al asignar rol:', error);
+                mostrarNotificacion(error.message || 'Error al asignar rol', 'error');
+            }
+        }
+
+        // FUNCIONES PARA ROLES
+        // Función para crear nuevo rol
+        function crearNuevoRol() {
+            // Configurar modal (necesitarías crear un modal para roles)
+            // Por ahora, mostrar una alerta con opción para crear
+            const nombreRol = prompt('Ingrese el nombre del nuevo rol:');
+            if (!nombreRol) return;
+            
+            const descripcion = prompt('Ingrese la descripción del rol (opcional):');
+            
+            // Aquí iría la lógica para guardar el rol
+            // Por ahora, mostrar mensaje
+            alert(`Rol "${nombreRol}" creado.\nDescripción: ${descripcion || 'Sin descripción'}`);
+            
+            // Recargar tabla de roles
+            cargarTablaRoles();
+        }
+
+        // Función para ver rol
+        async function verRol(id) {
+            try {
+                const rol = rolesData.find(r => r.ID_ROL === id);
+                if (!rol) {
+                    mostrarNotificacion('Rol no encontrado', 'error');
+                    return;
+                }
+                
+                // Crear modal para mostrar información del rol
+                const modalHTML = `
+                    <div class="data-section">
+                        <h3><i class="fas fa-user-tag"></i> Información del Rol</h3>
+                        <div class="data-row">
+                            <div class="data-label">ID:</div>
+                            <div class="data-value">${rol.ID_ROL}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Nombre:</div>
+                            <div class="data-value">${rol.NOMBRE}</div>
+                        </div>
+                        <div class="data-row">
+                            <div class="data-label">Descripción:</div>
+                            <div class="data-value">${rol.DESCRIPCION || 'Sin descripción'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-section">
+                        <h3><i class="fas fa-users"></i> Personas Asignadas</h3>
+                        <div id="personas-rol-container">
+                            <p>Cargando personas asignadas...</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Crear modal dinámico
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-user-tag"></i> Ver Rol: ${rol.NOMBRE}</h2>
+                            <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            ${modalHTML}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cerrar</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Cargar personas asignadas a este rol
+                const personasContainer = document.getElementById('personas-rol-container');
+                if (personasContainer) {
+                    const personasAsignadas = personasRolesData
+                        .filter(pr => pr.ID_ROL === id && pr.ESTADO === 'ACTIVO')
+                        .map(pr => obtenerPersonaById(pr.ID_PERSONA))
+                        .filter(p => p);
+                    
+                    if (personasAsignadas.length === 0) {
+                        personasContainer.innerHTML = '<p>No hay personas asignadas a este rol.</p>';
+                    } else {
+                        personasContainer.innerHTML = `
+                            <div class="personas-list">
+                                ${personasAsignadas.map(persona => `
+                                    <div class="persona-item">
+                                        <strong>${persona.NOMBRE_COMPLETO}</strong>
+                                        <br>
+                                        <small>${persona.IDENTIFICACION}</small>
+                                        <br>
+                                        <small>${persona.EMAIL || 'Sin email'}</small>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <p class="mt-2"><strong>Total:</strong> ${personasAsignadas.length} persona(s)</p>
+                        `;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error al ver rol:', error);
+                mostrarNotificacion('Error al cargar información del rol', 'error');
+            }
+        }
+
+        // MODAL PARA NUEVO USUARIO
+        // Función para crear nuevo usuario
+        function crearNuevoUsuario() {
+            currentUsuarioId = 0;
+            
+            // Configurar modal
+            document.getElementById('modal-title-usuario').innerHTML = `<i class="fas fa-user-plus"></i> Nuevo Usuario`;
+            document.getElementById('view-data-usuario').style.display = 'none';
+            document.getElementById('form-usuario').style.display = 'block';
+            document.getElementById('edit-btn-usuario').style.display = 'none';
+            document.getElementById('delete-btn-usuario').style.display = 'none';
+            document.getElementById('save-btn-usuario').style.display = 'inline-flex';
+            
+            // Limpiar formulario
+            document.getElementById('form-usuario').reset();
+            document.getElementById('usuario-id').value = 0;
+            document.getElementById('usuario-estado').value = 'ACTIVO';
+            document.getElementById('usuario-password').value = '';
+            
+            // Cargar select de personas (solo personas activas sin usuario)
+            const selectPersona = document.getElementById('usuario-persona');
+            selectPersona.innerHTML = '<option value="">Seleccionar Persona</option>';
+            
+            personasData
+                .filter(p => p.ESTADO === 'ACTIVO')
+                .forEach(persona => {
+                    // Verificar si ya tiene usuario
+                    const tieneUsuario = usuariosData.some(u => u.ID_PERSONA === persona.ID_PERSONA && u.ESTADO === 'ACTIVO');
+                    if (!tieneUsuario) {
+                        const option = document.createElement('option');
+                        option.value = persona.ID_PERSONA;
+                        option.textContent = `${persona.NOMBRE_COMPLETO} (${persona.IDENTIFICACION})`;
+                        selectPersona.appendChild(option);
+                    }
+                });
+            
+            // Si no hay personas disponibles, mostrar mensaje
+            if (selectPersona.options.length === 1) {
+                selectPersona.innerHTML = '<option value="">No hay personas disponibles para crear usuario</option>';
+                selectPersona.disabled = true;
+                mostrarNotificacion('No hay personas disponibles para crear usuario', 'warning');
+            } else {
+                selectPersona.disabled = false;
+            }
+            
+            // Limpiar username
+            document.getElementById('usuario-username').value = '';
+            
+            // Mostrar modal
+            document.getElementById('modal-usuario').classList.add('active');
+        }
+
+
+        // Función para mostrar modal de nuevo rol
+        function mostrarModalNuevoRol() {
+            // Limpiar formulario
+            document.getElementById('form-nuevo-rol').reset();
+            document.getElementById('rol-id').value = '0';
+            
+            // Mostrar modal
+            document.getElementById('modal-nuevo-rol').classList.add('active');
+            
+            // Enfocar el campo nombre
+            setTimeout(() => {
+                document.getElementById('rol-nombre').focus();
+            }, 100);
+        }
+
+        // Función para guardar nuevo rol
+        async function guardarNuevoRol() {
+            const id = parseInt(document.getElementById('rol-id').value);
+            const nombre = document.getElementById('rol-nombre').value.trim();
+            const descripcion = document.getElementById('rol-descripcion').value.trim();
+            
+            // Validaciones
+            if (!nombre) {
+                mostrarNotificacion('El nombre del rol es requerido', 'error');
+                return;
+            }
+            
+            try {
+                const rolData = {
+                    NOMBRE: nombre,
+                    DESCRIPCION: descripcion || null
+                };
+                
+                // Determinar si es creación o actualización
+                const esNuevo = id === 0;
+                const endpoint = `${API_BASE_URL}/roles`;
+                const method = esNuevo ? 'POST' : 'PUT';
+                const url = esNuevo ? endpoint : `${endpoint}/${id}`;
+                
+                if (!esNuevo) {
+                    rolData.ID_ROL = id;
+                }
+                
+                const resultado = await apiRequest(url, method, rolData);
+                
+                // Recargar datos de roles
+                rolesData = await apiRequest(`${API_BASE_URL}/roles`);
+                
+                // Recargar tabla de roles
+                await cargarTablaRoles();
+                
+                // Cerrar modal y mostrar notificación
+                document.getElementById('modal-nuevo-rol').classList.remove('active');
+                mostrarNotificacion(`Rol ${esNuevo ? 'creado' : 'actualizado'} correctamente`, 'success');
+                
+            } catch (error) {
+                console.error('Error al guardar rol:', error);
+                mostrarNotificacion(error.message || 'Error al guardar rol', 'error');
+            }
+        }
+
+        // FUNCIÓN PARA EDITAR ROL
+        async function editarRol(id) {
+            try {
+                const rol = rolesData.find(r => r.ID_ROL === id);
+                if (!rol) {
+                    mostrarNotificacion('Rol no encontrado', 'error');
+                    return;
+                }
+                
+                // Cargar datos en formulario
+                document.getElementById('rol-id').value = rol.ID_ROL;
+                document.getElementById('rol-nombre').value = rol.NOMBRE;
+                document.getElementById('rol-descripcion').value = rol.DESCRIPCION || '';
+                
+                // Cambiar título del modal
+                document.querySelector('#modal-nuevo-rol .modal-header h2').innerHTML = 
+                    `<i class="fas fa-edit"></i> Editar Rol: ${rol.NOMBRE}`;
+                
+                // Mostrar modal
+                document.getElementById('modal-nuevo-rol').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error al editar rol:', error);
+                mostrarNotificacion('Error al cargar información del rol', 'error');
+            }
+        }        
+
+        // INICIALIZACIÓN DE SELECTS CON APIS
+        async function cargarEstadosCivilSelect() {
+            try {
+                // Función auxiliar para filtrar por estado ACTIVO
+                function filtrarActivos(catalogo) {
+                    return catalogo.filter(item => {
+                        // Verificar en ambos formatos posibles
+                        const estado = item.ESTADO || item.estado;
+                        return estado === 'ACTIVO';
+                    });
+                }
+                
+                // Función auxiliar para obtener valores
+                function obtenerValor(item, keyMayus, keyMinus) {
+                    return item[keyMayus] !== undefined ? item[keyMayus] : item[keyMinus];
+                }
+                
+                // Estados civiles - SOLO UNA VEZ
+                const selectEstadoCivil = document.getElementById('persona-estado-civil');
+                if (selectEstadoCivil) {
+                    selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>';
+                    const estadosActivos = filtrarActivos(catalogoEstadosCivil);
+                    
+                    if (estadosActivos.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No hay estados civiles activos';
+                        selectEstadoCivil.appendChild(option);
+                        selectEstadoCivil.disabled = true;
+                    } else {
+                        estadosActivos.forEach(ec => {
+                            const option = document.createElement('option');
+                            option.value = obtenerValor(ec, 'ID_ESTADO_CIVIL', 'id');
+                            option.textContent = obtenerValor(ec, 'NOMBRE', 'nombre');
+                            selectEstadoCivil.appendChild(option);
+                        });
+                        selectEstadoCivil.disabled = false;
+                    }
+                }
+                
+                if (filtrarActivos(catalogoEstadosCivil).length === 0) {
+                    console.warn('No hay estados civiles activos disponibles');
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar estados civiles:', error);
+            }
+        }
+
+        // INICIALIZACIÓN DE LA PÁGINA
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Mostrar cargando
+                mostrarNotificacion('Cargando datos...', 'info');
+                
+                // Cargar todos los datos de las APIs
+                const cargado = await cargarCatalogos();
+                
+                if (!cargado) {
+                    mostrarNotificacion('Error al cargar datos iniciales. Verifique la conexión con el servidor.', 'error');
+                    return;
+                }
+                
+                // Cargar selects
+                await cargarEstadosCivilSelect();
+                
+                // Cargar tablas iniciales
+                await cargarTablaPersonas();
+                await cargarTablaVendedores();
+                await cargarTablaUsuarios();
+                await cargarTablaRoles();
+                
+                mostrarNotificacion('Datos cargados correctamente', 'success');
+            } catch (error) {
+                console.error('Error en inicialización:', error);
+                mostrarNotificacion('Error al inicializar la aplicación', 'error');
+            }
+            
+            // Manejar cambio de pestañas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Quitar clase active de todas las pestañas y contenidos
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Añadir clase active a la pestaña seleccionada
+                    btn.classList.add('active');
+                    
+                    // Mostrar el contenido correspondiente
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Actualizar tablas según la pestaña
+                    currentTab = tabId;
+                    if (tabId === 'vendedores') {
+                        cargarTablaVendedores();
+                    }
+                });
+            });
+            
+            // Botones para agregar
+            document.getElementById('add-persona').addEventListener('click', crearNuevaPersona);
+            document.getElementById('add-usuario').addEventListener('click', crearNuevoUsuario);
+            document.getElementById('btn-asignar-rol').addEventListener('click', mostrarModalAsignarRol);
+            document.getElementById('add-rol').addEventListener('click', mostrarModalNuevoRol);
+            
+            // Botones del modal de nuevo rol (si usas el modal)
+            document.getElementById('close-modal-rol').addEventListener('click', () => {
+                document.getElementById('modal-nuevo-rol').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-rol').addEventListener('click', () => {
+                document.getElementById('modal-nuevo-rol').classList.remove('active');
+            });
+            
+            document.getElementById('save-btn-rol').addEventListener('click', guardarNuevoRol);
+            
+            // Cerrar modal de rol al hacer clic fuera
+            document.getElementById('modal-nuevo-rol').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+
+            // Filtros para personas
+            const filterNombre = document.getElementById('filter-nombre');
+            const filterIdentificacion = document.getElementById('filter-identificacion');
+            const filterEstado = document.getElementById('filter-estado');
+            
+            const aplicarFiltros = () => {
+                const filtros = {
+                    nombre: filterNombre.value,
+                    identificacion: filterIdentificacion.value,
+                    estado: filterEstado.value
+                };
+                cargarTablaPersonas(filtros);
+            };
+            
+            filterNombre.addEventListener('input', aplicarFiltros);
+            filterIdentificacion.addEventListener('input', aplicarFiltros);
+            filterEstado.addEventListener('change', aplicarFiltros);
+            
+            document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
+                filterNombre.value = '';
+                filterIdentificacion.value = '';
+                filterEstado.value = '';
+                cargarTablaPersonas();
+            });
+            
+            // Toggles de estado
+            document.getElementById('persona-estado-toggle').addEventListener('change', function() {
+                const estadoHidden = document.getElementById('persona-estado');
+                const estadoLabel = document.getElementById('persona-estado-label');
+                
+                if (this.checked) {
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+            });
+            
+            document.getElementById('asignar-estado-toggle').addEventListener('change', function() {
+                const estadoHidden = document.getElementById('asignar-estado');
+                const estadoLabel = document.getElementById('asignar-estado-label');
+                
+                if (this.checked) {
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+            });
+            
+            // Botones del modal de persona
+            document.getElementById('close-modal-persona').addEventListener('click', () => {
+                document.getElementById('modal-persona').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-persona').addEventListener('click', () => {
+                document.getElementById('modal-persona').classList.remove('active');
+            });
+            
+            document.getElementById('edit-btn-persona').addEventListener('click', () => {
+                editarPersona(currentPersonaId);
+            });
+            
+            document.getElementById('delete-btn-persona').addEventListener('click', () => {
+                eliminarPersona();
+            });
+            
+            document.getElementById('save-btn-persona').addEventListener('click', guardarPersona);
+            
+            // Botones del modal de usuario
+            document.getElementById('close-modal-usuario').addEventListener('click', () => {
+                document.getElementById('modal-usuario').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-usuario').addEventListener('click', () => {
+                document.getElementById('modal-usuario').classList.remove('active');
+            });
+            
+            document.getElementById('edit-btn-usuario').addEventListener('click', () => {
+                editarUsuario(currentUsuarioId);
+            });
+            
+            document.getElementById('delete-btn-usuario').addEventListener('click', () => {
+                eliminarUsuario();
+            });
+            
+            document.getElementById('save-btn-usuario').addEventListener('click', guardarUsuario);
+            
+            // Botones del modal de asignar rol
+            document.getElementById('close-modal-asignar').addEventListener('click', () => {
+                document.getElementById('modal-asignar-rol').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-asignar').addEventListener('click', () => {
+                document.getElementById('modal-asignar-rol').classList.remove('active');
+            });
+            
+            document.getElementById('save-btn-asignar').addEventListener('click', asignarRol);
+            
+            // Cerrar modales al hacer clic fuera
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+
+            // Búsqueda de personas por identificación (con Enter)
+            document.getElementById('buscar-identificacion').addEventListener('keypress', async function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const identificacion = this.value.trim();
+                    if (identificacion) {
+                        const personas = await buscarPersonasPorIdentificacion(identificacion);
+                        mostrarResultadosBusqueda(personas);
+                    }
+                }
+            });
+
+            // Búsqueda de personas (con botón)
+            document.getElementById('btn-buscar-persona').addEventListener('click', async function() {
+                const identificacion = document.getElementById('buscar-identificacion').value.trim();
+                if (identificacion) {
+                    const personas = await buscarPersonasPorIdentificacion(identificacion);
+                    mostrarResultadosBusqueda(personas);
+                }
+            });
+
+            // Botón para cambiar persona seleccionada
+            document.getElementById('btn-cambiar-persona').addEventListener('click', permitirCambiarPersona);
+
+            // Modifica la función asignarRol para usar el campo oculto
+            async function asignarRol() {
+                const idPersona = parseInt(document.getElementById('asignar-persona-id').value);
+                const idRol = parseInt(document.getElementById('asignar-rol').value);
+                const estado = document.getElementById('asignar-estado').value;
+                
+                // Validaciones
+                if (!idPersona || !idRol) {
+                    mostrarNotificacion('Debe seleccionar una persona y un rol', 'error');
+                    return;
+                }
+                
+                try {
+                    const asignacionData = {
+                        id_persona: idPersona,
+                        id_rol: idRol,
+                        estado: estado
+                    };
+                    
+                    await asignarRolAPI(asignacionData);
+                    
+                    // Recargar tablas
+                    await cargarTablaPersonas();
+                    await cargarTablaVendedores();
+                    
+                    // Cerrar modal y mostrar notificación
+                    document.getElementById('modal-asignar-rol').classList.remove('active');
+                    mostrarNotificacion('Rol asignado correctamente', 'success');
+                } catch (error) {
+                    console.error('Error al asignar rol:', error);
+                    mostrarNotificacion(error.message || 'Error al asignar rol', 'error');
+                }
+            }            
+        });
+    </script>
+</body>
+</html>

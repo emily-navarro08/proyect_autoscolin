@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Proveedores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/Style_mantenimiento.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-truck-loading"></i> Sistema de Gestión de Proveedores</h1>
+            <p>Administración de proveedores y vehículos en inventario</p>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="proveedores">
+                    <i class="fas fa-user-tie"></i> Proveedores
+                </button>
+                <button class="tab-btn" data-tab="vehiculos">
+                    <i class="fas fa-car"></i> Vehículos
+                </button>
+
+            </div>
+
+            <!-- Tab Proveedores -->
+            <div class="tab-content active" id="proveedores">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-user-tie"></i> Gestión de Proveedores</h2>
+                    <button class="btn btn-primary" id="add-proveedor">
+                        <i class="fas fa-plus"></i> Nuevo Proveedor
+                    </button>
+                </div>
+                
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-nombre-proveedor">Nombre:</label>
+                            <input type="text" id="filter-nombre-proveedor" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-identificacion-proveedor">Identificación:</label>
+                            <input type="text" id="filter-identificacion-proveedor" placeholder="Buscar por identificación...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-estado-proveedor">Estado:</label>
+                            <select id="filter-estado-proveedor">
+                                <option value="">Todos</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" style="align-self: flex-end;">
+                            <button class="btn btn-secondary" id="btn-limpiar-filtros-proveedor">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #27ae60;">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-proveedores">0</h3>
+                            <p>Proveedores Activos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #3498db;">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-vehiculos">0</h3>
+                            <p>Vehículos Totales</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #f39c12;">
+                            <i class="fas fa-warehouse"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="vehiculos-comprados">0</h3>
+                            <p>Comprados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #9b59b6;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="vehiculos-vendidos">0</h3>
+                            <p>Vendidos</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-proveedores">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Identificación</th>
+                                <th>Proveedor</th>
+                                <th>Contacto</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Vehículos -->
+            <div class="tab-content" id="vehiculos">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-car"></i> Gestión de Vehículos</h2>
+                    <button class="btn btn-primary" id="add-vehiculo">
+                        <i class="fas fa-plus"></i> Nuevo Vehículo
+                    </button>
+                </div>
+                
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-chasis">Chasis:</label>
+                            <input type="text" id="filter-chasis" placeholder="Buscar por chasis...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-placa">Placa:</label>
+                            <input type="text" id="filter-placa" placeholder="Buscar por placa...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-estado-vehiculo">Estado:</label>
+                            <select id="filter-estado-vehiculo">
+                                <option value="">Todos</option>
+                                <option value="COMPRADO">COMPRADO</option>
+                                <option value="VENDIDO">VENDIDO</option>
+                                <option value="DEVUELTO">DEVUELTO</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-proveedor-vehiculo">Proveedor:</label>
+                            <select id="filter-proveedor-vehiculo">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" style="align-self: flex-end;">
+                            <button class="btn btn-secondary" id="btn-limpiar-filtros-vehiculo">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reemplaza el div por una tabla -->
+                <div class="table-container">
+                    <table id="tabla-vehiculos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Chasis</th>
+                                <th>Marca/Modelo</th>
+                                <th>Proveedor</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Inventario -->
+            <div class="tab-content" id="inventario">
+                <div class="header-row">
+                    <h2 class="tab-title"><i class="fas fa-warehouse"></i> Reporte de Inventario</h2>
+                    <button class="btn btn-info" id="btn-exportar-inventario">
+                        <i class="fas fa-file-export"></i> Exportar Reporte
+                    </button>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #27ae60;">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inventario-total">0</h3>
+                            <p>Total Vehículos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #3498db;">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inventario-comprados">0</h3>
+                            <p>Disponibles</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #f39c12;">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inventario-reservado">0</h3>
+                            <p>Reservados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #9b59b6;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inventario-vendido">0</h3>
+                            <p>Vendidos</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-inventario">
+                        <thead>
+                            <tr>
+                                <th>Proveedor</th>
+                                <th>Comprados</th>
+                                <th>Reservados</th>
+                                <th>Vendidos</th>
+                                <th>Devueltos</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Proveedores -->
+    <div class="modal" id="modal-proveedor">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-proveedor"><i class="fas fa-user-tie"></i> Ver Proveedor</h2>
+                <button class="close-btn" id="close-modal-proveedor">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="view-data-proveedor" class="view-data">
+                    <!-- Datos en modo vista -->
+                </div>
+                <form id="form-proveedor" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proveedor-tipo-documento">Tipo Documento:</label>
+                            <select id="proveedor-tipo-documento" name="tipo_documento" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Cedúla_Física">Cedúla Física</option>
+                                <option value="Cedúla_Jurídica">Cedúla Jurídica</option>
+                                <option value="DIMEX">DIMEX</option>
+                                <option value="NITE">NITE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor-identificacion">Identificación:</label>
+                            <input type="text" id="proveedor-identificacion" name="identificacion" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="proveedor-nombre">Nombre Completo:</label>
+                        <input type="text" id="proveedor-nombre" name="nombre_completo" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proveedor-nacionalidad">Nacionalidad:</label>
+                            <input type="text" id="proveedor-nacionalidad" name="nacionalidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor-estado-civil">Estado Civil:</label>
+                            <select id="proveedor-estado-civil" name="id_estado_civil">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proveedor-ocupacion">Ocupación:</label>
+                            <input type="text" id="proveedor-ocupacion" name="ocupacion" value="Proveedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor-telefono">Teléfono Principal:</label>
+                            <input type="text" id="proveedor-telefono" name="telefono_principal" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proveedor-telefono-sec">Teléfono Secundario:</label>
+                            <input type="text" id="proveedor-telefono-sec" name="telefono_secundario">
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor-email">Email:</label>
+                            <input type="email" id="proveedor-email" name="email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="proveedor-direccion">Dirección:</label>
+                        <textarea id="proveedor-direccion" name="direccion"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="proveedor-observacion">Observación:</label>
+                        <textarea id="proveedor-observacion" name="observacion"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="proveedor-estado">Estado:</label>
+                        <div class="state-toggle">
+                            <span id="proveedor-estado-label">ACTIVO</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="proveedor-estado-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <input type="hidden" id="proveedor-estado" name="estado" value="ACTIVO">
+                    </div>
+                    
+                    <input type="hidden" id="proveedor-id" name="id">
+                </form>
+                
+                <!-- Sección de Vehículos del Proveedor -->
+                <div id="vehiculos-proveedor-section" style="margin-top: 30px;">
+                    <h3><i class="fas fa-car"></i> Vehículos Proveídos</h3>
+                    <div id="vehiculos-proveedor-container">
+                        <!-- Los vehículos se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-proveedor">Cancelar</button>
+                <button class="btn btn-warning" id="edit-btn-proveedor">Editar</button>
+                <button class="btn btn-danger" id="delete-btn-proveedor">Desactivar</button>
+                <button class="btn btn-success" id="save-btn-proveedor" style="display: none;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Vehículos -->
+    <div class="modal" id="modal-vehiculo">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-vehiculo"><i class="fas fa-car"></i> Ver Vehículo</h2>
+                <button class="close-btn" id="close-modal-vehiculo">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="view-data-vehiculo" class="view-data">
+                    <!-- Datos en modo vista -->
+                </div>
+                <form id="form-vehiculo" style="display: none;">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="vehiculo-proveedor">Proveedor:</label>
+                            <select id="vehiculo-proveedor" name="id_proveedor" required>
+                                <option value="">Seleccionar Proveedor</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="vehiculo-estado">Estado del Vehículo:</label>
+                            <select id="vehiculo-estado" name="estado" required>
+                                <option value="COMPRADO">COMPRADO</option>
+                                <option value="RESERVADO">RESERVADO</option>
+                                <option value="VENDIDO">VENDIDO</option>
+                                <option value="DEVUELTO">DEVUELTO</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehiculo-chasis">Chasis (VIN):</label>
+                            <input type="text" id="vehiculo-chasis" name="chasis" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-motor">Motor:</label>
+                            <input type="text" id="vehiculo-motor" name="motor">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-placa">Placa:</label>
+                            <input type="text" id="vehiculo-placa" name="placa">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehiculo-marca">Marca:</label>
+                            <select id="vehiculo-marca" name="id_marca" required>
+                                <option value="">Seleccionar Marca</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-modelo">Modelo (Año):</label>
+                            <select id="vehiculo-modelo" name="modelo" required>
+                                <option value="">Seleccionar Año</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-color">Color:</label>
+                            <select id="vehiculo-color" name="id_color">
+                                <option value="">Seleccionar Color</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehiculo-combustible">Combustible:</label>
+                            <select id="vehiculo-combustible" name="id_combustible">
+                                <option value="">Seleccionar Combustible</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-transmision">Transmisión:</label>
+                            <select id="vehiculo-transmision" name="id_transmision">
+                                <option value="">Seleccionar Transmisión</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-traccion">Tracción:</label>
+                            <input type="text" id="vehiculo-traccion" name="traccion">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehiculo-estilo">Estilo:</label>
+                            <input type="text" id="vehiculo-estilo" name="estilo">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-carroceria">Carrocería:</label>
+                            <input type="text" id="vehiculo-carroceria" name="carroceria">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-cilindros">Cilindros:</label>
+                            <input type="number" id="vehiculo-cilindros" name="cilindros" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vehiculo-cc">Cilindrada (C.C):</label>
+                            <input type="number" id="vehiculo-cc" name="cc" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-km-actual">Kilometraje Actual:</label>
+                            <input type="number" id="vehiculo-km-actual" name="kilometraje_actual" step="0.01" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-km-anterior">Kilometraje Anterior:</label>
+                            <input type="number" id="vehiculo-km-anterior" name="kilometraje_anterior" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="vehiculo-fecha-ingreso">Fecha de Ingreso:</label>
+                            <input type="date" id="vehiculo-fecha-ingreso" name="fecha_ingreso">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehiculo-pv">P.V:</label>
+                            <input type="text" id="vehiculo-pv" name="pv">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vehiculo-observaciones">Observaciones:</label>
+                        <textarea id="vehiculo-observaciones" name="observaciones"></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="vehiculo-id" name="id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-vehiculo">Cancelar</button>
+                <button class="btn btn-warning" id="edit-btn-vehiculo">Editar</button>
+                <button class="btn btn-danger" id="delete-btn-vehiculo">Eliminar</button>
+                <button class="btn btn-success" id="save-btn-vehiculo" style="display: none;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // URLs base de las APIs
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // APIs específicas
+        const API_ENDPOINTS = {
+            proveedores: `${API_BASE_URL}/proveedores`,
+            vehiculos: `${API_BASE_URL}/vehiculos`,
+            catalogos: {
+                estadosCivil: `${API_BASE_URL}/estados-civil`,
+                marcas: `${API_BASE_URL}/marcas`,
+                colores: `${API_BASE_URL}/colores`,
+                combustibles: `${API_BASE_URL}/combustibles`,
+                transmisiones: `${API_BASE_URL}/transmisiones`
+            },
+            estadisticas: `${API_BASE_URL}/estadisticas/vehiculos`
+        };
+
+        // Variables globales
+        let currentProveedorId = 0;
+        let currentVehiculoId = 0;
+        let catalogoEstadosCivil = [];
+        let catalogoMarcas = [];
+        let catalogoColores = [];
+        let catalogoCombustibles = [];
+        let catalogoTransmisiones = [];
+
+        // Funciones de utilidad
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = mensaje;
+            notification.className = `notification show ${tipo}`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatearFecha(fechaString) {
+            if (!fechaString) return '-';
+            try {
+                const fecha = new Date(fechaString);
+                return fecha.toLocaleDateString('es-ES');
+            } catch (e) {
+                return fechaString;
+            }
+        }
+
+        // API FUNCTIONS - PROVEEDORES
+        async function cargarProveedores(filtros = {}) {
+            try {
+                let url = API_ENDPOINTS.proveedores;
+                const params = new URLSearchParams();
+                
+                if (filtros.nombre) params.append('nombre', filtros.nombre);
+                if (filtros.identificacion) params.append('identificacion', filtros.identificacion);
+                if (filtros.estado) params.append('estado', filtros.estado);
+                
+                if (params.toString()) {
+                    url += `?${params.toString()}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Error al cargar proveedores');
+                const proveedores = await response.json();
+                
+                actualizarTablaProveedores(proveedores);
+                actualizarEstadisticasProveedores(proveedores);
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al cargar proveedores', 'error');
+            }
+        }
+
+        function actualizarTablaProveedores(proveedores) {
+            const tbody = document.querySelector('#tabla-proveedores tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            proveedores.forEach(proveedor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${proveedor.ID_PERSONA || proveedor.id}</td>
+                    <td>${proveedor.TIPO_DOCUMENTO || proveedor.tipo_documento}: ${proveedor.IDENTIFICACION || proveedor.identificacion}</td>
+                    <td>
+                        ${proveedor.NOMBRE_COMPLETO || proveedor.nombre_completo}<br>
+                        <small>${proveedor.OCUPACION || proveedor.ocupacion || 'Proveedor'}</small>
+                    </td>
+                    <td>
+                        <small>Tel: ${proveedor.TELEFONO_PRINCIPAL || proveedor.telefono_principal || '-'}</small><br>
+                        <small>Email: ${proveedor.EMAIL || proveedor.email || '-'}</small>
+                    </td>
+                    <td><span class="status-badge ${(proveedor.ESTADO || proveedor.estado) === 'ACTIVO' ? 'status-active' : 'status-inactive'}">${proveedor.ESTADO || proveedor.estado}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-proveedor" data-id="${proveedor.ID_PERSONA || proveedor.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-warning btn-edit-proveedor" data-id="${proveedor.ID_PERSONA || proveedor.id}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-info btn-vehiculos-proveedor" data-id="${proveedor.ID_PERSONA || proveedor.id}">
+                            <i class="fas fa-car"></i> Vehículos
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-proveedor').forEach(btn => {
+                btn.addEventListener('click', () => verProveedor(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-edit-proveedor').forEach(btn => {
+                btn.addEventListener('click', () => editarProveedor(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-vehiculos-proveedor').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab-btn[data-tab="vehiculos"]').classList.add('active');
+                    document.getElementById('vehiculos').classList.add('active');
+                    
+                    document.getElementById('filter-proveedor-vehiculo').value = btn.dataset.id;
+                    cargarVehiculos();
+                });
+            });
+        }
+
+        function actualizarEstadisticasProveedores(proveedores) {
+            const activos = proveedores.filter(p => (p.ESTADO || p.estado) === 'ACTIVO').length;
+            document.getElementById('total-proveedores').textContent = activos;
+        }
+
+        async function obtenerProveedorPorId(id) {
+            try {
+                const response = await fetch(`${API_ENDPOINTS.proveedores}/${id}`);
+                if (!response.ok) throw new Error('Error al cargar proveedor');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al cargar proveedor', 'error');
+                return null;
+            }
+        }
+
+        async function guardarProveedor(proveedorData) {
+            try {
+                const method = proveedorData.ID_PERSONA ? 'PUT' : 'POST';
+                const url = proveedorData.ID_PERSONA ? 
+                    `${API_ENDPOINTS.proveedores}/${proveedorData.ID_PERSONA}` : 
+                    API_ENDPOINTS.proveedores;
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(proveedorData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al guardar proveedor');
+                }
+                
+                const resultado = await response.json();
+                mostrarNotificacion(proveedorData.ID_PERSONA ? 'Proveedor actualizado' : 'Proveedor creado', 'success');
+                cargarProveedores();
+                cargarSelectProveedores();
+                return resultado;
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion(error.message || 'Error al guardar proveedor', 'error');
+                throw error;
+            }
+        }
+
+        async function eliminarProveedorAPI(id) {
+            if (!confirm('¿Está seguro de que desea desactivar este proveedor?')) return;
+            
+            try {
+                const response = await fetch(`${API_ENDPOINTS.proveedores}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Error al eliminar proveedor');
+                
+                mostrarNotificacion('Proveedor desactivado', 'success');
+                cargarProveedores();
+                cargarSelectProveedores();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al eliminar proveedor', 'error');
+            }
+        }
+
+        // API FUNCTIONS - VEHÍCULOS
+        async function cargarVehiculos(filtros = {}) {
+            try {
+                let url = API_ENDPOINTS.vehiculos;
+                const params = new URLSearchParams();
+                
+                if (filtros.chasis) params.append('chasis', filtros.chasis);
+                if (filtros.placa) params.append('placa', filtros.placa);
+                if (filtros.estado) params.append('estado', filtros.estado);
+                if (filtros.id_proveedor) params.append('id_proveedor', filtros.id_proveedor);
+                
+                if (params.toString()) {
+                    url += `?${params.toString()}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Error al cargar vehículos');
+                const vehiculos = await response.json();
+                
+                actualizarTablaVehiculos(vehiculos);
+                actualizarEstadisticasVehiculos(vehiculos);
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al cargar vehículos', 'error');
+            }
+        }
+
+        function actualizarTablaVehiculos(vehiculos) {
+            const tbody = document.querySelector('#tabla-vehiculos tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (vehiculos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-car" style="font-size: 2rem; color: #bdc3c7;"></i>
+                            <h3>No se encontraron vehículos</h3>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            vehiculos.forEach(vehiculo => {
+                let estadoClass = '';
+                switch(vehiculo.ESTADO || vehiculo.estado) {
+                    case 'COMPRADO':
+                        estadoClass = 'status-comprados';
+                        break;
+                    case 'VENDIDO':
+                        estadoClass = 'status-vendido';
+                        break;
+                    case 'DEVUELTO':
+                        estadoClass = 'status-devuelto';
+                        break;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehiculo.ID_VEHICULO || vehiculo.id}</td>
+                    <td>${vehiculo.CHASIS || vehiculo.chasis}</td>
+                    <td>
+                        ${vehiculo.marca_nombre || vehiculo.MARCA_NOMBRE || 'Marca'} ${vehiculo.MODELO || vehiculo.modelo || ''}<br>
+                        <small>${vehiculo.PLACA || vehiculo.placa || 'Sin placa'}</small>
+                    </td>
+                    <td>${vehiculo.proveedor_nombre || vehiculo.PROVEEDOR_NOMBRE || 'Proveedor'}</td>
+                    <td>
+                        <span class="vehicle-status ${estadoClass}">
+                            ${vehiculo.ESTADO || vehiculo.estado}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-view-vehiculo" data-id="${vehiculo.ID_VEHICULO || vehiculo.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning btn-edit-vehiculo" data-id="${vehiculo.ID_VEHICULO || vehiculo.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-delete-vehiculo" data-id="${vehiculo.ID_VEHICULO || vehiculo.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Añadir eventos
+            document.querySelectorAll('.btn-view-vehiculo').forEach(btn => {
+                btn.addEventListener('click', () => verVehiculo(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-edit-vehiculo').forEach(btn => {
+                btn.addEventListener('click', () => editarVehiculo(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-delete-vehiculo').forEach(btn => {
+                btn.addEventListener('click', () => eliminarVehiculoAPI(parseInt(btn.dataset.id)));
+            });
+        }
+
+        function actualizarEstadisticasVehiculos(vehiculos) {
+            const total = vehiculos.length;
+            const comprados = vehiculos.filter(v => (v.ESTADO || v.estado) === 'COMPRADO').length;
+            const vendidos = vehiculos.filter(v => (v.ESTADO || v.estado) === 'VENDIDO').length;
+            
+            document.getElementById('total-vehiculos').textContent = total;
+            document.getElementById('vehiculos-comprados').textContent = comprados;
+            document.getElementById('vehiculos-vendidos').textContent = vendidos;
+        }
+
+        async function obtenerVehiculoPorId(id) {
+            try {
+                const response = await fetch(`${API_ENDPOINTS.vehiculos}/${id}`);
+                if (!response.ok) throw new Error('Error al cargar vehículo');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al cargar vehículo', 'error');
+                return null;
+            }
+        }
+
+        async function guardarVehiculoAPI(vehiculoData) {
+            try {
+                const method = vehiculoData.id ? 'PUT' : 'POST';
+                const url = vehiculoData.id ? 
+                    `${API_ENDPOINTS.vehiculos}/${vehiculoData.id}` : 
+                    API_ENDPOINTS.vehiculos;
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(vehiculoData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al guardar vehículo');
+                }
+                
+                const resultado = await response.json();
+                mostrarNotificacion(vehiculoData.id ? 'Vehículo actualizado' : 'Vehículo creado', 'success');
+                cargarVehiculos();
+                return resultado;
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion(error.message || 'Error al guardar vehículo', 'error');
+                throw error;
+            }
+        }
+
+        async function eliminarVehiculoAPI(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este vehículo?')) return;
+            
+            try {
+                const response = await fetch(`${API_ENDPOINTS.vehiculos}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Error al eliminar vehículo');
+                
+                mostrarNotificacion('Vehículo eliminado', 'success');
+                cargarVehiculos();
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al eliminar vehículo', 'error');
+            }
+        }
+
+        // CATÁLOGOS
+        async function cargarCatalogos() {
+            try {
+                // Cargar catálogos desde API
+                const [estadosCivil, marcas, colores, combustibles, transmisiones] = await Promise.all([
+                    fetch(API_ENDPOINTS.catalogos.estadosCivil).then(r => r.ok ? r.json() : []),
+                    fetch(API_ENDPOINTS.catalogos.marcas).then(r => r.ok ? r.json() : []),
+                    fetch(API_ENDPOINTS.catalogos.colores).then(r => r.ok ? r.json() : []),
+                    fetch(API_ENDPOINTS.catalogos.combustibles).then(r => r.ok ? r.json() : []),
+                    fetch(API_ENDPOINTS.catalogos.transmisiones).then(r => r.ok ? r.json() : [])
+                ]);
+                
+                catalogoEstadosCivil = estadosCivil;
+                catalogoMarcas = marcas;
+                catalogoColores = colores;
+                catalogoCombustibles = combustibles;
+                catalogoTransmisiones = transmisiones;
+                
+                actualizarSelectsCatalogos();
+            } catch (error) {
+                console.error('Error cargando catálogos:', error);
+            }
+        }
+
+        async function cargarSelectProveedores() {
+            try {
+                const response = await fetch(API_ENDPOINTS.proveedores);
+                if (!response.ok) throw new Error('Error al cargar proveedores');
+                const proveedores = await response.json();
+                
+                const selectProveedor = document.getElementById('vehiculo-proveedor');
+                const selectFilterProveedor = document.getElementById('filter-proveedor-vehiculo');
+                
+                if (!selectProveedor || !selectFilterProveedor) return;
+                
+                selectProveedor.innerHTML = '<option value="">Seleccionar Proveedor</option>';
+                selectFilterProveedor.innerHTML = '<option value="">Todos</option>';
+                
+                const proveedoresActivos = proveedores.filter(p => (p.ESTADO || p.estado) === 'ACTIVO');
+                
+                proveedoresActivos.forEach(proveedor => {
+                    const option1 = document.createElement('option');
+                    option1.value = proveedor.ID_PERSONA || proveedor.id;
+                    option1.textContent = `${proveedor.NOMBRE_COMPLETO || proveedor.nombre_completo} (${proveedor.IDENTIFICACION || proveedor.identificacion})`;
+                    selectProveedor.appendChild(option1);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = proveedor.ID_PERSONA || proveedor.id;
+                    option2.textContent = `${proveedor.NOMBRE_COMPLETO || proveedor.nombre_completo} (${proveedor.IDENTIFICACION || proveedor.identificacion})`;
+                    selectFilterProveedor.appendChild(option2);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Función para actualizar los selects de los catálogos
+        function actualizarSelectsCatalogos() {
+            // Función auxiliar para filtrar por estado ACTIVO
+            function filtrarActivos(catalogo) {
+                return catalogo.filter(item => {
+                    // Verificar en ambos formatos posibles
+                    const estado = item.ESTADO || item.estado;
+                    return estado === 'ACTIVO';
+                });
+            }
+            
+            // Función auxiliar para obtener valores
+            function obtenerValor(item, keyMayus, keyMinus) {
+                return item[keyMayus] !== undefined ? item[keyMayus] : item[keyMinus];
+            }
+            
+            // Estados civiles
+            const selectEstadoCivil = document.getElementById('proveedor-estado-civil');
+            if (selectEstadoCivil) {
+                selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>';
+                const estadosActivos = filtrarActivos(catalogoEstadosCivil);
+                
+                if (estadosActivos.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay estados civiles activos';
+                    selectEstadoCivil.appendChild(option);
+                    selectEstadoCivil.disabled = true;
+                } else {
+                    estadosActivos.forEach(ec => {
+                        const option = document.createElement('option');
+                        option.value = obtenerValor(ec, 'ID_ESTADO_CIVIL', 'id');
+                        option.textContent = obtenerValor(ec, 'NOMBRE', 'nombre');
+                        selectEstadoCivil.appendChild(option);
+                    });
+                    selectEstadoCivil.disabled = false;
+                }
+            }
+            
+            // Marcas
+            const selectMarca = document.getElementById('vehiculo-marca');
+            if (selectMarca) {
+                selectMarca.innerHTML = '<option value="">Seleccionar Marca</option>';
+                const marcasActivas = filtrarActivos(catalogoMarcas);
+                
+                if (marcasActivas.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay marcas activas';
+                    selectMarca.appendChild(option);
+                    selectMarca.disabled = true;
+                } else {
+                    marcasActivas.forEach(marca => {
+                        const option = document.createElement('option');
+                        option.value = obtenerValor(marca, 'ID_MARCA', 'id');
+                        option.textContent = obtenerValor(marca, 'NOMBRE', 'nombre');
+                        selectMarca.appendChild(option);
+                    });
+                    selectMarca.disabled = false;
+                }
+            }
+            
+            // Colores
+            const selectColor = document.getElementById('vehiculo-color');
+            if (selectColor) {
+                selectColor.innerHTML = '<option value="">Seleccionar Color</option>';
+                const coloresActivos = filtrarActivos(catalogoColores);
+                
+                if (coloresActivos.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay colores activos';
+                    selectColor.appendChild(option);
+                    selectColor.disabled = true;
+                } else {
+                    coloresActivos.forEach(color => {
+                        const option = document.createElement('option');
+                        option.value = obtenerValor(color, 'ID_COLOR', 'id');
+                        option.textContent = obtenerValor(color, 'NOMBRE', 'nombre');
+                        selectColor.appendChild(option);
+                    });
+                    selectColor.disabled = false;
+                }
+            }
+            
+            // Combustibles
+            const selectCombustible = document.getElementById('vehiculo-combustible');
+            if (selectCombustible) {
+                selectCombustible.innerHTML = '<option value="">Seleccionar Combustible</option>';
+                const combustiblesActivos = filtrarActivos(catalogoCombustibles);
+                
+                if (combustiblesActivos.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay combustibles activos';
+                    selectCombustible.appendChild(option);
+                    selectCombustible.disabled = true;
+                } else {
+                    combustiblesActivos.forEach(combustible => {
+                        const option = document.createElement('option');
+                        option.value = obtenerValor(combustible, 'ID_COMBUSTIBLE', 'id');
+                        option.textContent = obtenerValor(combustible, 'NOMBRE', 'nombre');
+                        selectCombustible.appendChild(option);
+                    });
+                    selectCombustible.disabled = false;
+                }
+            }
+            
+            // Transmisiones
+            const selectTransmision = document.getElementById('vehiculo-transmision');
+            if (selectTransmision) {
+                selectTransmision.innerHTML = '<option value="">Seleccionar Transmisión</option>';
+                const transmisionesActivas = filtrarActivos(catalogoTransmisiones);
+                
+                if (transmisionesActivas.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay transmisiones activas';
+                    selectTransmision.appendChild(option);
+                    selectTransmision.disabled = true;
+                } else {
+                    transmisionesActivas.forEach(transmision => {
+                        const option = document.createElement('option');
+                        option.value = obtenerValor(transmision, 'ID_TRANSMISION', 'id');
+                        option.textContent = obtenerValor(transmision, 'NOMBRE', 'nombre');
+                        selectTransmision.appendChild(option);
+                    });
+                    selectTransmision.disabled = false;
+                }
+            }
+            
+            // Años para modelo
+            const selectModelo = document.getElementById('vehiculo-modelo');
+            if (selectModelo) {
+                selectModelo.innerHTML = '<option value="">Seleccionar Año</option>';
+                const añoActual = new Date().getFullYear();
+                for (let i = añoActual; i >= añoActual - 40; i--) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    selectModelo.appendChild(option);
+                }
+            }
+            
+            // Mostrar notificación si algún catálogo está vacío
+            const catalogos = [
+                { nombre: 'Estados Civiles', datos: catalogoEstadosCivil },
+                { nombre: 'Marcas', datos: catalogoMarcas },
+                { nombre: 'Colores', datos: catalogoColores },
+                { nombre: 'Combustibles', datos: catalogoCombustibles },
+                { nombre: 'Transmisiones', datos: catalogoTransmisiones }
+            ];
+            
+            const catalogosVacios = catalogos
+                .filter(cat => filtrarActivos(cat.datos).length === 0)
+                .map(cat => cat.nombre);
+            
+            if (catalogosVacios.length > 0) {
+                console.warn('Los siguientes catálogos no tienen elementos ACTIVOS:', catalogosVacios);
+                mostrarNotificacion(`Los catálogos ${catalogosVacios.join(', ')} no tienen elementos activos`, 'warning');
+            }
+        }
+
+        // FUNCIONES DE INTERFAZ
+        async function verProveedor(id) {
+            const proveedor = await obtenerProveedorPorId(id);
+            if (!proveedor) return;
+            
+            currentProveedorId = id;
+            
+            document.getElementById('modal-title-proveedor').innerHTML = `<i class="fas fa-user-tie"></i> Ver Proveedor`;
+            document.getElementById('view-data-proveedor').style.display = 'block';
+            document.getElementById('form-proveedor').style.display = 'none';
+            document.getElementById('vehiculos-proveedor-section').style.display = 'block';
+            document.getElementById('edit-btn-proveedor').style.display = 'inline-flex';
+            document.getElementById('delete-btn-proveedor').style.display = 'inline-flex';
+            document.getElementById('save-btn-proveedor').style.display = 'none';
+            
+            const container = document.getElementById('view-data-proveedor');
+            container.innerHTML = `
+                <div class="data-section">
+                    <h3><i class="fas fa-id-card"></i> Información del Proveedor</h3>
+                    <div class="data-row">
+                        <div class="data-label">ID:</div>
+                        <div class="data-value">${proveedor.ID_PERSONA || proveedor.id}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Tipo Documento:</div>
+                        <div class="data-value">${proveedor.TIPO_DOCUMENTO || proveedor.tipo_documento}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Identificación:</div>
+                        <div class="data-value">${proveedor.IDENTIFICACION || proveedor.identificacion}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Nombre Completo:</div>
+                        <div class="data-value">${proveedor.NOMBRE_COMPLETO || proveedor.nombre_completo}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Nacionalidad:</div>
+                        <div class="data-value">${proveedor.NACIONALIDAD || proveedor.nacionalidad || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Ocupación:</div>
+                        <div class="data-value">${proveedor.OCUPACION || proveedor.ocupacion || '-'}</div>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3><i class="fas fa-address-book"></i> Información de Contacto</h3>
+                    <div class="data-row">
+                        <div class="data-label">Dirección:</div>
+                        <div class="data-value">${proveedor.DIRECCION || proveedor.direccion || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Teléfono Principal:</div>
+                        <div class="data-value">${proveedor.TELEFONO_PRINCIPAL || proveedor.telefono_principal || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Teléfono Secundario:</div>
+                        <div class="data-value">${proveedor.TELEFONO_SECUNDARIO || proveedor.telefono_secundario || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Email:</div>
+                        <div class="data-value">${proveedor.EMAIL || proveedor.email || '-'}</div>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3><i class="fas fa-info-circle"></i> Información Adicional</h3>
+                    <div class="data-row">
+                        <div class="data-label">Observación:</div>
+                        <div class="data-value">${proveedor.OBSERVACION || proveedor.observacion || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Fecha Registro:</div>
+                        <div class="data-value">${formatearFecha(proveedor.FECHA_REGISTRO || proveedor.fecha_registro)}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Estado:</div>
+                        <div class="data-value">
+                            <span class="status-badge ${(proveedor.ESTADO || proveedor.estado) === 'ACTIVO' ? 'status-active' : 'status-inactive'}">
+                                ${proveedor.ESTADO || proveedor.estado}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Cargar vehículos del proveedor
+            await cargarVehiculosProveedor(id);
+            
+            document.getElementById('modal-proveedor').classList.add('active');
+        }
+
+        async function cargarVehiculosProveedor(idProveedor) {
+            try {
+                const response = await fetch(`${API_ENDPOINTS.vehiculos}?id_proveedor=${idProveedor}`);
+                if (!response.ok) throw new Error('Error al cargar vehículos');
+                const vehiculos = await response.json();
+                
+                const vehiculosContainer = document.getElementById('vehiculos-proveedor-container');
+                vehiculosContainer.innerHTML = '';
+                
+                if (vehiculos.length > 0) {
+                    const estadisticas = {
+                        total: vehiculos.length,
+                        comprados: vehiculos.filter(v => (v.ESTADO || v.estado) === 'COMPRADO').length,
+                        vendidos: vehiculos.filter(v => (v.ESTADO || v.estado) === 'VENDIDO').length,
+                        devueltos: vehiculos.filter(v => (v.ESTADO || v.estado) === 'DEVUELTO').length
+                    };
+                    
+                    const resumen = document.createElement('div');
+                    resumen.style.marginBottom = '15px';
+                    resumen.innerHTML = `
+                        <p><strong>Resumen de vehículos:</strong> Total: ${estadisticas.total} | 
+                        Comprados: ${estadisticas.comprados} | Vendidos: ${estadisticas.vendidos} | 
+                        Devueltos: ${estadisticas.devueltos}</p>
+                    `;
+                    vehiculosContainer.appendChild(resumen);
+                    
+                    vehiculos.forEach(vehiculo => {
+                        const estadoClass = {
+                            'COMPRADO': 'status-comprados',
+                            'VENDIDO': 'status-vendido',
+                            'DEVUELTO': 'status-devuelto'
+                        }[vehiculo.ESTADO || vehiculo.estado] || '';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'vehicle-card';
+                        card.style.padding = '15px';
+                        card.style.marginBottom = '10px';
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${vehiculo.marca_nombre || vehiculo.MARCA_NOMBRE || 'Marca'} ${vehiculo.MODELO || vehiculo.modelo}</strong><br>
+                                    <small>Chasis: ${vehiculo.CHASIS || vehiculo.chasis} | Placa: ${vehiculo.PLACA || vehiculo.placa || 'Sin placa'}</small>
+                                </div>
+                                <span class="vehicle-status ${estadoClass}" style="font-size: 0.8rem;">
+                                    ${vehiculo.ESTADO || vehiculo.estado}
+                                </span>
+                            </div>
+                        `;
+                        vehiculosContainer.appendChild(card);
+                    });
+                } else {
+                    vehiculosContainer.innerHTML = `
+                        <div class="empty-state" style="padding: 20px;">
+                            <i class="fas fa-car" style="font-size: 2rem;"></i>
+                            <p>Este proveedor no tiene vehículos registrados.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function editarProveedor(id) {
+            const proveedor = await obtenerProveedorPorId(id);
+            if (!proveedor) return;
+            
+            currentProveedorId = id;
+            
+            document.getElementById('modal-title-proveedor').innerHTML = `<i class="fas fa-edit"></i> Editar Proveedor`;
+            document.getElementById('view-data-proveedor').style.display = 'none';
+            document.getElementById('form-proveedor').style.display = 'block';
+            document.getElementById('vehiculos-proveedor-section').style.display = 'none';
+            document.getElementById('edit-btn-proveedor').style.display = 'none';
+            document.getElementById('delete-btn-proveedor').style.display = 'inline-flex';
+            document.getElementById('save-btn-proveedor').style.display = 'inline-flex';
+            
+            document.getElementById('proveedor-id').value = proveedor.ID_PERSONA || proveedor.id;
+            document.getElementById('proveedor-tipo-documento').value = proveedor.TIPO_DOCUMENTO || proveedor.tipo_documento;
+            document.getElementById('proveedor-identificacion').value = proveedor.IDENTIFICACION || proveedor.identificacion;
+            document.getElementById('proveedor-nombre').value = proveedor.NOMBRE_COMPLETO || proveedor.nombre_completo;
+            document.getElementById('proveedor-nacionalidad').value = proveedor.NACIONALIDAD || proveedor.nacionalidad || '';
+            document.getElementById('proveedor-estado-civil').value = proveedor.ID_ESTADO_CIVIL || proveedor.id_estado_civil || '';
+            document.getElementById('proveedor-ocupacion').value = proveedor.OCUPACION || proveedor.ocupacion || '';
+            document.getElementById('proveedor-direccion').value = proveedor.DIRECCION || proveedor.direccion || '';
+            document.getElementById('proveedor-telefono').value = proveedor.TELEFONO_PRINCIPAL || proveedor.telefono_principal || '';
+            document.getElementById('proveedor-telefono-sec').value = proveedor.TELEFONO_SECUNDARIO || proveedor.telefono_secundario || '';
+            document.getElementById('proveedor-email').value = proveedor.EMAIL || proveedor.email || '';
+            document.getElementById('proveedor-observacion').value = proveedor.OBSERVACION || proveedor.observacion || '';
+            
+            const estadoToggle = document.getElementById('proveedor-estado-toggle');
+            const estadoHidden = document.getElementById('proveedor-estado');
+            const estadoLabel = document.getElementById('proveedor-estado-label');
+            
+            if ((proveedor.ESTADO || proveedor.estado) === 'ACTIVO') {
+                estadoToggle.checked = true;
+                estadoHidden.value = 'ACTIVO';
+                estadoLabel.textContent = 'ACTIVO';
+            } else {
+                estadoToggle.checked = false;
+                estadoHidden.value = 'INACTIVO';
+                estadoLabel.textContent = 'INACTIVO';
+            }
+            
+            document.getElementById('modal-proveedor').classList.add('active');
+        }
+
+        function crearNuevoProveedor() {
+            currentProveedorId = 0;
+            
+            document.getElementById('modal-title-proveedor').innerHTML = `<i class="fas fa-plus"></i> Nuevo Proveedor`;
+            document.getElementById('view-data-proveedor').style.display = 'none';
+            document.getElementById('form-proveedor').style.display = 'block';
+            document.getElementById('vehiculos-proveedor-section').style.display = 'none';
+            document.getElementById('edit-btn-proveedor').style.display = 'none';
+            document.getElementById('delete-btn-proveedor').style.display = 'none';
+            document.getElementById('save-btn-proveedor').style.display = 'inline-flex';
+            
+            document.getElementById('form-proveedor').reset();
+            document.getElementById('proveedor-id').value = 0;
+            document.getElementById('proveedor-ocupacion').value = 'Proveedor';
+            
+            document.getElementById('proveedor-estado-toggle').checked = true;
+            document.getElementById('proveedor-estado').value = 'ACTIVO';
+            document.getElementById('proveedor-estado-label').textContent = 'ACTIVO';
+            
+            document.getElementById('modal-proveedor').classList.add('active');
+        }
+
+        async function guardarProveedorDesdeForm() {
+            // Validar campos requeridos
+            const tipo_documento = document.getElementById('proveedor-tipo-documento').value;
+            const identificacion = document.getElementById('proveedor-identificacion').value.trim();
+            const nombre_completo = document.getElementById('proveedor-nombre').value.trim();
+            const nacionalidad = document.getElementById('proveedor-nacionalidad').value.trim();
+
+            if (!tipo_documento || !identificacion || !nombre_completo || !nacionalidad) {
+                mostrarNotificacion('Por favor complete todos los campos requeridos', 'error');
+                return;
+            }
+
+            const id = parseInt(document.getElementById('proveedor-id').value);
+            
+            // Helper function para convertir strings vacíos a null
+            const toNullIfEmpty = (value) => {
+                if (value === undefined || value === null) return null;
+                if (typeof value === 'string' && value.trim() === '') return null;
+                return value;
+            };
+
+            const proveedorData = {
+                tipo_documento: document.getElementById('proveedor-tipo-documento').value,
+                identificacion: document.getElementById('proveedor-identificacion').value.trim(),
+                nombre_completo: document.getElementById('proveedor-nombre').value.trim(),
+                nacionalidad: document.getElementById('proveedor-nacionalidad').value.trim() || null,
+                id_estado_civil: document.getElementById('proveedor-estado-civil').value ? 
+                    parseInt(document.getElementById('proveedor-estado-civil').value) : null,
+                ocupacion: document.getElementById('proveedor-ocupacion').value.trim() || 'Proveedor',
+                direccion: document.getElementById('proveedor-direccion').value.trim() || null,
+                telefono_principal: document.getElementById('proveedor-telefono').value.trim() || null,
+                telefono_secundario: document.getElementById('proveedor-telefono-sec').value.trim() || null,
+                email: document.getElementById('proveedor-email').value.trim() || null,
+                observacion: document.getElementById('proveedor-observacion').value.trim() || null,
+                estado: document.getElementById('proveedor-estado').value
+            };
+            
+            if (id && id !== 0) {
+                proveedorData.id = id;
+            }
+            
+            console.log('Datos antes de convertir:', proveedorData); // Para depurar
+            
+            const dataParaAPI = {
+                TIPO_DOCUMENTO: proveedorData.tipo_documento,
+                IDENTIFICACION: proveedorData.identificacion,
+                NOMBRE_COMPLETO: proveedorData.nombre_completo,
+                NACIONALIDAD: proveedorData.nacionalidad,
+                ID_ESTADO_CIVIL: proveedorData.id_estado_civil,
+                OCUPACION: proveedorData.ocupacion,
+                DIRECCION: proveedorData.direccion,
+                TELEFONO_PRINCIPAL: proveedorData.telefono_principal,
+                TELEFONO_SECUNDARIO: proveedorData.telefono_secundario,
+                EMAIL: proveedorData.email,
+                OBSERVACION: proveedorData.observacion,
+                ESTADO: proveedorData.estado
+            };
+            
+            if (id && id !== 0) {
+                dataParaAPI.ID_PERSONA = id; // Incluir ID solo si es actualización
+            }
+            
+            console.log('Datos convertidos para API:', dataParaAPI);
+            
+            try {
+                const method = id === 0 ? 'POST' : 'PUT';
+                const url = id === 0 ? 
+                    `${API_ENDPOINTS.proveedores}` : 
+                    `${API_ENDPOINTS.proveedores}/${id}`;
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataParaAPI) // Enviar con mayúsculas
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al guardar proveedor');
+                }
+                
+                const resultado = await response.json();
+                mostrarNotificacion(id === 0 ? 'Proveedor creado' : 'Proveedor actualizado', 'success');
+                cargarProveedores();
+                cargarSelectProveedores();
+                document.getElementById('modal-proveedor').classList.remove('active');
+                return resultado;
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion(error.message || 'Error al guardar proveedor', 'error');
+                throw error;
+            }
+        }
+
+        // VEHÍCULOS - Funciones de interfaz
+        async function verVehiculo(id) {
+            const vehiculo = await obtenerVehiculoPorId(id);
+            if (!vehiculo) return;
+            
+            currentVehiculoId = id;
+            
+            document.getElementById('modal-title-vehiculo').innerHTML = `<i class="fas fa-car"></i> Ver Vehículo`;
+            document.getElementById('view-data-vehiculo').style.display = 'block';
+            document.getElementById('form-vehiculo').style.display = 'none';
+            document.getElementById('edit-btn-vehiculo').style.display = 'inline-flex';
+            document.getElementById('delete-btn-vehiculo').style.display = 'inline-flex';
+            document.getElementById('save-btn-vehiculo').style.display = 'none';
+            
+            const container = document.getElementById('view-data-vehiculo');
+            
+            // Función helper para obtener valores
+            const getVal = (field1, field2) => vehiculo[field1] || vehiculo[field2] || '-';
+            
+            container.innerHTML = `
+                <div class="data-section">
+                    <h3><i class="fas fa-car"></i> Información del Vehículo</h3>
+                    <div class="data-row">
+                        <div class="data-label">ID:</div>
+                        <div class="data-value">${getVal('ID_VEHICULO', 'id')}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Chasis (VIN):</div>
+                        <div class="data-value">${getVal('CHASIS', 'chasis')}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Motor:</div>
+                        <div class="data-value">${getVal('MOTOR', 'motor')}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Placa:</div>
+                        <div class="data-value">${getVal('PLACA', 'placa') || 'Sin placa'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Estado:</div>
+                        <div class="data-value">
+                            <span class="vehicle-status ${(vehiculo.ESTADO || vehiculo.estado) === 'COMPRADO' ? 'status-comprados' : 
+                                (vehiculo.ESTADO || vehiculo.estado) === 'VENDIDO' ? 'status-vendido' : 'status-devuelto'}">
+                                ${vehiculo.ESTADO || vehiculo.estado}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3><i class="fas fa-cogs"></i> Especificaciones Técnicas</h3>
+                    <div class="data-row">
+                        <div class="data-label">Marca:</div>
+                        <div class="data-value">${vehiculo.marca_nombre || vehiculo.MARCA_NOMBRE || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Modelo (Año):</div>
+                        <div class="data-value">${getVal('MODELO', 'modelo')}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Color:</div>
+                        <div class="data-value">${vehiculo.color_nombre || vehiculo.COLOR_NOMBRE || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Combustible:</div>
+                        <div class="data-value">${vehiculo.combustible_nombre || vehiculo.COMBUSTIBLE_NOMBRE || '-'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Transmisión:</div>
+                        <div class="data-value">${vehiculo.transmision_nombre || vehiculo.TRANSMISION_NOMBRE || '-'}</div>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3><i class="fas fa-chart-line"></i> Historial y Ubicación</h3>
+                    <div class="data-row">
+                        <div class="data-label">Kilometraje Actual:</div>
+                        <div class="data-value">${(vehiculo.KILOMETRAJE_ACTUAL || vehiculo.kilometraje_actual || 0).toLocaleString('es-ES')} km</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Kilometraje Anterior:</div>
+                        <div class="data-value">${(vehiculo.KILOMETRAJE_ANTERIOR || vehiculo.kilometraje_anterior || 0).toLocaleString('es-ES')} km</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Fecha de Ingreso:</div>
+                        <div class="data-value">${formatearFecha(vehiculo.FECHA_INGRESO || vehiculo.fecha_ingreso)}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Proveedor:</div>
+                        <div class="data-value">${vehiculo.proveedor_nombre || vehiculo.PROVEEDOR_NOMBRE || 'Desconocido'}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">P.V:</div>
+                        <div class="data-value">${getVal('PV', 'pv') || 'N/A'}</div>
+                    </div>
+                </div>
+                
+                <div class="data-section">
+                    <h3><i class="fas fa-sticky-note"></i> Observaciones</h3>
+                    <div class="data-row">
+                        <div class="data-label">Observaciones:</div>
+                        <div class="data-value">${getVal('OBSERVACIONES', 'observaciones') || 'Sin observaciones'}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-vehiculo').classList.add('active');
+        }
+
+        async function editarVehiculo(id) {
+            const vehiculo = await obtenerVehiculoPorId(id);
+            if (!vehiculo) return;
+            
+            currentVehiculoId = id;
+            
+            document.getElementById('modal-title-vehiculo').innerHTML = `<i class="fas fa-edit"></i> Editar Vehículo`;
+            document.getElementById('view-data-vehiculo').style.display = 'none';
+            document.getElementById('form-vehiculo').style.display = 'block';
+            document.getElementById('edit-btn-vehiculo').style.display = 'none';
+            document.getElementById('delete-btn-vehiculo').style.display = 'inline-flex';
+            document.getElementById('save-btn-vehiculo').style.display = 'inline-flex';
+            
+            document.getElementById('vehiculo-id').value = vehiculo.ID_VEHICULO || vehiculo.id;
+            document.getElementById('vehiculo-chasis').value = vehiculo.CHASIS || vehiculo.chasis;
+            document.getElementById('vehiculo-motor').value = vehiculo.MOTOR || vehiculo.motor || '';
+            document.getElementById('vehiculo-placa').value = vehiculo.PLACA || vehiculo.placa || '';
+            document.getElementById('vehiculo-marca').value = vehiculo.ID_MARCA || vehiculo.id_marca;
+            document.getElementById('vehiculo-modelo').value = vehiculo.MODELO || vehiculo.modelo;
+            document.getElementById('vehiculo-color').value = vehiculo.ID_COLOR || vehiculo.id_color || '';
+            document.getElementById('vehiculo-combustible').value = vehiculo.ID_COMBUSTIBLE || vehiculo.id_combustible || '';
+            document.getElementById('vehiculo-transmision').value = vehiculo.ID_TRANSMISION || vehiculo.id_transmision || '';
+            document.getElementById('vehiculo-estilo').value = vehiculo.ESTILO || vehiculo.estilo || '';
+            document.getElementById('vehiculo-traccion').value = vehiculo.TRACCION || vehiculo.traccion || '';
+            document.getElementById('vehiculo-carroceria').value = vehiculo.CARROCERIA || vehiculo.carroceria || '';
+            document.getElementById('vehiculo-cc').value = vehiculo.C_C || vehiculo.cc || '';
+            document.getElementById('vehiculo-cilindros').value = vehiculo.CILINDROS || vehiculo.cilindros || '';
+            document.getElementById('vehiculo-km-actual').value = vehiculo.KILOMETRAJE_ACTUAL || vehiculo.kilometraje_actual || 0;
+            document.getElementById('vehiculo-km-anterior').value = vehiculo.KILOMETRAJE_ANTERIOR || vehiculo.kilometraje_anterior || 0;
+            
+            // Procesar fecha para asegurar formato YYYY-MM-DD
+            const fechaIngreso = vehiculo.FECHA_INGRESO || vehiculo.fecha_ingreso;
+            if (fechaIngreso) {
+                const fecha = new Date(fechaIngreso);
+                const fechaFormato = fecha.toISOString().split('T')[0];
+                document.getElementById('vehiculo-fecha-ingreso').value = fechaFormato;
+            } else {
+                document.getElementById('vehiculo-fecha-ingreso').value = '';
+            }
+            
+            document.getElementById('vehiculo-pv').value = vehiculo.PV || vehiculo.pv || '';
+            document.getElementById('vehiculo-estado').value = vehiculo.ESTADO || vehiculo.estado || 'COMPRADO';
+            document.getElementById('vehiculo-observaciones').value = vehiculo.OBSERVACIONES || vehiculo.observaciones || '';
+            document.getElementById('vehiculo-proveedor').value = vehiculo.ID_PROVEEDOR || vehiculo.id_proveedor;
+            
+            document.getElementById('modal-vehiculo').classList.add('active');
+        }
+
+        function crearNuevoVehiculo() {
+            currentVehiculoId = 0;
+            
+            document.getElementById('modal-title-vehiculo').innerHTML = `<i class="fas fa-plus"></i> Nuevo Vehículo`;
+            document.getElementById('view-data-vehiculo').style.display = 'none';
+            document.getElementById('form-vehiculo').style.display = 'block';
+            document.getElementById('edit-btn-vehiculo').style.display = 'none';
+            document.getElementById('delete-btn-vehiculo').style.display = 'none';
+            document.getElementById('save-btn-vehiculo').style.display = 'inline-flex';
+            
+            document.getElementById('form-vehiculo').reset();
+            document.getElementById('vehiculo-id').value = 0;
+            document.getElementById('vehiculo-estado').value = 'COMPRADO';
+            document.getElementById('vehiculo-km-actual').value = 0;
+            document.getElementById('vehiculo-km-anterior').value = 0;
+            document.getElementById('vehiculo-fecha-ingreso').value = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('modal-vehiculo').classList.add('active');
+        }
+
+        async function guardarVehiculoDesdeForm() {
+            const id = parseInt(document.getElementById('vehiculo-id').value);
+            
+            const vehiculoData = {
+                id: id || undefined,
+                ID_PROVEEDOR: parseInt(document.getElementById('vehiculo-proveedor').value),
+                CHASIS: document.getElementById('vehiculo-chasis').value.trim(),
+                MOTOR: document.getElementById('vehiculo-motor').value.trim() || null,
+                PLACA: document.getElementById('vehiculo-placa').value.trim() || null,
+                ID_MARCA: parseInt(document.getElementById('vehiculo-marca').value),
+                MODELO: parseInt(document.getElementById('vehiculo-modelo').value),
+                ID_COLOR: document.getElementById('vehiculo-color').value ? 
+                    parseInt(document.getElementById('vehiculo-color').value) : null,
+                ID_COMBUSTIBLE: document.getElementById('vehiculo-combustible').value ? 
+                    parseInt(document.getElementById('vehiculo-combustible').value) : null,
+                ID_TRANSMISION: document.getElementById('vehiculo-transmision').value ? 
+                    parseInt(document.getElementById('vehiculo-transmision').value) : null,
+                ESTILO: document.getElementById('vehiculo-estilo').value.trim() || null,
+                TRACCION: document.getElementById('vehiculo-traccion').value.trim() || null,
+                CARROCERIA: document.getElementById('vehiculo-carroceria').value.trim() || null,
+                C_C: document.getElementById('vehiculo-cc').value ? 
+                    parseFloat(document.getElementById('vehiculo-cc').value) : null,
+                CILINDROS: document.getElementById('vehiculo-cilindros').value ? 
+                    parseInt(document.getElementById('vehiculo-cilindros').value) : null,
+                KILOMETRAJE_ACTUAL: parseFloat(document.getElementById('vehiculo-km-actual').value) || 0,
+                KILOMETRAJE_ANTERIOR: parseFloat(document.getElementById('vehiculo-km-anterior').value) || 0,
+                FECHA_INGRESO: document.getElementById('vehiculo-fecha-ingreso').value,
+                PV: document.getElementById('vehiculo-pv').value.trim() || null,
+                ESTADO: document.getElementById('vehiculo-estado').value,
+                OBSERVACIONES: document.getElementById('vehiculo-observaciones').value.trim() || null
+            };
+            
+            try {
+                await guardarVehiculoAPI(vehiculoData);
+                document.getElementById('modal-vehiculo').classList.remove('active');
+            } catch (error) {
+                mostrarNotificacion('Error al guardar vehículo', 'error');
+            }
+        }
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar catálogos y datos iniciales
+            cargarCatalogos().then(() => {
+                cargarSelectProveedores();
+            });
+            cargarProveedores();
+            cargarVehiculos();
+            
+            // Eventos de pestañas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Botones principales
+            document.getElementById('add-proveedor').addEventListener('click', crearNuevoProveedor);
+            document.getElementById('add-vehiculo').addEventListener('click', crearNuevoVehiculo);
+            
+            // Eventos de guardar
+            document.getElementById('save-btn-proveedor').addEventListener('click', guardarProveedorDesdeForm);
+            document.getElementById('save-btn-vehiculo').addEventListener('click', guardarVehiculoDesdeForm);
+            
+            // Filtros
+            const filterNombreProveedor = document.getElementById('filter-nombre-proveedor');
+            const filterIdentificacionProveedor = document.getElementById('filter-identificacion-proveedor');
+            const filterEstadoProveedor = document.getElementById('filter-estado-proveedor');
+            
+            const aplicarFiltrosProveedores = () => {
+                const filtros = {
+                    nombre: filterNombreProveedor.value,
+                    identificacion: filterIdentificacionProveedor.value,
+                    estado: filterEstadoProveedor.value
+                };
+                cargarProveedores(filtros);
+            };
+            
+            filterNombreProveedor.addEventListener('input', aplicarFiltrosProveedores);
+            filterIdentificacionProveedor.addEventListener('input', aplicarFiltrosProveedores);
+            filterEstadoProveedor.addEventListener('change', aplicarFiltrosProveedores);
+            
+            document.getElementById('btn-limpiar-filtros-proveedor').addEventListener('click', () => {
+                filterNombreProveedor.value = '';
+                filterIdentificacionProveedor.value = '';
+                filterEstadoProveedor.value = '';
+                cargarProveedores();
+            });
+            
+            // Filtros vehículos
+            const filterChasis = document.getElementById('filter-chasis');
+            const filterPlaca = document.getElementById('filter-placa');
+            const filterEstadoVehiculo = document.getElementById('filter-estado-vehiculo');
+            const filterProveedorVehiculo = document.getElementById('filter-proveedor-vehiculo');
+            
+            const aplicarFiltrosVehiculos = () => {
+                const filtros = {
+                    chasis: filterChasis.value,
+                    placa: filterPlaca.value,
+                    estado: filterEstadoVehiculo.value,
+                    id_proveedor: filterProveedorVehiculo.value
+                };
+                cargarVehiculos(filtros);
+            };
+            
+            filterChasis.addEventListener('input', aplicarFiltrosVehiculos);
+            filterPlaca.addEventListener('input', aplicarFiltrosVehiculos);
+            filterEstadoVehiculo.addEventListener('change', aplicarFiltrosVehiculos);
+            filterProveedorVehiculo.addEventListener('change', aplicarFiltrosVehiculos);
+            
+            document.getElementById('btn-limpiar-filtros-vehiculo').addEventListener('click', () => {
+                filterChasis.value = '';
+                filterPlaca.value = '';
+                filterEstadoVehiculo.value = '';
+                filterProveedorVehiculo.value = '';
+                cargarVehiculos();
+            });
+            
+            // Toggle estado
+            document.getElementById('proveedor-estado-toggle').addEventListener('change', function() {
+                const estadoHidden = document.getElementById('proveedor-estado');
+                const estadoLabel = document.getElementById('proveedor-estado-label');
+                
+                if (this.checked) {
+                    estadoHidden.value = 'ACTIVO';
+                    estadoLabel.textContent = 'ACTIVO';
+                } else {
+                    estadoHidden.value = 'INACTIVO';
+                    estadoLabel.textContent = 'INACTIVO';
+                }
+            });
+            
+            // Modal proveedor
+            document.getElementById('close-modal-proveedor').addEventListener('click', () => {
+                document.getElementById('modal-proveedor').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-proveedor').addEventListener('click', () => {
+                document.getElementById('modal-proveedor').classList.remove('active');
+            });
+            
+            document.getElementById('edit-btn-proveedor').addEventListener('click', () => {
+                if (currentProveedorId) editarProveedor(currentProveedorId);
+            });
+            
+            document.getElementById('delete-btn-proveedor').addEventListener('click', () => {
+                if (currentProveedorId) eliminarProveedorAPI(currentProveedorId);
+            });
+            
+            // Modal vehículo
+            document.getElementById('close-modal-vehiculo').addEventListener('click', () => {
+                document.getElementById('modal-vehiculo').classList.remove('active');
+            });
+            
+            document.getElementById('cancel-btn-vehiculo').addEventListener('click', () => {
+                document.getElementById('modal-vehiculo').classList.remove('active');
+            });
+            
+            document.getElementById('edit-btn-vehiculo').addEventListener('click', () => {
+                if (currentVehiculoId) editarVehiculo(currentVehiculoId);
+            });
+            
+            document.getElementById('delete-btn-vehiculo').addEventListener('click', () => {
+                if (currentVehiculoId) eliminarVehiculoAPI(currentVehiculoId);
+            });
+            
+            // Cerrar modales al hacer clic fuera
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
