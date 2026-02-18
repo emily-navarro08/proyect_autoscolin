@@ -19,8 +19,8 @@ const dbConfig = {
     port: 4000,
     multipleStatements: true,
     ssl: {
-        rejectUnauthorized: true,
-        // CA
+        ca: fs.readFileSync('certs/isrgrootx1.pem'),
+        rejectUnauthorized: true
     }
 };
 
@@ -5019,5 +5019,6 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
