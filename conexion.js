@@ -24,32 +24,6 @@ const dbConfig = {
     }
 };
 
-// ============================================
-// MIDDLEWARE PARA VERIFICAR TOKEN (OPCIONAL)
-// ============================================
-
-// Middleware para verificar token JWT
-const verificarToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ error: 'Token no proporcionado' });
-    }
-    
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(403).json({ error: 'Token inválido' });
-    }
-};
-
-// Proteger algunas rutas con token (opcional)
-app.use('/api/personas', verificarToken);
-app.use('/api/usuarios', verificarToken);
-app.use('/api/personas-roles', verificarToken);
-
 // ===== CRUD-CATALOGOS =====
 // Obtener todos los roles
 app.get('/api/roles', async (req, res) => {
@@ -129,6 +103,7 @@ app.get('/api/bancos', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
+
 // Obtener un banco por ID
 app.get('/api/bancos/:id', async (req, res) => {
     try {
@@ -4269,29 +4244,6 @@ app.get('/api/certificados/vehiculos/placa/:placa', async (req, res) => {
 });
 
 // ===== APIs PARA ANTICIPOS =====
-// Obtener todos los anticipos
-app.get('/api/anticipos', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [anticipos] = await connection.execute(`
-            SELECT 
-                a.*,
-                v.CODIGO_VENTA
-            FROM ANTICIPOS a
-            LEFT JOIN VENTAS v ON a.ID_VENTA = v.ID_VENTA
-            ORDER BY a.FECHA_ANTICIPO DESC
-        `);
-        
-        await connection.end();
-        res.json(anticipos);
-        
-    } catch (err) {
-        console.error('Error al obtener anticipos:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
 // Obtener un anticipo por ID
 app.get('/api/anticipos/:id', async (req, res) => {
     try {
@@ -4674,7 +4626,6 @@ app.post('/api/plan-ventas', async (req, res) => {
 //  GET /api/anticipos?id_venta=X  — Filtrar anticipos por venta
 //  (Reemplaza o complementa el GET /api/anticipos existente)
 // ================================================================
-
 app.get('/api/anticipos', async (req, res) => {
     try {
         const { id_venta } = req.query;
@@ -4689,7 +4640,7 @@ app.get('/api/anticipos', async (req, res) => {
             query += ' AND a.ID_VENTA = ?';
             params.push(id_venta);
         }
-        query += ' ORDER BY a.FECHA_ANTICIPO ASC, a.ID_ANTICIPO ASC';
+        query += ' ORDER BY a.FECHA_VENCIMIENTO ASC, a.ID_ANTICIPO ASC';
 
         const connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute(query, params);
@@ -4700,7 +4651,6 @@ app.get('/api/anticipos', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
-
 
 // ================================================================
 //  POST /api/anticipos  — Crear un anticipo individual
@@ -4865,7 +4815,7 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
                 CAST(
                     SUBSTRING_INDEX(SUBSTRING_INDEX(a.NUM_DOCUMENTO, '-', 2), '-', -1)
                 AS UNSIGNED)                            AS numero_cuota,
-                a.FECHA_ANTICIPO                        AS fecha_vencimiento,
+                a.FECHA_VENCIMIENTO                      AS fecha_vencimiento,  -- 👈 CAMBIO CLAVE: ahora usa FECHA_VENCIMIENTO
                 a.MONTO_COLONES                         AS monto_cuota,
                 a.SALDO_PENDIENTE                       AS saldo_pendiente,
                 fp.INTERES_NOMINAL                      AS interes_nominal,
@@ -4873,7 +4823,7 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
                 -- Estado: si SALDO_PENDIENTE = 0 → pagado, si no → pendiente
                 CASE
                     WHEN a.SALDO_PENDIENTE <= 0 THEN 'pagado'
-                    WHEN a.FECHA_ANTICIPO < CURDATE() AND a.SALDO_PENDIENTE > 0 THEN 'atrasado'
+                    WHEN a.FECHA_VENCIMIENTO < CURDATE() AND a.SALDO_PENDIENTE > 0 THEN 'atrasado'  -- 👈 CAMBIO CLAVE aquí también
                     WHEN a.SALDO_PENDIENTE > 0 THEN 'pendiente'
                     ELSE 'pendiente'
                 END                                     AS estado,
@@ -4881,7 +4831,6 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
                 a.REALIZADO_POR                         AS realizado_por
             FROM ANTICIPOS a
             JOIN VENTAS v      ON a.ID_VENTA = v.ID_VENTA
-            -- CAMBIO AQUÍ: ID_CLIENTE_FACTURAR → ID_CLIENTE_FACTURACION
             LEFT JOIN PERSONAS pf ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
             LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
             LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
@@ -4903,9 +4852,9 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
         if (estado === 'pagado') {
             query += ' AND a.SALDO_PENDIENTE <= 0';
         } else if (estado === 'pendiente') {
-            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_ANTICIPO >= CURDATE()';
+            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_VENCIMIENTO >= CURDATE()';
         } else if (estado === 'atrasado') {
-            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_ANTICIPO < CURDATE()';
+            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_VENCIMIENTO < CURDATE()';
         }
 
         query += ' ORDER BY v.CODIGO_VENTA, numero_cuota ASC';
@@ -5019,6 +4968,3 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
-
-
-
