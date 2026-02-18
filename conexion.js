@@ -20,6 +20,7 @@ const dbConfig = {
     multipleStatements: true,
     ssl: {
         rejectUnauthorized: true,
+        // CA
     }
 };
 
@@ -5018,4 +5019,5 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
