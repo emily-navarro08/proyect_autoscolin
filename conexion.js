@@ -12,11 +12,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== CONFIGURACIÓN DE BASE DE DATOS =====
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: 'MySQL123',
+    host: 'gateway01.us-east-1.prod.aws.tidbcloud.com',
+    user: '2kMd2TkhjVzTXcf.root',
+    password: 'PtWpFOTh6nBlTkf2',
     database: 'sistema_autoscolin',
-    multipleStatements: true
+    port: 4000,
+    multipleStatements: true,
+    ssl: {
+        rejectUnauthorized: true,
+    }
 };
 
 // ============================================
@@ -5014,3 +5018,4 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
