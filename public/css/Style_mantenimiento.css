@@ -28,6 +28,30 @@ header {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-back {
+    background: white;
+    color: #1e3a8a;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: #e5e7eb;
+}
+
 h1 {
     display: flex;
     align-items: center;
@@ -880,4 +904,5 @@ input:checked + .slider:before {
     .filter-group {
         min-width: 100%;
     }
+
 }
