@@ -10,10 +10,11 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-users"></i> Sistema de Gestión de Vendedores</h1>
-            <p>Administración de personas, roles y usuarios del sistema</p>
+            <div class="header-content">
+                <button class="btn-back" onclick="history.back()"><i class="fas fa-arrow-left"></i> Volver</button>
+                <h1><i class="fas fa-database"></i> Sistema de Gestión de Catálogos</h1>
+            </div>
         </header>
-
         <div class="tabs-container">
             <div class="tabs-header">
                 <button class="tab-btn active" data-tab="personas">
@@ -29,7 +30,6 @@
                     <i class="fas fa-user-tag"></i> Roles
                 </button>
             </div>
-
             <!-- Tab Personas -->
             <div class="tab-content active" id="personas">
                 <div class="header-row">
@@ -38,7 +38,6 @@
                         <i class="fas fa-plus"></i> Nueva Persona
                     </button>
                 </div>
-                
                 <div class="filter-container">
                     <div class="filter-row">
                         <div class="filter-group">
@@ -64,7 +63,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="table-container">
                     <table id="tabla-personas">
                         <thead>
@@ -85,7 +83,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Vendedores -->
             <div class="tab-content" id="vendedores">
                 <div class="header-row">
@@ -96,7 +93,6 @@
                         </button>
                     </div>
                 </div>
-                
                 <div class="stats-container">
                     <div class="stat-card">
                         <div class="stat-icon" style="background-color: #3498db;">
@@ -126,7 +122,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="table-container">
                     <table id="tabla-vendedores">
                         <thead>
@@ -146,7 +141,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Usuarios -->
             <div class="tab-content" id="usuarios">
                 <div class="header-row">
@@ -175,7 +169,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Roles -->
             <div class="tab-content" id="roles">
                 <div class="header-row">
@@ -184,7 +177,6 @@
                         <i class="fas fa-plus"></i> Nuevo Rol
                     </button>
                 </div>
-                
                 <div class="table-container">
                     <table id="tabla-roles">
                         <thead>
@@ -204,7 +196,6 @@
             </div>
         </div>
     </div>
-
     <!-- Modal para Personas -->
     <div class="modal" id="modal-persona">
         <div class="modal-content">
@@ -234,12 +225,10 @@
                             <input type="text" id="persona-identificacion" name="identificacion" required>
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label for="persona-nombre">Nombre Completo:</label>
                         <input type="text" id="persona-nombre" name="nombre_completo" required>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="persona-nacionalidad">Nacionalidad:</label>
@@ -252,7 +241,6 @@
                             </select>
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="persona-ocupacion">Ocupación:</label>
@@ -263,7 +251,6 @@
                             <input type="text" id="persona-telefono" name="telefono_principal">
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="persona-telefono-sec">Teléfono Secundario:</label>
@@ -274,17 +261,14 @@
                             <input type="email" id="persona-email" name="email">
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label for="persona-direccion">Dirección:</label>
                         <textarea id="persona-direccion" name="direccion"></textarea>
                     </div>
-                    
                     <div class="form-group">
                         <label for="persona-observacion">Observación:</label>
                         <textarea id="persona-observacion" name="observacion"></textarea>
                     </div>
-                    
                     <div class="form-group">
                         <label for="persona-estado">Estado:</label>
                         <div class="state-toggle">
@@ -296,10 +280,8 @@
                         </div>
                         <input type="hidden" id="persona-estado" name="estado" value="ACTIVO">
                     </div>
-                    
                     <input type="hidden" id="persona-id" name="id">
                 </form>
-                
                 <!-- Sección de Roles Asignados -->
                 <div id="roles-asignados-section" style="display: none; margin-top: 30px;">
                     <h3><i class="fas fa-user-tag"></i> Roles Asignados</h3>
@@ -316,7 +298,6 @@
             </div>
         </div>
     </div>
-
     <!-- Modal para Usuarios -->
     <div class="modal" id="modal-usuario">
         <div class="modal-content">
@@ -335,7 +316,6 @@
                             <option value="">Seleccionar Persona</option>
                         </select>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="usuario-username">Username:</label>
@@ -347,7 +327,6 @@
                             <small>Dejar en blanco para mantener la contraseña actual</small>
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label for="usuario-estado">Estado:</label>
                         <select id="usuario-estado" name="estado" required>
@@ -356,7 +335,6 @@
                             <option value="BLOQUEADO">BLOQUEADO</option>
                         </select>
                     </div>
-                    
                     <input type="hidden" id="usuario-id" name="id">
                 </form>
             </div>
@@ -393,7 +371,6 @@
                         </div>
                         <small class="text-muted">Escriba los primeros dígitos de la identificación</small>
                     </div>
-                    
                     <!-- Resultados de búsqueda -->
                     <div id="resultados-busqueda" style="display: none; margin: 15px 0; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
                         <h4><i class="fas fa-users"></i> Resultados de búsqueda</h4>
@@ -401,7 +378,6 @@
                             <!-- Aquí se mostrarán las personas encontradas -->
                         </div>
                     </div>
-                    
                     <!-- Persona seleccionada (oculto inicialmente) -->
                     <div id="persona-seleccionada-container" style="display: none;">
                         <div class="selected-person-card">
@@ -416,10 +392,8 @@
                             </div>
                         </div>
                     </div>
-                    
                     <!-- Campo oculto para ID de persona -->
                     <input type="hidden" id="asignar-persona-id" name="id_persona">
-                    
                     <!-- Selección de rol -->
                     <div class="form-group">
                         <label for="asignar-rol">Rol a Asignar:</label>
@@ -427,7 +401,6 @@
                             <option value="">Seleccionar Rol</option>
                         </select>
                     </div>
-                    
                     <!-- Estado -->
                     <div class="form-group">
                         <label for="asignar-estado">Estado:</label>
@@ -440,7 +413,6 @@
                         </div>
                         <input type="hidden" id="asignar-estado" name="estado" value="ACTIVO">
                     </div>
-                    
                     <!-- Información de roles actuales -->
                     <div id="roles-actuales-container" style="display: none; margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
                         <h5><i class="fas fa-info-circle"></i> Roles Actuales</h5>
@@ -454,7 +426,6 @@
             </div>
         </div>
     </div>
-
     <!-- Modal para Nuevo Rol -->
     <div class="modal" id="modal-nuevo-rol">
         <div class="modal-content">
@@ -469,13 +440,11 @@
                         <input type="text" id="rol-nombre" name="nombre" required 
                             placeholder="Ej: Vendedor, Administrador, Cliente">
                     </div>
-                    
                     <div class="form-group">
                         <label for="rol-descripcion">Descripción:</label>
                         <textarea id="rol-descripcion" name="descripcion" 
                                 placeholder="Descripción del rol (opcional)" rows="3"></textarea>
                     </div>
-                    
                     <input type="hidden" id="rol-id" name="id">
                 </form>
             </div>
@@ -530,7 +499,6 @@
         }
 
         // FUNCIONES DE API
-        // Función genérica para hacer peticiones HTTP
         async function apiRequest(endpoint, method = 'GET', data = null) {
             try {
                 const config = {
@@ -550,7 +518,6 @@
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
                 
-                // Para DELETE que no retorna contenido
                 if (response.status === 204) {
                     return { success: true };
                 }
@@ -2376,3 +2343,4 @@
 </body>
 
 </html>
+
