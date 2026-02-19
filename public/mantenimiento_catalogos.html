@@ -10,9 +10,11 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-database"></i> Sistema de Gestión de Catálogos</h1>
+            <div class="header-content">
+                <button class="btn-back" onclick="history.back()"><i class="fas fa-arrow-left"></i> Volver</button>
+                <h1><i class="fas fa-database"></i> Sistema de Gestión de Catálogos</h1>
+            </div>
         </header>
-
         <div class="tabs-container">
             <div class="tabs-header">
                 <button class="tab-btn active" data-tab="bancos">
@@ -34,7 +36,6 @@
                     <i class="fas fa-cogs"></i> Transmisiones
                 </button>
             </div>
-
             <!-- Tab Bancos -->
             <div class="tab-content active" id="bancos">
                 <div class="header-row">
@@ -59,7 +60,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Estados Civil -->
             <div class="tab-content" id="estados-civil">
                 <div class="header-row">
@@ -84,7 +84,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Marcas -->
             <div class="tab-content" id="marcas">
                 <div class="header-row">
@@ -109,7 +108,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Colores -->
             <div class="tab-content" id="colores">
                 <div class="header-row">
@@ -134,7 +132,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Combustibles -->
             <div class="tab-content" id="combustibles">
                 <div class="header-row">
@@ -159,7 +156,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- Tab Transmisiones -->
             <div class="tab-content" id="transmisiones">
                 <div class="header-row">
@@ -236,14 +232,14 @@
         // Mapeo de catálogos a endpoints - CORREGIDO
         const API_ENDPOINTS = {
             'bancos': `${API_BASE_URL}/bancos`,
-            'estados-civil': `${API_BASE_URL}/estados-civil`,  // CON GUÍÓN
+            'estados-civil': `${API_BASE_URL}/estados-civil`,
             'marcas': `${API_BASE_URL}/marcas`,
             'colores': `${API_BASE_URL}/colores`,
             'combustibles': `${API_BASE_URL}/combustibles`,
             'transmisiones': `${API_BASE_URL}/transmisiones`
         };
 
-        // Variables globales - CON LOS MISMOS NOMBRES QUE API_ENDPOINTS
+        // Variables globales
         let currentCatalogo = '';
         let currentId = 0;
 
@@ -270,10 +266,7 @@
             return nombres[catalogo] || 'Registro';
         }
 
-        // ============================================
         // FUNCIONES DE API
-        // ============================================
-
         async function cargarDatosAPI(catalogo) {
             try {
                 const endpoint = API_ENDPOINTS[catalogo];
@@ -372,10 +365,7 @@
             }
         }
 
-        // ============================================
         // FUNCIONES DE INTERFAZ - CORREGIDAS
-        // ============================================
-
         function actualizarTabla(catalogo, datos) {
             // Mapeo de nombres de catálogo a IDs de tabla HTML
             const tablaMap = {
@@ -612,10 +602,7 @@
             }
         }
 
-        // ============================================
         // INICIALIZACIÓN DE LA PÁGINA
-        // ============================================
-
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('=== INICIANDO SISTEMA DE CATÁLOGOS ===');
             
@@ -719,10 +706,7 @@
             });
         });
 
-        // ============================================
-        // FUNCIONES DE DEPURACIÓN (para consola)
-        // ============================================
-
+        // FUNCIONES DE DEPURACIÓN
         window.verificarAPIs = async function() {
             console.log('=== VERIFICANDO APIS ===');
             
@@ -749,7 +733,6 @@
                 }
             }
         };
-
         window.probarEditar = async function(catalogo = 'estados-civil', id = 1) {
             console.log(`Probando editar ${catalogo} ID ${id}`);
             await editarDatos(catalogo, id);
