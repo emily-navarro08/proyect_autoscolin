@@ -81,17 +81,18 @@ testDBConnection();
 // ===== CRUD-CATALOGOS =====
 // Obtener todos los roles
 app.get('/api/roles', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_ROL, NOMBRE, DESCRIPCION FROM ROLES;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar roles:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_ROL, NOMBRE, DESCRIPCION FROM ROLES;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar roles:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
-// Obtener un rol por ID - CORREGIDO
+
+// Obtener un rol por ID
 app.get('/api/roles/:id', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -111,51 +112,53 @@ app.get('/api/roles/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nuevo rol
 app.post('/api/roles', async (req, res) => {
-  try {
-    const { NOMBRE, DESCRIPCION } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO ROLES (NOMBRE, DESCRIPCION) VALUES (?, ?)',
-      [NOMBRE, DESCRIPCION]
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Rol creado exitosamente' });
-  } catch (err) {
-    console.error('Error al crear rol:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, DESCRIPCION } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO ROLES (NOMBRE, DESCRIPCION) VALUES (?, ?)',
+            [NOMBRE, DESCRIPCION]
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Rol creado exitosamente' });
+    } catch (err) {
+        console.error('Error al crear rol:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar rol
 app.put('/api/roles/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, DESCRIPCION } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE ROLES SET NOMBRE = ?, DESCRIPCION = ? WHERE ID_ROL = ?',
-      [NOMBRE, DESCRIPCION, id]
-    );
-    await connection.end();
-    res.json({ message: 'Rol actualizado exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar rol:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, DESCRIPCION } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE ROLES SET NOMBRE = ?, DESCRIPCION = ? WHERE ID_ROL = ?',
+            [NOMBRE, DESCRIPCION, id]
+        );
+        await connection.end();
+        res.json({ message: 'Rol actualizado exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar rol:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todos los bancos
 app.get('/api/bancos', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_BANCO, NOMBRE, ESTADO FROM CAT_BANCOS;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar bancos:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_BANCO, NOMBRE, ESTADO FROM CAT_BANCOS;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar bancos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener un banco por ID
@@ -178,52 +181,55 @@ app.get('/api/bancos/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nuevo banco
 app.post('/api/bancos', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_BANCOS (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Banco creado exitosamente' });
-  } catch (err) {
-    console.error('Error al crear banco:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_BANCOS (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Banco creado exitosamente' });
+    } catch (err) {
+        console.error('Error al crear banco:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar banco
 app.put('/api/bancos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_BANCOS SET NOMBRE = ?, ESTADO = ? WHERE ID_BANCO = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Banco actualizado exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar banco:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_BANCOS SET NOMBRE = ?, ESTADO = ? WHERE ID_BANCO = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Banco actualizado exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar banco:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todos los estados civiles
 app.get('/api/estados-civil', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_ESTADO_CIVIL, NOMBRE, ESTADO FROM CAT_ESTADOS_CIVIL;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar estados civiles:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_ESTADO_CIVIL, NOMBRE, ESTADO FROM CAT_ESTADOS_CIVIL;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar estados civiles:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Obtener un estado civil por ID
 app.get('/api/estados-civil/:id', async (req, res) => {
     try {
@@ -244,52 +250,55 @@ app.get('/api/estados-civil/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nuevo estado civil
 app.post('/api/estados-civil', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_ESTADOS_CIVIL (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Estado civil creado exitosamente' });
-  } catch (err) {
-    console.error('Error al crear estado civil:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_ESTADOS_CIVIL (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Estado civil creado exitosamente' });
+    } catch (err) {
+        console.error('Error al crear estado civil:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar estado civil
 app.put('/api/estados-civil/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_ESTADOS_CIVIL SET NOMBRE = ?, ESTADO = ? WHERE ID_ESTADO_CIVIL = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Estado civil actualizado exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar estado civil:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_ESTADOS_CIVIL SET NOMBRE = ?, ESTADO = ? WHERE ID_ESTADO_CIVIL = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Estado civil actualizado exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar estado civil:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todas las marcas
 app.get('/api/marcas', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_MARCA, NOMBRE, ESTADO FROM CAT_MARCAS;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar marcas:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_MARCA, NOMBRE, ESTADO FROM CAT_MARCAS;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar marcas:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Obtener una marca por ID
 app.get('/api/marcas/:id', async (req, res) => {
     try {
@@ -310,52 +319,55 @@ app.get('/api/marcas/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nueva marca
 app.post('/api/marcas', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_MARCAS (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Marca creada exitosamente' });
-  } catch (err) {
-    console.error('Error al crear marca:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_MARCAS (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Marca creada exitosamente' });
+    } catch (err) {
+        console.error('Error al crear marca:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar marca
 app.put('/api/marcas/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_MARCAS SET NOMBRE = ?, ESTADO = ? WHERE ID_MARCA = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Marca actualizada exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar marca:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_MARCAS SET NOMBRE = ?, ESTADO = ? WHERE ID_MARCA = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Marca actualizada exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar marca:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todos los colores
 app.get('/api/colores', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_COLOR, NOMBRE, ESTADO FROM CAT_COLORES;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar colores:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_COLOR, NOMBRE, ESTADO FROM CAT_COLORES;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar colores:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Obtener un color por ID
 app.get('/api/colores/:id', async (req, res) => {
     try {
@@ -376,52 +388,55 @@ app.get('/api/colores/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nuevo color
 app.post('/api/colores', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_COLORES (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Color creado exitosamente' });
-  } catch (err) {
-    console.error('Error al crear color:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_COLORES (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Color creado exitosamente' });
+    } catch (err) {
+        console.error('Error al crear color:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar color
 app.put('/api/colores/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_COLORES SET NOMBRE = ?, ESTADO = ? WHERE ID_COLOR = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Color actualizado exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar color:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_COLORES SET NOMBRE = ?, ESTADO = ? WHERE ID_COLOR = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Color actualizado exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar color:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todos los combustibles
 app.get('/api/combustibles', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_COMBUSTIBLE, NOMBRE, ESTADO FROM CAT_COMBUSTIBLES;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar combustibles:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_COMBUSTIBLE, NOMBRE, ESTADO FROM CAT_COMBUSTIBLES;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar combustibles:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Obtener un combustible por ID
 app.get('/api/combustibles/:id', async (req, res) => {
     try {
@@ -442,52 +457,55 @@ app.get('/api/combustibles/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nuevo combustible
 app.post('/api/combustibles', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_COMBUSTIBLES (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Combustible creado exitosamente' });
-  } catch (err) {
-    console.error('Error al crear combustible:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_COMBUSTIBLES (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Combustible creado exitosamente' });
+    } catch (err) {
+        console.error('Error al crear combustible:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar combustible
 app.put('/api/combustibles/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_COMBUSTIBLES SET NOMBRE = ?, ESTADO = ? WHERE ID_COMBUSTIBLE = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Combustible actualizado exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar combustible:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_COMBUSTIBLES SET NOMBRE = ?, ESTADO = ? WHERE ID_COMBUSTIBLE = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Combustible actualizado exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar combustible:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Obtener todas las transmisiones
 app.get('/api/transmisiones', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT ID_TRANSMISION, NOMBRE, ESTADO FROM CAT_TRANSMISIONES;');
-    await connection.end();
-    res.json(rows);
-  } catch (err) {
-    console.error('Error al cargar transmisiones:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT ID_TRANSMISION, NOMBRE, ESTADO FROM CAT_TRANSMISIONES;');
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al cargar transmisiones:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Obtener una transmisión por ID
 app.get('/api/transmisiones/:id', async (req, res) => {
     try {
@@ -508,38 +526,40 @@ app.get('/api/transmisiones/:id', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Crear nueva transmisión
 app.post('/api/transmisiones', async (req, res) => {
-  try {
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-      'INSERT INTO CAT_TRANSMISIONES (NOMBRE, ESTADO) VALUES (?, ?)',
-      [NOMBRE, ESTADO || 'ACTIVO']
-    );
-    await connection.end();
-    res.json({ id: result.insertId, message: 'Transmisión creada exitosamente' });
-  } catch (err) {
-    console.error('Error al crear transmisión:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO CAT_TRANSMISIONES (NOMBRE, ESTADO) VALUES (?, ?)',
+            [NOMBRE, ESTADO || 'ACTIVO']
+        );
+        await connection.end();
+        res.json({ id: result.insertId, message: 'Transmisión creada exitosamente' });
+    } catch (err) {
+        console.error('Error al crear transmisión:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
+
 // Modificar transmisión
 app.put('/api/transmisiones/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { NOMBRE, ESTADO } = req.body;
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute(
-      'UPDATE CAT_TRANSMISIONES SET NOMBRE = ?, ESTADO = ? WHERE ID_TRANSMISION = ?',
-      [NOMBRE, ESTADO, id]
-    );
-    await connection.end();
-    res.json({ message: 'Transmisión actualizada exitosamente' });
-  } catch (err) {
-    console.error('Error al modificar transmisión:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
+    try {
+        const { id } = req.params;
+        const { NOMBRE, ESTADO } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE CAT_TRANSMISIONES SET NOMBRE = ?, ESTADO = ? WHERE ID_TRANSMISION = ?',
+            [NOMBRE, ESTADO, id]
+        );
+        await connection.end();
+        res.json({ message: 'Transmisión actualizada exitosamente' });
+    } catch (err) {
+        console.error('Error al modificar transmisión:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
 });
 
 // Ruta de login actualizada para tu estructura
@@ -551,27 +571,27 @@ app.post('/api/login', async (req, res) => {
         
         // Consulta actualizada según tu estructura
         const [rows] = await connection.execute(
-        `
-        SELECT 
-            p.ID_PERSONA,
-            p.NOMBRE_COMPLETO,
-            p.EMAIL,
-            u.USERNAME,
-            r.NOMBRE AS rol,
-            u.ESTADO as estado_usuario,
-            u.INTENTOS_FALLIDOS,
-            u.FECHA_BLOQUEO
-        FROM PERSONAS p
-        INNER JOIN USUARIOS u ON p.ID_PERSONA = u.ID_PERSONA
-        INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
-        INNER JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
-        WHERE p.EMAIL = ? 
-        AND u.PASSWORD_HASH = ?
-        AND u.ESTADO = 'ACTIVO'
-        AND pr.ESTADO = 'ACTIVO'
-        LIMIT 1
-        `,
-        [correo, contrasena]
+            `
+            SELECT 
+                p.ID_PERSONA,
+                p.NOMBRE_COMPLETO,
+                p.EMAIL,
+                u.USERNAME,
+                r.NOMBRE AS rol,
+                u.ESTADO as estado_usuario,
+                u.INTENTOS_FALLIDOS,
+                u.FECHA_BLOQUEO
+            FROM PERSONAS p
+            INNER JOIN USUARIOS u ON p.ID_PERSONA = u.ID_PERSONA
+            INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
+            INNER JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
+            WHERE p.EMAIL = ? 
+            AND u.PASSWORD_HASH = ?
+            AND u.ESTADO = 'ACTIVO'
+            AND pr.ESTADO = 'ACTIVO'
+            LIMIT 1
+            `,
+            [correo, contrasena]
         );
         await connection.end();
 
@@ -625,7 +645,6 @@ async function actualizarUltimoAcceso(idPersona) {
 }
 
 // ===== APIs PARA PROVEEDORES (Personas con rol de proveedor) ===== //
-
 // Obtener todos los proveedores
 app.get('/api/proveedores', async (req, res) => {
     try {
@@ -846,58 +865,65 @@ app.delete('/api/proveedores/:id', async (req, res) => {
 // Obtener todos los vehículos con información relacionada
 app.get('/api/vehiculos', async (req, res) => {
     try {
-        const { chasis, placa, estado, id_proveedor } = req.query;
+        const connection = await mysql.createConnection(dbConfig);
         
         let query = `
             SELECT 
                 v.*,
-                p.NOMBRE_COMPLETO as proveedor_nombre,
-                p.IDENTIFICACION as proveedor_identificacion,
                 m.NOMBRE as marca_nombre,
                 c.NOMBRE as color_nombre,
                 comb.NOMBRE as combustible_nombre,
-                t.NOMBRE as transmision_nombre
+                t.NOMBRE as transmision_nombre,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                -- Estos ya están en COLONES en la BD
+                cv.PRECIO_COMPRA as PRECIO_COMPRA_CRC,
+                cv.TOTAL_INVERSION as INVERSION_CRC,
+                cv.SALDO as SALDO_CRC,
+                -- Calcular dólares (opcional, si los necesitas)
+                ROUND(cv.PRECIO_COMPRA / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as PRECIO_COMPRA_USD,
+                ROUND(cv.TOTAL_INVERSION / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as INVERSION_USD,
+                ROUND(cv.SALDO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as SALDO_USD
             FROM VEHICULOS v
-            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
             LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
             WHERE 1=1
         `;
         
         const params = [];
         
-        if (chasis) {
-            query += ' AND v.CHASIS LIKE ?';
-            params.push(`%${chasis}%`);
-        }
-        
-        if (placa) {
+        if (req.query.placa) {
             query += ' AND v.PLACA LIKE ?';
-            params.push(`%${placa}%`);
+            params.push(`%${req.query.placa}%`);
         }
         
-        if (estado) {
+        if (req.query.marca) {
+            query += ' AND v.ID_MARCA = ?';
+            params.push(req.query.marca);
+        }
+        
+        if (req.query.modelo) {
+            query += ' AND v.MODELO LIKE ?';
+            params.push(`%${req.query.modelo}%`);
+        }
+        
+        if (req.query.estado) {
             query += ' AND v.ESTADO = ?';
-            params.push(estado);
-        }
-        
-        if (id_proveedor) {
-            query += ' AND v.ID_PROVEEDOR = ?';
-            params.push(id_proveedor);
+            params.push(req.query.estado);
         }
         
         query += ' ORDER BY v.FECHA_INGRESO DESC';
         
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(query, params);
+        const [vehiculos] = await connection.execute(query, params);
         await connection.end();
         
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener vehículos:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
+        res.json(vehiculos);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Error al obtener vehículos' });
     }
 });
 
@@ -942,26 +968,11 @@ app.get('/api/vehiculos/:id', async (req, res) => {
 app.post('/api/vehiculos', async (req, res) => {
     try {
         const {
-            ID_PROVEEDOR,
-            CHASIS,
-            MOTOR,
-            PLACA,
-            ID_MARCA,
-            MODELO,
-            ID_COLOR,
-            ID_COMBUSTIBLE,
-            ID_TRANSMISION,
-            ESTILO,
-            TRACCION,
-            CARROCERIA,
-            C_C,
-            CILINDROS,
-            KILOMETRAJE_ACTUAL,
-            KILOMETRAJE_ANTERIOR,
-            FECHA_INGRESO,
-            PV,
-            ESTADO,
-            OBSERVACIONES
+            ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO, ID_COLOR,
+            ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
+            C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR,
+            FECHA_INGRESO, PV, ESTADO, OBSERVACIONES,
+            ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, MONTO_INTERCAMBIO, FECHA_RECEPCION
         } = req.body;
         
         const connection = await mysql.createConnection(dbConfig);
@@ -972,8 +983,9 @@ app.post('/api/vehiculos', async (req, res) => {
                 ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO,
                 TRACCION, CARROCERIA, C_C, CILINDROS,
                 KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, FECHA_INGRESO,
-                PV, ESTADO, OBSERVACIONES
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                PV, ESTADO, OBSERVACIONES,
+                ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, MONTO_INTERCAMBIO, FECHA_RECEPCION
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 ID_PROVEEDOR, CHASIS, MOTOR || null, PLACA || null, ID_MARCA, MODELO,
                 ID_COLOR || null, ID_COMBUSTIBLE || null, ID_TRANSMISION || null,
@@ -981,7 +993,9 @@ app.post('/api/vehiculos', async (req, res) => {
                 C_C || null, CILINDROS || null,
                 KILOMETRAJE_ACTUAL || 0, KILOMETRAJE_ANTERIOR || 0,
                 FECHA_INGRESO || new Date().toISOString().split('T')[0],
-                PV || null, ESTADO || 'COMPRADO', OBSERVACIONES || null
+                PV || null, ESTADO || 'COMPRADO', OBSERVACIONES || null,
+                ES_INTERCAMBIO || false, ID_CLIENTE_ORIGEN || null,
+                MONTO_INTERCAMBIO || 0, FECHA_RECEPCION || null
             ]
         );
         
@@ -1012,52 +1026,23 @@ app.post('/api/vehiculos', async (req, res) => {
 app.put('/api/vehiculos/:id', async (req, res) => {
     try {
         const {
-            ID_PROVEEDOR,
-            CHASIS,
-            MOTOR,
-            PLACA,
-            ID_MARCA,
-            MODELO,
-            ID_COLOR,
-            ID_COMBUSTIBLE,
-            ID_TRANSMISION,
-            ESTILO,
-            TRACCION,
-            CARROCERIA,
-            C_C,
-            CILINDROS,
-            KILOMETRAJE_ACTUAL,
-            KILOMETRAJE_ANTERIOR,
-            FECHA_INGRESO,
-            PV,
-            ESTADO,
-            OBSERVACIONES
+            ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO, ID_COLOR,
+            ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
+            C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR,
+            FECHA_INGRESO, PV, ESTADO, OBSERVACIONES,
+            ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, MONTO_INTERCAMBIO, FECHA_RECEPCION
         } = req.body;
         
         const connection = await mysql.createConnection(dbConfig);
         
         const [result] = await connection.execute(
             `UPDATE VEHICULOS SET
-                ID_PROVEEDOR = ?,
-                CHASIS = ?,
-                MOTOR = ?,
-                PLACA = ?,
-                ID_MARCA = ?,
-                MODELO = ?,
-                ID_COLOR = ?,
-                ID_COMBUSTIBLE = ?,
-                ID_TRANSMISION = ?,
-                ESTILO = ?,
-                TRACCION = ?,
-                CARROCERIA = ?,
-                C_C = ?,
-                CILINDROS = ?,
-                KILOMETRAJE_ACTUAL = ?,
-                KILOMETRAJE_ANTERIOR = ?,
-                FECHA_INGRESO = ?,
-                PV = ?,
-                ESTADO = ?,
-                OBSERVACIONES = ?
+                ID_PROVEEDOR = ?, CHASIS = ?, MOTOR = ?, PLACA = ?, ID_MARCA = ?, MODELO = ?,
+                ID_COLOR = ?, ID_COMBUSTIBLE = ?, ID_TRANSMISION = ?, ESTILO = ?, TRACCION = ?, 
+                CARROCERIA = ?, C_C = ?, CILINDROS = ?, 
+                KILOMETRAJE_ACTUAL = ?, KILOMETRAJE_ANTERIOR = ?, 
+                FECHA_INGRESO = ?, PV = ?, ESTADO = ?, OBSERVACIONES = ?,
+                ES_INTERCAMBIO = ?, ID_CLIENTE_ORIGEN = ?, MONTO_INTERCAMBIO = ?, FECHA_RECEPCION = ?
             WHERE ID_VEHICULO = ?`,
             [
                 ID_PROVEEDOR, CHASIS, MOTOR || null, PLACA || null, ID_MARCA, MODELO,
@@ -1067,6 +1052,8 @@ app.put('/api/vehiculos/:id', async (req, res) => {
                 KILOMETRAJE_ACTUAL || 0, KILOMETRAJE_ANTERIOR || 0,
                 FECHA_INGRESO || null,
                 PV || null, ESTADO || 'COMPRADO', OBSERVACIONES || null,
+                ES_INTERCAMBIO || false, ID_CLIENTE_ORIGEN || null,
+                MONTO_INTERCAMBIO || 0, FECHA_RECEPCION || null,
                 req.params.id
             ]
         );
@@ -1097,24 +1084,47 @@ app.put('/api/vehiculos/:id', async (req, res) => {
 
 // Eliminar un vehículo
 app.delete('/api/vehiculos/:id', async (req, res) => {
+    const connection = await mysql.createConnection(dbConfig);
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [result] = await connection.execute(
-            'DELETE FROM VEHICULOS WHERE ID_VEHICULO = ?',
+        await connection.beginTransaction();
+        // Verificar si el vehículo tiene ventas asociadas
+        const [ventas] = await connection.execute(
+            'SELECT ID_VENTA FROM VENTAS WHERE ID_VEHICULO = ?',
             [req.params.id]
         );
         
-        await connection.end();
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Vehículo no encontrado' });
+        if (ventas.length > 0) {
+            await connection.rollback();
+            await connection.end();
+            return res.status(400).json({ 
+                error: 'No se puede eliminar el vehículo porque tiene ventas asociadas' 
+            });
         }
-        
+        // Eliminar extras
+        await connection.execute(
+            'DELETE FROM EXTRAS_VEHICULO WHERE ID_VEHICULO = ?',
+            [req.params.id]
+        );
+        // Eliminar costos
+        await connection.execute(
+            'DELETE FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
+            [req.params.id]
+        );
+        // Eliminar vehículo
+        await connection.execute(
+            'DELETE FROM VEHICULOS WHERE ID_VEHICULO = ?',
+            [req.params.id]
+        );
+        await connection.commit();
+        await connection.end();
+
         res.json({ message: 'Vehículo eliminado exitosamente' });
-    } catch (err) {
-        console.error('Error al eliminar vehículo:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
+        
+    } catch (error) {
+        await connection.rollback();
+        await connection.end();
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Error al eliminar vehículo' });
     }
 });
 
@@ -1156,27 +1166,160 @@ app.get('/api/vehiculos/vendidos/cliente/:idCliente', async (req, res) => {
                     c.NOMBRE as color_nombre,
                     cb.NOMBRE as combustible_nombre,
                     t.NOMBRE as transmision_nombre,
+                    ve.ID_VENTA,           -- ESTO ES CRITICO
                     ve.FECHA_VENTA,
-                    ve.CODIGO_VENTA
+                    ve.CODIGO_VENTA,
+                    ve.TOTAL as TOTAL_VENTA,
+                    ve.OBSERVACIONES_VENTA
              FROM VENTAS ve
              INNER JOIN VEHICULOS v ON ve.ID_VEHICULO = v.ID_VEHICULO
              LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
              LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
              LEFT JOIN CAT_COMBUSTIBLES cb ON v.ID_COMBUSTIBLE = cb.ID_COMBUSTIBLE
              LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-             WHERE ve.ID_CLIENTE_FACTURACION = ? OR ve.ID_CLIENTE_INSCRIPCION = ?
+             WHERE (ve.ID_CLIENTE_FACTURACION = ? OR ve.ID_CLIENTE_INSCRIPCION = ?)
              AND v.ESTADO = 'VENDIDO'
              ORDER BY ve.FECHA_VENTA DESC`,
             [idCliente, idCliente]
         );
         
         await connection.end();
-        
         res.json(vehiculos);
         
     } catch (err) {
         console.error('Error al obtener vehículos vendidos:', err);
         res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// GET /api/vehiculos/lista-colaborador
+app.get('/api/vehiculos/lista-colaborador', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const query = `
+            SELECT 
+                v.ID_VEHICULO,
+                v.PLACA,
+                v.ESTILO,
+                v.TRACCION,
+                v.MODELO,
+                v.KILOMETRAJE_ACTUAL,
+                v.KILOMETRAJE_ANTERIOR,
+                v.ESTADO,
+                v.OBSERVACIONES,
+                v.CHASIS,
+                v.MOTOR,
+                v.PV,
+                v.C_C,
+                v.CILINDROS,
+                v.CARROCERIA,
+                v.FECHA_INGRESO,
+                
+                -- Datos de catálogos
+                m.ID_MARCA,
+                m.NOMBRE as marca_nombre,
+                c.ID_COLOR,
+                c.NOMBRE as color_nombre,
+                comb.ID_COMBUSTIBLE,
+                comb.NOMBRE as combustible_nombre,
+                t.ID_TRANSMISION,
+                t.NOMBRE as transmision_nombre,
+                
+                -- Datos del proveedor
+                p.ID_PERSONA as ID_PROVEEDOR,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                
+                -- DATOS DE COSTOS (los que necesitas)
+                cv.PRECIO_PUBLICO,           -- Precio Público
+                cv.PRECIO_DESCUENTO,          -- Precio con Descuento
+                cv.MONTO_TRANSPASO,            -- Monto Traspaso
+                
+                -- Otros costos por si los necesitas
+                cv.PRECIO_COMPRA,
+                cv.PRIMA,
+                cv.COMISION,
+                cv.TOTAL_INVERSION,
+                cv.SALDO,
+                cv.TIPO_CAMBIO_COMPRA
+                
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+            WHERE 1=1
+            ORDER BY v.FECHA_INGRESO DESC
+        `;
+        
+        const [vehiculos] = await connection.execute(query);
+        await connection.end();
+        
+        res.json(vehiculos);
+    } catch (error) {
+        console.error('Error en /api/vehiculos/lista-colaborador:', error);
+        res.status(500).json({ error: 'Error al obtener vehículos' });
+    }
+});
+
+// GET /api/vehiculos/:id/detalle-colaborador
+app.get('/api/vehiculos/:id/detalle-colaborador', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const { id } = req.params;
+        
+        // Obtener datos del vehículo
+        const [vehiculos] = await connection.execute(`
+            SELECT 
+                v.*,
+                m.NOMBRE as marca_nombre,
+                c.NOMBRE as color_nombre,
+                comb.NOMBRE as combustible_nombre,
+                t.NOMBRE as transmision_nombre,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                p.IDENTIFICACION as proveedor_identificacion,
+                p.TELEFONO_PRINCIPAL as proveedor_telefono,
+                p.EMAIL as proveedor_email
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            WHERE v.ID_VEHICULO = ?
+        `, [id]);
+        
+        if (vehiculos.length === 0) {
+            return res.status(404).json({ error: 'Vehículo no encontrado' });
+        }
+        
+        const vehiculo = vehiculos[0];
+        
+        // Obtener costos
+        const [costos] = await connection.execute(`
+            SELECT * FROM COSTOS_VEHICULO 
+            WHERE ID_VEHICULO = ?
+        `, [id]);
+        
+        // Obtener extras
+        const [extras] = await connection.execute(`
+            SELECT * FROM EXTRAS_VEHICULO 
+            WHERE ID_VEHICULO = ?
+        `, [id]);
+        
+        await connection.end();
+        
+        res.json({
+            vehiculo: vehiculo,
+            costos: costos[0] || null,
+            extras: extras || []
+        });
+        
+    } catch (error) {
+        console.error('Error en detalle-colaborador:', error);
+        res.status(500).json({ error: 'Error al cargar detalles del vehículo' });
     }
 });
 
@@ -1232,6 +1375,512 @@ app.get('/api/estadisticas/vehiculos', async (req, res) => {
     }
 });
 
+// ================================================================
+// ===== ENDPOINTS DE ESTADÍSTICAS DE VENTAS =====
+// Agregar estos endpoints en tu archivo server.js (index.js)
+// ================================================================
+
+// ──────────────────────────────────────────────────────────────
+// HELPER INTERNO: construir WHERE con fechas opcionales
+// ──────────────────────────────────────────────────────────────
+function dateRange(alias, startVal, endVal) {
+  const parts = [];
+  const params = [];
+  if (startVal) { parts.push(`DATE(${alias}) >= ?`); params.push(startVal); }
+  if (endVal)   { parts.push(`DATE(${alias}) <= ?`); params.push(endVal); }
+  return { sql: parts.join(' AND '), params };
+}
+
+// ════════════════════════════════════════════════════════════════
+// 1. KPIs RÁPIDOS
+//    GET /api/estadisticas/ventas-kpis?fecha_inicio&fecha_fin&estado
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-kpis', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, estado } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (estado)       { whereClause += ' AND v.ESTADO_PAGO = ?';         params.push(estado); }
+
+    // Conteos generales
+    const [general] = await connection.execute(`
+      SELECT
+        COUNT(DISTINCT v.ID_VENTA) AS total_ventas,
+        COALESCE(SUM(v.TOTAL), 0)  AS total_crc,
+        COALESCE(AVG(v.TOTAL), 0)  AS promedio,
+        SUM(CASE WHEN f.ID_FINANCIAMIENTOS IS NULL THEN 1 ELSE 0 END) AS contado,
+        SUM(CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 1 ELSE 0 END) AS credito
+      FROM VENTAS v
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      WHERE ${whereClause}
+    `, params);
+
+    // Por estado
+    const [porEstado] = await connection.execute(`
+      SELECT ESTADO_PAGO AS estado, COUNT(*) AS cantidad
+      FROM VENTAS v
+      WHERE ${whereClause}
+      GROUP BY ESTADO_PAGO
+    `, params);
+
+    // Inventario actual
+    const [inventario] = await connection.execute(
+      `SELECT COUNT(*) AS total FROM VEHICULOS WHERE ESTADO = 'COMPRADO'`
+    );
+
+    await connection.end();
+    res.json({
+      ...general[0],
+      inventario: inventario[0].total,
+      por_estado: porEstado
+    });
+  } catch (err) {
+    console.error('Error KPIs ventas:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 2. VENTAS POR MES
+//    GET /api/estadisticas/ventas-mensual?fecha_inicio&fecha_fin
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-mensual', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        DATE_FORMAT(FECHA_VENTA, '%Y-%m') AS mes,
+        COUNT(*)                          AS cantidad,
+        COALESCE(SUM(TOTAL), 0)           AS total_crc,
+        COALESCE(AVG(TOTAL), 0)           AS promedio_crc
+      FROM VENTAS
+      WHERE ${whereClause}
+      GROUP BY DATE_FORMAT(FECHA_VENTA, '%Y-%m')
+      ORDER BY mes ASC
+    `, params);
+
+    await connection.end();
+    res.json(rows);
+  } catch (err) {
+    console.error('Error ventas mensuales:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 3. VENTAS TOTALES (tabla detalle)
+//    GET /api/estadisticas/ventas-total?fecha_inicio&fecha_fin&estado
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-total', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, estado } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (estado)       { whereClause += ' AND v.ESTADO_PAGO = ?';         params.push(estado); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        v.ID_VENTA,
+        v.CODIGO_VENTA,
+        v.FECHA_VENTA,
+        v.ESTADO_PAGO,
+        v.TOTAL,
+        -- Tipo de venta
+        CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END AS tipo,
+        -- Vehículo
+        veh.PLACA,
+        veh.MODELO,
+        veh.ESTILO,
+        m.NOMBRE AS marca_nombre,
+        -- Cliente facturación
+        cf.NOMBRE_COMPLETO AS cliente_nombre,
+        cf.IDENTIFICACION  AS cliente_cedula,
+        -- Vendedor
+        vend.NOMBRE_COMPLETO AS vendedor_nombre,
+        -- Precio venta (desde costos)
+        cv.PRECIO_PUBLICO AS precio_venta
+      FROM VENTAS v
+      INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+      LEFT JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
+      LEFT JOIN COSTOS_VEHICULO cv ON veh.ID_VEHICULO = cv.ID_VEHICULO
+      INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+      INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      WHERE ${whereClause}
+      ORDER BY v.FECHA_VENTA DESC
+    `, params);
+
+    await connection.end();
+    res.json(rows);
+  } catch (err) {
+    console.error('Error ventas total:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 4. VENTAS POR CLIENTE
+//    GET /api/estadisticas/ventas-por-cliente?fecha_inicio&fecha_fin&nombre
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-por-cliente', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, nombre } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (nombre)       { whereClause += ' AND (cf.NOMBRE_COMPLETO LIKE ? OR cf.IDENTIFICACION LIKE ?)'; params.push(`%${nombre}%`, `%${nombre}%`); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        cf.ID_PERSONA          AS id_cliente,
+        cf.NOMBRE_COMPLETO     AS cliente_nombre,
+        cf.IDENTIFICACION,
+        cf.TELEFONO_PRINCIPAL,
+        cf.EMAIL,
+        COUNT(DISTINCT v.ID_VENTA)  AS num_compras,
+        COALESCE(SUM(v.TOTAL), 0)   AS total_crc,
+        COALESCE(AVG(v.TOTAL), 0)   AS promedio_crc,
+        MAX(v.FECHA_VENTA)           AS ultima_compra,
+        MIN(v.FECHA_VENTA)           AS primera_compra
+      FROM VENTAS v
+      INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+      WHERE ${whereClause}
+      GROUP BY cf.ID_PERSONA, cf.NOMBRE_COMPLETO, cf.IDENTIFICACION, cf.TELEFONO_PRINCIPAL, cf.EMAIL
+      ORDER BY num_compras DESC, total_crc DESC
+    `, params);
+
+    await connection.end();
+    res.json({ clientes: rows });
+  } catch (err) {
+    console.error('Error ventas por cliente:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 5. VENTAS POR PRODUCTO (VEHÍCULO)
+//    GET /api/estadisticas/ventas-por-producto?fecha_inicio&fecha_fin&id_marca&tipo_venta
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-por-producto', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, id_marca, tipo_venta } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (id_marca)     { whereClause += ' AND veh.ID_MARCA = ?';           params.push(id_marca); }
+    if (tipo_venta === 'CONTADO')  whereClause += ' AND f.ID_FINANCIAMIENTOS IS NULL';
+    if (tipo_venta === 'CREDITO')  whereClause += ' AND f.ID_FINANCIAMIENTOS IS NOT NULL';
+
+    const [rows] = await connection.execute(`
+      SELECT
+        veh.ID_VEHICULO,
+        veh.PLACA,
+        veh.MODELO,
+        veh.ESTILO,
+        veh.CHASIS,
+        m.NOMBRE   AS marca_nombre,
+        col.NOMBRE AS color_nombre,
+        comb.NOMBRE AS combustible_nombre,
+        tr.NOMBRE  AS transmision_nombre,
+        -- Precios
+        COALESCE(cv.PRECIO_PUBLICO, v.TOTAL, 0)   AS precio_venta,
+        COALESCE(cv.TOTAL_INVERSION, 0)            AS costo_total,
+        COALESCE(cv.PRECIO_PUBLICO - cv.TOTAL_INVERSION, 0) AS ganancia,
+        -- Tipo
+        CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END AS tipo,
+        -- Fecha y venta
+        v.FECHA_VENTA,
+        v.CODIGO_VENTA,
+        v.ESTADO_PAGO,
+        v.TOTAL
+      FROM VENTAS v
+      INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+      LEFT JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
+      LEFT JOIN CAT_COLORES col ON veh.ID_COLOR = col.ID_COLOR
+      LEFT JOIN CAT_COMBUSTIBLES comb ON veh.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+      LEFT JOIN CAT_TRANSMISIONES tr ON veh.ID_TRANSMISION = tr.ID_TRANSMISION
+      LEFT JOIN COSTOS_VEHICULO cv ON veh.ID_VEHICULO = cv.ID_VEHICULO
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      WHERE ${whereClause}
+      ORDER BY v.FECHA_VENTA DESC
+    `, params);
+
+    await connection.end();
+    res.json({ vehiculos: rows });
+  } catch (err) {
+    console.error('Error ventas por producto:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 6. VENTAS POR AGENTE
+//    GET /api/estadisticas/ventas-por-agente?fecha_inicio&fecha_fin&id_vendedor
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-por-agente', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, id_vendedor } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (id_vendedor)  { whereClause += ' AND v.ID_VENDEDOR = ?';         params.push(id_vendedor); }
+
+    // Agregado por agente
+    const [agentes] = await connection.execute(`
+      SELECT
+        vend.ID_PERSONA     AS id_vendedor,
+        vend.NOMBRE_COMPLETO AS vendedor_nombre,
+        vend.IDENTIFICACION,
+        COUNT(DISTINCT v.ID_VENTA)  AS num_ventas,
+        COALESCE(SUM(v.TOTAL), 0)   AS total_crc,
+        COALESCE(AVG(v.TOTAL), 0)   AS promedio_crc,
+        SUM(CASE WHEN f.ID_FINANCIAMIENTOS IS NULL THEN 1 ELSE 0 END) AS contado,
+        SUM(CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 1 ELSE 0 END) AS credito,
+        COALESCE(SUM(cv.COMISION), 0) AS total_comision,
+        MAX(v.FECHA_VENTA)  AS ultima_venta
+      FROM VENTAS v
+      INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      LEFT JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+      LEFT JOIN COSTOS_VEHICULO cv ON veh.ID_VEHICULO = cv.ID_VEHICULO
+      WHERE ${whereClause}
+      GROUP BY vend.ID_PERSONA, vend.NOMBRE_COMPLETO, vend.IDENTIFICACION
+      ORDER BY num_ventas DESC
+    `, params);
+
+    // Por mes para cada agente (top 5 para el gráfico de líneas)
+    const top5ids = agentes.slice(0,5).map(a => a.id_vendedor);
+    const mensualMap = {};
+
+    if (top5ids.length) {
+      for (const id of top5ids) {
+        const mesParams = [...params, id];
+        const mesWhere = whereClause + ' AND v.ID_VENDEDOR = ?';
+        const [meses] = await connection.execute(`
+          SELECT DATE_FORMAT(FECHA_VENTA, '%Y-%m') AS mes, COUNT(*) AS cantidad
+          FROM VENTAS v
+          WHERE ${mesWhere}
+          GROUP BY DATE_FORMAT(FECHA_VENTA, '%Y-%m')
+          ORDER BY mes ASC
+        `, mesParams);
+        mensualMap[id] = meses;
+      }
+    }
+
+    // Adjuntar datos mensuales
+    const result = agentes.map(a => ({
+      ...a,
+      por_mes: mensualMap[a.id_vendedor] || []
+    }));
+
+    await connection.end();
+    res.json({ agentes: result });
+  } catch (err) {
+    console.error('Error ventas por agente:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 7. VENTAS: AGENTE × CLIENTE
+//    GET /api/estadisticas/ventas-agente-cliente?fecha_inicio&fecha_fin&id_vendedor&cliente
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-agente-cliente', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, id_vendedor, cliente } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (id_vendedor)  { whereClause += ' AND v.ID_VENDEDOR = ?';         params.push(id_vendedor); }
+    if (cliente)      { whereClause += ' AND (cf.NOMBRE_COMPLETO LIKE ? OR cf.IDENTIFICACION LIKE ?)'; params.push(`%${cliente}%`, `%${cliente}%`); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        vend.ID_PERSONA          AS id_vendedor,
+        vend.NOMBRE_COMPLETO     AS vendedor_nombre,
+        cf.ID_PERSONA            AS id_cliente,
+        cf.NOMBRE_COMPLETO       AS cliente_nombre,
+        cf.IDENTIFICACION        AS cliente_cedula,
+        cf.TELEFONO_PRINCIPAL    AS telefono,
+        COUNT(DISTINCT v.ID_VENTA)  AS num_compras,
+        COALESCE(SUM(v.TOTAL), 0)   AS total_crc,
+        MAX(v.FECHA_VENTA)           AS ultima_venta,
+        MAX(v.ESTADO_PAGO)           AS ultimo_estado
+      FROM VENTAS v
+      INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+      INNER JOIN PERSONAS cf   ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+      WHERE ${whereClause}
+      GROUP BY vend.ID_PERSONA, vend.NOMBRE_COMPLETO,
+               cf.ID_PERSONA, cf.NOMBRE_COMPLETO, cf.IDENTIFICACION, cf.TELEFONO_PRINCIPAL
+      ORDER BY vend.NOMBRE_COMPLETO, num_compras DESC, total_crc DESC
+    `, params);
+
+    await connection.end();
+    res.json({ rows });
+  } catch (err) {
+    console.error('Error agente×cliente:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 8. VENTAS: AGENTE × PRODUCTO
+//    GET /api/estadisticas/ventas-agente-producto?fecha_inicio&fecha_fin&id_vendedor&id_marca
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-agente-producto', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, id_vendedor, id_marca } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (id_vendedor)  { whereClause += ' AND v.ID_VENDEDOR = ?';         params.push(id_vendedor); }
+    if (id_marca)     { whereClause += ' AND veh.ID_MARCA = ?';           params.push(id_marca); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        vend.ID_PERSONA          AS id_vendedor,
+        vend.NOMBRE_COMPLETO     AS vendedor_nombre,
+        veh.ID_VEHICULO,
+        veh.PLACA,
+        veh.MODELO,
+        veh.ESTILO,
+        m.NOMBRE  AS marca_nombre,
+        cf.NOMBRE_COMPLETO AS cliente_nombre,
+        cf.IDENTIFICACION  AS cliente_cedula,
+        COALESCE(cv.PRECIO_PUBLICO, v.TOTAL, 0)  AS precio_venta,
+        COALESCE(cv.PRECIO_PUBLICO - cv.TOTAL_INVERSION, 0) AS ganancia,
+        CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END AS tipo,
+        v.FECHA_VENTA,
+        v.CODIGO_VENTA,
+        v.ESTADO_PAGO,
+        v.TOTAL
+      FROM VENTAS v
+      INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+      INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+      INNER JOIN PERSONAS cf   ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+      LEFT JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
+      LEFT JOIN COSTOS_VEHICULO cv ON veh.ID_VEHICULO = cv.ID_VEHICULO
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      WHERE ${whereClause}
+      ORDER BY vend.NOMBRE_COMPLETO, v.FECHA_VENTA DESC
+    `, params);
+
+    await connection.end();
+    res.json({ rows });
+  } catch (err) {
+    console.error('Error agente×producto:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// 9. VENTAS COMPLETO: AGENTE × CLIENTE × PRODUCTO
+//    GET /api/estadisticas/ventas-completo?fecha_inicio&fecha_fin&id_vendedor&cliente&id_marca
+// ════════════════════════════════════════════════════════════════
+app.get('/api/estadisticas/ventas-completo', async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, id_vendedor, cliente, id_marca } = req.query;
+    const connection = await mysql.createConnection(dbConfig);
+
+    let whereClause = '1=1';
+    const params = [];
+    if (fecha_inicio) { whereClause += ' AND DATE(v.FECHA_VENTA) >= ?'; params.push(fecha_inicio); }
+    if (fecha_fin)    { whereClause += ' AND DATE(v.FECHA_VENTA) <= ?'; params.push(fecha_fin); }
+    if (id_vendedor)  { whereClause += ' AND v.ID_VENDEDOR = ?';         params.push(id_vendedor); }
+    if (id_marca)     { whereClause += ' AND veh.ID_MARCA = ?';           params.push(id_marca); }
+    if (cliente)      { whereClause += ' AND (cf.NOMBRE_COMPLETO LIKE ? OR cf.IDENTIFICACION LIKE ?)'; params.push(`%${cliente}%`, `%${cliente}%`); }
+
+    const [rows] = await connection.execute(`
+      SELECT
+        v.ID_VENTA,
+        v.CODIGO_VENTA,
+        v.FECHA_VENTA,
+        v.ESTADO_PAGO,
+        v.TOTAL,
+        -- Agente
+        vend.ID_PERSONA      AS id_vendedor,
+        vend.NOMBRE_COMPLETO AS vendedor_nombre,
+        vend.IDENTIFICACION  AS vendedor_cedula,
+        -- Cliente facturación
+        cf.ID_PERSONA        AS id_cliente,
+        cf.NOMBRE_COMPLETO   AS cliente_facturacion,
+        cf.IDENTIFICACION    AS cedula_facturacion,
+        -- Cliente inscripción
+        ci.NOMBRE_COMPLETO   AS cliente_inscripcion,
+        ci.IDENTIFICACION    AS cedula_inscripcion,
+        -- Vehículo
+        veh.ID_VEHICULO,
+        veh.PLACA,
+        veh.MODELO,
+        veh.ESTILO,
+        veh.CHASIS,
+        m.NOMBRE   AS marca_nombre,
+        col.NOMBRE AS color_nombre,
+        comb.NOMBRE AS combustible_nombre,
+        tr.NOMBRE  AS transmision_nombre,
+        -- Costos
+        COALESCE(cv.PRECIO_PUBLICO, v.TOTAL, 0)  AS precio_venta,
+        COALESCE(cv.TOTAL_INVERSION, 0)            AS costo_total,
+        COALESCE(cv.PRECIO_PUBLICO - cv.TOTAL_INVERSION, 0) AS ganancia,
+        -- Tipo
+        CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END AS tipo,
+        -- Financiamiento
+        f.PLAZO_MESES,
+        f.ENTIDAD_FINANCIERA,
+        f.CUOTA_MENSUAL
+      FROM VENTAS v
+      INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+      INNER JOIN PERSONAS cf   ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+      LEFT JOIN PERSONAS ci    ON v.ID_CLIENTE_INSCRIPCION = ci.ID_PERSONA
+      INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+      LEFT JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
+      LEFT JOIN CAT_COLORES col ON veh.ID_COLOR = col.ID_COLOR
+      LEFT JOIN CAT_COMBUSTIBLES comb ON veh.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+      LEFT JOIN CAT_TRANSMISIONES tr ON veh.ID_TRANSMISION = tr.ID_TRANSMISION
+      LEFT JOIN COSTOS_VEHICULO cv ON veh.ID_VEHICULO = cv.ID_VEHICULO
+      LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+      WHERE ${whereClause}
+      ORDER BY v.FECHA_VENTA DESC
+    `, params);
+
+    await connection.end();
+    res.json({ rows });
+  } catch (err) {
+    console.error('Error ventas completo:', err);
+    res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+  }
+});
+
 /* 1. PERSONAS (VENDEDORES/COLABORADORES) */
 // Obtener vendedores activos
 app.get('/api/vendedores-activos', async (req, res) => {
@@ -1260,7 +1909,7 @@ app.get('/api/vendedores-activos', async (req, res) => {
     }
 });
 
-/* Obtener todos los vendedores (Cpersonas con rol de vendedor) */
+/* Obtener todos los vendedores */
 app.get('/api/vendedores', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -1332,7 +1981,7 @@ app.get('/api/vendedores/:id', async (req, res) => {
             LEFT JOIN USUARIOS u ON p.ID_PERSONA = u.ID_PERSONA
             LEFT JOIN CAT_ESTADOS_CIVIL ec ON p.ID_ESTADO_CIVIL = ec.ID_ESTADO_CIVIL
             WHERE p.ID_PERSONA = ?
-            AND pr.ID_ROL = 5
+            AND pr.ID_ROL = 5  -- Rol de Vendedor
             AND pr.ESTADO = 'ACTIVO'
         `, [id]);
         
@@ -1341,36 +1990,93 @@ app.get('/api/vendedores/:id', async (req, res) => {
             return res.status(404).json({ error: 'Vendedor no encontrado' });
         }
         
-        // Obtener estadísticas del vendedor
+        // Obtener estadísticas del vendedor (CORREGIDO - usando DETALLE_PAGOS y VENTAS)
         const [estadisticas] = await connection.execute(`
             SELECT 
-                COUNT(*) as total_ventas,
-                SUM(fp.PRIMA) as total_prima,
-                SUM(fp.SALDO) as total_saldo_pendiente,
+                COUNT(DISTINCT v.ID_VENTA) as total_ventas,
+                COALESCE(SUM(CASE 
+                    WHEN dp.MONEDA = 'USD' THEN dp.EFECTIVO * dp.TIPO_CAMBIO 
+                    ELSE dp.EFECTIVO 
+                END), 0) as total_efectivo,
+                COALESCE(SUM(CASE 
+                    WHEN dp.MONEDA = 'USD' THEN dp.TRANSFERENCIA * dp.TIPO_CAMBIO 
+                    ELSE dp.TRANSFERENCIA 
+                END), 0) as total_transferencias,
+                COALESCE(SUM(CASE 
+                    WHEN dp.MONEDA = 'USD' THEN dp.TARJETA * dp.TIPO_CAMBIO 
+                    ELSE dp.TARJETA 
+                END), 0) as total_tarjetas,
+                COALESCE(SUM(f.PRIMA), 0) as total_prima_financiamientos,
+                COALESCE(SUM(f.MONTO_FINANCIAR), 0) as total_financiado,
                 MAX(v.FECHA_VENTA) as ultima_venta
             FROM VENTAS v
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
+            LEFT JOIN DETALLE_PAGOS dp ON v.ID_VENTA = dp.ID_VENTA
+            LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
             WHERE v.ID_VENDEDOR = ?
         `, [id]);
         
-        // Obtener ventas recientes
+        // Obtener ventas recientes (CORREGIDO - con datos de pagos reales)
         const [ventas] = await connection.execute(`
             SELECT 
                 v.ID_VENTA,
                 v.CODIGO_VENTA,
                 v.FECHA_VENTA,
+                v.FECHA_CANCELACION,
+                v.ESTADO_PAGO,
                 veh.PLACA,
                 veh.ID_MARCA,
                 veh.MODELO,
+                veh.ESTILO,
+                m.NOMBRE as marca_nombre,
                 cf.NOMBRE_COMPLETO as cliente_facturacion,
-                fp.TIPO_VENTA,
-                fp.PRIMA,
-                fp.SALDO,
-                fp.ESTADO_PAGO
+                ci.NOMBRE_COMPLETO as cliente_inscripcion,
+                -- Totales de pagos
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN dp2.MONEDA = 'USD' THEN dp2.EFECTIVO * dp2.TIPO_CAMBIO 
+                        ELSE dp2.EFECTIVO 
+                    END)
+                    FROM DETALLE_PAGOS dp2 
+                    WHERE dp2.ID_VENTA = v.ID_VENTA
+                ), 0) as total_efectivo_crc,
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN dp2.MONEDA = 'USD' THEN dp2.TRANSFERENCIA * dp2.TIPO_CAMBIO 
+                        ELSE dp2.TRANSFERENCIA 
+                    END)
+                    FROM DETALLE_PAGOS dp2 
+                    WHERE dp2.ID_VENTA = v.ID_VENTA
+                ), 0) as total_transferencias_crc,
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN dp2.MONEDA = 'USD' THEN dp2.TARJETA * dp2.TIPO_CAMBIO 
+                        ELSE dp2.TARJETA 
+                    END)
+                    FROM DETALLE_PAGOS dp2 
+                    WHERE dp2.ID_VENTA = v.ID_VENTA
+                ), 0) as total_tarjetas_crc,
+                -- Datos de financiamiento si existe
+                f.PRIMA as prima_financiamiento,
+                f.MONTO_FINANCIAR,
+                f.PLAZO_MESES,
+                f.ENTIDAD_FINANCIERA,
+                f.CUOTA_MENSUAL,
+                -- Anticipos si existen
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN a.MONEDA = 'USD' THEN a.MONTO_DOLARES * a.TIPO_CAMBIO 
+                        ELSE a.MONTO_COLONES 
+                    END)
+                    FROM ANTICIPOS a
+                    INNER JOIN FINANCIAMIENTOS f2 ON a.ID_FINANCIAMIENTO = f2.ID_FINANCIAMIENTOS
+                    WHERE f2.ID_VENTA = v.ID_VENTA
+                ), 0) as total_anticipos
             FROM VENTAS v
             INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+            INNER JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
             INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
+            LEFT JOIN PERSONAS ci ON v.ID_CLIENTE_INSCRIPCION = ci.ID_PERSONA
+            LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
             WHERE v.ID_VENDEDOR = ?
             ORDER BY v.FECHA_VENTA DESC
             LIMIT 10
@@ -1380,9 +2086,18 @@ app.get('/api/vendedores/:id', async (req, res) => {
         
         res.json({
             vendedor: vendedor[0],
-            estadisticas: estadisticas[0],
+            estadisticas: {
+                total_ventas: estadisticas[0].total_ventas || 0,
+                total_efectivo_crc: estadisticas[0].total_efectivo || 0,
+                total_transferencias_crc: estadisticas[0].total_transferencias || 0,
+                total_tarjetas_crc: estadisticas[0].total_tarjetas || 0,
+                total_prima_financiamientos: estadisticas[0].total_prima_financiamientos || 0,
+                total_financiado: estadisticas[0].total_financiado || 0,
+                ultima_venta: estadisticas[0].ultima_venta
+            },
             ventas_recientes: ventas
         });
+        
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Error al obtener vendedor' });
@@ -2453,7 +3168,6 @@ app.get('/api/vendedores/:id/roles', async (req, res) => {
     }
 });
 
-/* 4. VENTAS DE VENDEDORES*/
 /* Obtener ventas de un vendedor */
 app.get('/api/vendedores/:id/ventas', async (req, res) => {
     const { id } = req.params;
@@ -2468,28 +3182,124 @@ app.get('/api/vendedores/:id/ventas', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
         
+        // Query base con toda la información necesaria
         let query = `
             SELECT 
-                v.*,
-                veh.PLACA, veh.ID_MARCA, veh.MODELO, veh.ESTILO,
+                v.ID_VENTA,
+                v.CODIGO_VENTA,
+                v.FECHA_VENTA,
+                v.FECHA_CANCELACION,
+                v.ESTADO_PAGO,
+                v.OBSERVACIONES_VENTA,
+                v.PV_PURDI,
+                v.NOMBRE_NOTARIO,
+                v.FECHA_APROBACION,
+                
+                -- Datos del vehículo
+                veh.ID_VEHICULO,
+                veh.PLACA,
+                veh.ID_MARCA,
+                veh.MODELO,
+                veh.ESTILO,
+                veh.CHASIS,
+                m.NOMBRE as marca_nombre,
+                
+                -- Datos de clientes
+                cf.ID_PERSONA as id_cliente_facturacion,
                 cf.NOMBRE_COMPLETO as cliente_facturacion,
+                cf.IDENTIFICACION as identificacion_facturacion,
+                ci.ID_PERSONA as id_cliente_inscripcion,
                 ci.NOMBRE_COMPLETO as cliente_inscripcion,
-                fp.TIPO_VENTA, fp.PRIMA, fp.SALDO, fp.ESTADO_PAGO, fp.PLAZO_MESES, fp.ENTIDAD_FINANCIERA,
+                ci.IDENTIFICACION as identificacion_inscripcion,
+                
+                -- Resumen de pagos
                 COALESCE((
-                    SELECT SUM(MONTO_COLONES) 
-                    FROM ANTICIPOS a 
-                    WHERE a.ID_VENTA = v.ID_VENTA
-                ), 0) as total_anticipos
+                    SELECT SUM(CASE 
+                        WHEN dp.MONEDA = 'USD' THEN dp.EFECTIVO * dp.TIPO_CAMBIO 
+                        ELSE dp.EFECTIVO 
+                    END)
+                    FROM DETALLE_PAGOS dp 
+                    WHERE dp.ID_VENTA = v.ID_VENTA
+                ), 0) as total_efectivo_crc,
+                
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN dp.MONEDA = 'USD' THEN dp.TRANSFERENCIA * dp.TIPO_CAMBIO 
+                        ELSE dp.TRANSFERENCIA 
+                    END)
+                    FROM DETALLE_PAGOS dp 
+                    WHERE dp.ID_VENTA = v.ID_VENTA
+                ), 0) as total_transferencias_crc,
+                
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN dp.MONEDA = 'USD' THEN dp.TARJETA * dp.TIPO_CAMBIO 
+                        ELSE dp.TARJETA 
+                    END)
+                    FROM DETALLE_PAGOS dp 
+                    WHERE dp.ID_VENTA = v.ID_VENTA
+                ), 0) as total_tarjetas_crc,
+                
+                -- Datos de financiamiento
+                f.ID_FINANCIAMIENTOS,
+                f.PRIMA as prima_financiamiento,
+                f.HONORARIOS,
+                f.MONTO_FINANCIAR,
+                f.TOTAL as total_financiamiento,
+                f.TASA_NOMINAL,
+                f.TASA_MENSUAL,
+                f.INTERES_MORATORIO,
+                f.INTERESXADELANTO,
+                f.PRESTAMO_TOTAL,
+                f.PLAZO_MESES,
+                f.ENTIDAD_FINANCIERA,
+                f.CUOTA_MENSUAL,
+                f.FECHA_PRIMERPAGO,
+                
+                -- Anticipos totales
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN a.MONEDA = 'USD' THEN a.MONTO_DOLARES * a.TIPO_CAMBIO 
+                        ELSE a.MONTO_COLONES 
+                    END)
+                    FROM ANTICIPOS a
+                    INNER JOIN FINANCIAMIENTOS f2 ON a.ID_FINANCIAMIENTO = f2.ID_FINANCIAMIENTOS
+                    WHERE f2.ID_VENTA = v.ID_VENTA AND a.ESTADO_ANTICIPO != 'COMPLETADO'
+                ), 0) as anticipos_pendientes,
+                
+                COALESCE((
+                    SELECT SUM(CASE 
+                        WHEN a.MONEDA = 'USD' THEN a.MONTO_DOLARES * a.TIPO_CAMBIO 
+                        ELSE a.MONTO_COLONES 
+                    END)
+                    FROM ANTICIPOS a
+                    INNER JOIN FINANCIAMIENTOS f2 ON a.ID_FINANCIAMIENTO = f2.ID_FINANCIAMIENTOS
+                    WHERE f2.ID_VENTA = v.ID_VENTA
+                ), 0) as total_anticipos,
+                
+                -- Totales
+                (
+                    COALESCE((
+                        SELECT SUM(CASE 
+                            WHEN dp.MONEDA = 'USD' THEN (dp.EFECTIVO + dp.TRANSFERENCIA + dp.TARJETA) * dp.TIPO_CAMBIO 
+                            ELSE (dp.EFECTIVO + dp.TRANSFERENCIA + dp.TARJETA) 
+                        END)
+                        FROM DETALLE_PAGOS dp 
+                        WHERE dp.ID_VENTA = v.ID_VENTA
+                    ), 0)
+                ) as total_pagado_crc
+                
             FROM VENTAS v
             INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+            INNER JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
             INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
             LEFT JOIN PERSONAS ci ON v.ID_CLIENTE_INSCRIPCION = ci.ID_PERSONA
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
+            LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
             WHERE v.ID_VENDEDOR = ?
         `;
 
         const params = [id];
-        let offset = (pagina - 1) * limite;
+        const offset = (pagina - 1) * limite;
 
         // Aplicar filtros
         if (fecha_desde) {
@@ -2503,13 +3313,26 @@ app.get('/api/vendedores/:id/ventas', async (req, res) => {
         }
 
         if (estado_pago) {
-            query += ' AND fp.ESTADO_PAGO = ?';
+            query += ' AND v.ESTADO_PAGO = ?';
             params.push(estado_pago);
         }
 
-        // Contar total de registros
-        const countQuery = `SELECT COUNT(*) as total FROM (${query}) as subquery`;
-        const [countResult] = await connection.execute(countQuery, params);
+        // Query para contar total de registros
+        const countQuery = `
+            SELECT COUNT(*) as total 
+            FROM VENTAS v 
+            WHERE v.ID_VENDEDOR = ? 
+            ${fecha_desde ? 'AND DATE(v.FECHA_VENTA) >= ?' : ''}
+            ${fecha_hasta ? 'AND DATE(v.FECHA_VENTA) <= ?' : ''}
+            ${estado_pago ? 'AND v.ESTADO_PAGO = ?' : ''}
+        `;
+        
+        const countParams = [id];
+        if (fecha_desde) countParams.push(fecha_desde);
+        if (fecha_hasta) countParams.push(fecha_hasta);
+        if (estado_pago) countParams.push(estado_pago);
+        
+        const [countResult] = await connection.execute(countQuery, countParams);
         const totalRegistros = countResult[0].total;
 
         // Aplicar paginación
@@ -2520,60 +3343,101 @@ app.get('/api/vendedores/:id/ventas', async (req, res) => {
         
         await connection.end();
         
+        // Formatear la respuesta
+        const ventasFormateadas = ventas.map(v => ({
+            ...v,
+            tipo_venta: v.ID_FINANCIAMIENTOS ? 'CREDITO' : 'CONTADO',
+            total_pagado_crc: parseFloat(v.total_pagado_crc) || 0,
+            saldo_pendiente: v.ID_FINANCIAMIENTOS ? 
+                (parseFloat(v.total_financiamiento || 0) - parseFloat(v.total_pagado_crc || 0)) : 0
+        }));
+        
         res.json({
             total: totalRegistros,
             pagina: parseInt(pagina),
             por_pagina: parseInt(limite),
             total_paginas: Math.ceil(totalRegistros / limite),
-            ventas: ventas
+            ventas: ventasFormateadas
         });
+        
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Error al obtener ventas del vendedor' });
     }
 });
 
-/* Exportar vendedores a Excel */
-app.get('/api/vendedores/exportar/excel', async (req, res) => {
+// ===== API ADICIONAL: OBTENER DETALLE COMPLETO DE UNA VENTA =====
+app.get('/api/ventas/:id/detalle', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
         
-        const [vendedores] = await connection.execute(`
+        const [ventas] = await connection.execute(`
             SELECT 
-                p.ID_PERSONA, p.IDENTIFICACION, p.NOMBRE_COMPLETO,
-                p.OCUPACION, p.TELEFONO_PRINCIPAL, p.EMAIL, p.ESTADO as estado_persona,
-                u.USERNAME, u.ESTADO as estado_usuario, u.ULTIMO_ACCESO, u.INTENTOS_FALLIDOS,
-                COALESCE(v.total_ventas, 0) as total_ventas, COALESCE(v.total_prima, 0) as total_prima
-            FROM PERSONAS p
-            INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
-            LEFT JOIN USUARIOS u ON p.ID_PERSONA = u.ID_PERSONA
-            LEFT JOIN (
-                SELECT 
-                    ID_VENDEDOR,
-                    COUNT(*) as total_ventas,
-                    SUM(fp.PRIMA) as total_prima
-                FROM VENTAS v
-                LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
-                GROUP BY ID_VENDEDOR
-            ) v ON p.ID_PERSONA = v.ID_VENDEDOR
-            WHERE pr.ID_ROL = 5
-            AND pr.ESTADO = 'ACTIVO'
-            ORDER BY p.NOMBRE_COMPLETO
-        `);
+                v.*,
+                -- Vendedor
+                vend.NOMBRE_COMPLETO as vendedor_nombre,
+                vend.IDENTIFICACION as vendedor_identificacion,
+                -- Aprobador
+                aprob.NOMBRE_COMPLETO as aprobador_nombre,
+                -- Vehículo
+                veh.*,
+                m.NOMBRE as marca_nombre,
+                c.NOMBRE as color_nombre,
+                comb.NOMBRE as combustible_nombre,
+                t.NOMBRE as transmision_nombre,
+                -- Clientes
+                cf.NOMBRE_COMPLETO as cliente_facturacion_nombre,
+                cf.IDENTIFICACION as cliente_facturacion_identificacion,
+                cf.TELEFONO_PRINCIPAL as cliente_facturacion_telefono,
+                cf.EMAIL as cliente_facturacion_email,
+                ci.NOMBRE_COMPLETO as cliente_inscripcion_nombre,
+                ci.IDENTIFICACION as cliente_inscripcion_identificacion,
+                -- Pagos
+                dp.*,
+                -- Financiamiento
+                f.*
+            FROM VENTAS v
+            INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
+            LEFT JOIN PERSONAS aprob ON v.ID_APROBADOR = aprob.ID_PERSONA
+            INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+            LEFT JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON veh.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON veh.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON veh.ID_TRANSMISION = t.ID_TRANSMISION
+            INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
+            LEFT JOIN PERSONAS ci ON v.ID_CLIENTE_INSCRIPCION = ci.ID_PERSONA
+            LEFT JOIN DETALLE_PAGOS dp ON v.ID_VENTA = dp.ID_VENTA
+            LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
+            WHERE v.ID_VENTA = ?
+        `, [req.params.id]);
+        
+        if (ventas.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Venta no encontrada' });
+        }
+        
+        // Obtener anticipos si existe financiamiento
+        let anticipos = [];
+        if (ventas[0].ID_FINANCIAMIENTOS) {
+            const [anticiposResult] = await connection.execute(`
+                SELECT a.*
+                FROM ANTICIPOS a
+                WHERE a.ID_FINANCIAMIENTO = ?
+                ORDER BY a.FECHA_ANTICIPO DESC
+            `, [ventas[0].ID_FINANCIAMIENTOS]);
+            anticipos = anticiposResult;
+        }
         
         await connection.end();
         
-        // Aquí iría la lógica para generar el Excel
-        // Por ahora devolvemos JSON
         res.json({
-            total: vendedores.length,
-            vendedores: vendedores,
-            formato: 'excel',
-            fecha_generacion: new Date().toISOString()
+            venta: ventas[0],
+            anticipos: anticipos
         });
+        
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Error al exportar vendedores' });
+        res.status(500).json({ error: 'Error al obtener detalle de venta' });
     }
 });
 
@@ -2592,8 +3456,9 @@ app.get('/api/personas', async (req, res) => {
         const params = [];
         
         if (nombre) {
-            query += ' AND p.NOMBRE_COMPLETO LIKE ?';
-            params.push(`%${nombre}%`);
+            // MEJORADO: buscar en nombre Y identificación
+            query += ' AND (p.NOMBRE_COMPLETO LIKE ? OR p.IDENTIFICACION LIKE ?)';
+            params.push(`%${nombre}%`, `%${nombre}%`);
         }
         
         if (identificacion) {
@@ -2606,7 +3471,7 @@ app.get('/api/personas', async (req, res) => {
             params.push(estado);
         }
         
-        query += ' ORDER BY p.NOMBRE_COMPLETO';
+        query += ' ORDER BY p.NOMBRE_COMPLETO LIMIT 50'; // Añadido límite
         
         const connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute(query, params);
@@ -2850,6 +3715,50 @@ app.get('/api/usuarios/:id', async (req, res) => {
         }
         
         res.json(rows[0]);
+    } catch (err) {
+        console.error('Error al obtener usuario:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// ===== API PARA OBTENER INFORMACIÓN DEL USUARIO =====
+app.get('/api/usuarios/:id/info', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [usuarios] = await connection.execute(`
+            SELECT 
+                u.ID_USUARIO,
+                u.USERNAME,
+                p.ID_PERSONA,
+                p.NOMBRE_COMPLETO,
+                p.IDENTIFICACION,
+                p.TELEFONO_PRINCIPAL,
+                p.EMAIL,
+                GROUP_CONCAT(DISTINCT r.NOMBRE) as ROLES
+            FROM USUARIOS u
+            INNER JOIN PERSONAS p ON u.ID_PERSONA = p.ID_PERSONA
+            LEFT JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA AND pr.ESTADO = 'ACTIVO'
+            LEFT JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
+            WHERE u.ID_USUARIO = ?
+            GROUP BY u.ID_USUARIO
+        `, [req.params.id]);
+        
+        await connection.end();
+        
+        if (usuarios.length === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        
+        const usuario = usuarios[0];
+        const roles = usuario.ROLES ? usuario.ROLES.split(',') : [];
+        
+        res.json({
+            ...usuario,
+            ROL_PRINCIPAL: roles[0] || 'USUARIO',
+            ROLES: roles
+        });
+        
     } catch (err) {
         console.error('Error al obtener usuario:', err);
         res.status(500).json({ error: 'Error en el servidor' });
@@ -3411,10 +4320,7 @@ app.get('/api/buscar/personas', async (req, res) => {
     }
 });
 
-// ============================================
-// APIS PARA VALIDACIONES
-// ============================================
-
+// ==== APIS PARA VALIDACIONES =======
 // Verificar si identificación existe
 app.get('/api/validar/identificacion/:identificacion', async (req, res) => {
     try {
@@ -3538,8 +4444,8 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
                     ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA,
                     COMISION, TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO,
                     PRECIO_DESCUENTO, PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO,
-                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CALCULO
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
                 [
                     req.params.id, PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA,
                     COMISION, TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO,
@@ -3557,6 +4463,135 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
         });
     } catch (err) {
         console.error('Error al guardar costos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// 1. Obtener información completa de la venta (DETALLE_PAGOS y FINANCIAMIENTOS)
+app.get('/api/ventas/completa/:idVenta', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        // Obtener información de la venta
+        const [venta] = await connection.execute(
+            `SELECT v.*,
+                    ve.CHASIS, ve.PLACA, ve.MOTOR,
+                    m.NOMBRE as marca_nombre,
+                    col.NOMBRE as color_nombre
+             FROM VENTAS v
+             INNER JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
+             LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
+             LEFT JOIN CAT_COLORES col ON ve.ID_COLOR = col.ID_COLOR
+             WHERE v.ID_VENTA = ?`,
+            [req.params.idVenta]
+        );
+        
+        // Obtener detalles de pago
+        const [detallesPago] = await connection.execute(
+            `SELECT dp.*, cb.NOMBRE as NOMBRE_BANCO
+             FROM DETALLE_PAGOS dp
+             LEFT JOIN CAT_BANCOS cb ON dp.ID_BANCO = cb.ID_BANCO
+             WHERE dp.ID_VENTA = ?`,
+            [req.params.idVenta]
+        );
+        
+        // Obtener financiamiento
+        const [financiamiento] = await connection.execute(
+            `SELECT * FROM FINANCIAMIENTOS 
+             WHERE ID_VENTA = ?`,
+            [req.params.idVenta]
+        );
+        
+        // Obtener anticipos
+        let anticipos = [];
+        if (financiamiento.length > 0) {
+            const [anticiposData] = await connection.execute(
+                `SELECT a.* 
+                 FROM ANTICIPOS a
+                 WHERE a.ID_FINANCIAMIENTO = ?`,
+                [financiamiento[0].ID_FINANCIAMIENTOS]
+            );
+            anticipos = anticiposData;
+        }
+        
+        await connection.end();
+        
+        res.json({
+            venta: venta[0] || null,
+            detallesPago: detallesPago,
+            financiamiento: financiamiento[0] || null,
+            anticipos: anticipos
+        });
+        
+    } catch (err) {
+        console.error('Error al obtener información completa de la venta:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// 2. Obtener información de pago por venta (simplificado)
+app.get('/api/pagos/venta/:idVenta', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [pagos] = await connection.execute(
+            `SELECT 
+                dp.EFECTIVO,
+                dp.TRANSFERENCIA,
+                dp.NUM_TRANSFERENCIA,
+                dp.NOM_DEPOSITANTE,
+                dp.TARJETA,
+                dp.NUMERO_TARJETA,
+                dp.TIPO_TARJETA,
+                dp.FORMA_PAGO,
+                dp.FECHA_PAGO,
+                cb.NOMBRE as BANCO_NOMBRE
+             FROM DETALLE_PAGOS dp
+             LEFT JOIN CAT_BANCOS cb ON dp.ID_BANCO = cb.ID_BANCO
+             WHERE dp.ID_VENTA = ?`,
+            [req.params.idVenta]
+        );
+        
+        await connection.end();
+        res.json(pagos);
+        
+    } catch (err) {
+        console.error('Error al obtener pagos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// 3. Obtener financiamiento por venta
+app.get('/api/financiamiento/venta/:idVenta', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [financiamiento] = await connection.execute(
+            `SELECT * FROM FINANCIAMIENTOS 
+             WHERE ID_VENTA = ?`,
+            [req.params.idVenta]
+        );
+        
+        let anticipos = [];
+        if (financiamiento.length > 0) {
+            const [anticiposData] = await connection.execute(
+                `SELECT * FROM ANTICIPOS 
+                 WHERE ID_FINANCIAMIENTO = ? 
+                 ORDER BY FECHA_ANTICIPO DESC`,
+                [financiamiento[0].ID_FINANCIAMIENTOS]
+            );
+            anticipos = anticiposData;
+        }
+        
+        await connection.end();
+        
+        res.json({
+            financiamiento: financiamiento[0] || null,
+            anticipos: anticipos
+        });
+        
+    } catch (err) {
+        console.error('Error al obtener financiamiento:', err);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
@@ -3584,7 +4619,7 @@ app.get('/api/vehiculos/:id/extras', async (req, res) => {
 app.post('/api/vehiculos/:id/extras', async (req, res) => {
     try {
         const {
-            ARREGLO, EXTRAS_DETALLE, OBSERVACIONES, PRECIO, MONEDA, TIPO_CAMBIO_COMPRA
+            EXTRAS_DETALLE, OBSERVACIONES, PRECIO, MONEDA, TIPO_CAMBIO_COMPRA
         } = req.body;
 
         const connection = await mysql.createConnection(dbConfig);
@@ -3670,27 +4705,40 @@ app.get('/api/vehiculos/:id/completo', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
         const vehiculoId = req.params.id;
-        
-        console.log('Buscando vehículo ID:', vehiculoId); // Para depuración
-        
+                
         // 1. Datos básicos del vehículo
         const [vehiculos] = await connection.execute(
             `SELECT 
                 v.*,
+                -- Fechas
+                v.FECHA_INGRESO,
+                v.FECHA_RECEPCION,
+                -- Proveedor (si existe)
                 p.NOMBRE_COMPLETO as proveedor_nombre,
                 p.IDENTIFICACION as proveedor_identificacion,
                 p.TELEFONO_PRINCIPAL as proveedor_telefono,
                 p.EMAIL as proveedor_email,
+                -- Cliente origen (para intercambios)
+                co.NOMBRE_COMPLETO as cliente_origen_nombre,
+                co.IDENTIFICACION as cliente_origen_identificacion,
+                co.TELEFONO_PRINCIPAL as cliente_origen_telefono,
+                co.EMAIL as cliente_origen_email,
+                -- Catálogos
                 m.NOMBRE as marca_nombre,
                 c.NOMBRE as color_nombre,
                 comb.NOMBRE as combustible_nombre,
-                t.NOMBRE as transmision_nombre
+                t.NOMBRE as transmision_nombre,
+                -- Venta origen (si viene de un intercambio)
+                vo.CODIGO_VENTA as venta_origen_codigo,
+                vo.FECHA_VENTA as venta_origen_fecha
             FROM VEHICULOS v
             LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            LEFT JOIN PERSONAS co ON v.ID_CLIENTE_ORIGEN = co.ID_PERSONA
             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
             LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN VENTAS vo ON v.ID_VENTA_ORIGEN = vo.ID_VENTA
             WHERE v.ID_VEHICULO = ?`,
             [vehiculoId]
         );
@@ -3699,6 +4747,8 @@ app.get('/api/vehiculos/:id/completo', async (req, res) => {
             await connection.end();
             return res.status(404).json({ error: 'Vehículo no encontrado' });
         }
+
+        const vehiculo = vehiculos[0];
 
         // 2. Costos del vehículo
         const [costos] = await connection.execute(
@@ -3712,30 +4762,31 @@ app.get('/api/vehiculos/:id/completo', async (req, res) => {
             [vehiculoId]
         );
 
-        // 4. Ventas del vehículo
-        const [ventas] = await connection.execute(
-            `SELECT v.*, 
-                    fp.*,
-                    cf.NOMBRE_COMPLETO as cliente_facturacion_nombre,
-                    ci.NOMBRE_COMPLETO as cliente_inscripcion_nombre
-             FROM VENTAS v
-             LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
-             LEFT JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
-             LEFT JOIN PERSONAS ci ON v.ID_CLIENTE_INSCRIPCION = ci.ID_PERSONA
-             WHERE v.ID_VEHICULO = ?`,
-            [vehiculoId]
-        );
-
         await connection.end();
 
         const response = {
-            vehiculo: vehiculos[0],
-            costos: costos,
+            vehiculo: vehiculo,
+            costos: costos.length > 0 ? costos[0] : null,
             extras: extras,
-            ventas: ventas
+            intercambio_info: vehiculo.ES_INTERCAMBIO ? {
+                es_intercambio: true,
+                cliente_origen: vehiculo.ID_CLIENTE_ORIGEN ? {
+                    id: vehiculo.ID_CLIENTE_ORIGEN,
+                    nombre: vehiculo.cliente_origen_nombre,
+                    identificacion: vehiculo.cliente_origen_identificacion
+                } : null,
+                monto_intercambio: vehiculo.MONTO_INTERCAMBIO,
+                fecha_recepcion: vehiculo.FECHA_RECEPCION,
+                venta_origen: vehiculo.ID_VENTA_ORIGEN ? {
+                    id: vehiculo.ID_VENTA_ORIGEN,
+                    codigo: vehiculo.venta_origen_codigo,
+                    fecha: vehiculo.venta_origen_fecha
+                } : null
+            } : {
+                es_intercambio: false
+            }
         };
 
-        console.log('Datos enviados:', response); // Para depuración
         res.json(response);
 
     } catch (err) {
@@ -3798,8 +4849,6 @@ app.get('/api/inventario/estadisticas', async (req, res) => {
     }
 });
 
-// ===== APIs DE VENTAS (COLOCAR ESTO ANTES DE LOS MIDDLEWARE DE VERIFICACIÓN) =====
-
 // ===== API PARA VENTAS PENDIENTES =====
 app.get('/api/ventas/pendientes', async (req, res) => {
     try {
@@ -3810,7 +4859,7 @@ app.get('/api/ventas/pendientes', async (req, res) => {
                 v.ID_VENTA,
                 v.CODIGO_VENTA,
                 v.FECHA_VENTA,
-                v.ESTADO_VENTA,
+                v.ESTADO_PAGO as ESTADO_VENTA,
                 v.ID_VEHICULO,
                 v.ID_CLIENTE_FACTURACION,
                 v.ID_VENDEDOR,
@@ -3831,67 +4880,32 @@ app.get('/api/ventas/pendientes', async (req, res) => {
                 -- Datos del vendedor
                 vend.NOMBRE_COMPLETO as VENDEDOR_NOMBRE,
                 
-                -- Datos de forma de pago
-                fp.ID_FORMA_PAGO,
-                fp.TIPO_VENTA,
-                fp.FORMA_PAGO,
-                fp.PLAZO_MESES,
-                fp.PRIMA,
-                fp.SALDO,
-                fp.ENTIDAD_FINANCIERA
+                -- ===== NUEVOS CAMPOS: Información de pago =====
+                -- Verificar si existe financiamiento
+                CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END as TIPO_VENTA,
+                
+                -- Plazo en meses (si existe)
+                f.PLAZO_MESES,
+                
+                -- Forma de pago desde detalle_pagos
+                (
+                    SELECT GROUP_CONCAT(DISTINCT dp.FORMA_PAGO SEPARATOR ', ')
+                    FROM DETALLE_PAGOS dp
+                    WHERE dp.ID_VENTA = v.ID_VENTA
+                ) as FORMA_PAGO
                 
             FROM VENTAS v
             INNER JOIN PERSONAS cf ON v.ID_CLIENTE_FACTURACION = cf.ID_PERSONA
             INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
             INNER JOIN CAT_MARCAS m ON veh.ID_MARCA = m.ID_MARCA
             INNER JOIN PERSONAS vend ON v.ID_VENDEDOR = vend.ID_PERSONA
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
-            WHERE v.ESTADO_VENTA = 'PENDIENTE DE FACTURAR'
+            LEFT JOIN FINANCIAMIENTOS f ON v.ID_VENTA = f.ID_VENTA
             ORDER BY v.FECHA_VENTA DESC
         `);
         
         await connection.end();
         
-        // Agrupar formas de pago por venta
-        const ventasMap = new Map();
-        ventas.forEach(row => {
-            if (!ventasMap.has(row.ID_VENTA)) {
-                ventasMap.set(row.ID_VENTA, {
-                    ID_VENTA: row.ID_VENTA,
-                    CODIGO_VENTA: row.CODIGO_VENTA,
-                    FECHA_VENTA: row.FECHA_VENTA,
-                    ESTADO_VENTA: row.ESTADO_VENTA,
-                    ID_VEHICULO: row.ID_VEHICULO,
-                    ID_CLIENTE_FACTURACION: row.ID_CLIENTE_FACTURACION,
-                    ID_VENDEDOR: row.ID_VENDEDOR,
-                    CLIENTE_NOMBRE: row.CLIENTE_NOMBRE,
-                    CLIENTE_IDENTIFICACION: row.CLIENTE_IDENTIFICACION,
-                    CLIENTE_TELEFONO: row.CLIENTE_TELEFONO,
-                    CLIENTE_EMAIL: row.CLIENTE_EMAIL,
-                    PLACA: row.PLACA,
-                    ESTILO: row.ESTILO,
-                    MODELO: row.MODELO,
-                    MARCA_NOMBRE: row.MARCA_NOMBRE,
-                    VEHICULO_DESCRIPCION: row.VEHICULO_DESCRIPCION,
-                    VENDEDOR_NOMBRE: row.VENDEDOR_NOMBRE,
-                    FORMAS_PAGO: []
-                });
-            }
-            
-            if (row.ID_FORMA_PAGO) {
-                ventasMap.get(row.ID_VENTA).FORMAS_PAGO.push({
-                    ID_FORMA_PAGO: row.ID_FORMA_PAGO,
-                    TIPO_VENTA: row.TIPO_VENTA,
-                    FORMA_PAGO: row.FORMA_PAGO,
-                    PLAZO_MESES: row.PLAZO_MESES,
-                    PRIMA: row.PRIMA,
-                    SALDO: row.SALDO,
-                    ENTIDAD_FINANCIERA: row.ENTIDAD_FINANCIERA
-                });
-            }
-        });
-        
-        res.json(Array.from(ventasMap.values()));
+        res.json(ventas);
         
     } catch (err) {
         console.error('Error al obtener ventas pendientes:', err);
@@ -3899,28 +4913,17 @@ app.get('/api/ventas/pendientes', async (req, res) => {
     }
 });
 
-// ===== API PARA OBTENER VENTA COMPLETA =====
+// ===== API PARA OBTENER VENTA COMPLETA (ACTUALIZADA) =====
 app.get('/api/ventas/:id/completo', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
         const ventaId = req.params.id;
         
-        // Datos de la venta
+        // Datos de la venta - INCLUIR ID_APROBADOR
         const [ventas] = await connection.execute(`
             SELECT v.*, 
-                   fp.ID_FORMA_PAGO,
-                   fp.TIPO_VENTA,
-                   fp.FORMA_PAGO,
-                   fp.PLAZO_MESES,
-                   fp.FECHA_PRIMER_PAGO,
-                   fp.ENTIDAD_FINANCIERA,
-                   fp.INTERES_NOMINAL,
-                   fp.INTERES_MORATORIO,
-                   fp.PRIMA,
-                   fp.SALDO,
-                   fp.ESTADO_PAGO
+                   v.ID_APROBADOR
             FROM VENTAS v
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
             WHERE v.ID_VENTA = ?
         `, [ventaId]);
         
@@ -3953,7 +4956,17 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
             [venta.ID_VENDEDOR]
         );
         
-        // Datos del vehículo
+        // ===== Datos del aprobador =====
+        let aprobador = null;
+        if (venta.ID_APROBADOR) {
+            const [aprobadores] = await connection.execute(
+                'SELECT * FROM PERSONAS WHERE ID_PERSONA = ?',
+                [venta.ID_APROBADOR]
+            );
+            aprobador = aprobadores[0] || null;
+        }
+        
+        // Datos del vehículo VENDIDO (el que se entrega al cliente)
         const [vehiculos] = await connection.execute(
             `SELECT v.*, 
                     m.NOMBRE as marca_nombre,
@@ -3969,13 +4982,69 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
             [venta.ID_VEHICULO]
         );
         
-        // Costos del vehículo
+        // Buscar vehículo RECIBIDO en intercambio
+        let vehiculoRecibido = null;
+        
+        const [vehiculosRecibidos] = await connection.execute(
+            `SELECT v.*, 
+                    m.NOMBRE as marca_nombre,
+                    c.NOMBRE as color_nombre,
+                    comb.NOMBRE as combustible_nombre,
+                    t.NOMBRE as transmision_nombre,
+                    cv.PRECIO_COMPRA as monto_recibido,
+                    cv.PRECIO_TRANSPASO as monto_traspaso
+             FROM VEHICULOS v
+             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+             LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+             LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+             WHERE v.ES_INTERCAMBIO = TRUE 
+             AND v.ID_VENTA_ORIGEN = ? 
+             LIMIT 1`,
+            [ventaId]
+        );
+        
+        if (vehiculosRecibidos.length > 0) {
+            vehiculoRecibido = vehiculosRecibidos[0];
+        }
+        
+        // Obtener financiamiento si existe
+        const [financiamientos] = await connection.execute(
+            `SELECT * FROM FINANCIAMIENTOS WHERE ID_VENTA = ?`,
+            [ventaId]
+        );
+        
+        // Obtener anticipos (cuotas)
+        let anticipos = [];
+        if (financiamientos.length > 0) {
+            const [anticiposResult] = await connection.execute(
+                `SELECT a.* 
+                 FROM ANTICIPOS a
+                 WHERE a.ID_FINANCIAMIENTO = ?
+                 ORDER BY a.FECHA_VENCIMIENTO ASC`,
+                [financiamientos[0].ID_FINANCIAMIENTOS]
+            );
+            anticipos = anticiposResult;
+        }
+        
+        // Obtener detalle de pagos
+        const [detallePagos] = await connection.execute(
+            `SELECT dp.*, cb.NOMBRE as banco_nombre
+             FROM DETALLE_PAGOS dp
+             LEFT JOIN CAT_BANCOS cb ON dp.ID_BANCO = cb.ID_BANCO
+             WHERE dp.ID_VENTA = ?
+             ORDER BY dp.FECHA_PAGO DESC`,
+            [ventaId]
+        );
+        
+        // Costos del vehículo vendido
         const [costos] = await connection.execute(
             'SELECT * FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ? ORDER BY FECHA_CALCULO DESC LIMIT 1',
             [venta.ID_VEHICULO]
         );
         
-        // Extras del vehículo
+        // Extras del vehículo vendido
         const [extras] = await connection.execute(
             'SELECT * FROM EXTRAS_VEHICULO WHERE ID_VEHICULO = ?',
             [venta.ID_VEHICULO]
@@ -3983,33 +5052,27 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
         
         await connection.end();
         
+        // Construir respuesta con todos los datos - INCLUIR APROBADOR
         res.json({
             ID_VENTA: venta.ID_VENTA,
             CODIGO_VENTA: venta.CODIGO_VENTA,
             FECHA_VENTA: venta.FECHA_VENTA,
-            ESTADO_VENTA: venta.ESTADO_VENTA,
+            ESTADO_VENTA: venta.ESTADO_PAGO,
             NOMBRE_NOTARIO: venta.NOMBRE_NOTARIO,
             PV_PURDI: venta.PV_PURDI,
             OBSERVACIONES_VENTA: venta.OBSERVACIONES_VENTA,
             CLIENTE_FACTURACION: clientesFact[0] || null,
             CLIENTE_INSCRIPCION: clienteInscripcion,
             VENDEDOR: vendedores[0] || null,
+            APROBADOR: aprobador, // <-- NUEVO: Aprobador
             VEHICULO: vehiculos[0] || null,
-            COSTOS: costos,
+            VEHICULO_RECIBIDO: vehiculoRecibido,
+            ES_INTERCAMBIO: vehiculoRecibido !== null,
+            COSTOS: costos[0] || null, // Cambiado a objeto en lugar de array
             EXTRAS: extras,
-            FORMA_PAGO: {
-                ID_FORMA_PAGO: venta.ID_FORMA_PAGO,
-                TIPO_VENTA: venta.TIPO_VENTA,
-                FORMA_PAGO: venta.FORMA_PAGO,
-                PLAZO_MESES: venta.PLAZO_MESES,
-                FECHA_PRIMER_PAGO: venta.FECHA_PRIMER_PAGO,
-                ENTIDAD_FINANCIERA: venta.ENTIDAD_FINANCIERA,
-                INTERES_NOMINAL: venta.INTERES_NOMINAL,
-                INTERES_MORATORIO: venta.INTERES_MORATORIO,
-                PRIMA: venta.PRIMA,
-                SALDO: venta.SALDO,
-                ESTADO_PAGO: venta.ESTADO_PAGO
-            }
+            FINANCIAMIENTO: financiamientos[0] || null,
+            ANTICIPOS: anticipos,
+            DETALLE_PAGOS: detallePagos
         });
         
     } catch (err) {
@@ -4021,15 +5084,41 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
 // ===== API PARA APROBAR VENTA =====
 app.put('/api/ventas/:id/aprobar', async (req, res) => {
     try {
-        const { estado, observaciones } = req.body;
+        const { 
+            estado, 
+            observaciones,
+            subtotal,
+            descuento_global,
+            impuestos,
+            total,
+            exonerar_imp,
+            items,
+            id_aprobador 
+        } = req.body;
+        
         const connection = await mysql.createConnection(dbConfig);
         
         const [result] = await connection.execute(
             `UPDATE VENTAS 
-             SET ESTADO_VENTA = ?, 
-                 OBSERVACIONES_VENTA = CONCAT(COALESCE(OBSERVACIONES_VENTA, ''), '\n', ?)
+             SET ESTADO_PAGO = ?, 
+                 OBSERVACIONES_VENTA = CONCAT(COALESCE(OBSERVACIONES_VENTA, ''), '\n', ?),
+                 FECHA_APROBACION = NOW(),
+                 ID_APROBADOR = ?,
+                 SUB_TOTAL = ?,
+                 DESCUENTO_GLOBAL = ?,
+                 TOTAL = ?,
+                 EXONERAR_IMP = ?
              WHERE ID_VENTA = ?`,
-            [estado || 'YA FUE FACTURADA', observaciones || 'Aprobada en facturación', req.params.id]
+            [
+                estado || 'YA FUE FACTURADA', 
+                observaciones || 'Aprobada en facturación',
+                id_aprobador,  // ← Usamos el ID que viene del frontend
+                subtotal || 0,
+                descuento_global || 0,
+                total || 0,
+                exonerar_imp || false,
+                req.params.id
+            ]
         );
         
         if (result.affectedRows === 0) {
@@ -4041,11 +5130,15 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
         await connection.execute(
             `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) 
              VALUES (?, 'APROBAR_VENTA', ?)`,
-            [req.user?.id || 1, `Venta ${req.params.id} aprobada`]
+            [id_aprobador, `Venta ${req.params.id} aprobada. Total: ${total}`]
         );
         
         await connection.end();
-        res.json({ message: 'Venta aprobada exitosamente' });
+        res.json({ 
+            message: 'Venta aprobada exitosamente',
+            id_aprobador: id_aprobador,
+            fecha_aprobacion: new Date()
+        });
         
     } catch (err) {
         console.error('Error al aprobar venta:', err);
@@ -4061,7 +5154,7 @@ app.put('/api/ventas/:id/rechazar', async (req, res) => {
         
         const [result] = await connection.execute(
             `UPDATE VENTAS 
-             SET ESTADO_VENTA = ?, 
+             SET ESTADO_PAGO = ?, 
                  OBSERVACIONES_VENTA = CONCAT(COALESCE(OBSERVACIONES_VENTA, ''), '\n', ?)
              WHERE ID_VENTA = ?`,
             [estado || 'PLAN YA FUE ANULADO', motivo || 'Rechazada en facturación', req.params.id]
@@ -4088,76 +5181,1329 @@ app.put('/api/ventas/:id/rechazar', async (req, res) => {
     }
 });
 
-// ===== API PARA CREAR VENTA DE PRUEBA =====
-app.post('/api/ventas/test', async (req, res) => {
+// ===== API PARA CREAR PLAN DE VENTA COMPLETO =====
+app.post('/api/plan-ventas', async (req, res) => {
+    const {
+        codigo_venta,
+        fecha_venta,
+        nombre_notario,
+        id_vendedor,
+        pv_purdi,
+        estado_venta,
+        cliente_facturar,
+        cliente_inscribir,
+        vehiculo,
+        vehiculo_recibir,
+        forma_pago,
+        financiamiento,
+        anticipos,
+        detalle_pagos
+    } = req.body;
+
+    if (!id_vendedor) return res.status(400).json({ error: 'El vendedor es requerido' });
+    if (!vehiculo?.id_vehiculo && !vehiculo?.chasis) return res.status(400).json({ error: 'El vehículo es requerido' });
+
+    const connection = await mysql.createConnection(dbConfig);
+
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        // Verificar si hay vehículos disponibles
-        const [vehiculos] = await connection.execute(
-            'SELECT ID_VEHICULO FROM VEHICULOS WHERE ESTADO = "COMPRADO" LIMIT 1'
+        await connection.beginTransaction();
+
+        // ─── 1 & 2. CLIENTES ─────────────────────────────────────────
+        const mismaCedula = cliente_facturar?.identificacion &&
+                            cliente_inscribir?.identificacion &&
+                            cliente_facturar.identificacion === cliente_inscribir.identificacion;
+
+        // Función auxiliar para crear/obtener persona
+        async function upsertPersona(conn, datos, idRol) {
+            let idPersona = datos?.id_persona_existente || null;
+
+            if (!idPersona && datos?.identificacion) {
+                const [existe] = await conn.execute(
+                    'SELECT ID_PERSONA FROM PERSONAS WHERE IDENTIFICACION = ?',
+                    [datos.identificacion]
+                );
+                if (existe.length > 0) {
+                    idPersona = existe[0].ID_PERSONA;
+                    await conn.execute(
+                        `UPDATE PERSONAS SET NOMBRE_COMPLETO=?,TELEFONO_PRINCIPAL=?,TELEFONO_SECUNDARIO=?,
+                        ID_ESTADO_CIVIL=?,OCUPACION=?,DIRECCION=?,EMAIL=?,NACIONALIDAD=?,TIPO_DOCUMENTO=?
+                        WHERE ID_PERSONA=?`,
+                        [datos.nombre_completo, datos.telefono_principal, datos.telefono_secundario,
+                        datos.id_estado_civil||null, datos.ocupacion||null, datos.direccion||null,
+                        datos.email||null, datos.nacionalidad||null, datos.tipo_documento||null, idPersona]
+                    );
+                } else {
+                    const [r] = await conn.execute(
+                        `INSERT INTO PERSONAS (TIPO_DOCUMENTO,IDENTIFICACION,NOMBRE_COMPLETO,TELEFONO_PRINCIPAL,
+                        TELEFONO_SECUNDARIO,ID_ESTADO_CIVIL,OCUPACION,DIRECCION,EMAIL,NACIONALIDAD,ESTADO)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,'ACTIVO')`,
+                        [datos.tipo_documento||null, datos.identificacion, datos.nombre_completo,
+                        datos.telefono_principal||null, datos.telefono_secundario||null,
+                        datos.id_estado_civil||null, datos.ocupacion||null, datos.direccion||null,
+                        datos.email||null, datos.nacionalidad||null]
+                    );
+                    idPersona = r.insertId;
+                }
+            }
+
+            if (idPersona) {
+                // Eliminar roles anteriores de cliente y asignar el correcto
+                await conn.execute(
+                    `DELETE FROM PERSONAS_ROLES WHERE ID_PERSONA = ? AND ID_ROL IN (1,2,3)`,
+                    [idPersona]
+                );
+                await conn.execute(
+                    `INSERT IGNORE INTO PERSONAS_ROLES (ID_PERSONA, ID_ROL, ESTADO) VALUES (?,?,'ACTIVO')`,
+                    [idPersona, idRol]
+                );
+            }
+
+            return idPersona;
+        }
+
+        let idClienteFacturar, idClienteInscribir;
+
+        if (mismaCedula) {
+            // Misma persona → Rol 3 (Cliente Ambos)
+            idClienteFacturar = await upsertPersona(connection, cliente_facturar, 3);
+            idClienteInscribir = idClienteFacturar;
+        } else {
+            // Personas distintas → Rol 1 y Rol 2 respectivamente
+            idClienteFacturar  = await upsertPersona(connection, cliente_facturar,  1);
+            idClienteInscribir = await upsertPersona(connection, cliente_inscribir, 2);
+        }
+
+        // ─── 3. VEHÍCULO VENDIDO ─────────────────────────────────────────
+        let idVehiculo = vehiculo?.id_vehiculo || null;
+        if (!idVehiculo && vehiculo?.chasis) {
+            const [existeVeh] = await connection.execute(
+                'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?',
+                [vehiculo.chasis]
+            );
+            if (existeVeh.length > 0) {
+                idVehiculo = existeVeh[0].ID_VEHICULO;
+            } else {
+                // Crear vehículo nuevo
+                const [rVeh] = await connection.execute(
+                    `INSERT INTO VEHICULOS (
+                        ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
+                        ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO,
+                        TRACCION, CARROCERIA, C_C, CILINDROS,
+                        KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, FECHA_INGRESO,
+                        PV, ESTADO, OBSERVACIONES
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        null, vehiculo.chasis, vehiculo.motor || null, vehiculo.placa || null, 
+                        vehiculo.id_marca, vehiculo.modelo,
+                        vehiculo.id_color || null, vehiculo.id_combustible || null, 
+                        vehiculo.id_transmision || null, vehiculo.estilo || null,
+                        vehiculo.traccion || null, vehiculo.carroceria || null,
+                        vehiculo.cc || null, vehiculo.cilindros || null,
+                        vehiculo.kilometraje_actual || 0, vehiculo.kilometraje_anterior || 0,
+                        new Date().toISOString().split('T')[0],
+                        vehiculo.pv || null, 'COMPRADO', vehiculo.observaciones || null
+                    ]
+                );
+                idVehiculo = rVeh.insertId;
+            }
+        }
+
+        if (!idVehiculo) {
+            throw new Error('No se pudo determinar el vehículo');
+        }
+
+        // ─── VEHÍCULO A RECIBIR (INTERCAMBIO) ──────────────────────────
+        let idVehRecibir = null;
+        const vr = vehiculo_recibir;
+
+        const tieneIntercambio = vr && (
+            (vr.placa && vr.placa.trim() !== '') || 
+            (vr.chasis && vr.chasis.trim() !== '')
         );
-        
-        if (vehiculos.length === 0) {
-            await connection.end();
-            return res.status(400).json({ error: 'No hay vehículos disponibles para crear ventas de prueba' });
+
+        if (tieneIntercambio) {
+            console.log('Procesando intercambio - Vehículo recibido:', vr);
+            
+            const idClienteOrigen = idClienteInscribir || idClienteFacturar;
+            
+            if (!idClienteOrigen) {
+                throw new Error('Para un intercambio se requiere un cliente');
+            }
+            
+            // Buscar si el vehículo ya existe por chasis o placa
+            if (vr.chasis) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', 
+                    [vr.chasis]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+            
+            if (!idVehRecibir && vr.placa) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', 
+                    [vr.placa]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+            
+            if (!idVehRecibir) {
+                // Es un vehículo nuevo en el sistema
+                const [rVR] = await connection.execute(
+                    `INSERT INTO VEHICULOS (
+                        ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
+                        ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
+                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV, 
+                        ESTADO, OBSERVACIONES,
+                        ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        idClienteOrigen,
+                        vr.chasis||null, 
+                        vr.motor||null, 
+                        vr.placa||null,
+                        vr.id_marca||1, 
+                        vr.modelo||new Date().getFullYear(),
+                        vr.id_color||null, 
+                        vr.id_combustible||null, 
+                        vr.id_transmision||null,
+                        vr.estilo||null, 
+                        vr.traccion||null, 
+                        vr.carroceria||null,
+                        vr.cc||null, 
+                        vr.cilindros||null,
+                        vr.kilometraje_actual||0, 
+                        vr.kilometraje_anterior||0,
+                        vr.pv||null, 
+                        'COMPRADO',
+                        vr.observaciones || 'Vehículo recibido en intercambio.',
+                        true,
+                        idClienteOrigen,
+                        new Date()
+                    ]
+                );
+                idVehRecibir = rVR.insertId;
+            } else {
+                // El vehículo ya existía, actualizamos su estado
+                await connection.execute(
+                    `UPDATE VEHICULOS SET 
+                        ESTADO = 'COMPRADO',
+                        ES_INTERCAMBIO = TRUE,
+                        ID_CLIENTE_ORIGEN = ?,
+                        FECHA_RECEPCION = ?,
+                        KILOMETRAJE_ACTUAL = ?,
+                        OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
+                    WHERE ID_VEHICULO = ?`,
+                    [
+                        idClienteOrigen,
+                        new Date(),
+                        vr.kilometraje_actual || 0,
+                        idVehRecibir
+                    ]
+                );
+            }
+            
+            // Guardar el monto del intercambio en COSTOS_VEHICULO
+            if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
+                const [costoExistente] = await connection.execute(
+                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
+                    [idVehRecibir]
+                );
+                
+                if (costoExistente.length === 0) {
+                    await connection.execute(
+                        `INSERT INTO COSTOS_VEHICULO (
+                            ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO
+                        ) VALUES (?,?,?,?,?)`,
+                        [
+                            idVehRecibir, 
+                            vr.monto_recibido, 
+                            vr.monto_traspaso || 0,
+                            vr.monto_recibido,
+                            vr.monto_recibido
+                        ]
+                    );
+                } else {
+                    await connection.execute(
+                        `UPDATE COSTOS_VEHICULO SET 
+                            PRECIO_COMPRA = ?,
+                            PRECIO_TRANSPASO = ?,
+                            TOTAL_INVERSION = ?,
+                            PRECIO_COSTO = ?
+                        WHERE ID_VEHICULO = ?`,
+                        [
+                            vr.monto_recibido,
+                            vr.monto_traspaso || 0,
+                            vr.monto_recibido,
+                            vr.monto_recibido,
+                            idVehRecibir
+                        ]
+                    );
+                }
+            }
+        }
+
+        // ─── 4. CREAR VENTA ───────────────────────────────────────
+        let codigoFinal = codigo_venta;
+        if (!codigoFinal || codigoFinal === 'NUEVO') {
+            const [lastVenta] = await connection.execute(
+                `SELECT CODIGO_VENTA FROM VENTAS ORDER BY ID_VENTA DESC LIMIT 1`
+            );
+            let nextNum = 1;
+            if (lastVenta.length > 0) {
+                const match = lastVenta[0].CODIGO_VENTA.match(/\d+$/);
+                if (match) nextNum = parseInt(match[0]) + 1;
+            }
+            codigoFinal = 'V' + String(nextNum).padStart(4, '0');
         }
         
-        // Verificar si hay clientes
-        const [clientes] = await connection.execute(
-            'SELECT ID_PERSONA FROM PERSONAS WHERE ESTADO = "ACTIVO" LIMIT 1'
-        );
-        
-        if (clientes.length === 0) {
-            await connection.end();
-            return res.status(400).json({ error: 'No hay clientes registrados' });
-        }
-        
-        // Verificar si hay vendedores
-        const [vendedores] = await connection.execute(
-            `SELECT p.ID_PERSONA FROM PERSONAS p
-             INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
-             WHERE pr.ID_ROL = 5 AND pr.ESTADO = 'ACTIVO' AND p.ESTADO = 'ACTIVO'
-             LIMIT 1`
-        );
-        
-        if (vendedores.length === 0) {
-            await connection.end();
-            return res.status(400).json({ error: 'No hay vendedores registrados' });
-        }
-        
-        // Crear venta de prueba
-        const codigoVenta = 'TEST-' + Date.now().toString().slice(-6);
-        const [result] = await connection.execute(
+        const [rv] = await connection.execute(
             `INSERT INTO VENTAS (
-                CODIGO_VENTA, ID_VEHICULO, ID_CLIENTE_FACTURACION, 
-                ID_VENDEDOR, FECHA_VENTA, ESTADO_VENTA
-            ) VALUES (?, ?, ?, ?, NOW(), 'PENDIENTE DE FACTURAR')`,
-            [codigoVenta, vehiculos[0].ID_VEHICULO, clientes[0].ID_PERSONA, vendedores[0].ID_PERSONA]
+                CODIGO_VENTA, ID_VEHICULO, ID_CLIENTE_FACTURACION, ID_CLIENTE_INSCRIPCION,
+                ID_VENDEDOR, NOMBRE_NOTARIO, FECHA_VENTA, PV_PURDI, ESTADO_PAGO
+            ) VALUES (?,?,?,?,?,?,?,?,?)`,
+            [
+                codigoFinal, idVehiculo, idClienteFacturar, idClienteInscribir||null,
+                id_vendedor, nombre_notario||null, fecha_venta||new Date(),
+                pv_purdi||null, estado_venta || 'PENDIENTE DE FACTURAR'
+            ]
         );
-        
-        // Crear forma de pago de prueba
+        const idVenta = rv.insertId;
+
+        // Si hay intercambio, actualizar ID_VENTA_ORIGEN en el vehículo recibido
+        if (idVehRecibir) {
+            await connection.execute(
+                `UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?`,
+                [idVenta, idVehRecibir]
+            );
+        }
+
+        // ─── 5. FINANCIAMIENTO (si es crédito) ────────────────────
+        let idFinanciamiento = null;
+        if (forma_pago?.tipo_venta === 'credito' || forma_pago?.tipo_venta === 'CREDITO') {
+            if (!financiamiento) {
+                console.warn('No hay datos de financiamiento aunque la venta es a crédito');
+            } else {
+                // Insertar financiamiento
+                const [rf] = await connection.execute(
+                    `INSERT INTO FINANCIAMIENTOS (
+                        ID_VENTA, VALOR_CONSUMO, PRIMA, HONORARIOS, MONTO_FINANCIAR,
+                        COMISION, TOTAL, TASA_NOMINAL, TASA_MENSUAL, INTERES_MORATORIO,
+                        INTERESXADELANTO, PRESTAMO_TOTAL, PLAZO_MESES, FECHA_PRIMERPAGO,
+                        ENTIDAD_FINANCIERA, CUOTA_MENSUAL, OBSERVACIONES, INTERESES_TOTAL
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                [
+                    idVenta,
+                    financiamiento.valor_consumo || 0,
+                    financiamiento.prima || 0,
+                    financiamiento.honorarios || 0,
+                    financiamiento.monto_financiar || 0,
+                    financiamiento.comision || 0,
+                    financiamiento.total || 0,
+                    financiamiento.tasa_nominal || 0,
+                    financiamiento.tasa_mensual || 0,
+                    financiamiento.interes_moratorio || 0,
+                    financiamiento.intereses_adelantado || 0,
+                    financiamiento.prestamo_total || 0,
+                    financiamiento.plazo_meses || 0,
+                    financiamiento.fecha_primer_pago || null,
+                    financiamiento.entidad_financiera || null,
+                    financiamiento.cuota_mensual || 0,
+                    financiamiento.observaciones || null,
+                    financiamiento.intereses_total || 0
+                ]
+            )};
+            idFinanciamiento = rf.insertId;
+        }
+
+        // ─── 6. ANTICIPOS (cuotas del crédito) ────────────────────
+        if (Array.isArray(anticipos) && anticipos.length > 0 && idFinanciamiento) {
+            for (const a of anticipos) {
+                await connection.execute(
+                    `INSERT INTO ANTICIPOS (
+                        ID_FINANCIAMIENTO, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
+                        MONTO_DOLARES, MONEDA, TIPO_CAMBIO, REALIZADO_POR, SALDO_PENDIENTE,
+                        FECHA_ANTICIPO, FECHA_VENCIMIENTO, OBSERVACIONES, ESTADO_ANTICIPO
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        idFinanciamiento,
+                        a.forma_pago || a.FORMA_PAGO || 'EFECTIVO',
+                        a.num_documento || a.NUM_DOCUMENTO || `CUOTA-${a.numero_cuota || 1}`,
+                        parseFloat(a.monto_colones || a.MONTO_COLONES) || 0,
+                        parseFloat(a.monto_dolares || a.MONTO_DOLARES) || 0,
+                        a.moneda || 'CRC',
+                        parseFloat(a.tipo_cambio || a.TIPO_CAMBIO) || 1,
+                        a.realizado_por || a.REALIZADO_POR || id_vendedor,
+                        parseFloat(a.saldo_pendiente || a.SALDO_PENDIENTE) || 0,
+                        a.fecha_anticipo || a.FECHA_ANTICIPO || new Date().toISOString().split('T')[0],
+                        a.fecha_vencimiento || a.FECHA_VENCIMIENTO || null,
+                        a.observaciones || a.OBSERVACIONES || null,
+                        'PENDIENTE'
+                    ]
+                );
+            }
+        }
+
+        // ─── 7. DETALLE_PAGOS (pagos iniciales) ───────────────────
+        if (Array.isArray(detalle_pagos) && detalle_pagos.length > 0) {
+            for (const dp of detalle_pagos) {
+                await connection.execute(
+                    `INSERT INTO DETALLE_PAGOS (
+                        ID_VENTA, ID_ANTICIPO, TIPO_VENTA, FORMA_PAGO,
+                        ID_BANCO, EFECTIVO, TRANSFERENCIA, NUM_TRANSFERENCIA,
+                        NOM_DEPOSITANTE, TARJETA, NUMERO_TARJETA, TIPO_TARJETA,
+                        DETALLE, MONEDA, TIPO_CAMBIO, FECHA_PAGO, ESTADO_PAGO, OBSERVACIONES
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        idVenta,
+                        dp.id_anticipo || null,
+                        forma_pago?.tipo_venta || 'CONTADO',
+                        dp.forma_pago || null,
+                        dp.id_banco || null,
+                        parseFloat(dp.efectivo) || 0,
+                        parseFloat(dp.transferencia) || 0,
+                        dp.num_transferencia || null,
+                        dp.nom_deposita || null,
+                        parseFloat(dp.tarjeta) || 0,
+                        dp.num_tarjeta || null,
+                        dp.tipo_tarjeta || null,
+                        dp.detalle || null,
+                        dp.moneda || 'CRC',
+                        parseFloat(dp.tipo_cambio) || 1,
+                        dp.fecha_pago || new Date().toISOString().split('T')[0],
+                        'COMPLETADO',
+                        dp.observaciones || null
+                    ]
+                );
+            }
+        }
+
+        // ─── 8. Actualizar estado del vehículo a VENDIDO ──────────
+        if (idVehiculo) {
+            await connection.execute(
+                'UPDATE VEHICULOS SET ESTADO = "VENDIDO" WHERE ID_VEHICULO = ?',
+                [idVehiculo]
+            );
+        }
+
+        // ─── 9. Auditoría ─────────────────────────────────────────
         await connection.execute(
-            `INSERT INTO FORMAS_PAGO (
-                ID_VENTA, TIPO_VENTA, FORMA_PAGO, PRIMA, SALDO
-            ) VALUES (?, 'CONTADO', 'EFECTIVO', 5000000, 0)`,
-            [result.insertId]
+            `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) VALUES (?,?,?)`,
+            [id_vendedor, 'CREAR_PLAN_VENTA', `Plan de venta ${codigoFinal} creado`]
         );
-        
+
+        await connection.commit();
         await connection.end();
-        
-        res.json({ 
-            message: 'Venta de prueba creada exitosamente',
-            id_venta: result.insertId,
-            codigo: codigoVenta
+
+        res.status(201).json({
+            id_venta:    idVenta,
+            codigo_venta: codigoFinal,
+            id_financiamiento: idFinanciamiento,
+            message:     'Plan de venta creado exitosamente'
         });
-        
+
     } catch (err) {
-        console.error('Error al crear venta de prueba:', err);
+        await connection.rollback();
+        await connection.end();
+        console.error('Error al crear plan de venta:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Ya existe un plan con ese código o el vehículo ya fue vendido' });
+        }
         res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
     }
 });
 
+// ===== API PARA ACTUALIZAR PLAN DE VENTA EXISTENTE =====
+app.put('/api/plan-ventas/:id', async (req, res) => {
+    const ventaId = req.params.id;
+    const {
+        codigo_venta,
+        fecha_venta,
+        nombre_notario,
+        id_vendedor,
+        pv_purdi,
+        estado_venta,
+        cliente_facturar,
+        cliente_inscribir,
+        vehiculo,
+        vehiculo_recibir,
+        forma_pago,
+        financiamiento,
+        anticipos,
+        detalle_pagos
+    } = req.body;
+
+    const connection = await mysql.createConnection(dbConfig);
+
+    try {
+        await connection.beginTransaction();
+
+        // Verificar que la venta existe
+        const [ventaExistente] = await connection.execute(
+            'SELECT * FROM VENTAS WHERE ID_VENTA = ?',
+            [ventaId]
+        );
+
+        if (ventaExistente.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Venta no encontrada' });
+        }
+
+        // ─── 1. ACTUALIZAR CLIENTES si es necesario ──────────────────
+        const mismaCedula = cliente_facturar?.identificacion &&
+                            cliente_inscribir?.identificacion &&
+                            cliente_facturar.identificacion === cliente_inscribir.identificacion;
+
+        async function upsertPersona(conn, datos, idRol) {
+            let idPersona = datos?.id_persona_existente || null;
+
+            if (!idPersona && datos?.identificacion) {
+                const [existe] = await conn.execute(
+                    'SELECT ID_PERSONA FROM PERSONAS WHERE IDENTIFICACION = ?',
+                    [datos.identificacion]
+                );
+                if (existe.length > 0) {
+                    idPersona = existe[0].ID_PERSONA;
+                    await conn.execute(
+                        `UPDATE PERSONAS SET NOMBRE_COMPLETO=?,TELEFONO_PRINCIPAL=?,TELEFONO_SECUNDARIO=?,
+                        ID_ESTADO_CIVIL=?,OCUPACION=?,DIRECCION=?,EMAIL=?,NACIONALIDAD=?,TIPO_DOCUMENTO=?
+                        WHERE ID_PERSONA=?`,
+                        [datos.nombre_completo, datos.telefono_principal, datos.telefono_secundario,
+                        datos.id_estado_civil||null, datos.ocupacion||null, datos.direccion||null,
+                        datos.email||null, datos.nacionalidad||null, datos.tipo_documento||null, idPersona]
+                    );
+                } else {
+                    const [r] = await conn.execute(
+                        `INSERT INTO PERSONAS (TIPO_DOCUMENTO,IDENTIFICACION,NOMBRE_COMPLETO,TELEFONO_PRINCIPAL,
+                        TELEFONO_SECUNDARIO,ID_ESTADO_CIVIL,OCUPACION,DIRECCION,EMAIL,NACIONALIDAD,ESTADO)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,'ACTIVO')`,
+                        [datos.tipo_documento||null, datos.identificacion, datos.nombre_completo,
+                        datos.telefono_principal||null, datos.telefono_secundario||null,
+                        datos.id_estado_civil||null, datos.ocupacion||null, datos.direccion||null,
+                        datos.email||null, datos.nacionalidad||null]
+                    );
+                    idPersona = r.insertId;
+                }
+            }
+
+            if (idPersona) {
+                await conn.execute(
+                    `DELETE FROM PERSONAS_ROLES WHERE ID_PERSONA = ? AND ID_ROL IN (1,2,3)`,
+                    [idPersona]
+                );
+                await conn.execute(
+                    `INSERT IGNORE INTO PERSONAS_ROLES (ID_PERSONA, ID_ROL, ESTADO) VALUES (?,?,'ACTIVO')`,
+                    [idPersona, idRol]
+                );
+            }
+
+            return idPersona;
+        }
+
+        let idClienteFacturar, idClienteInscribir;
+
+        if (mismaCedula) {
+            idClienteFacturar = await upsertPersona(connection, cliente_facturar, 3);
+            idClienteInscribir = idClienteFacturar;
+        } else {
+            idClienteFacturar  = await upsertPersona(connection, cliente_facturar,  1);
+            idClienteInscribir = await upsertPersona(connection, cliente_inscribir, 2);
+        }
+
+        // ─── 2. ACTUALIZAR VEHÍCULO VENDIDO si es necesario ───────
+        let idVehiculo = vehiculo?.id_vehiculo || ventaExistente[0].ID_VEHICULO;
+        
+        if (vehiculo?.id_vehiculo && vehiculo.id_vehiculo !== ventaExistente[0].ID_VEHICULO) {
+            // Actualizar el ID_VEHICULO en la venta
+            await connection.execute(
+                'UPDATE VENTAS SET ID_VEHICULO = ? WHERE ID_VENTA = ?',
+                [vehiculo.id_vehiculo, ventaId]
+            );
+        }
+
+        // ─── 3. VEHÍCULO A RECIBIR (INTERCAMBIO) ─────────────────
+        let idVehRecibir = null;
+        const vr = vehiculo_recibir;
+
+        const tieneIntercambio = vr && (
+            (vr.placa && vr.placa.trim() !== '') || 
+            (vr.chasis && vr.chasis.trim() !== '')
+        );
+
+        if (tieneIntercambio) {
+            console.log('Procesando intercambio - Vehículo recibido:', vr);
+            
+            const idClienteOrigen = idClienteInscribir || idClienteFacturar;
+            
+            if (!idClienteOrigen) {
+                throw new Error('Para un intercambio se requiere un cliente');
+            }
+            
+            if (vr.chasis) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', 
+                    [vr.chasis]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+            
+            if (!idVehRecibir && vr.placa) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', 
+                    [vr.placa]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+            
+            if (!idVehRecibir) {
+                const [rVR] = await connection.execute(
+                    `INSERT INTO VEHICULOS (
+                        ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
+                        ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
+                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV, 
+                        ESTADO, OBSERVACIONES,
+                        ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        idClienteOrigen,
+                        vr.chasis||null, 
+                        vr.motor||null, 
+                        vr.placa||null,
+                        vr.id_marca||1, 
+                        vr.modelo||new Date().getFullYear(),
+                        vr.id_color||null, 
+                        vr.id_combustible||null, 
+                        vr.id_transmision||null,
+                        vr.estilo||null, 
+                        vr.traccion||null, 
+                        vr.carroceria||null,
+                        vr.cc||null, 
+                        vr.cilindros||null,
+                        vr.kilometraje_actual||0, 
+                        vr.kilometraje_anterior||0,
+                        vr.pv||null, 
+                        'COMPRADO',
+                        vr.observaciones || 'Vehículo recibido en intercambio.',
+                        true,
+                        idClienteOrigen,
+                        new Date()
+                    ]
+                );
+                idVehRecibir = rVR.insertId;
+            } else {
+                await connection.execute(
+                    `UPDATE VEHICULOS SET 
+                        ESTADO = 'COMPRADO',
+                        ES_INTERCAMBIO = TRUE,
+                        ID_CLIENTE_ORIGEN = ?,
+                        FECHA_RECEPCION = ?,
+                        KILOMETRAJE_ACTUAL = ?,
+                        OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
+                    WHERE ID_VEHICULO = ?`,
+                    [
+                        idClienteOrigen,
+                        new Date(),
+                        vr.kilometraje_actual || 0,
+                        idVehRecibir
+                    ]
+                );
+            }
+            
+            if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
+                const [costoExistente] = await connection.execute(
+                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
+                    [idVehRecibir]
+                );
+                
+                if (costoExistente.length === 0) {
+                    await connection.execute(
+                        `INSERT INTO COSTOS_VEHICULO (
+                            ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO
+                        ) VALUES (?,?,?,?,?)`,
+                        [
+                            idVehRecibir, 
+                            vr.monto_recibido, 
+                            vr.monto_traspaso || 0,
+                            vr.monto_recibido,
+                            vr.monto_recibido
+                        ]
+                    );
+                } else {
+                    await connection.execute(
+                        `UPDATE COSTOS_VEHICULO SET 
+                            PRECIO_COMPRA = ?,
+                            PRECIO_TRANSPASO = ?,
+                            TOTAL_INVERSION = ?,
+                            PRECIO_COSTO = ?
+                        WHERE ID_VEHICULO = ?`,
+                        [
+                            vr.monto_recibido,
+                            vr.monto_traspaso || 0,
+                            vr.monto_recibido,
+                            vr.monto_recibido,
+                            idVehRecibir
+                        ]
+                    );
+                }
+            }
+        }
+
+        // ─── 4. ACTUALIZAR DATOS DE LA VENTA ─────────────────────
+        await connection.execute(
+            `UPDATE VENTAS SET
+                NOMBRE_NOTARIO = COALESCE(?, NOMBRE_NOTARIO),
+                FECHA_VENTA = COALESCE(?, FECHA_VENTA),
+                PV_PURDI = COALESCE(?, PV_PURDI),
+                ESTADO_PAGO = COALESCE(?, ESTADO_PAGO)
+            WHERE ID_VENTA = ?`,
+            [
+                nombre_notario || null,
+                fecha_venta || null,
+                pv_purdi || null,
+                estado_venta || 'PENDIENTE DE FACTURAR',
+                ventaId
+            ]
+        );
+
+        // Si hay intercambio, actualizar ID_VENTA_ORIGEN en el vehículo recibido
+        if (idVehRecibir) {
+            await connection.execute(
+                `UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?`,
+                [ventaId, idVehRecibir]
+            );
+        }
+
+        // ─── 5. VERIFICAR SI YA EXISTE FINANCIAMIENTO ────────────
+        const [financiamientoExistente] = await connection.execute(
+            'SELECT ID_FINANCIAMIENTOS FROM FINANCIAMIENTOS WHERE ID_VENTA = ?',
+            [ventaId]
+        );
+
+        let idFinanciamiento = null;
+
+        // ─── 6. MANEJAR FINANCIAMIENTO (si es crédito) ───────────
+        if (forma_pago?.tipo_venta === 'credito' || forma_pago?.tipo_venta === 'CREDITO') {
+            if (financiamientoExistente.length > 0) {
+                // Actualizar financiamiento existente
+                idFinanciamiento = financiamientoExistente[0].ID_FINANCIAMIENTOS;
+                
+                await connection.execute(
+                    `UPDATE FINANCIAMIENTOS SET
+                        VALOR_CONSUMO = ?,
+                        PRIMA = ?,
+                        HONORARIOS = ?,
+                        MONTO_FINANCIAR = ?,
+                        COMISION = ?,
+                        TOTAL = ?,
+                        TASA_NOMINAL = ?,
+                        TASA_MENSUAL = ?,
+                        INTERES_MORATORIO = ?,
+                        INTERESXADELANTO = ?,
+                        PRESTAMO_TOTAL = ?,
+                        PLAZO_MESES = ?,
+                        FECHA_PRIMERPAGO = ?,
+                        ENTIDAD_FINANCIERA = ?,
+                        CUOTA_MENSUAL = ?,
+                        OBSERVACIONES = ?,
+                        INTERESES_TOTAL = ?
+                    WHERE ID_FINANCIAMIENTOS = ?`,
+                    [
+                        financiamiento.valor_consumo || 0,
+                        financiamiento.prima || 0,
+                        financiamiento.honorarios || 0,
+                        financiamiento.monto_financiar || 0,
+                        financiamiento.comision || 0,
+                        financiamiento.total || 0,
+                        financiamiento.tasa_nominal || 0,
+                        financiamiento.tasa_mensual || 0,
+                        financiamiento.interes_moratorio || 0,
+                        financiamiento.intereses_adelantado || 0,
+                        financiamiento.prestamo_total || 0,
+                        financiamiento.plazo_meses || 0,
+                        financiamiento.fecha_primer_pago || null,
+                        financiamiento.entidad_financiera || null,
+                        financiamiento.cuota_mensual || 0,
+                        financiamiento.observaciones || null,
+                        financiamiento.intereses_total || 0,
+                        idFinanciamiento
+                    ]
+                );
+            } else if (financiamiento) {
+                // Crear nuevo financiamiento
+                const [rf] = await connection.execute(
+                    `INSERT INTO FINANCIAMIENTOS (
+                        ID_VENTA, VALOR_CONSUMO, PRIMA, HONORARIOS, MONTO_FINANCIAR,
+                        COMISION, TOTAL, TASA_NOMINAL, TASA_MENSUAL, INTERES_MORATORIO,
+                        INTERESXADELANTO, PRESTAMO_TOTAL, PLAZO_MESES, FECHA_PRIMERPAGO,
+                        ENTIDAD_FINANCIERA, CUOTA_MENSUAL, OBSERVACIONES, INTERESES_TOTAL
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        ventaId,
+                        financiamiento.valor_consumo || 0,
+                        financiamiento.prima || 0,
+                        financiamiento.honorarios || 0,
+                        financiamiento.monto_financiar || 0,
+                        financiamiento.comision || 0,
+                        financiamiento.total || 0,
+                        financiamiento.tasa_nominal || 0,
+                        financiamiento.tasa_mensual || 0,
+                        financiamiento.interes_moratorio || 0,
+                        financiamiento.intereses_adelantado || 0,
+                        financiamiento.prestamo_total || 0,
+                        financiamiento.plazo_meses || 0,
+                        financiamiento.fecha_primer_pago || null,
+                        financiamiento.entidad_financiera || null,
+                        financiamiento.cuota_mensual || 0,
+                        financiamiento.observaciones || null,
+                        financiamiento.intereses_total || 0
+                    ]
+                );
+                idFinanciamiento = rf.insertId;
+            }
+        }
+
+        // ─── 7. MANEJAR ANTICIPOS (cuotas) ───────────────────────
+        if (Array.isArray(anticipos) && anticipos.length > 0 && idFinanciamiento) {
+            // Obtener anticipos existentes para este financiamiento
+            const [anticiposExistentes] = await connection.execute(
+                'SELECT ID_ANTICIPO, NUM_DOCUMENTO FROM ANTICIPOS WHERE ID_FINANCIAMIENTO = ?',
+                [idFinanciamiento]
+            );
+
+            const documentosExistentes = new Set(anticiposExistentes.map(a => a.NUM_DOCUMENTO));
+
+            for (const a of anticipos) {
+                const numDocumento = a.num_documento || a.NUM_DOCUMENTO || `CUOTA-${Date.now()}`;
+                
+                if (documentosExistentes.has(numDocumento)) {
+                    // Actualizar anticipo existente
+                    await connection.execute(
+                        `UPDATE ANTICIPOS SET
+                            FORMA_PAGO = ?,
+                            MONTO_COLONES = ?,
+                            MONTO_DOLARES = ?,
+                            MONEDA = ?,
+                            TIPO_CAMBIO = ?,
+                            REALIZADO_POR = ?,
+                            SALDO_PENDIENTE = ?,
+                            FECHA_ANTICIPO = ?,
+                            FECHA_VENCIMIENTO = ?,
+                            OBSERVACIONES = ?,
+                            ESTADO_ANTICIPO = ?
+                        WHERE ID_FINANCIAMIENTO = ? AND NUM_DOCUMENTO = ?`,
+                        [
+                            a.forma_pago || 'EFECTIVO',
+                            parseFloat(a.monto_colones) || 0,
+                            parseFloat(a.monto_dolares) || 0,
+                            a.moneda || 'CRC',
+                            parseFloat(a.tipo_cambio) || 1,
+                            a.realizado_por || id_vendedor,
+                            parseFloat(a.saldo_pendiente) || 0,
+                            a.fecha_anticipo || new Date().toISOString().split('T')[0],
+                            a.fecha_vencimiento || null,
+                            a.observaciones || null,
+                            a.estado_anticipo || 'PENDIENTE',
+                            idFinanciamiento,
+                            numDocumento
+                        ]
+                    );
+                } else {
+                    // Insertar nuevo anticipo
+                    await connection.execute(
+                        `INSERT INTO ANTICIPOS (
+                            ID_FINANCIAMIENTO, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
+                            MONTO_DOLARES, MONEDA, TIPO_CAMBIO, REALIZADO_POR, SALDO_PENDIENTE,
+                            FECHA_ANTICIPO, FECHA_VENCIMIENTO, OBSERVACIONES, ESTADO_ANTICIPO
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                        [
+                            idFinanciamiento,
+                            a.forma_pago || 'EFECTIVO',
+                            numDocumento,
+                            parseFloat(a.monto_colones) || 0,
+                            parseFloat(a.monto_dolares) || 0,
+                            a.moneda || 'CRC',
+                            parseFloat(a.tipo_cambio) || 1,
+                            a.realizado_por || id_vendedor,
+                            parseFloat(a.saldo_pendiente) || 0,
+                            a.fecha_anticipo || new Date().toISOString().split('T')[0],
+                            a.fecha_vencimiento || null,
+                            a.observaciones || null,
+                            a.estado_anticipo || 'PENDIENTE'
+                        ]
+                    );
+                }
+            }
+        }
+
+        // ─── 8. DETALLE_PAGOS (pagos iniciales) ───────────────────
+        if (Array.isArray(detalle_pagos) && detalle_pagos.length > 0) {
+            // Eliminar detalles de pago existentes para esta venta (opcional)
+            // await connection.execute('DELETE FROM DETALLE_PAGOS WHERE ID_VENTA = ?', [ventaId]);
+            
+            for (const dp of detalle_pagos) {
+                await connection.execute(
+                    `INSERT INTO DETALLE_PAGOS (
+                        ID_VENTA, ID_ANTICIPO, TIPO_VENTA, FORMA_PAGO,
+                        ID_BANCO, EFECTIVO, TRANSFERENCIA, NUM_TRANSFERENCIA,
+                        NOM_DEPOSITANTE, TARJETA, NUMERO_TARJETA, TIPO_TARJETA,
+                        DETALLE, MONEDA, TIPO_CAMBIO, FECHA_PAGO, ESTADO_PAGO, OBSERVACIONES
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        ventaId,
+                        dp.id_anticipo || null,
+                        forma_pago?.tipo_venta || 'CONTADO',
+                        dp.forma_pago || null,
+                        dp.id_banco || null,
+                        parseFloat(dp.efectivo) || 0,
+                        parseFloat(dp.transferencia) || 0,
+                        dp.num_transferencia || null,
+                        dp.nom_deposita || null,
+                        parseFloat(dp.tarjeta) || 0,
+                        dp.num_tarjeta || null,
+                        dp.tipo_tarjeta || null,
+                        dp.detalle || null,
+                        dp.moneda || 'CRC',
+                        parseFloat(dp.tipo_cambio) || 1,
+                        dp.fecha_pago || new Date().toISOString().split('T')[0],
+                        'COMPLETADO',
+                        dp.observaciones || null
+                    ]
+                );
+            }
+        }
+
+        // ─── 9. AUDITORÍA ─────────────────────────────────────────
+        await connection.execute(
+            `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) VALUES (?,?,?)`,
+            [id_vendedor, 'ACTUALIZAR_PLAN_VENTA', `Plan de venta ${codigo_venta} actualizado`]
+        );
+
+        await connection.commit();
+        await connection.end();
+
+        res.json({
+            id_venta: ventaId,
+            codigo_venta: codigo_venta,
+            id_financiamiento: idFinanciamiento,
+            message: 'Plan de venta actualizado exitosamente'
+        });
+
+    } catch (err) {
+        await connection.rollback();
+        await connection.end();
+        console.error('Error al actualizar plan de venta:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Ya existe un plan con ese código o el vehículo ya fue vendido' });
+        }
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// ===== APIS PARA ANTICIPOS=====
+// Obtener anticipos por financiamiento
+app.get('/api/anticipos', async (req, res) => {
+    try {
+        const { id_financiamiento, id_venta } = req.query;
+        let query = `
+            SELECT a.*, f.ID_VENTA, v.CODIGO_VENTA
+            FROM ANTICIPOS a
+            LEFT JOIN FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
+            LEFT JOIN VENTAS v ON f.ID_VENTA = v.ID_VENTA
+            WHERE 1=1`;
+        const params = [];
+
+        if (id_financiamiento) {
+            query += ' AND a.ID_FINANCIAMIENTO = ?';
+            params.push(id_financiamiento);
+        } else if (id_venta) {
+            query += ' AND f.ID_VENTA = ?';
+            params.push(id_venta);
+        }
+        query += ' ORDER BY a.FECHA_VENCIMIENTO ASC, a.ID_ANTICIPO ASC';
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener anticipos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Obtener un anticipo por ID
+app.get('/api/anticipos/:id', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [anticipos] = await connection.execute(
+            `SELECT a.*, f.ID_VENTA, v.CODIGO_VENTA
+             FROM ANTICIPOS a
+             LEFT JOIN FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
+             LEFT JOIN VENTAS v ON f.ID_VENTA = v.ID_VENTA
+             WHERE a.ID_ANTICIPO = ?`,
+            [req.params.id]
+        );
+        
+        await connection.end();
+        
+        if (anticipos.length === 0) {
+            return res.status(404).json({ error: 'Anticipo no encontrado' });
+        }
+        
+        res.json(anticipos[0]);
+        
+    } catch (err) {
+        console.error('Error al obtener anticipo:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Crear un anticipo (cuota)
+app.post('/api/anticipos', async (req, res) => {
+    const {
+        id_financiamiento,
+        forma_pago,
+        num_documento,
+        monto_colones,
+        monto_dolares,
+        moneda,
+        tipo_cambio,
+        realizado_por,
+        saldo_pendiente,
+        fecha_anticipo,
+        fecha_vencimiento,
+        observaciones,
+        estado_anticipo
+    } = req.body;
+
+    if (!id_financiamiento || !forma_pago || !num_documento) {
+        return res.status(400).json({ error: 'Faltan campos requeridos' });
+    }
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            `INSERT INTO ANTICIPOS
+             (ID_FINANCIAMIENTO, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
+              MONTO_DOLARES, MONEDA, TIPO_CAMBIO, REALIZADO_POR, SALDO_PENDIENTE,
+              FECHA_ANTICIPO, FECHA_VENCIMIENTO, OBSERVACIONES, ESTADO_ANTICIPO)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [
+                id_financiamiento,
+                forma_pago,
+                num_documento,
+                parseFloat(monto_colones) || 0,
+                parseFloat(monto_dolares) || 0,
+                moneda || 'CRC',
+                parseFloat(tipo_cambio)   || 1,
+                realizado_por || '',
+                parseFloat(saldo_pendiente) || parseFloat(monto_colones) || 0,
+                fecha_anticipo || new Date().toISOString().split('T')[0],
+                fecha_vencimiento || null,
+                observaciones || null,
+                estado_anticipo || 'PENDIENTE'
+            ]
+        );
+        await connection.end();
+        res.status(201).json({ id: result.insertId, message: 'Anticipo creado' });
+    } catch (err) {
+        console.error('Error al crear anticipo:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// Actualizar un anticipo
+app.put('/api/anticipos/:id', async (req, res) => {
+    const { id } = req.params;
+    const {
+        forma_pago,
+        num_documento,
+        monto_colones,
+        monto_dolares,
+        moneda,
+        tipo_cambio,
+        realizado_por,
+        saldo_pendiente,
+        fecha_anticipo,
+        fecha_vencimiento,
+        observaciones,
+        estado_anticipo
+    } = req.body;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            `UPDATE ANTICIPOS SET
+             FORMA_PAGO=?, NUM_DOCUMENTO=?, MONTO_COLONES=?,
+             MONTO_DOLARES=?, MONEDA=?, TIPO_CAMBIO=?, REALIZADO_POR=?,
+             SALDO_PENDIENTE=?, FECHA_ANTICIPO=?, FECHA_VENCIMIENTO=?,
+             OBSERVACIONES=?, ESTADO_ANTICIPO=?
+             WHERE ID_ANTICIPO=?`,
+            [
+                forma_pago,
+                num_documento,
+                parseFloat(monto_colones) || 0,
+                parseFloat(monto_dolares) || 0,
+                moneda || 'CRC',
+                parseFloat(tipo_cambio)   || 1,
+                realizado_por || '',
+                parseFloat(saldo_pendiente) || 0,
+                fecha_anticipo,
+                fecha_vencimiento,
+                observaciones || null,
+                estado_anticipo || 'PENDIENTE',
+                id
+            ]
+        );
+        await connection.end();
+        res.json({ message: 'Anticipo actualizado' });
+    } catch (err) {
+        console.error('Error al actualizar anticipo:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// Eliminar un anticipo
+app.delete('/api/anticipos/:id', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute('DELETE FROM ANTICIPOS WHERE ID_ANTICIPO = ?', [req.params.id]);
+        await connection.end();
+        res.json({ message: 'Anticipo eliminado' });
+    } catch (err) {
+        console.error('Error al eliminar anticipo:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// ===== REGISTRAR PAGO DE ANTICIPO =====
+app.post('/api/anticipos/:id/pagar', async (req, res) => {
+    const { id } = req.params;
+    const {
+        monto_pago,
+        forma_pago,
+        id_banco,
+        num_transferencia,
+        nom_deposita,
+        num_tarjeta,
+        tipo_tarjeta,
+        fecha_pago,
+        realizado_por
+    } = req.body;
+
+    if (!monto_pago || monto_pago <= 0) {
+        return res.status(400).json({ error: 'El monto de pago es requerido' });
+    }
+
+    const connection = await mysql.createConnection(dbConfig);
+    
+    try {
+        await connection.beginTransaction();
+
+        // Obtener el anticipo actual
+        const [anticipos] = await connection.execute(
+            `SELECT a.*, f.ID_VENTA 
+             FROM ANTICIPOS a
+             LEFT JOIN FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
+             WHERE a.ID_ANTICIPO = ? FOR UPDATE`,
+            [id]
+        );
+
+        if (anticipos.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Anticipo no encontrado' });
+        }
+
+        const anticipo = anticipos[0];
+        const nuevoSaldo = Math.max(0, anticipo.SALDO_PENDIENTE - monto_pago);
+        
+        // Determinar nuevo estado
+        let nuevoEstado = anticipo.ESTADO_ANTICIPO;
+        if (nuevoSaldo <= 0) {
+            nuevoEstado = 'COMPLETADO';
+        } else if (nuevoSaldo < anticipo.SALDO_PENDIENTE) {
+            nuevoEstado = 'PARCIAL';
+        }
+
+        // Actualizar el anticipo
+        await connection.execute(
+            `UPDATE ANTICIPOS 
+             SET SALDO_PENDIENTE = ?, ESTADO_ANTICIPO = ?
+             WHERE ID_ANTICIPO = ?`,
+            [nuevoSaldo, nuevoEstado, id]
+        );
+
+        // Registrar el detalle del pago
+        await connection.execute(
+            `INSERT INTO DETALLE_PAGOS (
+                ID_VENTA, ID_ANTICIPO, TIPO_VENTA, FORMA_PAGO,
+                ID_BANCO, EFECTIVO, TRANSFERENCIA, NUM_TRANSFERENCIA,
+                NOM_DEPOSITANTE, TARJETA, NUMERO_TARJETA, TIPO_TARJETA,
+                FECHA_PAGO, ESTADO_PAGO, OBSERVACIONES
+            ) VALUES (?, ?, 'CREDITO', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'COMPLETADO', ?)`,
+            [
+                anticipo.ID_VENTA,
+                id,
+                forma_pago || 'EFECTIVO',
+                id_banco || null,
+                forma_pago === 'EFECTIVO' ? monto_pago : 0,
+                forma_pago === 'TRANSFERENCIA' ? monto_pago : 0,
+                num_transferencia || null,
+                nom_deposita || null,
+                forma_pago === 'TARJETA' ? monto_pago : 0,
+                num_tarjeta || null,
+                tipo_tarjeta || null,
+                fecha_pago || new Date().toISOString().split('T')[0],
+                `Pago de cuota ${anticipo.NUM_DOCUMENTO}`
+            ]
+        );
+
+        await connection.commit();
+        await connection.end();
+
+        res.json({ 
+            message: 'Pago registrado exitosamente',
+            nuevo_saldo: nuevoSaldo,
+            estado: nuevoEstado
+        });
+
+    } catch (err) {
+        await connection.rollback();
+        await connection.end();
+        console.error('Error al registrar pago:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// ===== API PARA CUENTAS POR COBRAR =====
+app.get('/api/cuentas-cobrar', async (req, res) => {
+    try {
+        const { plan_venta, cliente, estado } = req.query;
+
+        let query = `
+            SELECT
+                a.ID_ANTICIPO                           AS id,
+                a.ID_ANTICIPO                           AS id_cuenta,
+                f.ID_VENTA                               AS id_venta,
+                v.CODIGO_VENTA                          AS plan_venta,
+                pf.NOMBRE_COMPLETO                      AS cliente,
+                pf.IDENTIFICACION                       AS cedula,
+                pf.TELEFONO_PRINCIPAL                   AS telefono,
+                CONCAT(IFNULL(m.NOMBRE,''), ' ', IFNULL(ve.ESTILO,'')) AS vehiculo,
+                ve.PLACA                                AS placa,
+                -- El número de cuota se extrae del campo NUM_DOCUMENTO
+                CAST(
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(a.NUM_DOCUMENTO, '-', 2), '-', -1)
+                AS UNSIGNED)                            AS numero_cuota,
+                a.FECHA_VENCIMIENTO                     AS fecha_vencimiento,
+                a.MONTO_COLONES                          AS monto_cuota,
+                a.SALDO_PENDIENTE                       AS saldo_pendiente,
+                f.TASA_NOMINAL                           AS interes_nominal,
+                f.INTERES_MORATORIO                      AS interes_moratorio,
+                -- Estado
+                CASE
+                    WHEN a.ESTADO_ANTICIPO = 'COMPLETADO' THEN 'pagado'
+                    WHEN a.FECHA_VENCIMIENTO < CURDATE() AND a.SALDO_PENDIENTE > 0 THEN 'atrasado'
+                    WHEN a.SALDO_PENDIENTE > 0 THEN 'pendiente'
+                    ELSE 'pendiente'
+                END                                     AS estado,
+                a.OBSERVACIONES                         AS observaciones
+            FROM ANTICIPOS a
+            JOIN FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
+            JOIN VENTAS v ON f.ID_VENTA = v.ID_VENTA
+            LEFT JOIN PERSONAS pf ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
+            LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
+            LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
+            WHERE 1=1
+        `;
+
+        const params = [];
+
+        if (plan_venta) {
+            query += ' AND v.CODIGO_VENTA LIKE ?';
+            params.push(`%${plan_venta}%`);
+        }
+        if (cliente) {
+            query += ' AND (pf.NOMBRE_COMPLETO LIKE ? OR pf.IDENTIFICACION LIKE ?)';
+            params.push(`%${cliente}%`, `%${cliente}%`);
+        }
+        if (estado === 'pagado') {
+            query += ' AND a.ESTADO_ANTICIPO = "COMPLETADO"';
+        } else if (estado === 'pendiente') {
+            query += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE", "PARCIAL") AND a.FECHA_VENCIMIENTO >= CURDATE()';
+        } else if (estado === 'atrasado') {
+            query += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE", "PARCIAL") AND a.FECHA_VENCIMIENTO < CURDATE()';
+        }
+
+        query += ' ORDER BY v.CODIGO_VENTA, numero_cuota ASC';
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener cuentas por cobrar:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// ===== API PARA DETALLE DE PAGOS =====
+app.get('/api/detalle-pagos', async (req, res) => {
+    try {
+        const { id_venta, id_anticipo } = req.query;
+        let query = `
+            SELECT dp.*, cb.NOMBRE as banco_nombre
+            FROM DETALLE_PAGOS dp
+            LEFT JOIN CAT_BANCOS cb ON dp.ID_BANCO = cb.ID_BANCO
+            WHERE 1=1`;
+        const params = [];
+
+        if (id_venta) {
+            query += ' AND dp.ID_VENTA = ?';
+            params.push(id_venta);
+        }
+        if (id_anticipo) {
+            query += ' AND dp.ID_ANTICIPO = ?';
+            params.push(id_anticipo);
+        }
+
+        query += ' ORDER BY dp.FECHA_PAGO DESC';
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener detalle de pagos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// ===== APIS PARA FINANCIAMIENTOS =====
+app.get('/api/financiamientos', async (req, res) => {
+    try {
+        const { id_venta } = req.query;
+        let query = `SELECT * FROM FINANCIAMIENTOS WHERE 1=1`;
+        const params = [];
+
+        if (id_venta) {
+            query += ' AND ID_VENTA = ?';
+            params.push(id_venta);
+        }
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener financiamientos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// ===== DASHBOARD
 app.get('/api/dashboard', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -4208,7 +6554,6 @@ app.get('/api/dashboard', async (req, res) => {
     }
 });
 
-// APIs para Certificados de Garantía
 // buscar cliente por cédula (para certificado)
 app.get('/api/certificados/clientes/:cedula', async (req, res) => {
     try {
@@ -4297,714 +6642,447 @@ app.get('/api/certificados/vehiculos/placa/:placa', async (req, res) => {
     }
 });
 
-// ===== APIs PARA ANTICIPOS =====
-// Obtener un anticipo por ID
-app.get('/api/anticipos/:id', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [anticipos] = await connection.execute(
-            'SELECT * FROM ANTICIPOS WHERE ID_ANTICIPO = ?',
-            [req.params.id]
-        );
-        
-        await connection.end();
-        
-        if (anticipos.length === 0) {
-            return res.status(404).json({ error: 'Anticipo no encontrado' });
-        }
-        
-        res.json(anticipos[0]);
-        
-    } catch (err) {
-        console.error('Error al obtener anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
+//  HELPER: parseNumberServer
+function parseNumberServer(str) {
+    if (!str && str !== 0) return 0;
+    const num = parseFloat(str.toString().replace(/[^0-9.-]+/g, ''));
+    return isNaN(num) ? 0 : num;
+}
 
-// Crear un nuevo anticipo
-app.post('/api/anticipos', async (req, res) => {
+//  MAPEO DE GASTOS: descripción → tipo_gasto del ENUM
+const GASTOS_TIPO_MAP = {
+    'ALQUILER':        'ALQUILER',
+    'TEL 1':           'TEL_CEL',
+    'CEL 2':           'TEL_CEL',
+    'CEL 3':           'TEL_CEL',
+    'CEL 4':           'TEL_CEL',
+    'CORRIENTE':       'SERVICIOS',
+    'AGUA Y BASURA':   'SERVICIOS',
+    'CABLE':           'SERVICIOS',
+    'INTERNET':        'SERVICIOS',
+    'CRAUTOS':         'OTROS',
+    'JARDIN':          'OTROS',
+    'SEGURO CARROS':   'SEGUROS',
+    'LIQUIDOS':        'VEHICULOS',
+    'SELCA':           'OTROS',
+    'HERMANOS':        'PERSONAL',
+    'PAPI':            'PERSONAL',
+    'MANFRED':         'PERSONAL',
+    'NAZA':            'PERSONAL',
+    'TAVITO':          'PERSONAL',
+    'RAFITA':          'PERSONAL',
+    'PAGO DE CARRO':   'VEHICULOS',
+};
+
+function getTipoGasto(descripcion) {
+    const upper = (descripcion || '').toUpperCase().trim();
+    return GASTOS_TIPO_MAP[upper] || 'OTROS';
+}
+
+//  GET /api/financiero/cierre?year=2025&month=7
+app.get('/api/financiero/cierre', async (req, res) => {
     try {
-        const {
-            id_venta,
-            forma_pago,
-            num_documento,
-            monto_colones,
-            monto_dolares,
-            moneda,
-            tipo_cambio,
-            realizado_por,
-            fecha_anticipo,
-            saldo_pendiente,
-            observaciones
-        } = req.body;
-        
+        const { year, month } = req.query;
+        const y = parseInt(year) || new Date().getFullYear();
+        const m = parseInt(month); // 0 = anual, 1-12 = mes
+
         const connection = await mysql.createConnection(dbConfig);
-        
-        const [result] = await connection.execute(
-            `INSERT INTO ANTICIPOS (
-                ID_VENTA, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
-                MONTO_DOLARES, MONEDA, TIPO_CAMBIO, REALIZADO_POR,
-                FECHA_ANTICIPO, SALDO_PENDIENTE, OBSERVACIONES
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                id_venta || null,
-                forma_pago,
-                num_documento,
-                monto_colones || 0,
-                monto_dolares || 0,
-                moneda || 'CRC',
-                tipo_cambio || 1,
-                realizado_por,
-                fecha_anticipo || new Date(),
-                saldo_pendiente || monto_colones,
-                observaciones || null
-            ]
+
+        if (m === 0) {
+            // ── RESUMEN ANUAL ──────────────────────────────────────
+            const [cierres] = await connection.execute(
+                `SELECT c.*,
+                        MONTH(c.FECHA_INICIO) as mes
+                 FROM CIERRES c
+                 WHERE YEAR(c.FECHA_INICIO) = ?
+                   AND c.TIPO_CIERRE = 'MENSUAL'
+                 ORDER BY c.FECHA_INICIO ASC`,
+                [y]
+            );
+
+            // Sumar gastos detallados por mes
+            const [gastosDetalle] = await connection.execute(
+                `SELECT gd.*, c.FECHA_INICIO
+                 FROM GASTOS_DETALLE gd
+                 INNER JOIN CIERRES c ON gd.ID_CIERRE = c.ID_CIERRE
+                 WHERE YEAR(c.FECHA_INICIO) = ?
+                   AND c.TIPO_CIERRE = 'MENSUAL'
+                 ORDER BY c.FECHA_INICIO ASC, gd.ID_GASTO_DETALLE ASC`,
+                [y]
+            );
+
+            // Vehículos comprados en el año
+            const [comprados] = await connection.execute(
+                `SELECT COUNT(*) as cantidad,
+                        COALESCE(SUM(cv.PRECIO_COMPRA),0) as monto
+                 FROM VEHICULOS v
+                 LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+                 WHERE YEAR(v.FECHA_INGRESO) = ?`,
+                [y]
+            );
+
+            // Vehículos vendidos en el año (con ganancia)
+            const [vendidos] = await connection.execute(
+                `SELECT COUNT(*) as cantidad,
+                        COALESCE(SUM(cv.PRECIO_PUBLICO - cv.TOTAL_INVERSION),0) as ganancia,
+                        COALESCE(SUM(cv.PRECIO_PUBLICO),0) as monto_venta
+                 FROM VENTAS vt
+                 INNER JOIN VEHICULOS v ON vt.ID_VEHICULO = v.ID_VEHICULO
+                 LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+                 WHERE YEAR(vt.FECHA_VENTA) = ?`,
+                [y]
+            );
+
+            await connection.end();
+
+            // Acumular totales anuales
+            const totalesAnuales = cierres.reduce((acc, c) => {
+                acc.plata_inicial   += parseFloat(c.PLATA_INICIAL   || 0);
+                acc.bcr_colones     += parseFloat(c.BCR_COLONES     || 0);
+                acc.bcr_dolares     += parseFloat(c.BCR_DOLARES     || 0);
+                acc.bac_colones     += parseFloat(c.BAC_COLONES     || 0);
+                acc.bac_dolares     += parseFloat(c.BAC_DOLARES     || 0);
+                acc.total_bancos    += parseFloat(c.TOTAL_BANCOS    || 0);
+                acc.inventario_neto += parseFloat(c.INVENTARIO_NETO || 0);
+                acc.creditos        += parseFloat(c.CREDITOS_PENDIENTES || 0);
+                acc.efectivo        += parseFloat(c.EFECTIVO_DISPONIBLE || 0);
+                acc.total_gastos    += parseFloat(c.TOTAL_GASTOS    || 0);
+                acc.ganancia_neta   += parseFloat(c.GANANCIA_NETA   || 0);
+                return acc;
+            }, {
+                plata_inicial: 0, bcr_colones: 0, bcr_dolares: 0,
+                bac_colones: 0, bac_dolares: 0, total_bancos: 0,
+                inventario_neto: 0, creditos: 0, efectivo: 0,
+                total_gastos: 0, ganancia_neta: 0
+            });
+
+            return res.json({
+                tipo: 'anual',
+                year: y,
+                meses: cierres,
+                gastos_detalle: gastosDetalle,
+                totales_anuales: totalesAnuales,
+                vehiculos: {
+                    comprados: comprados[0],
+                    vendidos: vendidos[0]
+                }
+            });
+        }
+
+        // ── MES ESPECÍFICO ─────────────────────────────────────────
+        const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
+        const fechaFin    = new Date(y, m, 0).toISOString().split('T')[0]; // último día del mes
+
+        // Buscar cierre existente
+        let [cierres] = await connection.execute(
+            `SELECT * FROM CIERRES
+             WHERE TIPO_CIERRE = 'MENSUAL'
+               AND YEAR(FECHA_INICIO) = ?
+               AND MONTH(FECHA_INICIO) = ?
+             LIMIT 1`,
+            [y, m]
         );
-        
+
+        let cierre;
+        let idCierre;
+
+        if (cierres.length === 0) {
+            // Crear cierre vacío para el mes
+            const [ins] = await connection.execute(
+                `INSERT INTO CIERRES (TIPO_CIERRE, FECHA_INICIO, FECHA_FIN, ESTADO)
+                 VALUES ('MENSUAL', ?, ?, 'BORRADOR')`,
+                [fechaInicio, fechaFin]
+            );
+            idCierre = ins.insertId;
+            cierre   = {
+                ID_CIERRE: idCierre, TIPO_CIERRE: 'MENSUAL',
+                FECHA_INICIO: fechaInicio, FECHA_FIN: fechaFin,
+                PLATA_INICIAL: 0, BCR_COLONES: 0, BCR_DOLARES: 0,
+                BAC_COLONES: 0, BAC_DOLARES: 0, TOTAL_BANCOS: 0,
+                INVENTARIO_NETO: 0, CREDITOS_PENDIENTES: 0,
+                EFECTIVO_DISPONIBLE: 0, TOTAL_GASTOS: 0,
+                GANANCIA_NETA: 0, ESTADO: 'BORRADOR'
+            };
+        } else {
+            cierre   = cierres[0];
+            idCierre = cierre.ID_CIERRE;
+        }
+
+        // Obtener gastos detallados del mes
+        const [gastos] = await connection.execute(
+            `SELECT * FROM GASTOS_DETALLE
+             WHERE ID_CIERRE = ?
+             ORDER BY ID_GASTO_DETALLE ASC`,
+            [idCierre]
+        );
+
+        // Vehículos comprados en el mes
+        const [compradosMes] = await connection.execute(
+            `SELECT v.ID_VEHICULO,
+                    CONCAT(m.NOMBRE, ' ', v.ESTILO, ' ', v.MODELO) as descripcion,
+                    COALESCE(cv.PRECIO_COMPRA, 0) as monto,
+                    v.PLACA, v.FECHA_INGRESO
+             FROM VEHICULOS v
+             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+             LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+             WHERE YEAR(v.FECHA_INGRESO) = ? AND MONTH(v.FECHA_INGRESO) = ?
+             ORDER BY v.FECHA_INGRESO DESC`,
+            [y, m]
+        );
+
+        // Vehículos vendidos en el mes
+        const [vendidosMes] = await connection.execute(
+            `SELECT v.ID_VEHICULO,
+                    CONCAT(m.NOMBRE, ' ', v.ESTILO, ' ', v.MODELO) as descripcion,
+                    COALESCE(cv.PRECIO_PUBLICO - cv.TOTAL_INVERSION, 0) as ganancia,
+                    COALESCE(cv.PRECIO_PUBLICO, 0) as precio_venta,
+                    v.PLACA, vt.FECHA_VENTA, vt.CODIGO_VENTA
+             FROM VENTAS vt
+             INNER JOIN VEHICULOS v ON vt.ID_VEHICULO = v.ID_VEHICULO
+             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+             LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+             WHERE YEAR(vt.FECHA_VENTA) = ? AND MONTH(vt.FECHA_VENTA) = ?
+             ORDER BY vt.FECHA_VENTA DESC`,
+            [y, m]
+        );
+
         await connection.end();
-        
-        res.json({ 
-            id: result.insertId, 
-            message: 'Anticipo creado exitosamente' 
+
+        res.json({
+            tipo: 'mensual',
+            year: y,
+            month: m,
+            cierre,
+            gastos,
+            vehiculos: {
+                comprados: compradosMes,
+                vendidos: vendidosMes
+            }
         });
-        
+
     } catch (err) {
-        console.error('Error al crear anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
+        console.error('Error al obtener cierre financiero:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
     }
 });
 
-// Actualizar un anticipo
-app.put('/api/anticipos/:id', async (req, res) => {
-    try {
-        const {
-            id_venta,
-            forma_pago,
-            num_documento,
-            monto_colones,
-            monto_dolares,
-            moneda,
-            tipo_cambio,
-            realizado_por,
-            fecha_anticipo,
-            saldo_pendiente,
-            observaciones
-        } = req.body;
-        
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [result] = await connection.execute(
-            `UPDATE ANTICIPOS SET
-                ID_VENTA = ?,
-                FORMA_PAGO = ?,
-                NUM_DOCUMENTO = ?,
-                MONTO_COLONES = ?,
-                MONTO_DOLARES = ?,
-                MONEDA = ?,
-                TIPO_CAMBIO = ?,
-                REALIZADO_POR = ?,
-                FECHA_ANTICIPO = ?,
-                SALDO_PENDIENTE = ?,
-                OBSERVACIONES = ?
-            WHERE ID_ANTICIPO = ?`,
-            [
-                id_venta || null,
-                forma_pago,
-                num_documento,
-                monto_colones || 0,
-                monto_dolares || 0,
-                moneda || 'CRC',
-                tipo_cambio || 1,
-                realizado_por,
-                fecha_anticipo || new Date(),
-                saldo_pendiente || monto_colones,
-                observaciones || null,
-                req.params.id
-            ]
-        );
-        
-        await connection.end();
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Anticipo no encontrado' });
-        }
-        
-        res.json({ message: 'Anticipo actualizado exitosamente' });
-        
-    } catch (err) {
-        console.error('Error al actualizar anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// Eliminar un anticipo
-app.delete('/api/anticipos/:id', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [result] = await connection.execute(
-            'DELETE FROM ANTICIPOS WHERE ID_ANTICIPO = ?',
-            [req.params.id]
-        );
-        
-        await connection.end();
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Anticipo no encontrado' });
-        }
-        
-        res.json({ message: 'Anticipo eliminado exitosamente' });
-        
-    } catch (err) {
-        console.error('Error al eliminar anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// ================================================================
-//  NUEVO ENDPOINT — Agregar a server.js (antes de app.listen)
-//  POST /api/plan-ventas  — Guarda plan completo en una transacción
-// ================================================================
-
-app.post('/api/plan-ventas', async (req, res) => {
+//  POST /api/financiero/guardar
+app.post('/api/financiero/guardar', async (req, res) => {
     const {
-        codigo_venta,
-        fecha_venta,
-        nombre_notario,
-        id_vendedor,
-        pv_purdi,
-        estado_venta,
-        cliente_facturar,
-        cliente_inscribir,
-        vehiculo,
-        forma_pago,
-        anticipos
+        year, month,
+        plata_inicial,
+        bcr_colones, bcr_dolares,
+        bac_colones, bac_dolares,
+        inventario_neto, creditos, efectivo,
+        gastos,          // array: [{ descripcion, monto }]
+        id_persona_cierre // quien guarda (opcional)
     } = req.body;
 
-    if (!id_vendedor) return res.status(400).json({ error: 'El vendedor es requerido' });
-    if (!vehiculo?.id_vehiculo && !vehiculo?.chasis) return res.status(400).json({ error: 'El vehículo es requerido' });
+    if (!year || !month) {
+        return res.status(400).json({ error: 'year y month son requeridos' });
+    }
+
+    const y = parseInt(year);
+    const m = parseInt(month);
+    const fechaInicio = `${y}-${String(m).padStart(2,'0')}-01`;
+    const fechaFin    = new Date(y, m, 0).toISOString().split('T')[0];
+
+    // Calcular totales
+    const totalBancos    = parseNumberServer(bcr_colones) + parseNumberServer(bcr_dolares)
+                         + parseNumberServer(bac_colones) + parseNumberServer(bac_dolares);
+    const totalActivos   = parseNumberServer(inventario_neto) + parseNumberServer(creditos) + parseNumberServer(efectivo);
+    const totalGastos    = (gastos || []).reduce((s, g) => s + parseNumberServer(g.monto), 0);
+    const gananciaNeta   = parseNumberServer(plata_inicial) - totalGastos;
 
     const connection = await mysql.createConnection(dbConfig);
-
     try {
         await connection.beginTransaction();
 
-        // ─── 1. CLIENTE FACTURAR ─────────────────────────────────
-        let idClienteFacturar = cliente_facturar?.id_persona_existente || null;
-        if (!idClienteFacturar && cliente_facturar?.identificacion) {
-            // Buscar por identificación
-            const [existeF] = await connection.execute(
-                'SELECT ID_PERSONA FROM PERSONAS WHERE IDENTIFICACION = ?',
-                [cliente_facturar.identificacion]
-            );
-            if (existeF.length > 0) {
-                idClienteFacturar = existeF[0].ID_PERSONA;
-                // Actualizar datos
-                await connection.execute(
-                    `UPDATE PERSONAS SET NOMBRE_COMPLETO=?,TELEFONO_PRINCIPAL=?,TELEFONO_SECUNDARIO=?,
-                     ID_ESTADO_CIVIL=?,OCUPACION=?,DIRECCION=?,EMAIL=?,NACIONALIDAD=?,TIPO_DOCUMENTO=?
-                     WHERE ID_PERSONA=?`,
-                    [
-                        cliente_facturar.nombre_completo, cliente_facturar.telefono_principal,
-                        cliente_facturar.telefono_secundario, cliente_facturar.id_estado_civil||null,
-                        cliente_facturar.ocupacion||null, cliente_facturar.direccion||null,
-                        cliente_facturar.email||null, cliente_facturar.nacionalidad||null,
-                        cliente_facturar.tipo_documento||null, idClienteFacturar
-                    ]
-                );
-            } else {
-                // Crear nuevo cliente
-                const [rf] = await connection.execute(
-                    `INSERT INTO PERSONAS (TIPO_DOCUMENTO,IDENTIFICACION,NOMBRE_COMPLETO,TELEFONO_PRINCIPAL,
-                     TELEFONO_SECUNDARIO,ID_ESTADO_CIVIL,OCUPACION,DIRECCION,EMAIL,NACIONALIDAD,ESTADO)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,'ACTIVO')`,
-                    [
-                        cliente_facturar.tipo_documento||null, cliente_facturar.identificacion,
-                        cliente_facturar.nombre_completo, cliente_facturar.telefono_principal||null,
-                        cliente_facturar.telefono_secundario||null, cliente_facturar.id_estado_civil||null,
-                        cliente_facturar.ocupacion||null, cliente_facturar.direccion||null,
-                        cliente_facturar.email||null, cliente_facturar.nacionalidad||null
-                    ]
-                );
-                idClienteFacturar = rf.insertId;
-                // Asignar rol cliente
-                await connection.execute(
-                    'INSERT IGNORE INTO PERSONAS_ROLES (ID_PERSONA, ID_ROL, ESTADO) VALUES (?,1,"ACTIVO")',
-                    [idClienteFacturar]
-                );
-            }
-        }
-
-        // ─── 2. CLIENTE INSCRIBIR ─────────────────────────────────
-        let idClienteInscribir = cliente_inscribir?.id_persona_existente || null;
-        if (!idClienteInscribir && cliente_inscribir?.identificacion && cliente_inscribir.identificacion !== cliente_facturar?.identificacion) {
-            const [existeI] = await connection.execute(
-                'SELECT ID_PERSONA FROM PERSONAS WHERE IDENTIFICACION = ?',
-                [cliente_inscribir.identificacion]
-            );
-            if (existeI.length > 0) {
-                idClienteInscribir = existeI[0].ID_PERSONA;
-            } else {
-                const [ri] = await connection.execute(
-                    `INSERT INTO PERSONAS (TIPO_DOCUMENTO,IDENTIFICACION,NOMBRE_COMPLETO,TELEFONO_PRINCIPAL,
-                     TELEFONO_SECUNDARIO,ID_ESTADO_CIVIL,OCUPACION,DIRECCION,EMAIL,NACIONALIDAD,ESTADO)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,'ACTIVO')`,
-                    [
-                        cliente_inscribir.tipo_documento||null, cliente_inscribir.identificacion,
-                        cliente_inscribir.nombre_completo, cliente_inscribir.telefono_principal||null,
-                        cliente_inscribir.telefono_secundario||null, cliente_inscribir.id_estado_civil||null,
-                        cliente_inscribir.ocupacion||null, cliente_inscribir.direccion||null,
-                        cliente_inscribir.email||null, cliente_inscribir.nacionalidad||null
-                    ]
-                );
-                idClienteInscribir = ri.insertId;
-                await connection.execute(
-                    'INSERT IGNORE INTO PERSONAS_ROLES (ID_PERSONA, ID_ROL, ESTADO) VALUES (?,2,"ACTIVO")',
-                    [idClienteInscribir]
-                );
-            }
-        } else if (cliente_inscribir?.identificacion === cliente_facturar?.identificacion) {
-            idClienteInscribir = idClienteFacturar;
-        }
-
-        // ─── 3. VEHÍCULO ─────────────────────────────────────────
-        let idVehiculo = vehiculo?.id_vehiculo || null;
-        if (!idVehiculo && vehiculo?.chasis) {
-            const [existeVeh] = await connection.execute(
-                'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?',
-                [vehiculo.chasis]
-            );
-            if (existeVeh.length > 0) {
-                idVehiculo = existeVeh[0].ID_VEHICULO;
-            }
-        }
-
-        if (!idVehiculo && !cliente_facturar) {
-            throw new Error('No se encontró el vehículo');
-        }
-
-        // ─── 4. CREAR VENTA ───────────────────────────────────────
-        const codigoFinal = codigo_venta || ('PV-' + Date.now().toString().slice(-6));
-        const [rv] = await connection.execute(
-            `INSERT INTO VENTAS (CODIGO_VENTA, ID_VEHICULO, ID_CLIENTE_FACTURACION, ID_CLIENTE_INSCRIPCION,
-             ID_VENDEDOR, NOMBRE_NOTARIO, FECHA_VENTA, PV_PURDI, ESTADO_VENTA)
-             VALUES (?,?,?,?,?,?,?,?,?)`,
-            [
-                codigoFinal, idVehiculo, idClienteFacturar, idClienteInscribir||null,
-                id_vendedor, nombre_notario||null, fecha_venta||new Date(),
-                pv_purdi||null, estado_venta||'PENDIENTE DE FACTURAR'
-            ]
+        // Buscar cierre existente
+        const [existing] = await connection.execute(
+            `SELECT ID_CIERRE FROM CIERRES
+             WHERE TIPO_CIERRE = 'MENSUAL' AND YEAR(FECHA_INICIO) = ? AND MONTH(FECHA_INICIO) = ?
+             LIMIT 1`,
+            [y, m]
         );
-        const idVenta = rv.insertId;
 
-        // ─── 5. FORMA DE PAGO ─────────────────────────────────────
-        if (forma_pago) {
+        let idCierre;
+
+        if (existing.length > 0) {
+            idCierre = existing[0].ID_CIERRE;
             await connection.execute(
-                `INSERT INTO FORMAS_PAGO (ID_VENTA, TIPO_VENTA, PLAZO_MESES, FECHA_PRIMER_PAGO,
-                 ENTIDAD_FINANCIERA, INTERES_NOMINAL, INTERES_MORATORIO, PRIMA, SALDO, ESTADO_PAGO)
-                 VALUES (?,?,?,?,?,?,?,?,?,'PENDIENTE')`,
+                `UPDATE CIERRES SET
+                    FECHA_FIN             = ?,
+                    PLATA_INICIAL         = ?,
+                    BCR_COLONES           = ?,
+                    BCR_DOLARES           = ?,
+                    BAC_COLONES           = ?,
+                    BAC_DOLARES           = ?,
+                    TOTAL_BANCOS          = ?,
+                    INVENTARIO_NETO       = ?,
+                    CREDITOS_PENDIENTES   = ?,
+                    EFECTIVO_DISPONIBLE   = ?,
+                    TOTAL_ACTIVOS         = ?,
+                    TOTAL_GASTOS          = ?,
+                    TOTAL_EGRESOS         = ?,
+                    GANANCIA_NETA         = ?,
+                    CERRADO_POR           = ?,
+                    FECHA_CIERRE          = NOW()
+                 WHERE ID_CIERRE = ?`,
                 [
-                    idVenta,
-                    (forma_pago.tipo_venta||'CONTADO').toUpperCase(),
-                    forma_pago.plazo_meses||0,
-                    forma_pago.fecha_primer_pago||null,
-                    forma_pago.entidad_financiera||null,
-                    forma_pago.interes_nominal||null,
-                    forma_pago.interes_moratorio||null,
-                    forma_pago.prima||0,
-                    forma_pago.saldo||0
+                    fechaFin,
+                    parseNumberServer(plata_inicial),
+                    parseNumberServer(bcr_colones),
+                    parseNumberServer(bcr_dolares),
+                    parseNumberServer(bac_colones),
+                    parseNumberServer(bac_dolares),
+                    totalBancos,
+                    parseNumberServer(inventario_neto),
+                    parseNumberServer(creditos),
+                    parseNumberServer(efectivo),
+                    totalActivos,
+                    totalGastos,
+                    totalGastos,
+                    gananciaNeta,
+                    id_persona_cierre || null,
+                    idCierre
                 ]
             );
+            // Borrar gastos anteriores para re-insertarlos
+            await connection.execute(
+                'DELETE FROM GASTOS_DETALLE WHERE ID_CIERRE = ?',
+                [idCierre]
+            );
+        } else {
+            const [ins] = await connection.execute(
+                `INSERT INTO CIERRES (
+                    TIPO_CIERRE, FECHA_INICIO, FECHA_FIN,
+                    PLATA_INICIAL, BCR_COLONES, BCR_DOLARES, BAC_COLONES, BAC_DOLARES,
+                    TOTAL_BANCOS, INVENTARIO_NETO, CREDITOS_PENDIENTES, EFECTIVO_DISPONIBLE,
+                    TOTAL_ACTIVOS, TOTAL_GASTOS, TOTAL_EGRESOS, GANANCIA_NETA,
+                    CERRADO_POR, ESTADO
+                ) VALUES ('MENSUAL', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'BORRADOR')`,
+                [
+                    fechaInicio, fechaFin,
+                    parseNumberServer(plata_inicial),
+                    parseNumberServer(bcr_colones),
+                    parseNumberServer(bcr_dolares),
+                    parseNumberServer(bac_colones),
+                    parseNumberServer(bac_dolares),
+                    totalBancos,
+                    parseNumberServer(inventario_neto),
+                    parseNumberServer(creditos),
+                    parseNumberServer(efectivo),
+                    totalActivos,
+                    totalGastos,
+                    totalGastos,
+                    gananciaNeta,
+                    id_persona_cierre || null
+                ]
+            );
+            idCierre = ins.insertId;
         }
 
-        // ─── 6. ANTICIPOS (si se enviaron junto al plan) ──────────
-        if (Array.isArray(anticipos) && anticipos.length > 0) {
-            for (const a of anticipos) {
+        // Insertar gastos detallados
+        if (Array.isArray(gastos) && gastos.length > 0) {
+            for (const g of gastos) {
+                const monto = parseNumberServer(g.monto);
+                if (monto === 0 && !g.descripcion) continue; // skip líneas vacías
                 await connection.execute(
-                    `INSERT INTO ANTICIPOS (ID_VENTA, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
-                     MONTO_DOLARES, TIPO_CAMBIO, REALIZADO_POR, FECHA_ANTICIPO, SALDO_PENDIENTE, OBSERVACIONES)
-                     VALUES (?,?,?,?,?,?,?,?,?,?)`,
+                    `INSERT INTO GASTOS_DETALLE
+                     (ID_CIERRE, TIPO_GASTO, DESCRIPCION, MONTO_COLONES, MONEDA, FECHA_GASTO, REGISTRADO_POR)
+                     VALUES (?, ?, ?, ?, 'CRC', ?, ?)`,
                     [
-                        idVenta,
-                        a.forma_pago||a.FORMA_PAGO||'',
-                        a.num_documento||a.NUM_DOCUMENTO||'',
-                        a.monto_colones||a.MONTO_COLONES||0,
-                        a.monto_dolares||a.MONTO_DOLARES||0,
-                        a.tipo_cambio||a.TIPO_CAMBIO||1,
-                        a.realizado_por||a.REALIZADO_POR||'',
-                        a.fecha_anticipo||a.FECHA_ANTICIPO||new Date(),
-                        a.saldo_pendiente||a.SALDO_PENDIENTE||0,
-                        a.observaciones||a.OBSERVACIONES||null
+                        idCierre,
+                        getTipoGasto(g.descripcion),
+                        (g.descripcion || '').trim().toUpperCase(),
+                        monto,
+                        fechaFin,
+                        id_persona_cierre || null
                     ]
                 );
             }
         }
 
-        // ─── 7. Actualizar estado del vehículo a VENDIDO ──────────
-        if (idVehiculo) {
-            await connection.execute(
-                'UPDATE VEHICULOS SET ESTADO = "VENDIDO" WHERE ID_VEHICULO = ?',
-                [idVehiculo]
-            );
-        }
-
-        // ─── 8. Auditoría ─────────────────────────────────────────
+        // Auditoría
         await connection.execute(
-            `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) VALUES (?,?,?)`,
-            [id_vendedor, 'CREAR_PLAN_VENTA', `Plan de venta ${codigoFinal} creado`]
-        );
-
-        await connection.commit();
-        await connection.end();
-
-        res.status(201).json({
-            id_venta:    idVenta,
-            codigo_venta: codigoFinal,
-            message:     'Plan de venta creado exitosamente'
-        });
-
-    } catch (err) {
-        await connection.rollback();
-        await connection.end();
-        console.error('Error al crear plan de venta:', err);
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: 'Ya existe un plan con ese código o el vehículo ya fue vendido' });
-        }
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
-
-// ================================================================
-//  GET /api/anticipos?id_venta=X  — Filtrar anticipos por venta
-//  (Reemplaza o complementa el GET /api/anticipos existente)
-// ================================================================
-app.get('/api/anticipos', async (req, res) => {
-    try {
-        const { id_venta } = req.query;
-        let query = `
-            SELECT a.*, v.CODIGO_VENTA
-            FROM ANTICIPOS a
-            LEFT JOIN VENTAS v ON a.ID_VENTA = v.ID_VENTA
-            WHERE 1=1`;
-        const params = [];
-
-        if (id_venta) {
-            query += ' AND a.ID_VENTA = ?';
-            params.push(id_venta);
-        }
-        query += ' ORDER BY a.FECHA_VENCIMIENTO ASC, a.ID_ANTICIPO ASC';
-
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(query, params);
-        await connection.end();
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener anticipos:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// ================================================================
-//  POST /api/anticipos  — Crear un anticipo individual
-// ================================================================
-app.post('/api/anticipos', async (req, res) => {
-    const {
-        id_venta, forma_pago, num_documento,
-        monto_colones, monto_dolares, tipo_cambio,
-        realizado_por, fecha_anticipo, saldo_pendiente, observaciones
-    } = req.body;
-
-    if (!id_venta || !forma_pago || !num_documento) {
-        return res.status(400).json({ error: 'Faltan campos requeridos: id_venta, forma_pago, num_documento' });
-    }
-
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [result] = await connection.execute(
-            `INSERT INTO ANTICIPOS
-             (ID_VENTA, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
-              MONTO_DOLARES, TIPO_CAMBIO, REALIZADO_POR, FECHA_ANTICIPO,
-              SALDO_PENDIENTE, OBSERVACIONES)
-             VALUES (?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN)
+             VALUES (?, 'GUARDAR_CIERRE_FINANCIERO', ?)`,
             [
-                id_venta,
-                forma_pago,
-                num_documento,
-                parseNumberServer(monto_colones) || 0,
-                parseNumberServer(monto_dolares) || 0,
-                parseNumberServer(tipo_cambio)   || 1,
-                realizado_por || '',
-                fecha_anticipo || new Date().toISOString().split('T')[0],
-                parseNumberServer(saldo_pendiente) || 0,
-                observaciones || null
-            ]
-        );
-        await connection.end();
-        res.status(201).json({ id: result.insertId, message: 'Anticipo creado exitosamente' });
-    } catch (err) {
-        console.error('Error al crear anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
-// ================================================================
-//  PUT /api/anticipos/:id  — Actualizar un anticipo
-// ================================================================
-app.put('/api/anticipos/:id', async (req, res) => {
-    const { id } = req.params;
-    const {
-        forma_pago, num_documento, monto_colones,
-        monto_dolares, tipo_cambio, realizado_por,
-        fecha_anticipo, saldo_pendiente, observaciones
-    } = req.body;
-
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        await connection.execute(
-            `UPDATE ANTICIPOS SET
-             FORMA_PAGO=?, NUM_DOCUMENTO=?, MONTO_COLONES=?,
-             MONTO_DOLARES=?, TIPO_CAMBIO=?, REALIZADO_POR=?,
-             FECHA_ANTICIPO=?, SALDO_PENDIENTE=?, OBSERVACIONES=?
-             WHERE ID_ANTICIPO=?`,
-            [
-                forma_pago, num_documento,
-                parseNumberServer(monto_colones) || 0,
-                parseNumberServer(monto_dolares) || 0,
-                parseNumberServer(tipo_cambio)   || 1,
-                realizado_por || '',
-                fecha_anticipo,
-                parseNumberServer(saldo_pendiente) || 0,
-                observaciones || null,
-                id
-            ]
-        );
-        await connection.end();
-        res.json({ message: 'Anticipo actualizado' });
-    } catch (err) {
-        console.error('Error al actualizar anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
-// ================================================================
-//  DELETE /api/anticipos/:id  — Eliminar un anticipo
-// ================================================================
-app.delete('/api/anticipos/:id', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        await connection.execute('DELETE FROM ANTICIPOS WHERE ID_ANTICIPO = ?', [req.params.id]);
-        await connection.end();
-        res.json({ message: 'Anticipo eliminado' });
-    } catch (err) {
-        console.error('Error al eliminar anticipo:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
-// ================================================================
-//  GET /api/personas?nombre=X&estado=ACTIVO  — ya existe pero
-//  asegúrate de que soporte búsqueda por nombre Y por identificación
-// ================================================================
-
-// Si no tienes esta versión exacta, reemplaza el GET /api/personas con:
-app.get('/api/personas', async (req, res) => {
-    try {
-        const { nombre, identificacion, estado } = req.query;
-        let query = `
-            SELECT p.*, ec.NOMBRE as estado_civil_nombre
-            FROM PERSONAS p
-            LEFT JOIN CAT_ESTADOS_CIVIL ec ON p.ID_ESTADO_CIVIL = ec.ID_ESTADO_CIVIL
-            WHERE 1=1`;
-        const params = [];
-
-        if (nombre) {
-            // Busca en nombre Y en identificación para máxima flexibilidad
-            query += ' AND (p.NOMBRE_COMPLETO LIKE ? OR p.IDENTIFICACION LIKE ?)';
-            params.push(`%${nombre}%`, `%${nombre}%`);
-        }
-        if (identificacion) {
-            query += ' AND p.IDENTIFICACION LIKE ?';
-            params.push(`%${identificacion}%`);
-        }
-        if (estado) {
-            query += ' AND p.ESTADO = ?';
-            params.push(estado);
-        }
-        query += ' ORDER BY p.NOMBRE_COMPLETO LIMIT 50';
-
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(query, params);
-        await connection.end();
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener personas:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// ================================================================
-//  GET /api/cuentas-cobrar
-//  Retorna las cuotas de crédito con su estado de pago
-//  Query params opcionales: plan_venta, cliente, estado
-// ================================================================
-app.get('/api/cuentas-cobrar', async (req, res) => {
-    try {
-        const { plan_venta, cliente, estado } = req.query;
-
-        let query = `
-            SELECT
-                a.ID_ANTICIPO                           AS id,
-                a.ID_ANTICIPO                           AS id_cuenta,
-                a.ID_VENTA                              AS id_venta,
-                v.CODIGO_VENTA                          AS plan_venta,
-                pf.NOMBRE_COMPLETO                      AS cliente,
-                pf.IDENTIFICACION                       AS cedula,
-                pf.TELEFONO_PRINCIPAL                   AS telefono,
-                pf.DIRECCION                            AS direccion,
-                CONCAT(IFNULL(m.NOMBRE,''), ' ', IFNULL(ve.ESTILO,'')) AS vehiculo,
-                ve.PLACA                                AS placa,
-                -- El número de cuota se extrae del campo NUM_DOCUMENTO (ej: CUOTA-1-...)
-                CAST(
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(a.NUM_DOCUMENTO, '-', 2), '-', -1)
-                AS UNSIGNED)                            AS numero_cuota,
-                a.FECHA_VENCIMIENTO                      AS fecha_vencimiento,  -- 👈 CAMBIO CLAVE: ahora usa FECHA_VENCIMIENTO
-                a.MONTO_COLONES                         AS monto_cuota,
-                a.SALDO_PENDIENTE                       AS saldo_pendiente,
-                fp.INTERES_NOMINAL                      AS interes_nominal,
-                fp.INTERES_MORATORIO                    AS interes_moratorio,
-                -- Estado: si SALDO_PENDIENTE = 0 → pagado, si no → pendiente
-                CASE
-                    WHEN a.SALDO_PENDIENTE <= 0 THEN 'pagado'
-                    WHEN a.FECHA_VENCIMIENTO < CURDATE() AND a.SALDO_PENDIENTE > 0 THEN 'atrasado'  -- 👈 CAMBIO CLAVE aquí también
-                    WHEN a.SALDO_PENDIENTE > 0 THEN 'pendiente'
-                    ELSE 'pendiente'
-                END                                     AS estado,
-                a.OBSERVACIONES                         AS observaciones,
-                a.REALIZADO_POR                         AS realizado_por
-            FROM ANTICIPOS a
-            JOIN VENTAS v      ON a.ID_VENTA = v.ID_VENTA
-            LEFT JOIN PERSONAS pf ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
-            LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
-            LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
-            LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
-            -- Solo las filas que son cuotas de amortización (contienen "CUOTA-" en NUM_DOCUMENTO)
-            WHERE a.NUM_DOCUMENTO LIKE 'CUOTA-%'
-        `;
-
-        const params = [];
-
-        if (plan_venta) {
-            query += ' AND v.CODIGO_VENTA LIKE ?';
-            params.push(`%${plan_venta}%`);
-        }
-        if (cliente) {
-            query += ' AND (pf.NOMBRE_COMPLETO LIKE ? OR pf.IDENTIFICACION LIKE ?)';
-            params.push(`%${cliente}%`, `%${cliente}%`);
-        }
-        if (estado === 'pagado') {
-            query += ' AND a.SALDO_PENDIENTE <= 0';
-        } else if (estado === 'pendiente') {
-            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_VENCIMIENTO >= CURDATE()';
-        } else if (estado === 'atrasado') {
-            query += ' AND a.SALDO_PENDIENTE > 0 AND a.FECHA_VENCIMIENTO < CURDATE()';
-        }
-
-        query += ' ORDER BY v.CODIGO_VENTA, numero_cuota ASC';
-
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(query, params);
-        await connection.end();
-
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener cuentas por cobrar:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
-// ================================================================
-//  POST /api/cuentas-cobrar/pago
-//  Registra el pago de una cuota:
-//    1. Actualiza SALDO_PENDIENTE en ANTICIPOS
-//    2. Crea un nuevo registro en ANTICIPOS como recibo de pago
-// ================================================================
-app.post('/api/cuentas-cobrar/pago', async (req, res) => {
-    const {
-        id_cuenta,         // ID_ANTICIPO de la cuota a pagar
-        id_venta,
-        numero_cuota,
-        numero_recibo,
-        forma_pago,
-        num_documento,
-        monto_colones,
-        tipo_cambio,
-        monto_dolares,
-        realizado_por,
-        fecha_pago,
-        saldo_pendiente,   // saldo que queda después del pago
-    } = req.body;
-
-    if (!id_cuenta || !forma_pago || !num_documento || !monto_colones || !fecha_pago || !realizado_por) {
-        return res.status(400).json({ error: 'Faltan campos requeridos para registrar el pago' });
-    }
-
-    const connection = await mysql.createConnection(dbConfig);
-    try {
-        await connection.beginTransaction();
-
-        // 1. Actualizar el saldo pendiente de la cuota original
-        await connection.execute(
-            `UPDATE ANTICIPOS
-             SET SALDO_PENDIENTE = ?,
-                 REALIZADO_POR  = ?,
-                 OBSERVACIONES  = CONCAT(IFNULL(OBSERVACIONES,''), ' | PAGADO: ', ?)
-             WHERE ID_ANTICIPO  = ?`,
-            [
-                Math.max(0, parseFloat(saldo_pendiente) || 0),
-                realizado_por,
-                fecha_pago,
-                id_cuenta
-            ]
-        );
-
-        // 2. Crear registro de pago (recibo) en ANTICIPOS
-        const docRecibo = numero_recibo || num_documento;
-        await connection.execute(
-            `INSERT INTO ANTICIPOS
-             (ID_VENTA, FORMA_PAGO, NUM_DOCUMENTO, MONTO_COLONES,
-              MONTO_DOLARES, TIPO_CAMBIO, REALIZADO_POR, FECHA_ANTICIPO,
-              SALDO_PENDIENTE, OBSERVACIONES)
-             VALUES (?,?,?,?,?,?,?,?,?,?)`,
-            [
-                id_venta,
-                forma_pago,
-                docRecibo,
-                parseFloat(monto_colones)  || 0,
-                parseFloat(monto_dolares)  || 0,
-                parseFloat(tipo_cambio)    || 1,
-                realizado_por,
-                fecha_pago,
-                Math.max(0, parseFloat(saldo_pendiente) || 0),
-                `Pago cuota #${numero_cuota} — Recibo: ${docRecibo}`
+                id_persona_cierre || 1,
+                `Cierre financiero guardado: ${y}/${String(m).padStart(2,'0')}`
             ]
         );
 
         await connection.commit();
         await connection.end();
 
-        res.status(201).json({
-            message:       'Pago registrado correctamente',
-            numero_recibo: docRecibo,
+        res.json({
+            id_cierre:    idCierre,
+            total_gastos: totalGastos,
+            total_bancos: totalBancos,
+            ganancia_neta: gananciaNeta,
+            message: 'Cierre financiero guardado correctamente'
         });
 
     } catch (err) {
         await connection.rollback();
         await connection.end();
-        console.error('Error al registrar pago:', err);
+        console.error('Error al guardar cierre:', err);
         res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
     }
+});
+
+//  GET /api/financiero/meses-disponibles?year=2025
+app.get('/api/financiero/meses-disponibles', async (req, res) => {
+    try {
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const connection = await mysql.createConnection(dbConfig);
+
+        const [rows] = await connection.execute(
+            `SELECT MONTH(FECHA_INICIO) as mes,
+                    ID_CIERRE, ESTADO, TOTAL_GASTOS, GANANCIA_NETA,
+                    FECHA_CIERRE
+             FROM CIERRES
+             WHERE TIPO_CIERRE = 'MENSUAL' AND YEAR(FECHA_INICIO) = ?
+             ORDER BY mes ASC`,
+            [year]
+        );
+
+        await connection.end();
+        res.json({ year, meses: rows });
+    } catch (err) {
+        console.error('Error al obtener meses disponibles:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+//  GET /api/financiero/gastos-plantilla
+app.get('/api/financiero/gastos-plantilla', async (req, res) => {
+    res.json([
+        { id: 1,  descripcion: 'ALQUILER',      tipo: 'ALQUILER'  },
+        { id: 2,  descripcion: 'ALQUILER',      tipo: 'ALQUILER'  },
+        { id: 3,  descripcion: 'TEL 1',         tipo: 'TEL_CEL'   },
+        { id: 4,  descripcion: 'CEL 2',         tipo: 'TEL_CEL'   },
+        { id: 5,  descripcion: 'CEL 3',         tipo: 'TEL_CEL'   },
+        { id: 6,  descripcion: 'CEL 4',         tipo: 'TEL_CEL'   },
+        { id: 7,  descripcion: 'CORRIENTE',     tipo: 'SERVICIOS' },
+        { id: 8,  descripcion: 'AGUA Y BASURA', tipo: 'SERVICIOS' },
+        { id: 9,  descripcion: 'CABLE',         tipo: 'SERVICIOS' },
+        { id: 10, descripcion: 'CRAUTOS',       tipo: 'OTROS'     },
+        { id: 11, descripcion: 'INTERNET',      tipo: 'SERVICIOS' },
+        { id: 12, descripcion: 'JARDIN',        tipo: 'OTROS'     },
+        { id: 13, descripcion: 'SEGURO CARROS', tipo: 'SEGUROS'   },
+        { id: 14, descripcion: 'LIQUIDOS',      tipo: 'VEHICULOS' },
+        { id: 15, descripcion: 'SELCA',         tipo: 'OTROS'     },
+        { id: 16, descripcion: 'HERMANOS',      tipo: 'PERSONAL'  },
+        { id: 17, descripcion: 'PAPI',          tipo: 'PERSONAL'  },
+        { id: 18, descripcion: 'MANFRED',       tipo: 'PERSONAL'  },
+        { id: 19, descripcion: 'NAZA',          tipo: 'PERSONAL'  },
+        { id: 20, descripcion: 'TAVITO',        tipo: 'PERSONAL'  },
+        { id: 21, descripcion: 'RAFITA',        tipo: 'PERSONAL'  },
+        { id: 22, descripcion: 'PAGO DE CARRO', tipo: 'VEHICULOS' }
+    ]);
 });
 
 // ===== RUTA PARA SERVIR ARCHIVO HTML =====
@@ -5022,4 +7100,3 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
-
