@@ -1,4 +1,23 @@
-const API_BASE_URL = '/api';
+// URLs base de las APIs
+const API_BASE_URL = (() => {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+            
+    // En producción 
+    if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+        return `${protocol}//${hostname}/api`;
+    }
+            
+    // En desarrollo local
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:3000/api';
+    }
+            
+    // Fallback a ruta relativa
+    return '/api';
+})();    
+console.log('🌐 API Base URL:', API_BASE_URL); // Para depuración
+
 const API_CXC = {
     cuentas:   `${API_BASE_URL}/cuentas-cobrar`,
     anticipos: `${API_BASE_URL}/anticipos`,
@@ -732,3 +751,4 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('filtroEstado')?.addEventListener('change', aplicarFiltros);
 
 });
+
