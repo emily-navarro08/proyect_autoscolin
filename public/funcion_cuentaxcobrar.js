@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 const API_CXC = {
     cuentas:   `${API_BASE_URL}/cuentas-cobrar`,
     anticipos: `${API_BASE_URL}/anticipos`,
@@ -730,4 +730,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
     document.getElementById('filtroEstado')?.addEventListener('change', aplicarFiltros);
+
 });
