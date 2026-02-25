@@ -862,6 +862,207 @@ app.delete('/api/proveedores/:id', async (req, res) => {
 });
 
 // APIs PARA VEHÍCULOS
+// GET /api/vehiculos/lista-colaborador
+app.get('/api/vehiculos/lista-colaborador', async (req, res) => {
+    console.log('✅ EJECUTANDO /api/vehiculos/lista-colaborador');
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const query = `
+            SELECT 
+                v.ID_VEHICULO,
+                v.PLACA,
+                v.ESTILO,
+                v.TRACCION,
+                v.MODELO,
+                v.KILOMETRAJE_ACTUAL,
+                v.KILOMETRAJE_ANTERIOR,
+                v.ESTADO,
+                v.OBSERVACIONES,
+                v.CHASIS,
+                v.MOTOR,
+                v.PV,
+                v.C_C,
+                v.CILINDROS,
+                v.CARROCERIA,
+                v.FECHA_INGRESO,
+                
+                -- Datos de catálogos
+                m.ID_MARCA,
+                m.NOMBRE as marca_nombre,
+                c.ID_COLOR,
+                c.NOMBRE as color_nombre,
+                comb.ID_COMBUSTIBLE,
+                comb.NOMBRE as combustible_nombre,
+                t.ID_TRANSMISION,
+                t.NOMBRE as transmision_nombre,
+                
+                -- Datos del proveedor
+                p.ID_PERSONA as ID_PROVEEDOR,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                
+                -- DATOS DE COSTOS (con el nombre CORRECTO de la columna)
+                cv.PRECIO_PUBLICO,           -- Precio Público
+                cv.PRECIO_DESCUENTO,          -- Precio con Descuento
+                cv.MONTO_TRASPASO,             -- Monto Traspaso (con UNA 'S')
+                
+                -- Otros costos por si los necesitas
+                cv.PRECIO_COMPRA,
+                cv.PRIMA,
+                cv.COMISION,
+                cv.TOTAL_INVERSION,
+                cv.SALDO,
+                cv.TIPO_CAMBIO_COMPRA
+                
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+            WHERE 1=1
+            ORDER BY v.FECHA_INGRESO DESC
+        `;
+        
+        const [vehiculos] = await connection.execute(query);
+        await connection.end();
+        
+        console.log(`📊 Enviando ${vehiculos.length} vehículos`);
+        res.json(vehiculos);
+    } catch (error) {
+        console.error('Error en /api/vehiculos/lista-colaborador:', error);
+        res.status(500).json({ error: 'Error al obtener vehículos' });
+    }
+});
+
+// GET /api/vehiculos/:id/detalle-colaborador
+app.get('/api/vehiculos/:id/detalle-colaborador', async (req, res) => {
+    console.log(`✅ EJECUTANDO /api/vehiculos/${req.params.id}/detalle-colaborador`);
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const { id } = req.params;
+        
+        // Obtener datos del vehículo
+        const [vehiculos] = await connection.execute(`
+            SELECT 
+                v.*,
+                m.NOMBRE as marca_nombre,
+                c.NOMBRE as color_nombre,
+                comb.NOMBRE as combustible_nombre,
+                t.NOMBRE as transmision_nombre,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                p.IDENTIFICACION as proveedor_identificacion,
+                p.TELEFONO_PRINCIPAL as proveedor_telefono,
+                p.EMAIL as proveedor_email
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            WHERE v.ID_VEHICULO = ?
+        `, [id]);
+        
+        if (vehiculos.length === 0) {
+            return res.status(404).json({ error: 'Vehículo no encontrado' });
+        }
+        
+        const vehiculo = vehiculos[0];
+        
+        // Obtener costos
+        const [costos] = await connection.execute(`
+            SELECT 
+                *,
+                MONTO_TRASPASO  -- Asegúrate que aquí también esté correcto
+            FROM COSTOS_VEHICULO 
+            WHERE ID_VEHICULO = ?
+        `, [id]);
+        
+        // Obtener extras
+        const [extras] = await connection.execute(`
+            SELECT * FROM EXTRAS_VEHICULO 
+            WHERE ID_VEHICULO = ?
+        `, [id]);
+        
+        await connection.end();
+        
+        res.json({
+            vehiculo: vehiculo,
+            costos: costos[0] || null,
+            extras: extras || []
+        });
+        
+    } catch (error) {
+        console.error('Error en detalle-colaborador:', error);
+        res.status(500).json({ error: 'Error al cargar detalles del vehículo' });
+    }
+});
+
+// Obtener vehículos por proveedor
+app.get('/api/vehiculos/proveedor/:idProveedor', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [rows] = await connection.execute(
+            `SELECT 
+                v.*,
+                m.NOMBRE as marca_nombre,
+                c.NOMBRE as color_nombre
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            WHERE v.ID_PROVEEDOR = ?
+            ORDER BY v.ESTADO, v.FECHA_INGRESO DESC`,
+            [req.params.idProveedor]
+        );
+        
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener vehículos por proveedor:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Buscar vehículos vendidos por cliente
+app.get('/api/vehiculos/vendidos/cliente/:idCliente', async (req, res) => {
+    try {
+        const idCliente = req.params.idCliente;
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [vehiculos] = await connection.execute(
+            `SELECT v.*, 
+                    m.NOMBRE as marca_nombre,
+                    c.NOMBRE as color_nombre,
+                    cb.NOMBRE as combustible_nombre,
+                    t.NOMBRE as transmision_nombre,
+                    ve.ID_VENTA,           -- ESTO ES CRITICO
+                    ve.FECHA_VENTA,
+                    ve.CODIGO_VENTA,
+                    ve.TOTAL as TOTAL_VENTA,
+                    ve.OBSERVACIONES_VENTA
+             FROM VENTAS ve
+             INNER JOIN VEHICULOS v ON ve.ID_VEHICULO = v.ID_VEHICULO
+             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+             LEFT JOIN CAT_COMBUSTIBLES cb ON v.ID_COMBUSTIBLE = cb.ID_COMBUSTIBLE
+             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+             WHERE (ve.ID_CLIENTE_FACTURACION = ? OR ve.ID_CLIENTE_INSCRIPCION = ?)
+             AND v.ESTADO = 'VENDIDO'
+             ORDER BY ve.FECHA_VENTA DESC`,
+            [idCliente, idCliente]
+        );
+        
+        await connection.end();
+        res.json(vehiculos);
+        
+    } catch (err) {
+        console.error('Error al obtener vehículos vendidos:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
 // Obtener todos los vehículos con información relacionada
 app.get('/api/vehiculos', async (req, res) => {
     try {
@@ -1128,201 +1329,6 @@ app.delete('/api/vehiculos/:id', async (req, res) => {
     }
 });
 
-// Obtener vehículos por proveedor
-app.get('/api/vehiculos/proveedor/:idProveedor', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [rows] = await connection.execute(
-            `SELECT 
-                v.*,
-                m.NOMBRE as marca_nombre,
-                c.NOMBRE as color_nombre
-            FROM VEHICULOS v
-            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-            WHERE v.ID_PROVEEDOR = ?
-            ORDER BY v.ESTADO, v.FECHA_INGRESO DESC`,
-            [req.params.idProveedor]
-        );
-        
-        await connection.end();
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener vehículos por proveedor:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// Buscar vehículos vendidos por cliente
-app.get('/api/vehiculos/vendidos/cliente/:idCliente', async (req, res) => {
-    try {
-        const idCliente = req.params.idCliente;
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const [vehiculos] = await connection.execute(
-            `SELECT v.*, 
-                    m.NOMBRE as marca_nombre,
-                    c.NOMBRE as color_nombre,
-                    cb.NOMBRE as combustible_nombre,
-                    t.NOMBRE as transmision_nombre,
-                    ve.ID_VENTA,           -- ESTO ES CRITICO
-                    ve.FECHA_VENTA,
-                    ve.CODIGO_VENTA,
-                    ve.TOTAL as TOTAL_VENTA,
-                    ve.OBSERVACIONES_VENTA
-             FROM VENTAS ve
-             INNER JOIN VEHICULOS v ON ve.ID_VEHICULO = v.ID_VEHICULO
-             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-             LEFT JOIN CAT_COMBUSTIBLES cb ON v.ID_COMBUSTIBLE = cb.ID_COMBUSTIBLE
-             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-             WHERE (ve.ID_CLIENTE_FACTURACION = ? OR ve.ID_CLIENTE_INSCRIPCION = ?)
-             AND v.ESTADO = 'VENDIDO'
-             ORDER BY ve.FECHA_VENTA DESC`,
-            [idCliente, idCliente]
-        );
-        
-        await connection.end();
-        res.json(vehiculos);
-        
-    } catch (err) {
-        console.error('Error al obtener vehículos vendidos:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
-    }
-});
-
-// GET /api/vehiculos/lista-colaborador
-app.get('/api/vehiculos/lista-colaborador', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const query = `
-            SELECT 
-                v.ID_VEHICULO,
-                v.PLACA,
-                v.ESTILO,
-                v.TRACCION,
-                v.MODELO,
-                v.KILOMETRAJE_ACTUAL,
-                v.KILOMETRAJE_ANTERIOR,
-                v.ESTADO,
-                v.OBSERVACIONES,
-                v.CHASIS,
-                v.MOTOR,
-                v.PV,
-                v.C_C,
-                v.CILINDROS,
-                v.CARROCERIA,
-                v.FECHA_INGRESO,
-                
-                -- Datos de catálogos
-                m.ID_MARCA,
-                m.NOMBRE as marca_nombre,
-                c.ID_COLOR,
-                c.NOMBRE as color_nombre,
-                comb.ID_COMBUSTIBLE,
-                comb.NOMBRE as combustible_nombre,
-                t.ID_TRANSMISION,
-                t.NOMBRE as transmision_nombre,
-                
-                -- Datos del proveedor
-                p.ID_PERSONA as ID_PROVEEDOR,
-                p.NOMBRE_COMPLETO as proveedor_nombre,
-                
-                -- DATOS DE COSTOS (los que necesitas)
-                cv.PRECIO_PUBLICO,           -- Precio Público
-                cv.PRECIO_DESCUENTO,          -- Precio con Descuento
-                cv.MONTO_TRANSPASO,            -- Monto Traspaso
-                
-                -- Otros costos por si los necesitas
-                cv.PRECIO_COMPRA,
-                cv.PRIMA,
-                cv.COMISION,
-                cv.TOTAL_INVERSION,
-                cv.SALDO,
-                cv.TIPO_CAMBIO_COMPRA
-                
-            FROM VEHICULOS v
-            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
-            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
-            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
-            WHERE 1=1
-            ORDER BY v.FECHA_INGRESO DESC
-        `;
-        
-        const [vehiculos] = await connection.execute(query);
-        await connection.end();
-        
-        res.json(vehiculos);
-    } catch (error) {
-        console.error('Error en /api/vehiculos/lista-colaborador:', error);
-        res.status(500).json({ error: 'Error al obtener vehículos' });
-    }
-});
-
-// GET /api/vehiculos/:id/detalle-colaborador
-app.get('/api/vehiculos/:id/detalle-colaborador', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        const { id } = req.params;
-        
-        // Obtener datos del vehículo
-        const [vehiculos] = await connection.execute(`
-            SELECT 
-                v.*,
-                m.NOMBRE as marca_nombre,
-                c.NOMBRE as color_nombre,
-                comb.NOMBRE as combustible_nombre,
-                t.NOMBRE as transmision_nombre,
-                p.NOMBRE_COMPLETO as proveedor_nombre,
-                p.IDENTIFICACION as proveedor_identificacion,
-                p.TELEFONO_PRINCIPAL as proveedor_telefono,
-                p.EMAIL as proveedor_email
-            FROM VEHICULOS v
-            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
-            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
-            WHERE v.ID_VEHICULO = ?
-        `, [id]);
-        
-        if (vehiculos.length === 0) {
-            return res.status(404).json({ error: 'Vehículo no encontrado' });
-        }
-        
-        const vehiculo = vehiculos[0];
-        
-        // Obtener costos
-        const [costos] = await connection.execute(`
-            SELECT * FROM COSTOS_VEHICULO 
-            WHERE ID_VEHICULO = ?
-        `, [id]);
-        
-        // Obtener extras
-        const [extras] = await connection.execute(`
-            SELECT * FROM EXTRAS_VEHICULO 
-            WHERE ID_VEHICULO = ?
-        `, [id]);
-        
-        await connection.end();
-        
-        res.json({
-            vehiculo: vehiculo,
-            costos: costos[0] || null,
-            extras: extras || []
-        });
-        
-    } catch (error) {
-        console.error('Error en detalle-colaborador:', error);
-        res.status(500).json({ error: 'Error al cargar detalles del vehículo' });
-    }
-});
-
 // ===== APIs PARA ESTADÍSTICAS E INVENTARIO ===== //
 // Obtener estadísticas de vehículos por estado
 app.get('/api/estadisticas/vehiculos', async (req, res) => {
@@ -1375,14 +1381,9 @@ app.get('/api/estadisticas/vehiculos', async (req, res) => {
     }
 });
 
-// ================================================================
 // ===== ENDPOINTS DE ESTADÍSTICAS DE VENTAS =====
-// Agregar estos endpoints en tu archivo server.js (index.js)
-// ================================================================
 
-// ──────────────────────────────────────────────────────────────
 // HELPER INTERNO: construir WHERE con fechas opcionales
-// ──────────────────────────────────────────────────────────────
 function dateRange(alias, startVal, endVal) {
   const parts = [];
   const params = [];
@@ -1391,10 +1392,7 @@ function dateRange(alias, startVal, endVal) {
   return { sql: parts.join(' AND '), params };
 }
 
-// ════════════════════════════════════════════════════════════════
 // 1. KPIs RÁPIDOS
-//    GET /api/estadisticas/ventas-kpis?fecha_inicio&fecha_fin&estado
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-kpis', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, estado } = req.query;
@@ -1444,10 +1442,7 @@ app.get('/api/estadisticas/ventas-kpis', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 2. VENTAS POR MES
-//    GET /api/estadisticas/ventas-mensual?fecha_inicio&fecha_fin
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-mensual', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin } = req.query;
@@ -1478,10 +1473,7 @@ app.get('/api/estadisticas/ventas-mensual', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 3. VENTAS TOTALES (tabla detalle)
-//    GET /api/estadisticas/ventas-total?fecha_inicio&fecha_fin&estado
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-total', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, estado } = req.query;
@@ -1533,10 +1525,7 @@ app.get('/api/estadisticas/ventas-total', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 4. VENTAS POR CLIENTE
-//    GET /api/estadisticas/ventas-por-cliente?fecha_inicio&fecha_fin&nombre
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-por-cliente', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, nombre } = req.query;
@@ -1575,10 +1564,7 @@ app.get('/api/estadisticas/ventas-por-cliente', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 5. VENTAS POR PRODUCTO (VEHÍCULO)
-//    GET /api/estadisticas/ventas-por-producto?fecha_inicio&fecha_fin&id_marca&tipo_venta
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-por-producto', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, id_marca, tipo_venta } = req.query;
@@ -1634,10 +1620,7 @@ app.get('/api/estadisticas/ventas-por-producto', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 6. VENTAS POR AGENTE
-//    GET /api/estadisticas/ventas-por-agente?fecha_inicio&fecha_fin&id_vendedor
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-por-agente', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, id_vendedor } = req.query;
@@ -1705,10 +1688,7 @@ app.get('/api/estadisticas/ventas-por-agente', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 7. VENTAS: AGENTE × CLIENTE
-//    GET /api/estadisticas/ventas-agente-cliente?fecha_inicio&fecha_fin&id_vendedor&cliente
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-agente-cliente', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, id_vendedor, cliente } = req.query;
@@ -1750,10 +1730,7 @@ app.get('/api/estadisticas/ventas-agente-cliente', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 8. VENTAS: AGENTE × PRODUCTO
-//    GET /api/estadisticas/ventas-agente-producto?fecha_inicio&fecha_fin&id_vendedor&id_marca
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-agente-producto', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, id_vendedor, id_marca } = req.query;
@@ -1803,10 +1780,7 @@ app.get('/api/estadisticas/ventas-agente-producto', async (req, res) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════
 // 9. VENTAS COMPLETO: AGENTE × CLIENTE × PRODUCTO
-//    GET /api/estadisticas/ventas-completo?fecha_inicio&fecha_fin&id_vendedor&cliente&id_marca
-// ════════════════════════════════════════════════════════════════
 app.get('/api/estadisticas/ventas-completo', async (req, res) => {
   try {
     const { fecha_inicio, fecha_fin, id_vendedor, cliente, id_marca } = req.query;
@@ -3438,6 +3412,50 @@ app.get('/api/ventas/:id/detalle', async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Error al obtener detalle de venta' });
+    }
+});
+
+/* Exportar vendedores a Excel */
+app.get('/api/vendedores/exportar/excel', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const [vendedores] = await connection.execute(`
+            SELECT 
+                p.ID_PERSONA, p.IDENTIFICACION, p.NOMBRE_COMPLETO,
+                p.OCUPACION, p.TELEFONO_PRINCIPAL, p.EMAIL, p.ESTADO as estado_persona,
+                u.USERNAME, u.ESTADO as estado_usuario, u.ULTIMO_ACCESO, u.INTENTOS_FALLIDOS,
+                COALESCE(v.total_ventas, 0) as total_ventas, COALESCE(v.total_prima, 0) as total_prima
+            FROM PERSONAS p
+            INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
+            LEFT JOIN USUARIOS u ON p.ID_PERSONA = u.ID_PERSONA
+            LEFT JOIN (
+                SELECT 
+                    ID_VENDEDOR,
+                    COUNT(*) as total_ventas,
+                    SUM(fp.PRIMA) as total_prima
+                FROM VENTAS v
+                LEFT JOIN FORMAS_PAGO fp ON v.ID_VENTA = fp.ID_VENTA
+                GROUP BY ID_VENDEDOR
+            ) v ON p.ID_PERSONA = v.ID_VENDEDOR
+            WHERE pr.ID_ROL = 5
+            AND pr.ESTADO = 'ACTIVO'
+            ORDER BY p.NOMBRE_COMPLETO
+        `);
+        
+        await connection.end();
+        
+        // Aquí iría la lógica para generar el Excel
+        // Por ahora devolvemos JSON
+        res.json({
+            total: vendedores.length,
+            vendedores: vendedores,
+            formato: 'excel',
+            fecha_generacion: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Error al exportar vendedores' });
     }
 });
 
@@ -6503,7 +6521,6 @@ app.get('/api/financiamientos', async (req, res) => {
     }
 });
 
-// ===== DASHBOARD
 app.get('/api/dashboard', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -6554,6 +6571,7 @@ app.get('/api/dashboard', async (req, res) => {
     }
 });
 
+// APIs para Certificados de Garantía
 // buscar cliente por cédula (para certificado)
 app.get('/api/certificados/clientes/:cedula', async (req, res) => {
     try {
@@ -6642,6 +6660,8 @@ app.get('/api/certificados/vehiculos/placa/:placa', async (req, res) => {
     }
 });
 
+// ===== APIS FINANCIERAS (CIERRES Y GASTOS) =====
+
 //  HELPER: parseNumberServer
 function parseNumberServer(str) {
     if (!str && str !== 0) return 0;
@@ -6679,7 +6699,7 @@ function getTipoGasto(descripcion) {
     return GASTOS_TIPO_MAP[upper] || 'OTROS';
 }
 
-//  GET /api/financiero/cierre?year=2025&month=7
+//  Obtiene o crea el cierre del mes indicado.
 app.get('/api/financiero/cierre', async (req, res) => {
     try {
         const { year, month } = req.query;
@@ -6866,7 +6886,7 @@ app.get('/api/financiero/cierre', async (req, res) => {
     }
 });
 
-//  POST /api/financiero/guardar
+//  Guarda o actualiza el cierre mensual completo con sus gastos
 app.post('/api/financiero/guardar', async (req, res) => {
     const {
         year, month,
@@ -7033,7 +7053,7 @@ app.post('/api/financiero/guardar', async (req, res) => {
     }
 });
 
-//  GET /api/financiero/meses-disponibles?year=2025
+//  Lista qué meses tienen datos guardados en un año
 app.get('/api/financiero/meses-disponibles', async (req, res) => {
     try {
         const year = parseInt(req.query.year) || new Date().getFullYear();
@@ -7058,6 +7078,7 @@ app.get('/api/financiero/meses-disponibles', async (req, res) => {
 });
 
 //  GET /api/financiero/gastos-plantilla
+//  Devuelve la lista de conceptos de gasto predefinidos
 app.get('/api/financiero/gastos-plantilla', async (req, res) => {
     res.json([
         { id: 1,  descripcion: 'ALQUILER',      tipo: 'ALQUILER'  },
