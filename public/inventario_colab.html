@@ -607,7 +607,55 @@
                     
                     <!-- LAYOUT DE TRES COLUMNAS -->
                     <div class="three-column-layout">
-                        <!-- PRIMERA COLUMNA: PRECIOS Y OBSERVACIONES -->
+                        <!--  COLUMNA: DETALLES DEL VEHÍCULO -->
+                        <div class="column">
+                            <div class="section-title">DETALLES DEL VEHÍCULO</div>
+                            <div class="card">
+                                <div class="card-title">Especificaciones Técnicas</div>       
+                                <table class="vehicle-details">
+                                    <tr>
+                                        <td>Marca <select class="vehicle-input" id="modalMarca">
+                                            <option value="">Seleccione marca</option>
+                                        </select></td>
+                                        <td>Kilom. Anterior <input type="text" class="vehicle-input" id="modalKmAnterior" value="0"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Estilo <input type="text" class="vehicle-input" id="modalEstilo" value=""></td>
+                                        <td>Kilom. Actual <input type="text" class="vehicle-input" id="modalKmActual" value="0"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tracción <input type="text" class="vehicle-input" id="modalTraccion" value=""></td>
+                                        <td>Color <select class="vehicle-input" id="modalColor">
+                                            <option value="">Seleccione color</option>
+                                        </select></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Modelo <input type="text" class="vehicle-input" id="modalModelo" value=""></td>
+                                        <td>Transmisión <select class="vehicle-input" id="modalTransmision">
+                                            <option value="">Seleccione transmisión</option>
+                                        </select></td>
+                                    </tr>
+                                    <tr>
+                                        <td>PV# <input type="text" class="vehicle-input" id="modalPV" value=""></td>
+                                        <td>Combustible <select class="vehicle-input" id="modalCombustible">
+                                            <option value="">Seleccione combustible</option>
+                                        </select></td>
+                                    </tr>
+                                    <tr>
+                                        <td># Motor <input type="text" class="vehicle-input" id="modalMotor" value=""></td>
+                                        <td>C.C. <input type="text" class="vehicle-input" id="modalCC" value=""></td>
+                                    </tr>
+                                    <tr>
+                                        <td># Chasis <input type="text" class="vehicle-input" id="modalChasis" value=""></td>
+                                        <td>Cilindros <input type="text" class="vehicle-input" id="modalCilindros" value=""></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Carrocería <input type="text" class="vehicle-input" id="modalCarroceria" value=""></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>      
+                        <!-- COLUMNA: PRECIOS Y OBSERVACIONES -->
                         <div class="column">
                             <div class="section-title">Información Adicional</div>                            
                             <div class="card">
@@ -660,55 +708,6 @@
                                     </div>
                                 </div>
                             </div>                           
-                        </div>
-                        
-                        <!-- SEGUNDA COLUMNA: DETALLES DEL VEHÍCULO -->
-                        <div class="column">
-                            <div class="section-title">DETALLES DEL VEHÍCULO</div>
-                            <div class="card">
-                                <div class="card-title">Especificaciones Técnicas</div>       
-                                <table class="vehicle-details">
-                                    <tr>
-                                        <td>Marca <select class="vehicle-input" id="modalMarca">
-                                            <option value="">Seleccione marca</option>
-                                        </select></td>
-                                        <td>Kilom. Anterior <input type="text" class="vehicle-input" id="modalKmAnterior" value="0"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Estilo <input type="text" class="vehicle-input" id="modalEstilo" value=""></td>
-                                        <td>Kilom. Actual <input type="text" class="vehicle-input" id="modalKmActual" value="0"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tracción <input type="text" class="vehicle-input" id="modalTraccion" value=""></td>
-                                        <td>Color <select class="vehicle-input" id="modalColor">
-                                            <option value="">Seleccione color</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Modelo <input type="text" class="vehicle-input" id="modalModelo" value=""></td>
-                                        <td>Transmisión <select class="vehicle-input" id="modalTransmision">
-                                            <option value="">Seleccione transmisión</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td>PV# <input type="text" class="vehicle-input" id="modalPV" value=""></td>
-                                        <td>Combustible <select class="vehicle-input" id="modalCombustible">
-                                            <option value="">Seleccione combustible</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td># Motor <input type="text" class="vehicle-input" id="modalMotor" value=""></td>
-                                        <td>C.C. <input type="text" class="vehicle-input" id="modalCC" value=""></td>
-                                    </tr>
-                                    <tr>
-                                        <td># Chasis <input type="text" class="vehicle-input" id="modalChasis" value=""></td>
-                                        <td>Cilindros <input type="text" class="vehicle-input" id="modalCilindros" value=""></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Carrocería <input type="text" class="vehicle-input" id="modalCarroceria" value=""></td>
-                                    </tr>
-                                </table>
-                            </div>
                         </div>
                     </div>
                     
@@ -820,9 +819,12 @@
     // ===== CARGAR VEHÍCULOS =====
     async function cargarVehiculos() {
         try {
-            const response = await fetch('/api/vehiculos');
+            const response = await fetch('/api/vehiculos/lista-colaborador');
             vehiculos = await response.json();
+            
+            console.log('Vehículos cargados:', vehiculos);
             actualizarTabla(vehiculos);
+            
         } catch (error) {
             console.error('Error:', error);
             document.getElementById('inventoryTableBody').innerHTML = `
@@ -840,10 +842,6 @@
         }
 
         tbody.innerHTML = lista.map(v => {
-            const precioPublico = v.PRECIO_PUBLICO ? parseFloat(v.PRECIO_PUBLICO) : 0;
-            const precioDescuento = v.PRECIO_DESCUENTO ? parseFloat(v.PRECIO_DESCUENTO) : 0;
-            const precioTraspaso = v.PRECIO_TRANSPASO ? parseFloat(v.PRECIO_TRANSPASO) : 0;
-            
             return `
             <tr>
                 <td><span class="placa">${v.PLACA || 'S/N'}</span></td>
@@ -851,9 +849,9 @@
                 <td>${v.ESTILO || '-'}</td>
                 <td>${v.TRACCION || '-'}</td>
                 <td>${v.MODELO || '-'}</td>
-                <td class="currency-usd">$${formatearNumero(precioPublico)}</td>
-                <td class="currency-usd">$${formatearNumero(precioDescuento)}</td>
-                <td class="currency-crc">₡${formatearNumero(precioTraspaso)}</td>
+                <td class="currency-usd">$${formatearNumero(v.PRECIO_PUBLICO || 0)}</td>
+                <td class="currency-usd">$${formatearNumero(v.PRECIO_DESCUENTO || 0)}</td>
+                <td class="currency-crc">₡${formatearNumero(v.MONTO_TRANSPASO || 0)}</td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-icon view" onclick="verVehiculo(${v.ID_VEHICULO})" title="Ver">
@@ -942,15 +940,20 @@
         await editarVehiculo(id);
     }
 
+    // ===== EDITAR VEHÍCULO =====
     async function editarVehiculo(id) {
         try {
             console.log('Editando vehículo ID:', id);
-            const response = await fetch(`/api/vehiculos/${id}/completo`);
+            const response = await fetch(`/api/vehiculos/${id}/detalle-colaborador`);
             
             if (!response.ok) throw new Error('Error al cargar datos');
             
             const data = await response.json();
+            console.log('Datos completos:', data);
+            
             const v = data.vehiculo;
+            const costos = data.costos || {};
+            const extras = data.extras || [];
             
             vehiculoActual = v;
             
@@ -959,48 +962,41 @@
             const badge = document.getElementById('modalPlacaBadge');
             if (badge) badge.textContent = v.PLACA || 'SIN PLACA';
             
-            // Cargar datos básicos (usando setValue para evitar errores)
-            setValue('modalPlaca', v.PLACA);
+            // ===== CARGAR TODOS LOS CAMPOS =====
+            // Campos básicos
+            setValue('modalPlaca', v.PLACA || '');
             setValue('modalDescripcion', `${v.marca_nombre || ''} ${v.ESTILO || ''} ${v.MODELO || ''}`);
-            setValue('modalEstilo', v.ESTILO);
-            setValue('modalTraccion', v.TRACCION);
-            setValue('modalModelo', v.MODELO);
-            setValue('modalPV', v.PV);
-            setValue('modalMotor', v.MOTOR);
-            setValue('modalCC', v.C_C);
-            setValue('modalChasis', v.CHASIS);
-            setValue('modalCilindros', v.CILINDROS);
-            setValue('modalCarroceria', v.CARROCERIA);
+            setValue('modalEstilo', v.ESTILO || '');
+            setValue('modalTraccion', v.TRACCION || '');
+            setValue('modalModelo', v.MODELO || '');
+            setValue('modalPV', v.PV || '');
+            setValue('modalMotor', v.MOTOR || '');
+            setValue('modalCC', v.C_C || '');
+            setValue('modalChasis', v.CHASIS || '');
+            setValue('modalCilindros', v.CILINDROS || '');
+            setValue('modalCarroceria', v.CARROCERIA || '');
             setValue('modalKmAnterior', v.KILOMETRAJE_ANTERIOR || '0');
             setValue('modalKmActual', v.KILOMETRAJE_ACTUAL || '0');
-            setValue('modalObservaciones', v.OBSERVACIONES);
+            setValue('modalObservaciones', v.OBSERVACIONES || '');
             
-            // Selects
+            // Selects (catálogos)
             if (v.ID_MARCA) setValue('modalMarca', v.ID_MARCA);
             if (v.ID_COLOR) setValue('modalColor', v.ID_COLOR);
             if (v.ID_COMBUSTIBLE) setValue('modalCombustible', v.ID_COMBUSTIBLE);
             if (v.ID_TRANSMISION) setValue('modalTransmision', v.ID_TRANSMISION);
+            if (v.ID_PROVEEDOR) setValue('modalProveedor', v.ID_PROVEEDOR);
             
-            // Cargar costos
-            if (data.costos) {
-                const c = data.costos;
-                setValue('modalMontoTraspaso', formatearNumero(c.PRECIO_TRANSPASO));
-                setValue('modalPPrecio', formatearNumero(c.PRECIO_PUBLICO));
-                setValue('modalPCDescuento', formatearNumero(c.PRECIO_DESCUENTO));
-                setValue('modalPrimaFinanc', formatearNumero(c.PRIMA_FINANCIAMIENTO));
-                setValue('modalCuotaFinanc', formatearNumero(c.CUOTA_FINANCIAMIENTO));
-            } else {
-                // Valores por defecto
-                setValue('modalMontoTraspaso', '0,00');
-                setValue('modalPPrecio', '0,00');
-                setValue('modalPCDescuento', '0,00');
-                setValue('modalPrimaFinanc', '0,00');
-                setValue('modalCuotaFinanc', '0,00');
-            }
+            // ===== CARGAR PRECIOS (desde COSTOS_VEHICULO) =====
+            setValue('modalPPrecio', formatearNumero(costos.PRECIO_PUBLICO || 0));
+            setValue('modalPCDescuento', formatearNumero(costos.PRECIO_DESCUENTO || 0));
+            setValue('modalMontoTraspaso', formatearNumero(costos.MONTO_TRANSPASO || 0));
+            setValue('modalPrimaFinanc', formatearNumero(costos.PRIMA_FINANCIAMIENTO || 0));
+            setValue('modalCuotaFinanc', formatearNumero(costos.CUOTA_FINANCIAMIENTO || 0));
             
-            // Cargar extras
-            if (data.extras && data.extras.length > 0) {
-                const extrasText = data.extras.map(e => e.EXTRAS_DETALLE).join('\n');
+            // ===== CARGAR EXTRAS =====
+            if (extras.length > 0) {
+                // Si hay múltiples extras, los concatenamos
+                const extrasText = extras.map(e => e.ARREGLO || e.OBSERVACIONES || 'Extra').join('\n');
                 setValue('modalExtras', extrasText);
             } else {
                 setValue('modalExtras', '');
