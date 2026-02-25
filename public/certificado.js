@@ -1,7 +1,7 @@
 // certificado.js
 
 // Configuración de API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 
 // Elementos DOM
 const searchCedula = document.getElementById('searchCedula');
@@ -627,4 +627,5 @@ document.addEventListener('DOMContentLoaded', () => {
             searchBtn.click();
         }
     });
+
 });
