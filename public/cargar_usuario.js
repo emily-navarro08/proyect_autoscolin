@@ -21,12 +21,12 @@ function cargarInfoUsuario() {
         // Intentar obtener la información desde la API si no está en sessionStorage
         const usuarioId = sessionStorage.getItem('usuarioId');
         if (usuarioId) {
-            fetch(`/api/usuarios/${usuarioId}`)
+            fetch(`/api/usuarios/${usuarioId}/info`)
                 .then(response => response.json())
                 .then(data => {
                     if (data && data.NOMBRE_COMPLETO) {
                         sessionStorage.setItem('usuarioNombre', data.NOMBRE_COMPLETO);
-                        // Necesitarías también obtener el rol
+                        sessionStorage.setItem('usuarioRol', data.ROL_NOMBRE || 'USUARIO');
                         cargarInfoUsuario(); // Recargar
                     }
                 })
@@ -40,7 +40,7 @@ function cargarInfoUsuario() {
 // Función para cerrar sesión
 function cerrarSesion() {
     sessionStorage.clear(); // Limpiar toda la sesión
-    localStorage.removeItem('usuarioNombre'); // También limpiar localStorage si lo usas
+    localStorage.removeItem('usuarioNombre');
     localStorage.removeItem('usuarioRol');
     window.location.href = '/index.html';
 }

@@ -1,8 +1,3 @@
-// ================================================================
-//  CUENTAS POR COBRAR — funcion_cuentaxcobrar.js
-//  Integración completa con API REST
-// ================================================================
-
 const API_BASE_URL = 'http://localhost:3000/api';
 const API_CXC = {
     cuentas:   `${API_BASE_URL}/cuentas-cobrar`,
@@ -15,10 +10,7 @@ let cuentasPorCobrar = [];
 let anticiposData    = [];
 let cuentaSeleccionada = null;
 
-// ================================================================
 //  UTILIDADES
-// ================================================================
-
 function formatoNumero(num) {
     const n = Math.round(parseFloat(num) || 0);
     const partes = n.toFixed(2).split('.');
@@ -58,33 +50,81 @@ function generarNumeroRecibo() {
     return `RCP-${aa}${mm}${dd}-${rnd}`;
 }
 
-// ================================================================
 //  CALCULAR DÍAS DE ATRASO Y ESTADO
-// ================================================================
 function calcularEstado(cuenta) {
-    if (cuenta.estado === 'pagado') return { clase: 'estado-pagado', texto: 'Pagado', dias: 0 };
+    console.log('Calculando estado para cuenta ID:', cuenta.id);
+    
+    // Verificar si está pagado (usando el campo 'estado' que viene del backend)
+    if (cuenta.estado === 'pagado') {
+        console.log('  → Es PAGADO');
+        return { clase: 'estado-pagado', texto: 'Pagado', dias: 0 };
+    }
 
-    const hoy  = new Date();
-    const vence = new Date(cuenta.fecha_vencimiento + 'T12:00:00');
-    const diff  = Math.ceil((hoy - vence) / (1000 * 60 * 60 * 24));
+    // Obtener la fecha de vencimiento (viene como 'fecha_vencimiento')
+    let fechaVencimientoStr = cuenta.fecha_vencimiento;
+    
+    if (!fechaVencimientoStr) {
+        console.warn('  ⚠️ Sin fecha de vencimiento');
+        return { clase: 'estado-pendiente', texto: 'Pendiente', dias: 0 };
+    }
 
-    if (diff > 30) return { clase: 'estado-atrasado', texto: 'Atrasado', dias: diff };
-    if (diff > 0)  return { clase: 'estado-atrasado', texto: 'Atrasado', dias: diff };
-    return { clase: 'estado-pendiente', texto: 'Pendiente', dias: 0 };
-}
-
-// ================================================================
-//  CARGA DE DATOS DESDE API
-// ================================================================
-async function cargarCuentasPorCobrar() {
-    const tbody = document.getElementById('tablaCuentasCuerpo');
-    const icono = document.getElementById('icono-recargar');
-
-    tbody.innerHTML = `<tr class="loading-row"><td colspan="10"><span class="spinner-inline"></span> Cargando cuentas...</td></tr>`;
-    if (icono) icono.style.animation = 'spin .7s linear infinite';
+    console.log('  → Fecha original:', fechaVencimientoStr);
 
     try {
-        // Leer filtros actuales para pasarlos como query params
+        // Extraer la parte de la fecha (ignorar la hora)
+        // El formato es "2026-02-21T06:00:00.000Z"
+        const fechaParte = fechaVencimientoStr.split('T')[0]; // Obtiene "2026-02-21"
+        
+        if (!fechaParte) {
+            throw new Error('Formato de fecha no válido');
+        }
+        
+        // Separar año, mes, día
+        const [year, month, day] = fechaParte.split('-').map(Number);
+        
+        // Crear fecha (los meses en JavaScript son 0-indexados, por eso restamos 1)
+        const fechaVencimiento = new Date(year, month - 1, day);
+        fechaVencimiento.setHours(0, 0, 0, 0);
+        
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        console.log(`  → Fecha vencimiento: ${fechaVencimiento.toLocaleDateString()}, Hoy: ${hoy.toLocaleDateString()}`);
+
+        // Calcular diferencia en días
+        const diffTime = hoy.getTime() - fechaVencimiento.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        console.log(`  → Días de diferencia: ${diffDays}`);
+
+        // Determinar estado basado en días de atraso
+        if (diffDays > 0) {
+            return { 
+                clase: 'estado-atrasado', 
+                texto: 'Atrasado', 
+                dias: diffDays 
+            };
+        }
+        
+        return { 
+            clase: 'estado-pendiente', 
+            texto: 'Pendiente', 
+            dias: 0 
+        };
+        
+    } catch (e) {
+        console.error('Error al calcular estado:', e);
+        return { clase: 'estado-pendiente', texto: 'Pendiente', dias: 0 };
+    }
+}
+
+//  CARGA DE DATOS DESDE API
+async function cargarCuentasPorCobrar() {
+    const tbody = document.getElementById('tablaCuentasCuerpo');
+
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="10"><span class="spinner-inline"></span> Cargando cuentas...</td></tr>`;
+
+    try {
         const plan     = document.getElementById('filtroPlan')?.value.trim()   || '';
         const cliente  = document.getElementById('filtroCliente')?.value.trim() || '';
         const estado   = document.getElementById('filtroEstado')?.value         || '';
@@ -95,23 +135,36 @@ async function cargarCuentasPorCobrar() {
         if (estado)  params.append('estado', estado);
 
         const url = `${API_CXC.cuentas}?${params.toString()}`;
+        console.log('📡 URL de petición:', url);
+        
         cuentasPorCobrar = await apiFetch(url);
+
+        console.log('📊 DATOS RECIBIDOS DEL BACKEND:');
+        console.log('Cantidad de registros:', cuentasPorCobrar.length);
+        
+        if (cuentasPorCobrar.length > 0) {
+            console.log('Primer registro completo:', JSON.stringify(cuentasPorCobrar[0], null, 2));
+            console.log('Campos disponibles en el primer registro:', Object.keys(cuentasPorCobrar[0]));
+            
+            // Verificar específicamente los campos que necesitamos
+            const primerRegistro = cuentasPorCobrar[0];
+            console.log('ID_ANTICIPO:', primerRegistro.ID_ANTICIPO);
+            console.log('FECHA_VENCIMIENTO:', primerRegistro.FECHA_VENCIMIENTO);
+            console.log('ESTADO_ANTICIPO:', primerRegistro.ESTADO_ANTICIPO);
+            console.log('OBSERVACIONES:', primerRegistro.OBSERVACIONES);
+        }
 
         renderizarTabla(cuentasPorCobrar);
     } catch (e) {
         console.error('Error cargando cuentas:', e);
         mostrarToast('Error al cargar cuentas: ' + e.message, 'error');
         tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:30px;color:#e74c3c;">
-            <i class="fas fa-exclamation-triangle"></i> No se pudieron cargar los datos. Verifique la conexión al servidor.
+            <i class="fas fa-exclamation-triangle"></i> No se pudieron cargar los datos.
         </td></tr>`;
-    } finally {
-        if (icono) icono.style.animation = '';
     }
 }
 
-// ================================================================
 //  RENDERIZAR TABLA
-// ================================================================
 function renderizarTabla(cuentas) {
     const tbody = document.getElementById('tablaCuentasCuerpo');
     if (!tbody) return;
@@ -128,23 +181,26 @@ function renderizarTabla(cuentas) {
     cuentas.forEach(cuenta => {
         const { clase, texto, dias } = calcularEstado(cuenta);
 
+        // Determinar si está pagado
+        const estaPagado = cuenta.estado === 'pagado';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${cuenta.plan_venta || cuenta.CODIGO_VENTA || '-'}</td>
-            <td>${cuenta.cliente    || cuenta.NOMBRE_COMPLETO || '-'}</td>
-            <td>${cuenta.vehiculo   || cuenta.VEHICULO || '-'}</td>
-            <td style="text-align:center;">${cuenta.numero_cuota || cuenta.NUMERO_CUOTA || '-'}</td>
-            <td style="text-align:center;">${formatFecha(cuenta.fecha_vencimiento || cuenta.FECHA_VENCIMIENTO)}</td>
-            <td style="text-align:right;">${formatoNumero(cuenta.monto_cuota     || cuenta.MONTO_CUOTA     || 0)}</td>
-            <td style="text-align:right;">${formatoNumero(cuenta.saldo_pendiente || cuenta.SALDO_PENDIENTE || 0)}</td>
+            <td>${cuenta.plan_venta || '-'}</td>
+            <td>${cuenta.cliente || '-'}</td>
+            <td>${cuenta.vehiculo || '-'}</td>
+            <td style="text-align:center;">${cuenta.numero_cuota || '-'}</td>
+            <td style="text-align:center;">${formatFecha(cuenta.fecha_vencimiento)}</td>
+            <td style="text-align:right;">${formatoNumero(cuenta.monto_cuota || 0)}</td>
+            <td style="text-align:right;">${formatoNumero(cuenta.saldo_pendiente || 0)}</td>
             <td style="text-align:center;">${dias > 0 ? dias : '-'}</td>
             <td style="text-align:center;"><span class="${clase}">${texto}</span></td>
             <td style="text-align:center;">
-                ${cuenta.estado !== 'pagado' && (cuenta.ESTADO || '').toLowerCase() !== 'pagado'
-                    ? `<button class="btn-cobrar" onclick="abrirModalPago(${cuenta.id || cuenta.ID_ANTICIPO || cuenta.id_cuenta})">
+                ${!estaPagado
+                    ? `<button class="btn-cobrar" onclick="abrirModalPago(${cuenta.id})">
                            <i class="fas fa-dollar-sign"></i> Cobrar
                        </button>`
-                    : `<button class="btn-ver-detalle" onclick="verDetallePago(${cuenta.id || cuenta.ID_ANTICIPO || cuenta.id_cuenta})">
+                    : `<button class="btn-ver-detalle" onclick="verDetallePago(${cuenta.id})">
                            <i class="fas fa-eye"></i> Ver
                        </button>`
                 }
@@ -155,15 +211,23 @@ function renderizarTabla(cuentas) {
 
 function formatFecha(f) {
     if (!f) return '-';
-    const d = new Date(f + (f.includes('T') ? '' : 'T12:00:00'));
-    return d.toLocaleDateString('es-CR');
+    try {
+        // Si viene con formato ISO (2026-02-21T06:00:00.000Z)
+        if (f.includes('T')) {
+            const [year, month, day] = f.split('T')[0].split('-');
+            return `${day}/${month}/${year}`;
+        }
+        // Si viene en otro formato
+        const d = new Date(f);
+        if (isNaN(d.getTime())) return '-';
+        return d.toLocaleDateString('es-CR');
+    } catch (e) {
+        return '-';
+    }
 }
 
-// ================================================================
 //  FILTROS
-// ================================================================
 function aplicarFiltros() {
-    // Si el servidor soporta filtros por query params, recargamos con ellos
     cargarCuentasPorCobrar();
 }
 
@@ -174,36 +238,96 @@ function limpiarFiltros() {
     cargarCuentasPorCobrar();
 }
 
-// ================================================================
 //  MODAL DE PAGO
-// ================================================================
 function abrirModalPago(cuentaId) {
-    // Buscar la cuenta en el array local (ya cargado desde API)
-    cuentaSeleccionada = cuentasPorCobrar.find(c =>
-        (c.id || c.ID_ANTICIPO || c.id_cuenta) == cuentaId
-    );
-    if (!cuentaSeleccionada) return;
+    console.log('Abriendo modal para cuenta ID:', cuentaId);
+    
+    // Buscar la cuenta por su ID
+    cuentaSeleccionada = cuentasPorCobrar.find(c => c.id == cuentaId);
+    
+    if (!cuentaSeleccionada) {
+        console.error('No se encontró la cuenta:', cuentaId);
+        mostrarToast('No se encontró la cuenta seleccionada', 'error');
+        return;
+    }
 
-    const montoCuota    = cuentaSeleccionada.monto_cuota    || cuentaSeleccionada.MONTO_CUOTA    || 0;
-    const saldoPendiente= cuentaSeleccionada.saldo_pendiente|| cuentaSeleccionada.SALDO_PENDIENTE|| 0;
-    const planVenta     = cuentaSeleccionada.plan_venta     || cuentaSeleccionada.CODIGO_VENTA   || '-';
-    const cliente       = cuentaSeleccionada.cliente        || cuentaSeleccionada.NOMBRE_COMPLETO|| '-';
-    const numCuota      = cuentaSeleccionada.numero_cuota   || cuentaSeleccionada.NUMERO_CUOTA   || '-';
-    const fecVenc       = formatFecha(cuentaSeleccionada.fecha_vencimiento || cuentaSeleccionada.FECHA_VENCIMIENTO);
+    console.log('Cuenta seleccionada:', cuentaSeleccionada);
 
-    document.getElementById('detalleCuotaPago').innerHTML = `
-        <strong>Plan:</strong> ${planVenta}&nbsp;&nbsp;
-        <strong>Cliente:</strong> ${cliente}<br>
-        <strong>Cuota #${numCuota}</strong>&nbsp;&nbsp;
-        <strong>Monto:</strong> ${formatoNumero(montoCuota)}&nbsp;&nbsp;
-        <strong>Vence:</strong> ${fecVenc}
+    // Extraer datos directamente de la cuenta (usando los nombres que vienen del backend)
+    const planVenta = cuentaSeleccionada.plan_venta || '-';
+    const cliente = cuentaSeleccionada.cliente || '-';
+    const numeroCuota = cuentaSeleccionada.numero_cuota || '1';
+    const montoCuota = parseFloat(cuentaSeleccionada.monto_cuota) || 0;
+    const fechaVencimiento = cuentaSeleccionada.fecha_vencimiento;
+    const saldoPendiente = parseFloat(cuentaSeleccionada.saldo_pendiente) || montoCuota;
+    const observaciones = cuentaSeleccionada.observaciones || '';
+
+    // Extraer datos de la observación
+    let pagoIntereses = 0;
+    let amortizacion = 0;
+    let capital = 0;
+    
+    if (observaciones) {
+        console.log('Procesando observaciones:', observaciones);
+        
+        // Extraer Capital (formato: "Capital: ₡ 214.549,00")
+        const capitalMatch = observaciones.match(/Capital:\s*[₡]?\s*([\d.,]+)/);
+        if (capitalMatch) {
+            capital = parseFloat(capitalMatch[1].replace(/\./g, '').replace(',', '.'));
+            console.log('  → Capital extraído:', capital);
+        }
+        
+        // Extraer Intereses (formato: "Intereses: ₡ 170.750,00")
+        const interesesMatch = observaciones.match(/Intereses:\s*[₡]?\s*([\d.,]+)/);
+        if (interesesMatch) {
+            pagoIntereses = parseFloat(interesesMatch[1].replace(/\./g, '').replace(',', '.'));
+            console.log('  → Intereses extraídos:', pagoIntereses);
+        }
+    }
+
+    // Calcular amortización (Monto de cuota - Intereses)
+    amortizacion = Math.round(montoCuota - pagoIntereses);
+
+    // Formatear la fecha para mostrarla
+    const fechaFormateada = formatFecha(fechaVencimiento);
+
+    const detalleHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px; background: white; padding: 15px; border-radius: 8px;">
+            <div><strong>Plan:</strong> ${planVenta}</div>
+            <div><strong>Cliente:</strong> ${cliente}</div>
+            <div><strong>Cuota #:</strong> ${numeroCuota}</div>
+            <div><strong>Monto Cuota:</strong> ${formatoNumero(montoCuota)}</div>
+            <div><strong>Vence:</strong> ${fechaFormateada}</div>
+            <div><strong>Saldo:</strong> ${formatoNumero(saldoPendiente)}</div>
+            <div><strong>Capital:</strong> ${formatoNumero(capital)}</div>
+            <div><strong>Intereses:</strong> ${formatoNumero(pagoIntereses)}</div>
+            <div><strong>Amortización:</strong> ${formatoNumero(amortizacion)}</div>
+        </div>
     `;
 
-    document.getElementById('pagoMonto').value       = Math.round(saldoPendiente);
-    document.getElementById('pagoFecha').value       = new Date().toISOString().split('T')[0];
-    document.getElementById('pagoDocumento').value   = '';
-    document.getElementById('pagoRealizadoPor').value= '';
-    document.getElementById('pagoForma').value       = 'Efectivo';
+    document.getElementById('detalleCuotaPago').innerHTML = detalleHTML;
+    
+    // Guardar los valores en la cuenta seleccionada
+    cuentaSeleccionada.pagoIntereses = pagoIntereses;
+    cuentaSeleccionada.amortizacion = amortizacion;
+    cuentaSeleccionada.capital = capital;
+
+    // Establecer valores por defecto en el formulario
+    document.getElementById('pagoMonto').value = Math.round(saldoPendiente);
+    document.getElementById('pagoFecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('pagoDocumento').value = '';
+    document.getElementById('pagoRealizadoPor').value = '';
+    document.getElementById('pagoForma').value = 'Efectivo';
+    
+    // Limpiar campos de detalles de pago
+    document.getElementById('efectivo').value = '0.00';
+    document.getElementById('transferencia').value = '0.00';
+    document.getElementById('num_transferencia').value = '';
+    document.getElementById('nom_deposita').value = '';
+    document.getElementById('banco').value = '';
+    document.getElementById('tarjeta').value = '0.00';
+    document.getElementById('num_tarjeta').value = '';
+    document.getElementById('tipo_tarjeta').value = '';
 
     document.getElementById('modalPagoCuota').style.display = 'flex';
 }
@@ -213,9 +337,7 @@ function cerrarModalPago() {
     cuentaSeleccionada = null;
 }
 
-// ================================================================
 //  PROCESAR PAGO → API  →  RECIBO
-// ================================================================
 async function procesarPagoCuota() {
     if (!cuentaSeleccionada) return;
 
@@ -225,72 +347,74 @@ async function procesarPagoCuota() {
     const fechaPago    = document.getElementById('pagoFecha').value;
     const realizadoPor = document.getElementById('pagoRealizadoPor').value.trim();
 
+    // Validaciones
     if (!formaPago || !documento || !monto || !fechaPago || !realizadoPor) {
-        mostrarToast('Complete todos los campos', 'warning'); return;
+        mostrarToast('Complete todos los campos', 'warning'); 
+        return;
     }
     if (monto <= 0) {
-        mostrarToast('El monto debe ser mayor a cero', 'warning'); return;
+        mostrarToast('El monto debe ser mayor a cero', 'warning'); 
+        return;
     }
 
-    const saldoPendiente = cuentaSeleccionada.saldo_pendiente || cuentaSeleccionada.SALDO_PENDIENTE || 0;
+    const saldoPendiente = cuentaSeleccionada.SALDO_PENDIENTE || cuentaSeleccionada.monto_cuota || 0;
     if (monto > saldoPendiente) {
-        mostrarToast('El monto no puede superar el saldo pendiente', 'warning'); return;
+        mostrarToast('El monto no puede superar el saldo pendiente', 'warning'); 
+        return;
     }
 
     const numeroRecibo = generarNumeroRecibo();
 
+    // Preparar observación actualizada
+    const nuevaObservacion = cuentaSeleccionada.OBSERVACIONES || 
+        `Cuota ${cuentaSeleccionada.NUMERO_CUOTA} | Vence: ${formatFecha(cuentaSeleccionada.FECHA_VENCIMIENTO)} | Pagado: ${fechaPago} | Recibo: ${numeroRecibo}`;
+
     // Payload para la API
     const payload = {
-        id_cuenta:      cuentaSeleccionada.id || cuentaSeleccionada.id_cuenta,
-        id_anticipo:    cuentaSeleccionada.ID_ANTICIPO || cuentaSeleccionada.id_anticipo || null,
-        id_venta:       cuentaSeleccionada.id_venta    || cuentaSeleccionada.ID_VENTA    || null,
-        numero_cuota:   cuentaSeleccionada.numero_cuota|| cuentaSeleccionada.NUMERO_CUOTA,
-        numero_recibo:  numeroRecibo,
-        forma_pago:     formaPago,
-        num_documento:  documento,
-        monto_colones:  Math.round(monto),
-        tipo_cambio:    1,
-        monto_dolares:  0,
-        realizado_por:  realizadoPor,
-        fecha_pago:     fechaPago,
-        saldo_pendiente: Math.round(saldoPendiente - monto),
+        id_anticipo:        cuentaSeleccionada.ID_ANTICIPO,
+        id_financiamiento:  cuentaSeleccionada.ID_FINANCIAMIENTO,
+        forma_pago:         formaPago,
+        num_documento:      documento,
+        monto_colones:      Math.round(monto),
+        monto_dolares:      0,
+        moneda:             'CRC',
+        tipo_cambio:        1,
+        realizado_por:      realizadoPor,
+        fecha_anticipo:     fechaPago,
+        saldo_pendiente:    Math.round(saldoPendiente - monto),
+        observaciones:      nuevaObservacion,
+        estado_anticipo:    (saldoPendiente - monto) <= 0 ? 'COMPLETADO' : 'PAGADO'
     };
 
-    // Datos extra para la factura (calculados aquí)
-    const tasaMensual    = parseFloat(cuentaSeleccionada.interes_nominal || cuentaSeleccionada.INTERES_NOMINAL || 0) / 100;
-    const montoCuota     = cuentaSeleccionada.monto_cuota || cuentaSeleccionada.MONTO_CUOTA || monto;
-    const pagoIntereses  = Math.round(saldoPendiente * tasaMensual);
-    const amortizacion   = Math.round(monto - pagoIntereses);
-    const saldoNuevo     = Math.round(saldoPendiente - monto);
-
     try {
-        // Llamada a la API para guardar el pago
-        await apiFetch(API_CXC.pago, {
-            method: 'POST',
+        // Llamada a la API para actualizar el anticipo
+        await apiFetch(`${API_CXC.anticipos}/${cuentaSeleccionada.ID_ANTICIPO}`, {
+            method: 'PUT',
             body: JSON.stringify(payload)
         });
 
         mostrarToast('Pago registrado exitosamente', 'success');
 
-        // Armar datos para la factura
+        // Preparar datos para la factura
         const datosFactura = {
             numero_recibo:    numeroRecibo,
-            plan_venta:       cuentaSeleccionada.plan_venta  || cuentaSeleccionada.CODIGO_VENTA || '-',
-            numero_cuota:     cuentaSeleccionada.numero_cuota|| cuentaSeleccionada.NUMERO_CUOTA || '-',
-            cliente:          cuentaSeleccionada.cliente     || cuentaSeleccionada.NOMBRE_COMPLETO || '-',
-            cedula:           cuentaSeleccionada.cedula      || cuentaSeleccionada.IDENTIFICACION || '-',
-            telefono:         cuentaSeleccionada.telefono    || cuentaSeleccionada.TELEFONO_PRINCIPAL || 'N/A',
-            direccion:        cuentaSeleccionada.direccion   || cuentaSeleccionada.DIRECCION || 'N/A',
-            vehiculo:         cuentaSeleccionada.vehiculo    || cuentaSeleccionada.VEHICULO || '-',
+            plan_venta:       cuentaSeleccionada.CODIGO_VENTA || '-',
+            numero_cuota:     cuentaSeleccionada.NUMERO_CUOTA || '-',
+            cliente:          cuentaSeleccionada.NOMBRE_COMPLETO || '-',
+            cedula:           cuentaSeleccionada.IDENTIFICACION || '-',
+            telefono:         cuentaSeleccionada.TELEFONO_PRINCIPAL || 'N/A',
+            direccion:        cuentaSeleccionada.DIRECCION || 'N/A',
+            vehiculo:         cuentaSeleccionada.VEHICULO || '-',
             monto_pagado:     monto,
             saldo_anterior:   saldoPendiente,
-            interes_nominal:  cuentaSeleccionada.interes_nominal  || cuentaSeleccionada.INTERES_NOMINAL  || '0.00',
-            interes_moratorio:cuentaSeleccionada.interes_moratorio|| cuentaSeleccionada.INTERES_MORATORIO|| '0.00',
-            interes_adicional:'0.00',
-            pago_intereses:   pagoIntereses,
-            amortizacion:     amortizacion,
-            saldo_nuevo:      saldoNuevo,
-            saldo_actual:     saldoNuevo,
+            interes_nominal:  cuentaSeleccionada.interes_nominal || '0.00',
+            interes_moratorio: '0.00',
+            interes_adicional: '0.00',
+            pago_intereses:   cuentaSeleccionada.pagoIntereses || 0,
+            amortizacion:     cuentaSeleccionada.amortizacion || 0,
+            capital:          cuentaSeleccionada.capital || 0,
+            saldo_nuevo:      Math.round(saldoPendiente - monto),
+            saldo_actual:     Math.round(saldoPendiente - monto),
             realizado_por:    realizadoPor,
             fecha:            fechaPago,
         };
@@ -299,7 +423,7 @@ async function procesarPagoCuota() {
         cerrarModalPago();
         document.getElementById('modalFacturaPago').style.display = 'flex';
 
-        // Recargar tabla con datos frescos de la API
+        // Recargar tabla
         await cargarCuentasPorCobrar();
 
     } catch (e) {
@@ -312,54 +436,53 @@ async function procesarPagoCuota() {
 //  VER DETALLE DE PAGO YA REGISTRADO
 // ================================================================
 async function verDetallePago(cuentaId) {
-    const cuenta = cuentasPorCobrar.find(c =>
-        (c.id || c.ID_ANTICIPO || c.id_cuenta) == cuentaId
-    );
+    const cuenta = cuentasPorCobrar.find(c => c.id == cuentaId);
     if (!cuenta) return;
 
     try {
-        // Buscar anticipo asociado a esta cuenta/cuota en la API
-        const idVenta   = cuenta.id_venta   || cuenta.ID_VENTA;
-        const numCuota  = cuenta.numero_cuota|| cuenta.NUMERO_CUOTA;
-        const anticipos = await apiFetch(`${API_CXC.anticipos}?id_venta=${idVenta}`);
-
-        // Buscar el anticipo que corresponde a esta cuota por número de documento o número de cuota
-        const anticipo = anticipos.find(a =>
-            (a.NUM_DOCUMENTO || a.num_documento || '').includes(`CUOTA-${numCuota}`) ||
-            (a.cuota_numero) == numCuota
-        ) || anticipos[anticipos.length - 1]; // fallback: el más reciente
-
-        if (!anticipo) {
-            mostrarToast('No se encontró el recibo asociado a este pago', 'warning');
-            return;
+        // Extraer datos de la observación
+        let pagoIntereses = 0;
+        let amortizacion = 0;
+        let capital = 0;
+        
+        if (cuenta.observaciones) {
+            const observacion = cuenta.observaciones;
+            
+            const capitalMatch = observacion.match(/Capital:\s*[₡]?\s*([\d.,]+)/);
+            if (capitalMatch) {
+                capital = parseFloat(capitalMatch[1].replace(/\./g, '').replace(',', '.'));
+            }
+            
+            const interesesMatch = observacion.match(/Intereses:\s*[₡]?\s*([\d.,]+)/);
+            if (interesesMatch) {
+                pagoIntereses = parseFloat(interesesMatch[1].replace(/\./g, '').replace(',', '.'));
+            }
         }
 
-        const montoPagado   = anticipo.MONTO_COLONES || anticipo.monto_colones || 0;
-        const saldoPendiente= cuenta.saldo_pendiente || cuenta.SALDO_PENDIENTE || 0;
-        const montoCuota    = cuenta.monto_cuota     || cuenta.MONTO_CUOTA     || 0;
-        const tasaMensual   = parseFloat(cuenta.interes_nominal || cuenta.INTERES_NOMINAL || 0) / 100;
-        const pagoIntereses = Math.round(montoPagado * tasaMensual);
+        const montoCuota = parseFloat(cuenta.monto_cuota) || 0;
+        amortizacion = Math.round(montoCuota - pagoIntereses);
 
         const datosFactura = {
-            numero_recibo:    anticipo.NUM_DOCUMENTO || anticipo.numero_recibo || 'N/D',
-            plan_venta:       cuenta.plan_venta     || cuenta.CODIGO_VENTA    || '-',
-            numero_cuota:     numCuota,
-            cliente:          cuenta.cliente        || cuenta.NOMBRE_COMPLETO || '-',
-            cedula:           cuenta.cedula         || cuenta.IDENTIFICACION  || '-',
-            telefono:         cuenta.telefono       || cuenta.TELEFONO_PRINCIPAL || 'N/A',
-            direccion:        cuenta.direccion      || cuenta.DIRECCION       || 'N/A',
-            vehiculo:         cuenta.vehiculo       || cuenta.VEHICULO        || '-',
-            monto_pagado:     montoPagado,
-            saldo_anterior:   montoCuota,
-            interes_nominal:  cuenta.interes_nominal  || cuenta.INTERES_NOMINAL  || '0.00',
-            interes_moratorio:cuenta.interes_moratorio|| cuenta.INTERES_MORATORIO|| '0.00',
-            interes_adicional:'0.00',
+            numero_recibo:    `REC-${cuenta.id}-${new Date().getTime()}`,
+            plan_venta:       cuenta.plan_venta || '-',
+            numero_cuota:     cuenta.numero_cuota || '-',
+            cliente:          cuenta.cliente || '-',
+            cedula:           cuenta.cedula || '-',
+            telefono:         cuenta.telefono || 'N/A',
+            direccion:        'N/A',
+            vehiculo:         cuenta.vehiculo || '-',
+            monto_pagado:     parseFloat(cuenta.monto_cuota) || 0,
+            saldo_anterior:   parseFloat(cuenta.saldo_pendiente) || 0,
+            interes_nominal:  cuenta.interes_nominal || '0.00',
+            interes_moratorio: cuenta.interes_moratorio || '0.00',
+            interes_adicional: '0.00',
             pago_intereses:   pagoIntereses,
-            amortizacion:     Math.round(montoPagado - pagoIntereses),
-            saldo_nuevo:      saldoPendiente,
-            saldo_actual:     saldoPendiente,
-            realizado_por:    anticipo.REALIZADO_POR || anticipo.realizado_por || '-',
-            fecha:            anticipo.FECHA_ANTICIPO|| anticipo.fecha || '',
+            amortizacion:     amortizacion,
+            capital:          capital,
+            saldo_nuevo:      parseFloat(cuenta.saldo_pendiente) || 0,
+            saldo_actual:     parseFloat(cuenta.saldo_pendiente) || 0,
+            realizado_por:    'Sistema',
+            fecha:            new Date().toISOString(),
         };
 
         generarFactura(datosFactura);
@@ -370,6 +493,7 @@ async function verDetallePago(cuentaId) {
         mostrarToast('Error al cargar el recibo: ' + e.message, 'error');
     }
 }
+
 
 // ================================================================
 //  MODAL FACTURA
@@ -454,16 +578,22 @@ function generarFactura(d) {
                     <td style="text-align:right;">${d.interes_nominal}%</td>
                 </tr>
                 <tr>
-                    <td class="label">PAGO A INTERESES:</td>
-                    <td style="text-align:right;">${formatoNumero(d.pago_intereses)}</td>
+                    <td class="label">CAPITAL:</td>
+                    <td style="text-align:right;">${formatoNumero(d.capital || 0)}</td>
                     <td class="label">INTERÉS MORATORIO:</td>
                     <td style="text-align:right;">${d.interes_moratorio}%</td>
                 </tr>
                 <tr>
+                    <td class="label">PAGO A INTERESES:</td>
+                    <td style="text-align:right;">${formatoNumero(d.pago_intereses)}</td>
+                    <td class="label">INTERÉS ADICIONAL:</td>
+                    <td style="text-align:right;">${d.interes_adicional}%</td>
+                </tr>
+                <tr>
                     <td class="label">AMORTIZACIÓN:</td>
                     <td style="text-align:right;">${formatoNumero(d.amortizacion)}</td>
-                    <td class="label">INTERÉS ADICIONAL:</td>
-                    <td style="text-align:right;">${d.interes_adicional || '0.00'}%</td>
+                    <td class="label"></td>
+                    <td style="text-align:right;"></td>
                 </tr>
                 <tr>
                     <td class="label">SALDO NUEVO:</td>

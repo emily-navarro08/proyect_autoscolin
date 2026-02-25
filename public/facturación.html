@@ -668,7 +668,6 @@
                                     <th>Cliente</th>
                                     <th>Vehículo</th>
                                     <th>Vendedor</th>
-                                    <th>Monto Total</th>
                                     <th>Tipo Pago</th>
                                     <th>Plazo</th>
                                     <th>Acciones</th>
@@ -691,7 +690,18 @@
                             </button>
                         </div>
                         
-                        <!-- Opciones de venta -->
+                        <!-- BADGE DE INTERCAMBIO (visible solo si aplica) -->
+                        <div id="intercambioBadge" style="display: none; margin-bottom: 20px;">
+                            <div style="background: #f39c12; color: white; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
+                                <i class="fas fa-exchange-alt" style="font-size: 24px;"></i>
+                                <div>
+                                    <strong style="font-size: 16px;">🔄 VEHÍCULO RECIBIDO POR INTERCAMBIO</strong>
+                                    <div style="margin-top: 5px; font-size: 14px;" id="intercambioInfo"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Opciones de venta (se mantienen igual) -->
                         <div class="venta-opciones">
                             <div class="opcion-item">
                                 <label>
@@ -705,6 +715,7 @@
                             </div>
                         </div>
 
+                        <!-- Grid de 2 columnas para datos básicos (se mantiene) -->
                         <div class="detalle-grid">
                             <div class="detalle-card">
                                 <h4><i class="fas fa-user"></i> Datos del Cliente</h4>
@@ -745,8 +756,40 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="detalle-card">
+
+                        <!-- NUEVA SECCIÓN: Detalles Adicionales (Extras) -->
+                        <div class="detalle-card" style="margin-top: 20px;">
+                            <h4><i class="fas fa-plus-circle"></i> Detalles Adicionales</h4>
+                            <div id="extrasContainer">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- NUEVA SECCIÓN: Especificaciones Técnicas -->
+                        <div class="detalle-card" style="margin-top: 20px;">
+                            <h4><i class="fas fa-cogs"></i> Especificaciones Técnicas</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div>
+                                    <div class="detalle-row"><span class="detalle-label">Marca:</span> <span class="detalle-value" id="espMarca"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Estilo:</span> <span class="detalle-value" id="espEstilo"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Tracción:</span> <span class="detalle-value" id="espTraccion"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Modelo:</span> <span class="detalle-value" id="espModelo"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Color:</span> <span class="detalle-value" id="espColor"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Transmisión:</span> <span class="detalle-value" id="espTransmision"></span></div>
+                                </div>
+                                <div>
+                                    <div class="detalle-row"><span class="detalle-label">Combustible:</span> <span class="detalle-value" id="espCombustible"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Motor:</span> <span class="detalle-value" id="espMotor"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Chasis:</span> <span class="detalle-value" id="espChasis"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Cilindros:</span> <span class="detalle-value" id="espCilindros"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">C.C.:</span> <span class="detalle-value" id="espCC"></span></div>
+                                    <div class="detalle-row"><span class="detalle-label">Kilometraje:</span> <span class="detalle-value" id="espKilometraje"></span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN EXISTENTE: Detalle de la Venta (items) -->
+                        <div class="detalle-card" style="margin-top: 20px;">
                             <h4><i class="fas fa-shopping-cart"></i> Detalle de la Venta</h4>
                             <table class="items-table">
                                 <thead>
@@ -781,23 +824,6 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                            <div style="display: flex; gap: 10px; margin: 15px 0; justify-content: flex-end;">
-                                <button class="btn-icon" onclick="agregarItem()" style="width: auto; padding: 8px 15px; background: #27ae60; color: white; gap: 5px;">
-                                    <i class="fas fa-plus"></i> Agregar Item
-                                </button>
-                                <button class="btn-icon" onclick="eliminarUltimoItem()" style="width: auto; padding: 8px 15px; background: #e74c3c; color: white; gap: 5px;">
-                                    <i class="fas fa-trash"></i> Quitar Último
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
-                            <button class="btn-filter btn-filter-primary" onclick="aprobarVenta()">
-                                <i class="fas fa-check-circle"></i> Aprobar Venta
-                            </button>
-                            <button class="btn-filter" style="background: #e74c3c; color: white;" onclick="rechazarVenta()">
-                                <i class="fas fa-times-circle"></i> Rechazar Venta
-                            </button>
                         </div>
                     </div>
             </div>
@@ -859,7 +885,6 @@
 
     // ===== INICIALIZACIÓN =====
     document.addEventListener('DOMContentLoaded', function() {
-        cargarUsuario();
         cargarCatalogos();
         cargarVentasPendientes();
         
@@ -895,11 +920,6 @@
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    function cargarUsuario() {
-        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-        document.getElementById('usuarioInfo').innerHTML = ` 🖥️ ${usuario.nombre || 'Invitado'} - ${usuario.rol || 'USUARIO'}`;
-    }
-
     // ===== CARGA DE CATÁLOGOS =====
     async function cargarCatalogos() {
         try {
@@ -923,27 +943,51 @@
 
     // ===== CARGA DE VENTAS PENDIENTES =====
     async function cargarVentasPendientes() {
+        // Verificar sesión primero
+        if (!sessionStorage.getItem('usuarioId')) {
+            window.location.href = '/index.html';
+            return;
+        }
+        
         try {
             const response = await fetch('/api/ventas/pendientes');
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // No autorizado, redirigir al login
+                    window.location.href = '/index.html';
+                    return;
+                }
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
             ventasPendientes = await response.json();
+            console.log('Ventas pendientes:', ventasPendientes);
             ventasFiltradas = [...ventasPendientes];
             renderizarTabla();
             actualizarContadores();
         } catch (error) {
+            console.error('Error:', error);
             mostrarError('No se pudieron cargar las ventas pendientes');
         }
     }
 
     // ===== FUNCIONES DE UTILIDAD =====
-    function formatearNumero(num) {
-        const n = Number(num);
-        if (!isFinite(n)) {
-            return '₡ 0.00';
+    function formatearNumero(num, moneda = 'CRC') {
+        if (num === null || num === undefined || isNaN(num)) {
+            return moneda === 'CRC' ? '0,00' : '0.00';
         }
-        return '₡ ' + new Intl.NumberFormat('es-CR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(n);
+        
+        const numero = Number(num);
+        
+        if (moneda === 'USD') {
+            return numero.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        } else {
+            // Formato costarricense: puntos para miles, coma para decimales
+            return numero.toFixed(2)
+                .replace('.', ',')
+                .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
     }
 
     function formatearFecha(fechaStr) {
@@ -960,7 +1004,7 @@
         const tbody = document.getElementById('tablaVentasBody');
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; padding: 50px; color: #e74c3c;">
+                <td colspan="8" style="text-align: center; padding: 50px; color: #e74c3c;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
                     <p>${mensaje}</p>
                 </td>
@@ -978,18 +1022,20 @@
         );
 
         ventasAMostrar.forEach(venta => {
-            // Filtrar por tab si no es 'todas'
-            if (tabActual !== 'todas') {
-                const tipoPago = venta.FORMAS_PAGO?.[0]?.TIPO_VENTA?.toLowerCase() || '';
-                if (!tipoPago.includes(tabActual.toLowerCase())) {
-                    return;
-                }
-            }
-
             const fecha = formatearFecha(venta.FECHA_VENTA);
-            const montoTotal = calcularMontoTotal(venta);
-            const tipoPago = venta.FORMAS_PAGO?.[0]?.TIPO_VENTA || 'CONTADO';
-            const plazo = venta.FORMAS_PAGO?.[0]?.PLAZO_MESES || 0;
+            
+            // Usar los datos que ahora vienen de la API
+            const tipoPago = venta.TIPO_VENTA || 'CONTADO';
+            
+            // Determinar el plazo/forma de pago
+            let plazoTexto = '-';
+            if (tipoPago === 'CREDITO') {
+                const meses = venta.PLAZO_MESES;
+                plazoTexto = meses ? `${meses} meses` : 'Por definir';
+            } else {
+                // Si es contado, mostrar la forma de pago
+                plazoTexto = venta.FORMA_PAGO || 'Contado';
+            }
 
             const row = document.createElement('tr');
             row.onclick = () => verDetalleVenta(venta.ID_VENTA);
@@ -997,11 +1043,10 @@
                 <td><strong>${venta.CODIGO_VENTA || 'S/N'}</strong></td>
                 <td>${fecha}</td>
                 <td>${venta.CLIENTE_NOMBRE || 'N/A'}</td>
-                <td>${venta.VEHICULO_DESCRIPCION || 'N/A'} - ${venta.PLACA || 'S/N'}</td>
+                <td>${venta.VEHICULO_DESCRIPCION || 'N/A'}</td>
                 <td>${venta.VENDEDOR_NOMBRE || 'N/A'}</td>
-                <td class="${montoTotal > 10000000 ? 'monto-alto' : montoTotal > 5000000 ? 'monto-medio' : ''}">${formatearNumero(montoTotal)}</td>
                 <td>${tipoPago}</td>
-                <td>${plazo > 0 ? plazo + ' meses' : 'Contado'}</td>
+                <td>${plazoTexto}</td>
                 <td class="acciones-cell" onclick="event.stopPropagation()">
                     <button class="btn-icon view" onclick="verDetalleVenta(${venta.ID_VENTA})" title="Ver detalles">
                         <i class="fas fa-eye"></i>
@@ -1020,7 +1065,7 @@
         if (tbody.children.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 50px; color: #7f8c8d;">
+                    <td colspan="8" style="text-align: center; padding: 50px; color: #7f8c8d;">
                         <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px;"></i>
                         <p>No hay ventas pendientes de facturar</p>
                     </td>
@@ -1029,106 +1074,387 @@
         }
     }
 
-    function calcularMontoTotal(venta) {
-        // Esto debería venir de la BD, pero por ahora calculamos
-        let total = 0;
-        if (venta.FORMAS_PAGO && venta.FORMAS_PAGO.length > 0) {
-            const fp = venta.FORMAS_PAGO[0] || {};
-            const prima = parseFloat(String(fp.PRIMA || '').replace(/[^0-9.-]+/g, '')) || 0;
-            const saldo = parseFloat(String(fp.SALDO || '').replace(/[^0-9.-]+/g, '')) || 0;
-            total = prima + saldo;
-        }
-        return total;
-    }
-
     function actualizarContadores() {
-        const contado = ventasPendientes.filter(v => 
-            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
-            v.FORMAS_PAGO?.[0]?.TIPO_VENTA === 'CONTADO'
-        ).length;
-        
-        const credito = ventasPendientes.filter(v => 
-            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
-            v.FORMAS_PAGO?.[0]?.TIPO_VENTA === 'CRÉDITO'
-        ).length;
-        
-        const efectivo = ventasPendientes.filter(v => 
-            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
-            v.FORMAS_PAGO?.[0]?.FORMA_PAGO?.toLowerCase().includes('efectivo')
-        ).length;
-        
-        const tarjeta = ventasPendientes.filter(v => 
-            v.ESTADO_VENTA === 'PENDIENTE DE FACTURAR' && 
-            v.FORMAS_PAGO?.[0]?.FORMA_PAGO?.toLowerCase().includes('tarjeta')
-        ).length;
+        let contado = 0;
+        let credito = 0;
+        let efectivo = 0;
+        let tarjeta = 0;
+
+        ventasPendientes.forEach(v => {
+            if (v.ESTADO_VENTA !== 'PENDIENTE DE FACTURAR') return;
+
+            const tipoVenta = (v.TIPO_VENTA || '').toLowerCase();
+            const formaPago = (v.FORMA_PAGO || '').toLowerCase();
+
+            if (tipoVenta === 'credito') {
+                credito++;
+            } else {
+                contado++;
+            }
+            
+            if (formaPago.includes('efectivo')) efectivo++;
+            if (formaPago.includes('tarjeta')) tarjeta++;
+        });
 
         const tabs = document.querySelectorAll('.tab-venta');
         if (tabs[0]) tabs[0].innerHTML = `<i class="fas fa-money-bill-wave"></i> Contado <span class="badge">${contado}</span>`;
         if (tabs[1]) tabs[1].innerHTML = `<i class="fas fa-credit-card"></i> Crédito <span class="badge">${credito}</span>`;
         if (tabs[2]) tabs[2].innerHTML = `<i class="fas fa-money-bill"></i> Efectivo <span class="badge">${efectivo}</span>`;
         if (tabs[3]) tabs[3].innerHTML = `<i class="fas fa-credit-card"></i> Tarjeta <span class="badge">${tarjeta}</span>`;
-        if (tabs[4]) tabs[4].innerHTML = `<i class="fas fa-list"></i> Todas`;
+        if (tabs[4]) tabs[4].innerHTML = `<i class="fas fa-list"></i> Todas <span class="badge">${ventasPendientes.length}</span>`;
     }
 
     // ===== VER DETALLE DE VENTA =====
     async function verDetalleVenta(id) {
         try {
+            console.log('Cargando detalle de venta ID:', id);
+            
             const response = await fetch(`/api/ventas/${id}/completo`);
-            ventaSeleccionada = await response.json();
             
-            if (!ventaSeleccionada) return;
-
-            // Llenar datos del detalle
-            document.getElementById('detalleNumPlan').textContent = ventaSeleccionada.CODIGO_VENTA || 'S/N';
-            document.getElementById('detalleCliente').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.NOMBRE_COMPLETO || 'N/A';
-            document.getElementById('detalleCedula').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.IDENTIFICACION || 'N/A';
-            document.getElementById('detalleTelefono').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.TELEFONO_PRINCIPAL || 'N/A';
-            document.getElementById('detalleEmail').textContent = ventaSeleccionada.CLIENTE_FACTURACION?.EMAIL || 'N/A';
-            
-            document.getElementById('detalleVehiculo').textContent = ventaSeleccionada.VEHICULO?.marca_nombre + ' ' + ventaSeleccionada.VEHICULO?.ESTILO || 'N/A';
-            document.getElementById('detallePlaca').textContent = ventaSeleccionada.VEHICULO?.PLACA || 'N/A';
-            document.getElementById('detalleAnio').textContent = ventaSeleccionada.VEHICULO?.MODELO || 'N/A';
-            document.getElementById('detalleColor').textContent = ventaSeleccionada.VEHICULO?.color_nombre || 'N/A';
-
-            // Resetear opciones
-            document.getElementById('exonerarVenta').checked = false;
-            document.getElementById('descuentoGlobal').value = 0;
-
-            // Crear items de la venta (vehículo + extras)
-            const items = [];
-            
-            // Item del vehículo
-            items.push({
-                codigo: 'VEH-' + ventaSeleccionada.ID_VEHICULO,
-                descripcion: `${ventaSeleccionada.VEHICULO?.marca_nombre} ${ventaSeleccionada.VEHICULO?.ESTILO} ${ventaSeleccionada.VEHICULO?.MODELO}`,
-                cantidad: 1,
-                precio: ventaSeleccionada.VEHICULO?.PRECIO_VENTA || 0,
-                descuento: 0,
-                total: ventaSeleccionada.VEHICULO?.PRECIO_VENTA || 0
-            });
-            
-            // Items de extras si existen
-            if (ventaSeleccionada.EXTRAS && ventaSeleccionada.EXTRAS.length > 0) {
-                ventaSeleccionada.EXTRAS.forEach((extra, index) => {
-                    items.push({
-                        codigo: 'EXT-' + (index + 1),
-                        descripcion: extra.EXTRAS_DETALLE || 'Extra',
-                        cantidad: 1,
-                        precio: extra.PRECIO || 0,
-                        descuento: 0,
-                        total: extra.PRECIO || 0
-                    });
-                });
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
             }
-
-            ventaSeleccionada.items = items;
-            refrescarTablaItems();
-
-            document.getElementById('detalleVenta').classList.add('show');
+            
+            const data = await response.json();
+            console.log('Datos de venta completa:', data);
+            
+            if (!data) {
+                mostrarNotificacion('No se encontraron datos de la venta', 'error');
+                return;
+            }
+            
+            ventaSeleccionada = data;
+            
+            // Asegurarse de que el detalle esté visible
+            const detalleVenta = document.getElementById('detalleVenta');
+            detalleVenta.classList.add('show');
+            
+            // Llenar los datos
+            llenarDetalleVenta(data);
             
         } catch (error) {
             console.error('Error cargando detalle de venta:', error);
-            alert('Error al cargar el detalle de la venta');
+            mostrarNotificacion('Error al cargar el detalle de la venta: ' + error.message, 'error');
+        }
+    }
+
+    // ===== FUNCIÓN PARA LLENAR EL DETALLE DE VENTA =====
+    function llenarDetalleVenta(data) {
+        try {
+            console.log('Datos completos de la venta:', data);
+            
+            // Número de plan
+            document.getElementById('detalleNumPlan').textContent = data.CODIGO_VENTA || 'S/N';
+            
+            // ===== DATOS DEL CLIENTE =====
+            const cliente = data.CLIENTE_FACTURACION || {};
+            document.getElementById('detalleCliente').textContent = cliente.NOMBRE_COMPLETO || 'N/A';
+            document.getElementById('detalleCedula').textContent = cliente.IDENTIFICACION || 'N/A';
+            document.getElementById('detalleTelefono').textContent = cliente.TELEFONO_PRINCIPAL || 'N/A';
+            document.getElementById('detalleEmail').textContent = cliente.EMAIL || 'N/A';
+            
+            // ===== DATOS DEL VEHÍCULO VENDIDO =====
+            const vehiculo = data.VEHICULO || {};
+            document.getElementById('detalleVehiculo').textContent = `${vehiculo.marca_nombre || ''} ${vehiculo.ESTILO || ''}`.trim() || 'N/A';
+            document.getElementById('detallePlaca').textContent = vehiculo.PLACA || 'N/A';
+            document.getElementById('detalleAnio').textContent = vehiculo.MODELO || 'N/A';
+            document.getElementById('detalleColor').textContent = vehiculo.color_nombre || 'N/A';
+            
+            // ===== BADGE DE INTERCAMBIO =====
+            if (data.ES_INTERCAMBIO && data.VEHICULO_RECIBIDO) {
+                document.getElementById('intercambioBadge').style.display = 'block';
+                const vr = data.VEHICULO_RECIBIDO;
+                document.getElementById('intercambioInfo').innerHTML = `
+                    <strong>Vehículo recibido:</strong> ${vr.marca_nombre || ''} ${vr.ESTILO || ''} ${vr.MODELO || ''}<br>
+                    <strong>Placa:</strong> ${vr.PLACA || 'N/A'}<br>
+                    <strong>Monto intercambio:</strong> ₡${formatearNumero(vr.monto_recibido || 0)}<br>
+                    <strong>Cliente origen:</strong> ${data.CLIENTE_FACTURACION?.NOMBRE_COMPLETO || 'N/A'}
+                `;
+            } else {
+                document.getElementById('intercambioBadge').style.display = 'none';
+            }
+            
+            // ===== PRECIOS Y COSTOS (ahora van en Detalles Adicionales) =====
+            const costos = data.COSTOS || {};
+            console.log('Costos:', costos);
+            
+            // ===== EXTRAS (también van en Detalles Adicionales) =====
+            const extras = data.EXTRAS || [];
+            console.log('Extras:', extras);
+            
+            // ===== DETALLES ADICIONALES (COSTOS + EXTRAS + FINANCIAMIENTO) =====
+            const extrasContainer = document.getElementById('extrasContainer');
+
+            if (extrasContainer) {
+                extrasContainer.innerHTML = ''; // Limpiar contenedor
+                
+                // Crear un array con todos los costos, extras y financiamiento
+                const todosLosDetalles = [];
+                
+                // ===== 1. COSTOS DEL VEHÍCULO =====
+                if (costos.PRECIO_COMPRA > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Precio de Compra',
+                        monto: parseFloat(costos.PRECIO_COMPRA) || 0
+                    });
+                }
+                
+                if (costos.PRECIO_TRANSPASO > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Precio de Traspaso',
+                        monto: parseFloat(costos.PRECIO_TRANSPASO) || 0
+                    });
+                }
+                
+                if (costos.COSTO > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Costo Total',
+                        monto: parseFloat(costos.COSTO) || 0
+                    });
+                }
+                
+                if (costos.PRIMA > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Prima',
+                        monto: parseFloat(costos.PRIMA) || 0
+                    });
+                }
+                
+                if (costos.COMISION > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Comisión',
+                        monto: parseFloat(costos.COMISION) || 0
+                    });
+                }
+                
+                if (costos.TOTAL_INVERSION > 0) {
+                    todosLosDetalles.push({
+                        descripcion: 'Total Inversión',
+                        monto: parseFloat(costos.TOTAL_INVERSION) || 0
+                    });
+                }
+                
+                // ===== 2. EXTRAS DEL VEHÍCULO =====
+                if (extras.length > 0) {
+                    extras.forEach(extra => {
+                        const monto = parseFloat(extra.PRECIO) || 0;
+                        if (monto > 0) {
+                            todosLosDetalles.push({
+                                descripcion: extra.EXTRAS_DETALLE || extra.ARREGLO || 'Extra',
+                                monto: monto
+                            });
+                        }
+                    });
+                }
+                
+                // ===== 3. FINANCIAMIENTO (SI EXISTE) =====
+                const financiamiento = data.FINANCIAMIENTO;
+                if (financiamiento) {
+                    // Monto financiado
+                    if (financiamiento.MONTO_FINANCIAR > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Monto Financiado',
+                            monto: parseFloat(financiamiento.MONTO_FINANCIAR) || 0
+                        });
+                    }
+                    
+                    // Prima del financiamiento
+                    if (financiamiento.PRIMA > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Prima del Financiamiento',
+                            monto: parseFloat(financiamiento.PRIMA) || 0
+                        });
+                    }
+                    
+                    // Honorarios
+                    if (financiamiento.HONORARIOS > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Honorarios',
+                            monto: parseFloat(financiamiento.HONORARIOS) || 0
+                        });
+                    }
+                    
+                    // Comisión del financiamiento
+                    if (financiamiento.COMISION > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Comisión Financiamiento',
+                            monto: parseFloat(financiamiento.COMISION) || 0
+                        });
+                    }
+                    
+                    // Intereses totales
+                    if (financiamiento.INTERESES_TOTAL > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Intereses Totales',
+                            monto: parseFloat(financiamiento.INTERESES_TOTAL) || 0
+                        });
+                    }
+                    
+                    // Préstamo total (monto + intereses)
+                    if (financiamiento.PRESTAMO_TOTAL > 0) {
+                        todosLosDetalles.push({
+                            descripcion: 'Préstamo Total',
+                            monto: parseFloat(financiamiento.PRESTAMO_TOTAL) || 0
+                        });
+                    }
+                    
+                    // Cuota mensual
+                    if (financiamiento.CUOTA_MENSUAL > 0) {
+                        todosLosDetalles.push({
+                            descripcion: `Cuota Mensual (${financiamiento.PLAZO_MESES || '?'} meses)`,
+                            monto: parseFloat(financiamiento.CUOTA_MENSUAL) || 0
+                        });
+                    }
+                    
+                    // Tasa de interés
+                    if (financiamiento.TASA_MENSUAL > 0) {
+                        todosLosDetalles.push({
+                            descripcion: `Tasa Mensual: ${financiamiento.TASA_MENSUAL}%`,
+                            monto: 0  // No es un monto, es un porcentaje
+                        });
+                    }
+                    
+                    // Entidad financiera
+                    if (financiamiento.ENTIDAD_FINANCIERA) {
+                        // Agregar como un detalle especial sin monto
+                        const entidadDiv = document.createElement('div');
+                        entidadDiv.style.cssText = `
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 12px 15px;
+                            border-bottom: 1px solid #e0e0e0;
+                            background-color: #e8f4f8;
+                        `;
+                        entidadDiv.innerHTML = `
+                            <div>
+                                <i class="fas fa-university" style="color: #3498db; margin-right: 10px;"></i>
+                                <strong>Entidad Financiera:</strong> ${financiamiento.ENTIDAD_FINANCIERA}
+                            </div>
+                            <div style="font-weight: 600; color: #3498db;">
+                                Plazo: ${financiamiento.PLAZO_MESES || '?'} meses
+                            </div>
+                        `;
+                        extrasContainer.appendChild(entidadDiv);
+                    }
+                }
+                
+                // ===== MOSTRAR TODOS LOS DETALLES =====
+                if (todosLosDetalles.length === 0) {
+                    extrasContainer.innerHTML = '<p style="color: #7f8c8d; text-align: center; padding: 20px;">No hay detalles adicionales</p>';
+                } else {
+                    todosLosDetalles.forEach(detalle => {
+                        // Si el monto es 0 pero hay descripción (como la tasa), mostrar de otra forma
+                        if (detalle.monto === 0 && detalle.descripcion.includes('%')) {
+                            const detalleDiv = document.createElement('div');
+                            detalleDiv.style.cssText = `
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 15px;
+                                border-bottom: 1px solid #e0e0e0;
+                                background-color: #f0f2f5;
+                            `;
+                            detalleDiv.innerHTML = `
+                                <div>
+                                    <i class="fas fa-percent" style="color: #f39c12; margin-right: 10px;"></i>
+                                    ${detalle.descripcion}
+                                </div>
+                                <div style="font-weight: 600; color: #f39c12;"></div>
+                            `;
+                            extrasContainer.appendChild(detalleDiv);
+                        } else if (detalle.monto > 0) {
+                            const detalleDiv = document.createElement('div');
+                            detalleDiv.style.cssText = `
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 15px;
+                                border-bottom: 1px solid #e0e0e0;
+                            `;
+                            
+                            // Icono diferente para financiamiento
+                            let icono = 'fa-circle';
+                            let colorIcono = '#3498db';
+                            
+                            if (detalle.descripcion.includes('Financiado') || detalle.descripcion.includes('Préstamo')) {
+                                icono = 'fa-money-bill-wave';
+                                colorIcono = '#27ae60';
+                            } else if (detalle.descripcion.includes('Intereses')) {
+                                icono = 'fa-chart-line';
+                                colorIcono = '#e74c3c';
+                            } else if (detalle.descripcion.includes('Cuota')) {
+                                icono = 'fa-calendar-alt';
+                                colorIcono = '#f39c12';
+                            }
+                            
+                            detalleDiv.innerHTML = `
+                                <div>
+                                    <i class="fas ${icono}" style="font-size: 8px; color: ${colorIcono}; margin-right: 10px;"></i>
+                                    ${detalle.descripcion}
+                                </div>
+                                <div style="font-weight: 600;">₡${formatearNumero(detalle.monto)}</div>
+                            `;
+                            extrasContainer.appendChild(detalleDiv);
+                        }
+                    });
+                }
+            }
+            
+            // ===== ESPECIFICACIONES TÉCNICAS =====
+            document.getElementById('espMarca').textContent = vehiculo.marca_nombre || 'N/A';
+            document.getElementById('espEstilo').textContent = vehiculo.ESTILO || 'N/A';
+            document.getElementById('espTraccion').textContent = vehiculo.TRACCION || 'N/A';
+            document.getElementById('espModelo').textContent = vehiculo.MODELO || 'N/A';
+            document.getElementById('espColor').textContent = vehiculo.color_nombre || 'N/A';
+            document.getElementById('espTransmision').textContent = vehiculo.transmision_nombre || 'N/A';
+            document.getElementById('espCombustible').textContent = vehiculo.combustible_nombre || 'N/A';
+            document.getElementById('espMotor').textContent = vehiculo.MOTOR || 'N/A';
+            document.getElementById('espChasis').textContent = vehiculo.CHASIS || 'N/A';
+            document.getElementById('espCilindros').textContent = vehiculo.CILINDROS || 'N/A';
+            document.getElementById('espCC').textContent = vehiculo.C_C || 'N/A';
+            document.getElementById('espKilometraje').textContent = vehiculo.KILOMETRAJE_ACTUAL ? `${vehiculo.KILOMETRAJE_ACTUAL} km` : 'N/A';
+            
+            // ===== FINANCIAMIENTO =====
+            const financiamiento = data.FINANCIAMIENTO;
+            if (financiamiento) {
+                console.log('Financiamiento:', financiamiento);
+            }
+            
+            // Resetear opciones
+            const exonerarVenta = document.getElementById('exonerarVenta');
+            if (exonerarVenta) exonerarVenta.checked = false;
+            
+            const descuentoGlobal = document.getElementById('descuentoGlobal');
+            if (descuentoGlobal) descuentoGlobal.value = 0;
+
+            // ===== CREAR ITEMS (SOLO PRECIO PÚBLICO) =====
+            const items = [];
+
+            // SOLO el precio público del vehículo
+            if (costos.PRECIO_PUBLICO > 0) {
+                items.push({
+                    codigo: 'VEH-' + (vehiculo.ID_VEHICULO || ''),
+                    descripcion: `Vehículo: ${vehiculo.marca_nombre || ''} ${vehiculo.ESTILO || ''} ${vehiculo.MODELO || ''}`.trim() || 'Vehículo',
+                    cantidad: 1,
+                    precio: parseFloat(costos.PRECIO_PUBLICO) || 0,
+                    descuento: 0,
+                    total: parseFloat(costos.PRECIO_PUBLICO) || 0
+                });
+            }
+
+            console.log('Items creados (solo precio público):', items);
+
+            ventaSeleccionada = {
+                ...data,
+                items: items
+            };
+            
+            refrescarTablaItems();
+            
+        } catch (error) {
+            console.error('Error en llenarDetalleVenta:', error);
+            mostrarNotificacion('Error al procesar los datos de la venta', 'error');
         }
     }
 
@@ -1231,36 +1557,74 @@
 
     // ===== APROBAR VENTA =====
     function aprobarVenta(id) {
-        ventaSeleccionada = ventasPendientes.find(v => v.ID_VENTA === id);
-        if (!ventaSeleccionada) return;
+        // Buscar la venta en ventasPendientes
+        const venta = ventasPendientes.find(v => v.ID_VENTA === id);
+        if (!venta) {
+            mostrarNotificacion('Venta no encontrada', 'error');
+            return;
+        }
+        
+        // Si hay una venta seleccionada en el detalle, usarla, sino usar la de la lista
+        if (ventaSeleccionada && ventaSeleccionada.ID_VENTA === id) {
+            // Ya tenemos los datos completos
+        } else {
+            // Cargar los datos completos primero
+            verDetalleVenta(id).then(() => {
+                document.getElementById('modalAprobacion').style.display = 'flex';
+            });
+            return;
+        }
         
         document.getElementById('modalAprobacion').style.display = 'flex';
     }
 
+    // ===== CONFIRMAR APROBACIÓN =====
     async function confirmarAprobacion() {
         if (!ventaSeleccionada) return;
         
         try {
+            // Obtener los valores actuales del detalle
+            const subtotal = parseFloat(document.getElementById('detalleSubtotal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
+            const descuentoMonto = parseFloat(document.getElementById('detalleDescuentoGlobal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
+            const impuestos = parseFloat(document.getElementById('detalleImpuestos').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
+            const total = parseFloat(document.getElementById('detalleTotal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
+            const exonerar = document.getElementById('exonerarVenta').checked;
+            const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
+            
+            // Obtener el ID de la persona que aprueba desde sessionStorage
+            const idPersona = sessionStorage.getItem('usuarioId');
+            
+            if (!idPersona) {
+                mostrarNotificacion('No hay sesión activa', 'error');
+                return;
+            }
+            
             const response = await fetch(`/api/ventas/${ventaSeleccionada.ID_VENTA}/aprobar`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     estado: 'YA FUE FACTURADA',
-                    observaciones: 'Venta aprobada desde facturación'
+                    observaciones: 'Venta aprobada desde facturación',
+                    subtotal: subtotal,
+                    descuento_global: descuentoMonto,
+                    impuestos: impuestos,
+                    total: total,
+                    exonerar_imp: exonerar,
+                    items: ventaSeleccionada.items,
+                    id_aprobador: idPersona
                 })
             });
 
             if (response.ok) {
-                // Actualizar estado local
-                ventaSeleccionada.ESTADO_VENTA = 'YA FUE FACTURADA';
+                mostrarNotificacion('Venta aprobada exitosamente', 'success');
                 
                 // Recargar ventas pendientes
                 await cargarVentasPendientes();
                 
                 cerrarDetalle();
-                mostrarNotificacion('Venta aprobada exitosamente', 'success');
             } else {
-                mostrarNotificacion('Error al aprobar la venta', 'error');
+                const error = await response.json();
+                mostrarNotificacion('Error al aprobar la venta: ' + (error.error || ''), 'error');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -1353,6 +1717,24 @@
 
         document.querySelectorAll('.tab-venta').forEach(t => t.classList.remove('active'));
         element.classList.add('active');
+        
+        if (tab === 'todas') {
+            ventasFiltradas = [...ventasPendientes];
+        } else {
+            ventasFiltradas = ventasPendientes.filter(venta => {
+                if (tab === 'contado') return venta.TIPO_VENTA === 'CONTADO';
+                if (tab === 'credito') return venta.TIPO_VENTA === 'CREDITO';
+                if (tab === 'efectivo') {
+                    const formaPago = (venta.FORMA_PAGO || '').toLowerCase();
+                    return formaPago.includes('efectivo');
+                }
+                if (tab === 'tarjeta') {
+                    const formaPago = (venta.FORMA_PAGO || '').toLowerCase();
+                    return formaPago.includes('tarjeta');
+                }
+                return true;
+            });
+        }
         
         renderizarTabla();
     }

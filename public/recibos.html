@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibos - Autos Colín</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+
+    <style>
+        /* ===================== VARIABLES ===================== */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #8e44ad;
+            --light-bg: #f8f9fa;
+            --border: #e0e0e0;
+            --text: #2c3e50;
+            --text-muted: #7f8c8d;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* ===================== RESET & BASE ===================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #ecf0f1;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        /* ===================== LAYOUT ===================== */
+        .container { display: flex; min-height: calc(100vh - 66px); }
+
+        /* ===================== MAIN CONTENT ===================== */
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* ===================== RECIBOS CONTAINER ===================== */
+        .rec-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+        .rec-header h1 { margin: 0; color: var(--primary); font-size: 22px; }
+        .rec-header h1 i { color: var(--secondary); margin-right: 10px; }
+
+        /* ===================== TABS ===================== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+        .tab-btn {
+            padding: 10px 18px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .tab-btn:hover { color: var(--primary); }
+        .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===================== FILTROS ===================== */
+        .filters-box {
+            background: var(--light-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 18px;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .form-control {
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .form-control:focus { border-color: var(--secondary); }
+        .filter-actions { margin-top: 10px; text-align: right; display: flex; gap: 8px; justify-content: flex-end; }
+
+        /* ===================== BUTTONS ===================== */
+        .btn {
+            border: none; border-radius: 5px; padding: 7px 14px;
+            cursor: pointer; font-size: 12px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px; transition: opacity .2s;
+        }
+        .btn:hover { opacity: .85; }
+        .btn-primary { background: var(--secondary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger  { background: var(--danger);  color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-info    { background: var(--info);    color: white; }
+        .btn-dark    { background: var(--primary); color: white; }
+        .btn-gray    { background: #95a5a6; color: white; }
+        .btn-print   { background: #16a085; color: white; }
+
+        /* ===================== TABLE ===================== */
+        .rec-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .rec-table th {
+            background: var(--primary);
+            color: white;
+            padding: 11px 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .rec-table td {
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .rec-table tbody tr:hover { background: #f5f5f5; }
+        .loading-row td { text-align: center; padding: 40px; color: var(--text-muted); }
+        .spinner-inline {
+            display: inline-block; width: 18px; height: 18px;
+            border: 3px solid #ddd; border-top-color: var(--secondary);
+            border-radius: 50%; animation: spin .7s linear infinite;
+            vertical-align: middle; margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===================== BADGES ===================== */
+        .badge {
+            display: inline-block; padding: 3px 8px;
+            border-radius: 4px; font-size: 11px; font-weight: 700;
+        }
+        .badge-contado   { background: #d4edda; color: #155724; }
+        .badge-credito   { background: #cce5ff; color: #004085; }
+        .badge-pendiente { background: #fff3cd; color: #856404; }
+        .badge-pagado    { background: #d4edda; color: #155724; }
+        .badge-parcial   { background: #ffeeba; color: #856404; }
+        .badge-atrasado  { background: #f8d7da; color: #721c24; }
+        .badge-efectivo      { background: #d4edda; color: #155724; }
+        .badge-transferencia { background: #cce5ff; color: #004085; }
+        .badge-tarjeta       { background: #e2d9f3; color: #4a235a; }
+
+        /* ===================== MODAL ===================== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.5);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,.3);
+            width: 860px;
+            max-width: 96vw;
+        }
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .modal-header h2 { font-size: 16px; margin: 0; }
+        .close-modal {
+            background: none; border: none; color: white;
+            font-size: 18px; cursor: pointer; padding: 2px 6px;
+        }
+        .modal-body { padding: 20px; }
+        .modal-actions {
+            padding: 14px 20px;
+            background: var(--light-bg);
+            display: flex; gap: 10px; justify-content: flex-end;
+            border-top: 1px solid var(--border);
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* ===================== RECIBO (FACTURA) ===================== */
+        .recibo-wrap {
+            background: white;
+            font-family: 'Courier New', monospace;
+            max-width: 680px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 28px;
+        }
+        .recibo-top {
+            text-align: center;
+            padding-bottom: 18px;
+            border-bottom: 2px solid #333;
+            margin-bottom: 18px;
+        }
+        .recibo-top img { max-width: 90px; margin-bottom: 8px; }
+        .recibo-top .empresa-nombre { font-size: 22px; font-weight: bold; color: var(--primary); }
+        .recibo-top .empresa-razon  { font-size: 15px; color: #34495e; margin: 3px 0; }
+        .recibo-top .empresa-datos  { font-size: 11px; line-height: 1.6; margin-top: 6px; }
+
+        .recibo-meta {
+            display: flex;
+            justify-content: space-between;
+            background: var(--light-bg);
+            padding: 10px 12px;
+            border-radius: 5px;
+            margin-bottom: 14px;
+            font-size: 12px;
+        }
+        .recibo-meta div { line-height: 1.8; }
+
+        .recibo-cliente {
+            background: var(--light-bg);
+            padding: 10px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            line-height: 1.8;
+        }
+
+        .recibo-detalle {
+            width: 100%; border-collapse: collapse;
+            margin-bottom: 14px; font-size: 12px;
+        }
+        .recibo-detalle th { background: var(--primary); color: white; padding: 7px 8px; text-align: left; }
+        .recibo-detalle td { padding: 7px 8px; border-bottom: 1px solid #ddd; }
+        .recibo-detalle .tr-total td { font-weight: bold; background: #f0f0f0; }
+
+        .recibo-letras {
+            border-top: 1px dashed #333;
+            border-bottom: 1px dashed #333;
+            padding: 8px 0;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin: 10px 0;
+        }
+
+        .recibo-tabla-fin {
+            width: 100%; border-collapse: collapse; font-size: 11px; margin: 12px 0;
+        }
+        .recibo-tabla-fin td { padding: 5px 6px; border: 1px solid #ddd; }
+        .recibo-tabla-fin .lbl { background: #f8f9fa; font-weight: bold; width: 35%; }
+
+        .recibo-pagos {
+            width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0;
+        }
+        .recibo-pagos th { background: #34495e; color: white; padding: 6px 8px; }
+        .recibo-pagos td { padding: 6px 8px; border-bottom: 1px solid #ddd; }
+
+        .recibo-firma { margin-top: 26px; text-align: center; font-size: 11px; }
+        .recibo-firma .linea { width: 200px; border-top: 1px solid #333; margin: 10px auto; }
+
+        .recibo-gracias {
+            margin-top: 18px; text-align: center;
+            font-size: 13px; font-weight: bold; color: var(--success);
+        }
+
+        /* ===================== TIPO RECIBO SELECTOR ===================== */
+        .tipo-recibo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .tipo-card {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: white;
+        }
+        .tipo-card:hover, .tipo-card.selected {
+            border-color: var(--secondary);
+            background: #eaf4fb;
+        }
+        .tipo-card i { font-size: 32px; margin-bottom: 8px; display: block; }
+        .tipo-card span { font-size: 13px; font-weight: 700; color: var(--primary); }
+        .tipo-card.t-anticipo i { color: var(--info); }
+        .tipo-card.t-contado  i { color: var(--success); }
+        .tipo-card.t-detalle  i { color: var(--warning); }
+
+        /* ===================== FORM MODAL NUEVO RECIBO ===================== */
+        .form-section { margin-bottom: 18px; }
+        .form-section h3 {
+            font-size: 13px; color: var(--primary);
+            margin-bottom: 10px; padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+
+        /* ===================== TOAST ===================== */
+        .toast-notif {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 18px; border-radius: 8px; color: white;
+            font-size: .85rem; font-weight: 600; z-index: 99999;
+            box-shadow: 0 4px 18px rgba(0,0,0,.2);
+            display: flex; align-items: center; gap: 8px;
+            animation: toastIn .3s ease; max-width: 340px;
+        }
+        .toast-notif.success { background: var(--success); }
+        .toast-notif.error   { background: var(--danger); }
+        .toast-notif.warning { background: var(--warning); }
+        .toast-notif.info    { background: var(--secondary); }
+        @keyframes toastIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+
+        /* ===================== RESPONSIVE MENU ===================== */
+        .menu-toggle {
+            display: none; background: none; border: none;
+            color: white; font-size: 22px; cursor: pointer;
+        }
+        .overlay { display: none; }
+        @media(max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { position: fixed; left: -240px; top: 0; height: 100vh; z-index: 200; transition: left .3s; }
+            .sidebar.active { left: 0; }
+            .overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; display: none; }
+            .overlay.active { display: block; }
+            .filter-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .recibo-wrap, .recibo-wrap * { visibility: visible; }
+            .recibo-wrap { position: absolute; left: 0; top: 0; border: none; box-shadow: none; }
+            .modal-actions { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    <div class="overlay" id="overlay"></div>
+
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin" onerror="this.style.display='none'">
+        <div class="usuario" id="usuarioInfo">🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div style="padding:0 15px 15px; border-bottom:1px solid rgba(255,255,255,.1);">
+                <h2 style="margin:0; color:white; font-size:15px; text-align:center;">Autos Colín</h2>
+            </div>
+            <ul class="menu-items">
+                <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+            </ul>
+            <div class="sidebar-buttons-section">
+                <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                <div class="sidebar-buttons">
+                    <a href="facturación.html" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
+                    <a href="recibos.html"      class="sidebar-btn active"><i class="fas fa-receipt"></i><span>Recibos</span></a>
+                    <a href="inventario.html"   class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
+                    <a href="clientes.html"     class="sidebar-btn"><i class="fas fa-users"></i><span>Clientes</span></a>
+                    <a href="plan_venta.html"   class="sidebar-btn"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
+                    <a href="cuentas_cobrar.html" class="sidebar-btn"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
+                    <a href="index.html" class="sidebar-salirbtn"><i class="fas fa-sign-out-alt"></i><span>Salir</span></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="rec-container">
+                <div class="rec-header">
+                    <h1><i class="fas fa-receipt"></i> Recibos de Pago</h1>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-dark" onclick="cargarTodo()">
+                            <i class="fas fa-sync-alt"></i> Recargar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABS -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="cambiarTab('anticipos', this)">
+                        <i class="fas fa-calendar-check"></i> Cuotas / Anticipos
+                    </button>
+                    <button class="tab-btn" onclick="cambiarTab('formas', this)">
+                        <i class="fas fa-money-bill-wave"></i> Formas de Pago
+                    </button>
+                </div>
+
+                <!-- ======================== TAB: ANTICIPOS ======================== -->
+                <div id="tab-anticipos" class="tab-panel active">
+                    <div class="filters-box">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label>Plan Venta:</label>
+                                <input type="text" id="filtroAntPlan" class="form-control" placeholder="N° Plan">
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente:</label>
+                                <input type="text" id="filtroAntCliente" class="form-control" placeholder="Nombre o cédula">
+                            </div>
+                            <div class="form-group">
+                                <label>Estado:</label>
+                                <select id="filtroAntEstado" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="PENDIENTE">Pendiente</option>
+                                    <option value="PARCIAL">Parcial</option>
+                                    <option value="COMPLETADO">Completado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Desde:</label>
+                                <input type="date" id="filtroAntDesde" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Hasta:</label>
+                                <input type="date" id="filtroAntHasta" class="form-control">
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="buscarAnticipos()">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <button class="btn btn-gray" onclick="limpiarFiltrosAnt()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <table class="rec-table">
+                        <thead>
+                            <tr>
+                                <th>Plan</th>
+                                <th>Cliente</th>
+                                <th>Vehículo</th>
+                                <th>Cuota #</th>
+                                <th>Vencimiento</th>
+                                <th>Monto</th>
+                                <th>Saldo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAnticipos">
+                            <tr class="loading-row"><td colspan="9">
+                                <span class="spinner-inline"></span> Cargando anticipos...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ======================== TAB: FORMAS DE PAGO ======================== -->
+                <div id="tab-formas" class="tab-panel">
+                    <div class="filters-box">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label>Plan Venta / Código:</label>
+                                <input type="text" id="filtroFPlan" class="form-control" placeholder="Código venta">
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente:</label>
+                                <input type="text" id="filtroFCliente" class="form-control" placeholder="Nombre o cédula">
+                            </div>
+                            <div class="form-group">
+                                <label>Forma de Pago:</label>
+                                <select id="filtroFForma" class="form-control">
+                                    <option value="">Todas</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="Tarjeta">Tarjeta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo:</label>
+                                <select id="filtroFTipo" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="CONTADO">Contado</option>
+                                    <option value="CREDITO">Crédito</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Desde:</label>
+                                <input type="date" id="filtroFDesde" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Hasta:</label>
+                                <input type="date" id="filtroFHasta" class="form-control">
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="buscarFormasPago()">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <button class="btn btn-gray" onclick="limpiarFiltrosF()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <table class="rec-table">
+                        <thead>
+                            <tr>
+                                <th>Recibo #</th>
+                                <th>Plan / Código</th>
+                                <th>Cliente</th>
+                                <th>Vehículo</th>
+                                <th>Tipo</th>
+                                <th>Forma Pago</th>
+                                <th>Efectivo</th>
+                                <th>Transfer.</th>
+                                <th>Tarjeta</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaFormas">
+                            <tr class="loading-row"><td colspan="12">
+                                <span class="spinner-inline"></span> Cargando pagos...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div><!-- /rec-container -->
+        </div><!-- /main-content -->
+    </div><!-- /container -->
+
+
+    <!-- ===================== MODAL RECIBO ANTICIPO ===================== -->
+    <div id="modalReciboAnticipo" class="modal-overlay">
+        <div class="modal-content" style="width:720px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice"></i> RECIBO DE CUOTA / ANTICIPO</h2>
+                <button class="close-modal" onclick="cerrarModal('modalReciboAnticipo')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="bodyReciboAnticipo"></div>
+            <div class="modal-actions">
+                <button class="btn btn-print" onclick="imprimirRecibo('reciboAnticipoImp')">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button class="btn btn-gray" onclick="cerrarModal('modalReciboAnticipo')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL RECIBO FORMA DE PAGO ===================== -->
+    <div id="modalReciboFormaPago" class="modal-overlay">
+        <div class="modal-content" style="width:720px;">
+            <div class="modal-header" style="background:#16a085;">
+                <h2><i class="fas fa-money-bill-wave"></i> RECIBO DE FORMA DE PAGO</h2>
+                <button class="close-modal" onclick="cerrarModal('modalReciboFormaPago')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="bodyReciboFormaPago"></div>
+            <div class="modal-actions">
+                <button class="btn btn-print" onclick="imprimirRecibo('reciboFormaPagoImp')">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button class="btn btn-gray" onclick="cerrarModal('modalReciboFormaPago')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+// ================================================================
+//  CONFIGURACIÓN
+// ================================================================
+const API_BASE = 'http://localhost:3000/api';
+
+let anticiposData   = [];
+let formasPagoData  = [];
+
+// ================================================================
+//  UTILIDADES
+// ================================================================
+function fmt(num) {
+    const n = Math.round(parseFloat(num) || 0);
+    const p = n.toFixed(2).split('.');
+    return '₡ ' + p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + p[1];
+}
+
+function fmtFecha(f) {
+    if (!f) return '-';
+    try {
+        if (typeof f === 'string' && f.includes('T')) {
+            const [y, m, d] = f.split('T')[0].split('-');
+            return `${d}/${m}/${y}`;
+        }
+        const d = new Date(f);
+        if (isNaN(d)) return '-';
+        return d.toLocaleDateString('es-CR');
+    } catch(e) { return '-'; }
+}
+
+function toast(msg, tipo = 'info') {
+    const t = document.createElement('div');
+    t.className = `toast-notif ${tipo}`;
+    const ic = {success:'check-circle',error:'times-circle',warning:'exclamation-triangle',info:'info-circle'};
+    t.innerHTML = `<i class="fas fa-${ic[tipo]||'info-circle'}"></i> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+async function apiFetch(url) {
+    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || `Error ${r.status}`); }
+    return r.json();
+}
+
+function generarNumRecibo() {
+    const d = new Date();
+    const aa = d.getFullYear().toString().slice(-2);
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const rnd = Math.floor(Math.random()*1000).toString().padStart(3,'0');
+    return `RCP-${aa}${mm}${dd}-${rnd}`;
+}
+
+// ================================================================
+//  TABS
+// ================================================================
+function cambiarTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ================================================================
+//  CARGA INICIAL
+// ================================================================
+function cargarTodo() {
+    cargarAnticipos();
+    cargarFormasPago();
+}
+
+// ================================================================
+//  TAB 1: ANTICIPOS / CUOTAS
+// ================================================================
+async function cargarAnticipos() {
+    const tbody = document.getElementById('tablaAnticipos');
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="9"><span class="spinner-inline"></span> Cargando...</td></tr>`;
+    try {
+        const plan    = document.getElementById('filtroAntPlan').value.trim();
+        const cliente = document.getElementById('filtroAntCliente').value.trim();
+        const estado  = document.getElementById('filtroAntEstado').value;
+
+        const params = new URLSearchParams();
+        if (plan)    params.append('plan_venta', plan);
+        if (cliente) params.append('cliente', cliente);
+        if (estado) {
+            if (estado === 'COMPLETADO') params.append('estado', 'pagado');
+            else if (estado === 'PENDIENTE') params.append('estado', 'pendiente');
+            else if (estado === 'PARCIAL') params.append('estado', 'pendiente');
+        }
+
+        anticiposData = await apiFetch(`${API_BASE}/cuentas-cobrar?${params}`);
+
+        // Filtros locales adicionales
+        const desde = document.getElementById('filtroAntDesde').value;
+        const hasta = document.getElementById('filtroAntHasta').value;
+        let datos = anticiposData;
+        if (estado === 'PARCIAL') {
+            datos = datos.filter(r => r.estado === 'pendiente' && parseFloat(r.saldo_pendiente) < parseFloat(r.monto_cuota));
+        }
+        if (desde) datos = datos.filter(r => r.fecha_vencimiento && r.fecha_vencimiento.split('T')[0] >= desde);
+        if (hasta) datos = datos.filter(r => r.fecha_vencimiento && r.fecha_vencimiento.split('T')[0] <= hasta);
+
+        renderAnticipos(datos);
+    } catch(e) {
+        console.error(e);
+        toast('Error al cargar anticipos: ' + e.message, 'error');
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#e74c3c;padding:30px;"><i class="fas fa-exclamation-triangle"></i> Error cargando datos</td></tr>`;
+    }
+}
+
+function renderAnticipos(data) {
+    const tbody = document.getElementById('tablaAnticipos');
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#7f8c8d;"><i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:8px;"></i> Sin resultados</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(r => {
+        const estadoMap = {
+            'pagado':    '<span class="badge badge-pagado">Pagado</span>',
+            'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
+            'atrasado':  '<span class="badge badge-atrasado">Atrasado</span>',
+        };
+        const badgeEstado = estadoMap[r.estado] || `<span class="badge">${r.estado}</span>`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${r.plan_venta || '-'}</td>
+            <td>${r.cliente || '-'}</td>
+            <td>${r.vehiculo || '-'}</td>
+            <td style="text-align:center;">${r.numero_cuota || '-'}</td>
+            <td style="text-align:center;">${fmtFecha(r.fecha_vencimiento)}</td>
+            <td style="text-align:right;">${fmt(r.monto_cuota)}</td>
+            <td style="text-align:right;">${fmt(r.saldo_pendiente)}</td>
+            <td style="text-align:center;">${badgeEstado}</td>
+            <td style="text-align:center;">
+                <button class="btn btn-primary" onclick="verReciboAnticipo(${r.id})">
+                    <i class="fas fa-file-invoice"></i> Recibo
+                </button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function buscarAnticipos()     { cargarAnticipos(); }
+function limpiarFiltrosAnt()   {
+    ['filtroAntPlan','filtroAntCliente','filtroAntDesde','filtroAntHasta'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('filtroAntEstado').value = '';
+    cargarAnticipos();
+}
+
+// ================================================================
+//  TAB 2: FORMAS DE PAGO (DETALLE_PAGOS)
+// ================================================================
+async function cargarFormasPago() {
+    const tbody = document.getElementById('tablaFormas');
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="12"><span class="spinner-inline"></span> Cargando...</td></tr>`;
+    try {
+        // Traer ventas completas para obtener sus detalle_pagos
+        const ventas = await apiFetch(`${API_BASE}/ventas/pendientes`);
+
+        // Para cada venta, traer detalle de pago
+        const pagosPromises = ventas.map(v =>
+            apiFetch(`${API_BASE}/pagos/venta/${v.ID_VENTA}`)
+                .then(pagos => pagos.map(p => ({ ...p, _venta: v })))
+                .catch(() => [])
+        );
+
+        const allPagos = (await Promise.all(pagosPromises)).flat();
+        formasPagoData = allPagos;
+
+        // Filtros
+        const plan    = document.getElementById('filtroFPlan').value.trim().toLowerCase();
+        const cliente = document.getElementById('filtroFCliente').value.trim().toLowerCase();
+        const forma   = document.getElementById('filtroFForma').value;
+        const tipo    = document.getElementById('filtroFTipo').value;
+        const desde   = document.getElementById('filtroFDesde').value;
+        const hasta   = document.getElementById('filtroFHasta').value;
+
+        let datos = allPagos;
+        if (plan)    datos = datos.filter(p => (p._venta.CODIGO_VENTA||'').toLowerCase().includes(plan));
+        if (cliente) datos = datos.filter(p => (p._venta.CLIENTE_NOMBRE||'').toLowerCase().includes(cliente));
+        if (forma)   datos = datos.filter(p => (p.FORMA_PAGO||'') === forma);
+        if (tipo)    datos = datos.filter(p => (p._venta.TIPO_VENTA||'') === tipo || (p._venta.FORMA_PAGO||'').includes(tipo));
+        if (desde)   datos = datos.filter(p => p.FECHA_PAGO && p.FECHA_PAGO >= desde);
+        if (hasta)   datos = datos.filter(p => p.FECHA_PAGO && p.FECHA_PAGO <= hasta);
+
+        renderFormasPago(datos);
+    } catch(e) {
+        console.error(e);
+        toast('Error al cargar formas de pago: ' + e.message, 'error');
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#e74c3c;padding:30px;"><i class="fas fa-exclamation-triangle"></i> Error cargando datos</td></tr>`;
+    }
+}
+
+function renderFormasPago(data) {
+    const tbody = document.getElementById('tablaFormas');
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:30px;color:#7f8c8d;"><i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:8px;"></i> Sin resultados</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = '';
+
+    data.forEach((p, idx) => {
+        const efectivo = parseFloat(p.EFECTIVO||0);
+        const transfer = parseFloat(p.TRANSFERENCIA||0);
+        const tarjeta  = parseFloat(p.TARJETA||0);
+        const total    = efectivo + transfer + tarjeta;
+        const v        = p._venta || {};
+
+        const formaBadge = p.FORMA_PAGO
+            ? `<span class="badge badge-${(p.FORMA_PAGO||'').toLowerCase()}">${p.FORMA_PAGO}</span>`
+            : '<span class="badge">Mixto</span>';
+
+        const tipoBadge = v.TIPO_VENTA === 'CREDITO'
+            ? '<span class="badge badge-credito">Crédito</span>'
+            : '<span class="badge badge-contado">Contado</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align:center;font-weight:700;color:#888;">#${idx+1}</td>
+            <td>${v.CODIGO_VENTA || '-'}</td>
+            <td>${v.CLIENTE_NOMBRE || '-'}</td>
+            <td>${v.VEHICULO_DESCRIPCION || '-'}</td>
+            <td style="text-align:center;">${tipoBadge}</td>
+            <td style="text-align:center;">${formaBadge}</td>
+            <td style="text-align:right;">${efectivo > 0 ? fmt(efectivo) : '-'}</td>
+            <td style="text-align:right;">${transfer > 0 ? fmt(transfer) : '-'}</td>
+            <td style="text-align:right;">${tarjeta  > 0 ? fmt(tarjeta)  : '-'}</td>
+            <td style="text-align:right;font-weight:700;">${fmt(total)}</td>
+            <td style="text-align:center;">${fmtFecha(p.FECHA_PAGO)}</td>
+            <td style="text-align:center;">
+                <button class="btn btn-success" onclick="verReciboFormaPago(${idx})">
+                    <i class="fas fa-file-invoice-dollar"></i> Recibo
+                </button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function buscarFormasPago() { cargarFormasPago(); }
+function limpiarFiltrosF()  {
+    ['filtroFPlan','filtroFCliente','filtroFDesde','filtroFHasta'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('filtroFForma').value = '';
+    document.getElementById('filtroFTipo').value  = '';
+    cargarFormasPago();
+}
+
+// ================================================================
+//  MODAL: RECIBO DE ANTICIPO / CUOTA
+// ================================================================
+function verReciboAnticipo(id) {
+    const d = anticiposData.find(a => a.id == id || a.id_cuenta == id);
+    if (!d) { toast('No se encontró el anticipo', 'error'); return; }
+
+    // Extraer capital/intereses de observaciones
+    let capital = 0, intereses = 0;
+    if (d.observaciones) {
+        const capM = d.observaciones.match(/Capital:\s*[₡]?\s*([\d.,]+)/);
+        const intM = d.observaciones.match(/Intereses:\s*[₡]?\s*([\d.,]+)/);
+        if (capM) capital   = parseFloat(capM[1].replace(/\./g,'').replace(',','.'));
+        if (intM) intereses = parseFloat(intM[1].replace(/\./g,'').replace(',','.'));
+    }
+    const amortizacion = Math.round(parseFloat(d.monto_cuota||0) - intereses);
+
+    const html = `
+    <div class="recibo-wrap" id="reciboAnticipoImp">
+        <div class="recibo-top">
+            <img src="/img/icon-192.png" alt="Logo" onerror="this.style.display='none'">
+            <div class="empresa-nombre">AUTOS COLÍN</div>
+            <div class="empresa-razon">AUTOS COLÍN S.R.L</div>
+            <div class="empresa-datos">
+                <strong>Cédula Jurídica:</strong> 3-101-722004 &nbsp;|&nbsp;
+                <strong>Teléfonos:</strong> 8707-8363 / 2572-1170<br>
+                <strong>Dirección:</strong> 200 Sur entrada principal Parque Industrial
+            </div>
+        </div>
+
+        <div class="recibo-meta">
+            <div>
+                <strong>N° RECIBO:</strong> ${generarNumRecibo()}<br>
+                <strong>FECHA:</strong> ${new Date().toLocaleDateString('es-CR')}<br>
+                <strong>HORA:</strong> ${new Date().toLocaleTimeString('es-CR')}
+            </div>
+            <div>
+                <strong>TIPO:</strong> CUOTA / ANTICIPO<br>
+                <strong>PLAN VENTA:</strong> ${d.plan_venta || '-'}<br>
+                <strong>CUOTA N°:</strong> ${d.numero_cuota || '-'}
+            </div>
+        </div>
+
+        <div class="recibo-cliente">
+            <strong>CLIENTE:</strong> ${d.cliente || '-'}<br>
+            <strong>CÉDULA:</strong> ${d.cedula || '-'}<br>
+            <strong>TELÉFONO:</strong> ${d.telefono || 'N/A'}<br>
+            <strong>VEHÍCULO:</strong> ${d.vehiculo || '-'}
+        </div>
+
+        <table class="recibo-detalle">
+            <thead>
+                <tr>
+                    <th>DESCRIPCIÓN</th>
+                    <th style="text-align:right;">MONTO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pago de Cuota #${d.numero_cuota} — ${d.vehiculo || ''}</td>
+                    <td style="text-align:right;">${fmt(d.monto_cuota)}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="tr-total">
+                    <td><strong>TOTAL CUOTA</strong></td>
+                    <td style="text-align:right;"><strong>${fmt(d.monto_cuota)}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="recibo-letras">
+            SON: ${numeroALetras(parseFloat(d.monto_cuota||0))}
+        </div>
+
+        <table class="recibo-tabla-fin">
+            <tr>
+                <td class="lbl">FECHA VENCIMIENTO:</td>
+                <td>${fmtFecha(d.fecha_vencimiento)}</td>
+                <td class="lbl">INTERÉS NOMINAL:</td>
+                <td>${d.interes_nominal || '0.00'}%</td>
+            </tr>
+            <tr>
+                <td class="lbl">SALDO ANTERIOR:</td>
+                <td>${fmt(d.saldo_pendiente)}</td>
+                <td class="lbl">INTERÉS MORATORIO:</td>
+                <td>${d.interes_moratorio || '0.00'}%</td>
+            </tr>
+            <tr>
+                <td class="lbl">CAPITAL:</td>
+                <td>${fmt(capital)}</td>
+                <td class="lbl">PAGO A INTERESES:</td>
+                <td>${fmt(intereses)}</td>
+            </tr>
+            <tr>
+                <td class="lbl">AMORTIZACIÓN:</td>
+                <td>${fmt(amortizacion)}</td>
+                <td class="lbl">SALDO NUEVO:</td>
+                <td>${fmt(Math.max(0, parseFloat(d.saldo_pendiente||0) - parseFloat(d.monto_cuota||0)))}</td>
+            </tr>
+        </table>
+
+        <div class="recibo-firma">
+            <div class="linea"></div>
+            <p>FIRMA AUTORIZADA</p>
+        </div>
+        <div class="recibo-gracias">¡GRACIAS POR PREFERIRNOS!</div>
+    </div>`;
+
+    document.getElementById('bodyReciboAnticipo').innerHTML = html;
+    document.getElementById('modalReciboAnticipo').style.display = 'flex';
+}
+
+// ================================================================
+//  MODAL: RECIBO DE FORMA DE PAGO
+// ================================================================
+function verReciboFormaPago(idx) {
+    const allPagos = formasPagoData;
+    if (!allPagos || !allPagos[idx]) { toast('No se encontró el pago', 'error'); return; }
+
+    const p = allPagos[idx];
+    const v = p._venta || {};
+
+    const efectivo = parseFloat(p.EFECTIVO||0);
+    const transfer = parseFloat(p.TRANSFERENCIA||0);
+    const tarjeta  = parseFloat(p.TARJETA||0);
+    const total    = efectivo + transfer + tarjeta;
+
+    // Filas de detalle de pago
+    let filasPago = '';
+    if (efectivo > 0) {
+        filasPago += `<tr><td>Efectivo</td><td>-</td><td style="text-align:right;">${fmt(efectivo)}</td></tr>`;
+    }
+    if (transfer > 0) {
+        filasPago += `<tr>
+            <td>Transferencia</td>
+            <td>${p.NUM_TRANSFERENCIA || '-'}${p.BANCO_NOMBRE ? ' / ' + p.BANCO_NOMBRE : ''}${p.NOM_DEPOSITANTE ? ' / ' + p.NOM_DEPOSITANTE : ''}</td>
+            <td style="text-align:right;">${fmt(transfer)}</td>
+        </tr>`;
+    }
+    if (tarjeta > 0) {
+        filasPago += `<tr>
+            <td>Tarjeta</td>
+            <td>${p.TIPO_TARJETA || ''} ${p.NUMERO_TARJETA ? '****'+p.NUMERO_TARJETA.slice(-4) : ''}</td>
+            <td style="text-align:right;">${fmt(tarjeta)}</td>
+        </tr>`;
+    }
+    if (!filasPago) {
+        filasPago = `<tr><td colspan="3" style="text-align:center;color:#888;">Sin detalle de pago</td></tr>`;
+    }
+
+    const tipoTxt = v.TIPO_VENTA === 'CREDITO' ? 'CRÉDITO' : 'CONTADO';
+
+    const html = `
+    <div class="recibo-wrap" id="reciboFormaPagoImp">
+        <div class="recibo-top">
+            <img src="/img/icon-192.png" alt="Logo" onerror="this.style.display='none'">
+            <div class="empresa-nombre">AUTOS COLÍN</div>
+            <div class="empresa-razon">AUTOS COLÍN S.R.L</div>
+            <div class="empresa-datos">
+                <strong>Cédula Jurídica:</strong> 3-101-722004 &nbsp;|&nbsp;
+                <strong>Teléfonos:</strong> 8707-8363 / 2572-1170<br>
+                <strong>Dirección:</strong> 200 Sur entrada principal Parque Industrial
+            </div>
+        </div>
+
+        <div class="recibo-meta">
+            <div>
+                <strong>N° RECIBO:</strong> ${generarNumRecibo()}<br>
+                <strong>FECHA PAGO:</strong> ${fmtFecha(p.FECHA_PAGO)}<br>
+                <strong>HORA:</strong> ${new Date().toLocaleTimeString('es-CR')}
+            </div>
+            <div>
+                <strong>TIPO:</strong> ${tipoTxt}<br>
+                <strong>PLAN / CÓDIGO:</strong> ${v.CODIGO_VENTA || '-'}<br>
+                <strong>FORMA PAGO:</strong> ${p.FORMA_PAGO || 'Mixto'}
+            </div>
+        </div>
+
+        <div class="recibo-cliente">
+            <strong>CLIENTE:</strong> ${v.CLIENTE_NOMBRE || '-'}<br>
+            <strong>CÉDULA:</strong> ${v.CLIENTE_IDENTIFICACION || '-'}<br>
+            <strong>TELÉFONO:</strong> ${v.CLIENTE_TELEFONO || 'N/A'}<br>
+            <strong>VEHÍCULO:</strong> ${v.VEHICULO_DESCRIPCION || '-'}&nbsp;
+            ${v.PLACA ? '(' + v.PLACA + ')' : ''}
+        </div>
+
+        <table class="recibo-detalle">
+            <thead>
+                <tr>
+                    <th>DESCRIPCIÓN</th>
+                    <th style="text-align:right;">MONTO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pago — ${v.VEHICULO_DESCRIPCION || 'Vehículo'} — ${tipoTxt}</td>
+                    <td style="text-align:right;">${fmt(total)}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="tr-total">
+                    <td><strong>TOTAL PAGADO</strong></td>
+                    <td style="text-align:right;"><strong>${fmt(total)}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="recibo-letras">
+            SON: ${numeroALetras(total)}
+        </div>
+
+        <table class="recibo-pagos">
+            <thead>
+                <tr>
+                    <th>FORMA DE PAGO</th>
+                    <th>REFERENCIA</th>
+                    <th style="text-align:right;">MONTO</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasPago}
+            </tbody>
+            <tfoot>
+                <tr style="font-weight:700;background:#f0f0f0;">
+                    <td colspan="2">TOTAL</td>
+                    <td style="text-align:right;">${fmt(total)}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        ${p.OBSERVACIONES ? `<div style="font-size:11px;margin-top:10px;padding:6px;background:#f8f9fa;border-radius:4px;"><strong>OBS:</strong> ${p.OBSERVACIONES}</div>` : ''}
+
+        <div class="recibo-firma">
+            <div class="linea"></div>
+            <p>FIRMA AUTORIZADA</p>
+        </div>
+        <div class="recibo-gracias">¡GRACIAS POR PREFERIRNOS!</div>
+    </div>`;
+
+    document.getElementById('bodyReciboFormaPago').innerHTML = html;
+    document.getElementById('modalReciboFormaPago').style.display = 'flex';
+}
+
+// ================================================================
+//  IMPRIMIR
+// ================================================================
+function imprimirRecibo(idDiv) {
+    const contenido = document.getElementById(idDiv);
+    if (!contenido) return;
+    const estilos = document.querySelector('style')?.innerHTML || '';
+    const ventana = window.open('', '_blank');
+    ventana.document.write(`
+        <html><head>
+        <title>Recibo — Autos Colín</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            body { font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+            ${estilos}
+        </style>
+        </head><body>
+        ${contenido.outerHTML}
+        <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
+        </body></html>`);
+    ventana.document.close();
+}
+
+// ================================================================
+//  CERRAR MODAL
+// ================================================================
+function cerrarModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+// ================================================================
+//  NÚMERO A LETRAS
+// ================================================================
+function numeroALetras(numero) {
+    const unidades  = ['','UN','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE'];
+    const especiales= ['DIEZ','ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISÉIS','DIECISIETE','DIECIOCHO','DIECINUEVE'];
+    const decenas   = ['','DIEZ','VEINTE','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'];
+    const centenas  = ['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
+    if (numero === 0) return 'CERO';
+    let entero  = Math.floor(numero);
+    let decimal = Math.round((numero - entero) * 100);
+    const decStr = decimal < 10 ? '0' + decimal : String(decimal);
+    function grupo(n) {
+        if (n === 0) return '';
+        if (n === 100) return 'CIEN ';
+        let r = '';
+        if (n >= 100) { r += centenas[Math.floor(n/100)] + ' '; n %= 100; }
+        if (n >= 10 && n <= 19) { r += especiales[n-10] + ' '; }
+        else {
+            if (n >= 10) { r += decenas[Math.floor(n/10)] + ' '; n %= 10; }
+            if (n > 0)   { r += unidades[n] + ' '; }
+        }
+        return r;
+    }
+    let r = '';
+    if (entero >= 1000000) { const m = Math.floor(entero/1000000); r += m===1 ? 'UN MILLÓN ' : grupo(m)+'MILLONES '; entero %= 1000000; }
+    if (entero >= 1000)    { const m = Math.floor(entero/1000);    r += m===1 ? 'MIL '       : grupo(m)+'MIL ';     entero %= 1000; }
+    if (entero > 0) r += grupo(entero);
+    return r.trim() + ' CON ' + decStr + '/100 COLONES';
+}
+
+// ================================================================
+//  INICIALIZACIÓN
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    cargarTodo();
+
+    // Menú móvil
+    const toggle  = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Escape cierra modales
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+    });
+
+    // Click fuera de modal lo cierra
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
+    });
+
+    // Enter en filtros
+    ['filtroAntPlan','filtroAntCliente'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') buscarAnticipos(); });
+    });
+    ['filtroFPlan','filtroFCliente'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') buscarFormasPago(); });
+    });
+    document.getElementById('filtroAntEstado')?.addEventListener('change', buscarAnticipos);
+    document.getElementById('filtroFForma')?.addEventListener('change', buscarFormasPago);
+    document.getElementById('filtroFTipo')?.addEventListener('change', buscarFormasPago);
+});
+</script>
+
+<script src="cargar_usuario.js"></script>
+</body>
+</html>

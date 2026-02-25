@@ -1,3 +1,5 @@
+// certificado.js
+
 // Configuración de API
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -7,7 +9,6 @@ const searchBtn = document.getElementById('searchBtn');
 const garantiaForm = document.getElementById('garantiaForm');
 const clearBtn = document.getElementById('clearBtn');
 const printBtn = document.getElementById('printBtn');
-const downloadBtn = document.getElementById('downloadBtn');
 const certificatePreview = document.getElementById('certificatePreview');
 const messageAlert = document.getElementById('messageAlert');
 
@@ -15,6 +16,7 @@ const messageAlert = document.getElementById('messageAlert');
 let datosClienteActual = null;
 let datosVehiculoActual = null;
 let certificadoGenerado = false;
+let vehiculosCliente = [];
 
 // Función para mostrar mensajes
 function showMessage(message, type = 'success') {
@@ -50,27 +52,163 @@ async function buscarClientePorCedula(cedula) {
     }
 }
 
-// Función para obtener vehículo por placa usando API
-async function obtenerVehiculoPorPlaca(placa) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/certificados/vehiculos/placa/${placa}`);
+// Función para crear el selector de vehículos
+function crearSelectorVehiculos(vehiculos) {
+    // Guardar la lista de vehículos globalmente
+    vehiculosCliente = vehiculos;
+    
+    // Verificar si ya existe el selector, si no, crearlo
+    let selectorContainer = document.getElementById('vehiculosSelectorContainer');
+    
+    if (!selectorContainer) {
+        // Crear el contenedor del selector
+        selectorContainer = document.createElement('div');
+        selectorContainer.id = 'vehiculosSelectorContainer';
+        selectorContainer.className = 'vehiculos-selector';
+        selectorContainer.style.cssText = `
+            background: #f8f7ff;
+            border: 1px solid #e5e0ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease;
+        `;
         
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('Vehículo no encontrado');
+        // Agregar estilos para la animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
-            throw new Error('Error al obtener vehículo');
-        }
+        `;
+        document.head.appendChild(style);
         
-        return await response.json();
+        // Crear el título
+        const titulo = document.createElement('h4');
+        titulo.innerHTML = '<i class="fas fa-car" style="color: #7c3aed;"></i> Seleccione el vehículo para el certificado:';
+        titulo.style.cssText = `
+            margin: 0 0 15px 0;
+            color: #1a5276;
+            font-size: 1.1rem;
+        `;
         
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
+        // Crear el select
+        const select = document.createElement('select');
+        select.id = 'vehiculosCliente';
+        select.className = 'form-control';
+        select.style.cssText = `
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e0ff;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            background: white;
+            cursor: pointer;
+        `;
+        
+        // Crear el botón de carga
+        const cargarBtn = document.createElement('button');
+        cargarBtn.id = 'cargarVehiculoBtn';
+        cargarBtn.className = 'btn btn-search';
+        cargarBtn.innerHTML = '<i class="fas fa-check"></i> Cargar datos del vehículo seleccionado';
+        cargarBtn.style.cssText = `
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+        `;
+        
+        // Agregar elementos al contenedor
+        selectorContainer.appendChild(titulo);
+        selectorContainer.appendChild(select);
+        selectorContainer.appendChild(cargarBtn);
+        
+        // Insertar el selector después del contenedor de búsqueda
+        const searchContainer = document.querySelector('.search-container');
+        searchContainer.parentNode.insertBefore(selectorContainer, searchContainer.nextSibling);
+        
+        // Agregar event listener al botón
+        cargarBtn.addEventListener('click', cargarVehiculoSeleccionado);
+    }
+    
+    // Obtener el select y llenarlo con los vehículos
+    const selectVehiculos = document.getElementById('vehiculosCliente');
+    selectVehiculos.innerHTML = '<option value="">-- Seleccione un vehículo --</option>';
+    
+    vehiculos.forEach((vehiculo, index) => {
+        const option = document.createElement('option');
+        option.value = index; // Usamos el índice como valor
+        option.textContent = `${vehiculo.PLACA} - ${vehiculo.marca_nombre || 'Sin marca'} ${vehiculo.MODELO || ''} (${vehiculo.ESTILO || 'Sin estilo'})`;
+        
+        // Agregar data-atributos con la información del vehículo
+        option.dataset.placa = vehiculo.PLACA || '';
+        option.dataset.marca = vehiculo.marca_nombre || '';
+        option.dataset.modelo = vehiculo.MODELO || '';
+        option.dataset.estilo = vehiculo.ESTILO || '';
+        option.dataset.color = vehiculo.color_nombre || '';
+        option.dataset.motor = vehiculo.MOTOR || '';
+        option.dataset.chasis = vehiculo.CHASIS || '';
+        option.dataset.transmision = vehiculo.transmision_nombre || '';
+        option.dataset.combustible = vehiculo.combustible_nombre || '';
+        option.dataset.carroceria = vehiculo.CARROCERIA || '';
+        option.dataset.kilometraje = vehiculo.KILOMETRAJE_ACTUAL || '';
+        option.dataset.cc = vehiculo.C_C || '';
+        option.dataset.cilindros = vehiculo.CILINDROS || '';
+        option.dataset.traccion = vehiculo.TRACCION || '';
+        
+        selectVehiculos.appendChild(option);
+    });
+    
+    // Mostrar el selector
+    selectorContainer.style.display = 'block';
+    
+    // Si solo hay un vehículo, seleccionarlo automáticamente
+    if (vehiculos.length === 1) {
+        selectVehiculos.value = '0';
+        cargarVehiculoSeleccionado();
     }
 }
 
-// Función para cargar datos del cliente y vehículo
+// Función para cargar el vehículo seleccionado
+function cargarVehiculoSeleccionado() {
+    const selectVehiculos = document.getElementById('vehiculosCliente');
+    const selectedOption = selectVehiculos.options[selectVehiculos.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        showMessage('Por favor seleccione un vehículo', 'warning');
+        return;
+    }
+    
+    // Obtener los datos del vehículo desde los data-atributos
+    const vehiculo = {
+        PLACA: selectedOption.dataset.placa,
+        marca_nombre: selectedOption.dataset.marca,
+        MODELO: selectedOption.dataset.modelo,
+        ESTILO: selectedOption.dataset.estilo,
+        color_nombre: selectedOption.dataset.color,
+        MOTOR: selectedOption.dataset.motor,
+        CHASIS: selectedOption.dataset.chasis,
+        transmision_nombre: selectedOption.dataset.transmision,
+        combustible_nombre: selectedOption.dataset.combustible,
+        CARROCERIA: selectedOption.dataset.carroceria,
+        KILOMETRAJE_ACTUAL: selectedOption.dataset.kilometraje,
+        C_C: selectedOption.dataset.cc,
+        CILINDROS: selectedOption.dataset.cilindros,
+        TRACCION: selectedOption.dataset.traccion
+    };
+    
+    cargarDatosVehiculo(vehiculo);
+    showMessage(`Vehículo ${vehiculo.PLACA} cargado correctamente`, 'success');
+}
+
+// Función para cargar datos del cliente
 async function cargarDatosCliente(clienteData) {
     try {
         datosClienteActual = clienteData.cliente;
@@ -79,14 +217,18 @@ async function cargarDatosCliente(clienteData) {
         document.getElementById('nombreCliente').value = datosClienteActual.NOMBRE_COMPLETO || '';
         document.getElementById('cedula').value = datosClienteActual.IDENTIFICACION || '';
         
-        // Si el cliente tiene vehículos, cargar el primero
+        // Si el cliente tiene vehículos, mostrar el selector
         if (clienteData.vehiculos && clienteData.vehiculos.length > 0) {
-            const vehiculo = clienteData.vehiculos[0];
-            datosVehiculoActual = vehiculo;
-            cargarDatosVehiculo(vehiculo);
+            crearSelectorVehiculos(clienteData.vehiculos);
+            showMessage(`Cliente ${datosClienteActual.NOMBRE_COMPLETO} encontrado. ${clienteData.vehiculos.length} vehículo(s) disponible(s).`, 'success');
+        } else {
+            // Ocultar selector si existe
+            const selectorContainer = document.getElementById('vehiculosSelectorContainer');
+            if (selectorContainer) {
+                selectorContainer.style.display = 'none';
+            }
+            showMessage(`Cliente encontrado pero no tiene vehículos registrados.`, 'warning');
         }
-        
-        showMessage(`Cliente ${datosClienteActual.NOMBRE_COMPLETO} encontrado.`, 'success');
         
     } catch (error) {
         console.error('Error al cargar datos del cliente:', error);
@@ -112,6 +254,18 @@ function cargarDatosVehiculo(vehiculo) {
     document.getElementById('traccion').value = vehiculo.TRACCION || '';
     
     datosVehiculoActual = vehiculo;
+    
+    // Actualizar vista previa
+    actualizarVistaPrevia();
+}
+
+// Función para actualizar la vista previa
+function actualizarVistaPrevia() {
+    document.getElementById('previewMarca').textContent = document.getElementById('marca').value || '-';
+    document.getElementById('previewModelo').textContent = document.getElementById('modelo').value || '-';
+    document.getElementById('previewPlaca').textContent = document.getElementById('placa').value || '-';
+    document.getElementById('previewCliente').textContent = document.getElementById('nombreCliente').value || '[Nombre del cliente]';
+    document.getElementById('previewCedula').textContent = document.getElementById('cedula').value || '[Número de cédula]';
 }
 
 // Evento para buscar cliente
@@ -129,6 +283,11 @@ searchBtn.addEventListener('click', async () => {
         
     } catch (error) {
         showMessage(error.message, 'error');
+        // Ocultar selector de vehículos si hay error
+        const selectorContainer = document.getElementById('vehiculosSelectorContainer');
+        if (selectorContainer) {
+            selectorContainer.style.display = 'none';
+        }
     }
 });
 
@@ -138,42 +297,28 @@ clearBtn.addEventListener('click', () => {
     datosClienteActual = null;
     datosVehiculoActual = null;
     certificadoGenerado = false;
+    vehiculosCliente = [];
     
-    certificatePreview.innerHTML = `
-        <div class="certificate-header">
-            <h2>CERTIFICADO DE GARANTÍA</h2>
-            <div class="company-name">AUTOS COLIN S.R.L.</div>
-        </div>
-        
-        <table class="data-table">
-            <tr>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Placa</th>
-            </tr>
-            <tr>
-                <td id="previewMarca">-</td>
-                <td id="previewModelo">-</td>
-                <td id="previewPlaca">-</td>
-            </tr>
-        </table>
-        
-        <div class="client-info">
-            <p><strong>Cliente:</strong> <span id="previewCliente">[Nombre del cliente]</span></p>
-            <p><strong>Cédula:</strong> <span id="previewCedula">[Número de cédula]</span></p>
-        </div>
-        
-        <div class="date">
-            <p>Fecha: ____________________</p>
-        </div>
-    `;
+    // Ocultar y eliminar el selector de vehículos
+    const selectorContainer = document.getElementById('vehiculosSelectorContainer');
+    if (selectorContainer) {
+        selectorContainer.remove();
+    }
+    
+    // Limpiar vista previa
+    document.getElementById('previewMarca').textContent = '-';
+    document.getElementById('previewModelo').textContent = '-';
+    document.getElementById('previewPlaca').textContent = '-';
+    document.getElementById('previewCliente').textContent = '[Nombre del cliente]';
+    document.getElementById('previewCedula').textContent = '[Número de cédula]';
     
     printBtn.disabled = true;
-    downloadBtn.disabled = true;
+    certificadoGenerado = false;
+    
     showMessage('Formulario limpiado correctamente.', 'success');
 });
 
-// Función para generar el certificado HTML
+// Función para generar el certificado HTML completo
 function generarCertificadoHTML(datos) {
     const {
         nombreCliente,
@@ -200,8 +345,7 @@ function generarCertificadoHTML(datos) {
     const fechaFormateada = fechaActual.toLocaleDateString('es-ES', opcionesFecha);
     
     return `
-    <div class="page-container">
-
+    <div class="certificate">
         <div class="certificate-header">
             <h2 class="underline">CERTIFICADO DE GARANTIA</h2>
         </div>
@@ -337,30 +481,21 @@ function generarCertificadoHTML(datos) {
     `;
 }
 
-// Función para generar el certificado
-async function generarCertificado() {
+// Evento para enviar el formulario
+garantiaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
     try {
         // Obtener valores del formulario
         const nombreCliente = document.getElementById('nombreCliente').value;
         const cedula = document.getElementById('cedula').value;
         const marca = document.getElementById('marca').value;
         const modelo = document.getElementById('modelo').value;
-        const estilo = document.getElementById('estilo').value;
-        const traccion = document.getElementById('traccion').value;
-        const color = document.getElementById('color').value;
-        const motor = document.getElementById('motor').value;
-        const chasis = document.getElementById('chasis').value;
-        const transmision = document.getElementById('transmision').value;
-        const combustible = document.getElementById('combustible').value;
-        const carroceria = document.getElementById('carroceria').value;
-        const kilometraje = document.getElementById('kilometraje').value;
         const placa = document.getElementById('placa').value;
-        const cc = document.getElementById('cc').value;
-        const cilindrados = document.getElementById('cilindrados').value;
         
         // Validar campos requeridos
         if (!nombreCliente || !cedula || !marca || !modelo || !placa) {
-            showMessage('Por favor complete todos los campos requeridos (*) para generar el certificado.', 'error');
+            showMessage('Por favor complete todos los campos requeridos (*)', 'error');
             return;
         }
         
@@ -369,18 +504,18 @@ async function generarCertificado() {
             cedula,
             marca,
             modelo,
-            estilo,
-            traccion,
-            color,
-            motor,
-            chasis,
-            transmision,
-            combustible,
-            carroceria,
-            kilometraje,
+            estilo: document.getElementById('estilo').value,
+            traccion: document.getElementById('traccion').value,
+            color: document.getElementById('color').value,
+            motor: document.getElementById('motor').value,
+            chasis: document.getElementById('chasis').value,
+            transmision: document.getElementById('transmision').value,
+            combustible: document.getElementById('combustible').value,
+            carroceria: document.getElementById('carroceria').value,
+            kilometraje: document.getElementById('kilometraje').value,
             placa,
-            cc,
-            cilindrados
+            cc: document.getElementById('cc').value,
+            cilindrados: document.getElementById('cilindrados').value
         };
         
         // Generar HTML del certificado
@@ -389,7 +524,6 @@ async function generarCertificado() {
         
         certificadoGenerado = true;
         printBtn.disabled = false;
-        downloadBtn.disabled = false;
         
         showMessage('Certificado generado correctamente.', 'success');
         
@@ -397,12 +531,6 @@ async function generarCertificado() {
         console.error('Error al generar certificado:', error);
         showMessage('Error al generar certificado', 'error');
     }
-}
-
-// Evento para enviar el formulario
-garantiaForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await generarCertificado();
 });
 
 // Evento para imprimir el certificado
@@ -426,16 +554,13 @@ printBtn.addEventListener('click', () => {
                         size: letter;
                         margin: 15mm;
                     }
-                    @page :first {
-                        margin-top: 30mm;
-                    }
                 }
                 body { 
                     font-family: 'Times New Roman', Times, serif; 
                     line-height: 1.5; 
                     color: #000; 
                     margin: 0;
-                    padding: 0;
+                    padding: 20px;
                     background-image: url('/img/icon-192.png');
                     background-repeat: no-repeat;
                     background-position: center top 20px;
@@ -446,21 +571,14 @@ printBtn.addEventListener('click', () => {
                     text-align: center; 
                     margin-bottom: 20px;
                 }
-
-                .page-container {
-                    max-width: 170mm;
-                    margin: 0 auto;
-                    padding: 0;
-                    position: relative;
+                .certificate-header h2 {
+                    text-decoration: underline;
                 }
-                    
-                .underline { text-decoration: underline; }
                 .company-name { font-weight: bold; }
                 .data-table { 
                     width: 100%; 
                     border-collapse: collapse; 
                     margin: 15px 0; 
-                    page-break-inside: avoid;
                 }
                 .data-table td, .data-table th { 
                     border: 1px solid #000; 
@@ -472,39 +590,26 @@ printBtn.addEventListener('click', () => {
                     margin: 15px 0; 
                     padding: 10px; 
                     border: 1px dashed #ccc; 
-                    page-break-inside: avoid;
                 }
                 .signature-section { 
-                    margin-top: 30px; 
-                    text-align: right; 
+                    margin-top: 40px; 
+                    text-align: center; 
                     padding-top: 20px; 
                     border-top: 1px solid #000; 
-                }
-                .page-break {
-                    page-break-before: always;
                 }
                 @media print {
                     body { font-size: 12pt; }
                     .no-print { display: none; }
-                    button { display: none; }
                 }
             </style>
         </head>
         <body>
             ${contenido}
-            <div class="no-print" style="text-align: center; margin-top: 30px; padding: 20px;">
-                <button onclick="window.print()" style="padding: 12px 24px; background-color: #1a5276; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-                    <i class="fas fa-print"></i> Imprimir Certificado
+            <div class="no-print" style="text-align: center; margin-top: 30px;">
+                <button onclick="window.print();window.close()" style="padding: 10px 20px; background: #1a5276; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Imprimir
                 </button>
-                <button onclick="window.close()" style="padding: 12px 24px; background-color: #7b7d7d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 10px;">
-                    <i class="fas fa-times"></i> Cerrar
-                </button>
-                <p style="margin-top: 20px; font-size: 14px; color: #666;">
-                    <strong>Para guardar como PDF:</strong> En la ventana de impresión, seleccione "Guardar como PDF" como destino
-                </p>
             </div>
-
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"><\/script>
         </body>
         </html>
     `);
@@ -512,221 +617,14 @@ printBtn.addEventListener('click', () => {
     ventanaImpresion.document.close();
 });
 
-// Evento para descargar como PDF usando jsPDF y html2canvas
-downloadBtn.addEventListener('click', async () => {
-    if (!certificadoGenerado) {
-        showMessage('Primero debe generar un certificado', 'error');
-        return;
-    }
-    
-    try {
-        showMessage('Generando PDF...', 'info');
-        
-        // Verificar si las librerías están cargadas
-        if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-            // Cargar librerías dinámicamente
-            await cargarLibreriasPDF();
-        }
-        
-        await generarPDF();
-        
-    } catch (error) {
-        console.error('Error al generar PDF:', error);
-        showMessage('Error al generar PDF. Asegúrese de tener conexión a internet.', 'error');
-    }
-});
-
-// Función para cargar librerías de PDF
-function cargarLibreriasPDF() {
-    return new Promise((resolve, reject) => {
-        // Verificar si ya están cargadas
-        if (typeof html2canvas !== 'undefined' && typeof jsPDF !== 'undefined') {
-            resolve();
-            return;
-        }
-        
-        // Cargar html2canvas
-        const script1 = document.createElement('script');
-        script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        script1.onload = () => {
-            // Cargar jsPDF
-            const script2 = document.createElement('script');
-            script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-            script2.onload = () => {
-                resolve();
-            };
-            script2.onerror = () => reject(new Error('Error al cargar jsPDF'));
-            document.head.appendChild(script2);
-        };
-        script1.onerror = () => reject(new Error('Error al cargar html2canvas'));
-        document.head.appendChild(script1);
-    });
-}
-
-// Función para generar PDF con logo - usando html2pdf para mejor compatibilidad
-async function generarPDF() {
-    try {
-        const elemento = certificatePreview;
-        
-        // Usar html2pdf.js si está disponible (es la mejor opción)
-        if (window.html2pdf) {
-            const opt = {
-                margin: [15, 15, 15, 15],
-                filename: `Certificado_Garantia_${document.getElementById('cedula').value}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 1,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: false
-                },
-                jsPDF: { 
-                    orientation: 'portrait', 
-                    unit: 'mm', 
-                    format: 'letter',
-                    compress: true
-                },
-                pagebreak: { 
-                    mode: ['css', 'legacy'],
-                    before: '.page-break',
-                    avoid: ['tr', 'td', 'th', '.data-table', 'table']
-                }
-            };
-            
-            // Generar el PDF
-            await html2pdf().set(opt).from(elemento).save();
-            showMessage('PDF descargado correctamente', 'success');
-            return;
-        }
-        
-        // Fallback a html2canvas + jsPDF si html2pdf no está disponible
-        if (typeof html2canvas === 'undefined') {
-            throw new Error('Las librerías de PDF no están disponibles');
-        }
-        
-        const jsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
-        if (!jsPDFClass) {
-            throw new Error('jsPDF no está disponible');
-        }
-        
-        // Crear contenedor temporal con ancho fijo para mejor renderizado
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.width = '210mm'; 
-        tempContainer.style.padding = '20px';
-        tempContainer.style.backgroundColor = '#ffffff';
-        tempContainer.style.fontFamily = 'Arial, sans-serif';
-        
-        const clone = elemento.cloneNode(true);
-        tempContainer.appendChild(clone);
-        document.body.appendChild(tempContainer);
-        
-        try {
-            // Convertir a canvas con mejor configuración
-            const canvas = await html2canvas(tempContainer, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                windowWidth: tempContainer.scrollWidth,
-                windowHeight: tempContainer.scrollHeight
-            });
-            
-            // Configurar PDF
-            const pdf = new jsPDFClass({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'letter',
-                compress: true
-            });
-            
-            // Dimensiones de la página letter en mm
-            const pageWidth = 215.9; // letter width in mm
-            const pageHeight = 279.4; // letter height in mm
-            const margin = 10;
-            const contentWidth = pageWidth - (margin * 2);
-            
-            // Calcular altura de la imagen basada en el ancho
-            const imgWidth = contentWidth;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            // Convertir canvas a imagen
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            
-            let heightLeft = imgHeight;
-            let position = 0;
-            let isFirstPage = true;
-            
-            // Agregar páginas mientras haya contenido
-            while (heightLeft >= 0) {
-                if (!isFirstPage) {
-                    pdf.addPage();
-                }
-                
-                // Calcular la altura visible en esta página
-                const visibleHeight = isFirstPage ? 
-                    (pageHeight - (margin * 2)) : 
-                    (pageHeight - (margin * 2));
-                
-                pdf.addImage(
-                    imgData, 
-                    'JPEG', 
-                    margin, 
-                    margin - position, 
-                    imgWidth, 
-                    imgHeight
-                );
-                
-                heightLeft -= visibleHeight;
-                position += visibleHeight;
-                isFirstPage = false;
-            }
-            
-            // Guardar el PDF
-            const nombreArchivo = `Certificado_Garantia_${document.getElementById('cedula').value}.pdf`;
-            pdf.save(nombreArchivo);
-            
-            showMessage('PDF descargado correctamente', 'success');
-            
-        } finally {
-            document.body.removeChild(tempContainer);
-        }
-        
-    } catch (error) {
-        console.error('Error al generar PDF:', error);
-        showMessage(`Error al generar PDF: ${error.message}`, 'error');
-        throw error;
-    }
-}
-
-// Función para buscar vehículo por placa
-async function buscarVehiculoPorPlaca() {
-    const placaInput = document.getElementById('placa');
-    const placa = placaInput.value.trim();
-    
-    if (!placa) return;
-    
-    try {
-        showMessage('Buscando vehículo...', 'info');
-        const vehiculo = await obtenerVehiculoPorPlaca(placa);
-        
-        if (vehiculo) {
-            cargarDatosVehiculo(vehiculo);
-            showMessage('Vehículo encontrado y datos cargados', 'success');
-        }
-        
-    } catch (error) {
-        console.error('Error al buscar vehículo:', error);
-    }
-}
-
-// Escuchar cambios en el campo de placa
-document.getElementById('placa').addEventListener('blur', buscarVehiculoPorPlaca);
-
 // Inicialización
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     console.log('Sistema de certificados cargado');
+    
+    // Permitir buscar con Enter
+    searchCedula.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchBtn.click();
+        }
+    });
 });

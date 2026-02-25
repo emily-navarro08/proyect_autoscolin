@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Financiero - Autos Colin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg:          #0d0f14;
+            --bg2:         #141720;
+            --bg3:         #1c2030;
+            --border:      #252a3a;
+            --accent:      #3b82f6;
+            --accent2:     #22d3ee;
+            --green:       #10b981;
+            --red:         #ef4444;
+            --yellow:      #f59e0b;
+            --text:        #e2e8f0;
+            --text2:       #94a3b8;
+            --text3:       #4b5563;
+            --mono:        'DM Mono', monospace;
+            --sans:        'DM Sans', sans-serif;
+            --display:     'Syne', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-mark {
+            width: 36px; height: 36px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .logo-mark i { color: white; font-size: 16px; }
+
+        .header-title {
+            font-family: var(--display);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: var(--text);
+            flex: 1;
+        }
+        .header-title span { color: var(--accent); }
+
+        .period-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .year-select, .month-select {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+        .year-select:hover, .month-select:hover { border-color: var(--accent); }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 500;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary   { background: var(--accent); color: white; }
+        .btn-success   { background: var(--green);  color: white; }
+        .btn-danger    { background: var(--red);    color: white; }
+        .btn-ghost     { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+        /* ── STATUS BAR ── */
+        .status-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 28px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .status-pill {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+        .status-pill.saved   { background: rgba(16,185,129,0.12); color: var(--green);  }
+        .status-pill.unsaved { background: rgba(245,158,11,0.12); color: var(--yellow); }
+        .status-pill.loading { background: rgba(59,130,246,0.12); color: var(--accent); }
+        .status-pill .dot {
+            width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+        }
+        .status-pill.loading .dot { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .status-bar-right { margin-left: auto; display: flex; gap: 8px; }
+
+        /* ── LAYOUT ── */
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            min-height: calc(100vh - 104px);
+        }
+        .col {
+            background: var(--bg);
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── SECTION CARDS ── */
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-header-icon {
+            width: 28px; height: 28px;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+        }
+        .icon-blue   { background: rgba(59,130,246,0.15);  color: var(--accent);  }
+        .icon-green  { background: rgba(16,185,129,0.15);  color: var(--green);   }
+        .icon-yellow { background: rgba(245,158,11,0.15);  color: var(--yellow);  }
+        .icon-cyan   { background: rgba(34,211,238,0.15);  color: var(--accent2); }
+        .icon-red    { background: rgba(239,68,68,0.15);   color: var(--red);     }
+
+        .card-title {
+            font-family: var(--display);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text2);
+            flex: 1;
+        }
+        .card-body { padding: 16px 18px; }
+
+        /* ── SUMMARY ROWS ── */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label {
+            font-size: 13px;
+            color: var(--text2);
+        }
+        .summary-value {
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text);
+        }
+        .summary-value.editable-field {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--border);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 14px;
+            text-align: right;
+            width: 160px;
+            outline: none;
+            padding: 2px 4px;
+            cursor: text;
+        }
+        .summary-value.editable-field:focus {
+            border-bottom-color: var(--accent);
+            background: rgba(59,130,246,0.05);
+        }
+        .summary-row.total-row .summary-label { color: var(--text); font-weight: 600; }
+        .summary-row.total-row .summary-value { color: var(--accent2); font-size: 16px; }
+
+        /* ── EXPENSES TABLE ── */
+        .expenses-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .expenses-table th {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text3);
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .expenses-table td {
+            padding: 0;
+            border-bottom: 1px solid rgba(37,42,58,0.5);
+        }
+        .expenses-table tr:last-child td { border-bottom: none; }
+
+        .exp-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text3);
+            padding: 8px 10px;
+            width: 36px;
+        }
+        .exp-desc-input, .exp-amount-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--text);
+            padding: 8px 10px;
+            width: 100%;
+        }
+        .exp-amount-input {
+            font-family: var(--mono);
+            text-align: right;
+        }
+        .exp-desc-input:focus, .exp-amount-input:focus {
+            background: rgba(59,130,246,0.06);
+        }
+        .exp-desc-input::placeholder, .exp-amount-input::placeholder {
+            color: var(--text3);
+        }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            background: rgba(59,130,246,0.05);
+        }
+        .table-footer-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text2);
+        }
+        .table-footer-value {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--accent2);
+            font-weight: 500;
+        }
+
+        /* ── VEHICLE TABLE ── */
+        .vehicle-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .vehicle-table th {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text3); padding: 8px 12px;
+            text-align: left; border-bottom: 1px solid var(--border);
+        }
+        .vehicle-table td {
+            padding: 10px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(37,42,58,0.5);
+        }
+        .vehicle-table tr:last-child td { border-bottom: none; }
+        .vehicle-table .amount-col {
+            font-family: var(--mono); text-align: right; font-size: 13px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+        .badge-blue  { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+        /* ── RESULTS CARD ── */
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { font-size: 13px; color: var(--text2); }
+        .result-value { font-family: var(--mono); font-size: 15px; }
+        .result-row.final-row {
+            padding: 16px 0;
+            margin-top: 4px;
+        }
+        .result-row.final-row .result-label {
+            font-family: var(--display);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .result-row.final-row .result-value { font-size: 22px; }
+        .val-green { color: var(--green); }
+        .val-red   { color: var(--red);   }
+        .val-blue  { color: var(--accent); }
+        .val-cyan  { color: var(--accent2); }
+
+        /* ── ANNUAL GRID ── */
+        .annual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 16px 18px;
+        }
+        .month-tile {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .month-tile:hover { border-color: var(--accent); }
+        .month-tile.has-data { border-color: rgba(16,185,129,0.3); }
+        .month-tile.selected { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+        .month-tile-name {
+            font-family: var(--display);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .month-tile-amount {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--green);
+            margin-top: 4px;
+        }
+        .month-tile-gastos {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--red);
+            margin-top: 2px;
+        }
+        .month-tile.no-data .month-tile-amount { color: var(--text3); }
+
+        /* ── ANNUAL SUMMARY ── */
+        .annual-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px 18px;
+        }
+        .kpi-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 8px;
+        }
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 32px 18px;
+            text-align: center;
+        }
+        .empty-state i { font-size: 28px; color: var(--text3); margin-bottom: 10px; }
+        .empty-state p { font-size: 13px; color: var(--text3); }
+
+        /* ── ADD EXPENSE BTN ── */
+        .add-row-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 9px 18px;
+            font-size: 12px; font-weight: 500;
+            color: var(--accent); background: rgba(59,130,246,0.07);
+            border: none; cursor: pointer; width: 100%;
+            border-top: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        .add-row-btn:hover { background: rgba(59,130,246,0.14); }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed; bottom: 24px; right: 24px;
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 18px;
+            font-size: 13px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transform: translateY(80px); opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 999;
+        }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { border-color: var(--green); }
+        #toast.error   { border-color: var(--red); }
+        #toast i { font-size: 15px; }
+        #toast.success i { color: var(--green); }
+        #toast.error   i { color: var(--red); }
+
+        /* ── DIVIDER ── */
+        .divider { height: 1px; background: var(--border); margin: 0 18px; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1100px) {
+            .main { grid-template-columns: 1fr; }
+            .annual-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 700px) {
+            header { padding: 0 16px; }
+            .col { padding: 16px; }
+            .annual-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+    <div class="logo-mark"><i class="fas fa-car-side"></i></div>
+    <div class="header-title">AUTOS <span>COLIN</span> · Control Financiero</div>
+
+    <div class="period-bar">
+        <select id="yearSelect" class="year-select"></select>
+        <select id="monthSelect" class="month-select">
+            <option value="0">Resumen Anual</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadPeriod()">
+            <i class="fas fa-sync-alt"></i> Cargar
+        </button>
+    </div>
+</header>
+
+<!-- ── STATUS BAR ── -->
+<div class="status-bar">
+    <div id="statusPill" class="status-pill loading">
+        <div class="dot"></div>
+        <span id="statusText">Conectando…</span>
+    </div>
+    <div id="periodLabel" style="font-size:13px; color:var(--text2); font-family:var(--mono);"></div>
+
+    <div class="status-bar-right">
+        <button class="btn btn-ghost" onclick="syncVehicles()">
+            <i class="fas fa-database"></i> Sincronizar
+        </button>
+        <button class="btn btn-success" id="saveBtn" onclick="saveData()">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+    </div>
+</div>
+
+<!-- ── MAIN LAYOUT ── -->
+<div class="main" id="mainContent">
+    <!-- Placeholder while loading -->
+    <div class="col" style="align-items:center; justify-content:center; grid-column:1/-1;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:32px; color:var(--accent);"></i>
+        <p style="margin-top:12px; color:var(--text2); font-size:14px;">Cargando datos financieros…</p>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════════════════════════
+const API_BASE = '';   // mismo origen; cambia a 'http://localhost:3000' si difiere
+const MONTH_NAMES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let state = {
+    year:  new Date().getFullYear(),
+    month: new Date().getMonth() + 1,   // 1-12, 0 = anual
+    data:  null,
+    dirty: false,
+    expenses: []    // [ { descripcion, monto } ]
+};
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+(function init() {
+    // Poblar selector de años
+    const ys = document.getElementById('yearSelect');
+    const now = new Date().getFullYear();
+    for (let y = now + 1; y >= now - 3; y--) {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y;
+        if (y === now) o.selected = true;
+        ys.appendChild(o);
+    }
+
+    // Establecer mes actual
+    document.getElementById('monthSelect').value = state.month;
+
+    loadPeriod();
+})();
+
+// ══════════════════════════════════════════════════════════════
+//  LOAD PERIOD
+// ══════════════════════════════════════════════════════════════
+async function loadPeriod() {
+    state.year  = parseInt(document.getElementById('yearSelect').value);
+    state.month = parseInt(document.getElementById('monthSelect').value);
+
+    setStatus('loading', 'Cargando…');
+    setDirty(false);
+
+    try {
+        // Cargar datos del período seleccionado
+        const res = await fetch(`${API_BASE}/api/financiero/cierre?year=${state.year}&month=${state.month}`);
+        if (!res.ok) throw new Error(await res.text());
+        state.data = await res.json();
+
+        // Cargar plantilla de gastos si el mes no tiene gastos guardados
+        if (state.month !== 0 && (!state.data.gastos || state.data.gastos.length === 0)) {
+            const tmplRes = await fetch(`${API_BASE}/api/financiero/gastos-plantilla`);
+            const plantilla = await tmplRes.json();
+            state.expenses = plantilla.map(p => ({ descripcion: p.descripcion, monto: 0 }));
+        } else if (state.month !== 0) {
+            state.expenses = state.data.gastos.map(g => ({
+                descripcion: g.DESCRIPCION,
+                monto: parseFloat(g.MONTO_COLONES) || 0
+            }));
+        }
+
+        renderView();
+        setStatus('saved', `Datos cargados · ${getPeriodLabel()}`);
+    } catch (err) {
+        console.error(err);
+        setStatus('unsaved', 'Error de conexión · modo demo');
+        // Cargar con datos vacíos + plantilla
+        await loadFallback();
+        renderView();
+    }
+}
+
+async function loadFallback() {
+    try {
+        const tmplRes = await fetch(`${API_BASE}/api/financiero/gastos-plantilla`);
+        const plantilla = await tmplRes.json();
+        state.expenses = plantilla.map(p => ({ descripcion: p.descripcion, monto: 0 }));
+    } catch {
+        state.expenses = getDefaultExpenses();
+    }
+    state.data = {
+        tipo: state.month === 0 ? 'anual' : 'mensual',
+        cierre: {}, gastos: [],
+        vehiculos: { comprados: [], vendidos: [] },
+        totales_anuales: {}
+    };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════════
+function renderView() {
+    const main = document.getElementById('mainContent');
+    const label = getPeriodLabel();
+    document.getElementById('periodLabel').textContent = label;
+
+    if (state.month === 0) {
+        main.innerHTML = renderAnnual();
+    } else {
+        main.innerHTML = renderMonthly();
+        attachInputListeners();
+    }
+}
+
+// ── MONTHLY VIEW ───────────────────────────────────────────────
+function renderMonthly() {
+    const d  = state.data;
+    const ci = d.cierre || {};
+
+    const comprados = d.vehiculos.comprados || [];
+    const vendidos  = d.vehiculos.vendidos  || [];
+
+    const totalComprado = comprados.reduce((s,v) => s + parseFloat(v.monto||0), 0);
+    const totalGanancia = vendidos.reduce((s,v)  => s + parseFloat(v.ganancia||0), 0);
+    const totalGastos   = state.expenses.reduce((s,e) => s + parseFloat(e.monto||0), 0);
+    const gananciaNeta  = totalGanancia - totalGastos;
+
+    const invNeto   = parseFloat(ci.INVENTARIO_NETO||0);
+    const creditos  = parseFloat(ci.CREDITOS_PENDIENTES||0);
+    const efectivo  = parseFloat(ci.EFECTIVO_DISPONIBLE||0);
+    const totalActivos = invNeto + creditos + efectivo;
+
+    const bcrCol = parseFloat(ci.BCR_COLONES||0);
+    const bcrDol = parseFloat(ci.BCR_DOLARES||0);
+    const bacCol = parseFloat(ci.BAC_COLONES||0);
+    const bacDol = parseFloat(ci.BAC_DOLARES||0);
+    const totalBancos = bcrCol + bcrDol + bacCol + bacDol;
+
+    const plataInicial = parseFloat(ci.PLATA_INICIAL||0);
+
+    return `
+    <!-- LEFT COL -->
+    <div class="col">
+
+      <!-- PLATA INICIAL -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-yellow"><i class="fas fa-coins"></i></div>
+          <div class="card-title">Plata Inicial & Saldo</div>
+        </div>
+        <div class="card-body">
+          <div class="summary-row">
+            <span class="summary-label">Plata Inicial</span>
+            <input class="summary-value editable-field" id="plataInicial" type="text"
+                   value="${fmt(plataInicial)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Gastos</span>
+            <span class="summary-value val-red" id="displayTotalGastos">${fmt(totalGastos)}</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="summary-label">Saldo Disponible</span>
+            <span class="summary-value" id="displaySaldo">${fmt(plataInicial - totalGastos)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GASTOS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-red"><i class="fas fa-receipt"></i></div>
+          <div class="card-title">Gastos del Mes</div>
+          <span style="font-family:var(--mono); font-size:12px; color:var(--text3);">${state.expenses.length} conceptos</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Concepto</th>
+                <th style="text-align:right;">Monto ₡</th>
+              </tr>
+            </thead>
+            <tbody id="expensesTbody">
+              ${state.expenses.map((e,i) => `
+              <tr>
+                <td><span class="exp-num">${i+1}</span></td>
+                <td><input class="exp-desc-input" value="${e.descripcion}" data-i="${i}" data-field="descripcion" oninput="onExpenseChange(this)"></td>
+                <td><input class="exp-amount-input" value="${fmtOrEmpty(e.monto)}" data-i="${i}" data-field="monto" oninput="onExpenseChange(this)" onblur="fmtBlur(this)" placeholder="0" style="width:140px;"></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <button class="add-row-btn" onclick="addExpenseRow()">
+          <i class="fas fa-plus"></i> Agregar gasto
+        </button>
+        <div class="table-footer">
+          <span class="table-footer-label">Total Gastos</span>
+          <span class="table-footer-value" id="footerTotalGastos">${fmt(totalGastos)}</span>
+        </div>
+      </div>
+
+      <!-- VEHICULOS COMPRADOS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-blue"><i class="fas fa-car"></i></div>
+          <div class="card-title">Vehículos Comprados</div>
+          <span class="badge badge-blue">${comprados.length}</span>
+        </div>
+        ${comprados.length === 0 ? `<div class="empty-state"><i class="fas fa-box-open"></i><p>Sin compras este mes</p></div>` : `
+        <table class="vehicle-table">
+          <thead><tr><th>#</th><th>Vehículo</th><th>Placa</th><th style="text-align:right;">Monto ₡</th></tr></thead>
+          <tbody>
+            ${comprados.map((v,i) => `
+            <tr>
+              <td style="color:var(--text3); font-family:var(--mono); font-size:11px; padding: 10px 12px;">${i+1}</td>
+              <td>${v.descripcion||'—'}</td>
+              <td><span class="badge badge-blue">${v.placa||'—'}</span></td>
+              <td class="amount-col">${fmt(v.monto)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <span class="table-footer-label">Total Comprado</span>
+          <span class="table-footer-value" style="color:var(--accent);">${fmt(totalComprado)}</span>
+        </div>`}
+      </div>
+
+    </div><!-- /LEFT COL -->
+
+    <!-- RIGHT COL -->
+    <div class="col">
+
+      <!-- PLATA TRABAJANDO -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-cyan"><i class="fas fa-chart-line"></i></div>
+          <div class="card-title">Plata Trabajando</div>
+        </div>
+        <div class="card-body">
+          <div class="summary-row">
+            <span class="summary-label">Inventario Neto</span>
+            <input class="summary-value editable-field" id="inventarioNeto" type="text"
+                   value="${fmt(invNeto)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Créditos</span>
+            <input class="summary-value editable-field" id="creditos" type="text"
+                   value="${fmt(creditos)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Efectivo</span>
+            <input class="summary-value editable-field" id="efectivo" type="text"
+                   value="${fmt(efectivo)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row total-row">
+            <span class="summary-label">Total</span>
+            <span class="summary-value val-cyan" id="displayTotalActivos">${fmt(totalActivos)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BANCOS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-blue"><i class="fas fa-university"></i></div>
+          <div class="card-title">Plata en Bancos</div>
+        </div>
+        <div class="card-body">
+          <div class="summary-row">
+            <span class="summary-label">BCR Colones</span>
+            <input class="summary-value editable-field" id="bcrColones" type="text"
+                   value="${fmt(bcrCol)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">BCR Dólares</span>
+            <input class="summary-value editable-field" id="bcrDolares" type="text"
+                   value="${fmt(bcrDol)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">BAC Colones</span>
+            <input class="summary-value editable-field" id="bacColones" type="text"
+                   value="${fmt(bacCol)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">BAC Dólares</span>
+            <input class="summary-value editable-field" id="bacDolares" type="text"
+                   value="${fmt(bacDol)}" placeholder="0" oninput="onFieldChange()">
+          </div>
+          <div class="summary-row total-row">
+            <span class="summary-label">Total Bancos</span>
+            <span class="summary-value val-cyan" id="displayTotalBancos">${fmt(totalBancos)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VEHICULOS VENDIDOS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-green"><i class="fas fa-car-side"></i></div>
+          <div class="card-title">Vehículos Vendidos</div>
+          <span class="badge badge-green">${vendidos.length}</span>
+        </div>
+        ${vendidos.length === 0 ? `<div class="empty-state"><i class="fas fa-box-open"></i><p>Sin ventas este mes</p></div>` : `
+        <table class="vehicle-table">
+          <thead><tr><th>#</th><th>Vehículo</th><th>Código</th><th style="text-align:right;">Ganancia ₡</th></tr></thead>
+          <tbody>
+            ${vendidos.map((v,i) => `
+            <tr>
+              <td style="color:var(--text3); font-family:var(--mono); font-size:11px; padding: 10px 12px;">${i+1}</td>
+              <td>${v.descripcion||'—'}</td>
+              <td style="font-family:var(--mono); font-size:11px; color:var(--text3);">${v.codigo_venta||'—'}</td>
+              <td class="amount-col val-green">${fmt(v.ganancia)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <span class="table-footer-label">Total Ganancia</span>
+          <span class="table-footer-value" style="color:var(--green);">${fmt(totalGanancia)}</span>
+        </div>`}
+      </div>
+
+      <!-- RESULTADOS FINALES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-yellow"><i class="fas fa-calculator"></i></div>
+          <div class="card-title">Resultados Finales</div>
+        </div>
+        <div class="card-body">
+          <div class="result-row">
+            <span class="result-label">Vehículos Comprados</span>
+            <span class="result-value val-blue">${fmt(totalComprado)}</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Ganancia por Ventas</span>
+            <span class="result-value val-green" id="resGanancia">${fmt(totalGanancia)}</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Total Gastos</span>
+            <span class="result-value val-red" id="resGastos">${fmt(totalGastos)}</span>
+          </div>
+          <div class="divider" style="margin: 0;"></div>
+          <div class="result-row final-row">
+            <span class="result-label">GANANCIA NETA</span>
+            <span class="result-value ${gananciaNeta >= 0 ? 'val-green' : 'val-red'}" id="resNeta">${fmt(gananciaNeta)}</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /RIGHT COL -->`;
+}
+
+// ── ANNUAL VIEW ────────────────────────────────────────────────
+function renderAnnual() {
+    const d   = state.data;
+    const tot = d.totales_anuales || {};
+    const meses = d.meses || [];
+    const mesMap = {};
+    meses.forEach(m => { mesMap[m.mes] = m; });
+
+    const vComp = d.vehiculos?.comprados || {};
+    const vVend = d.vehiculos?.vendidos  || {};
+
+    const totalGastosAnual  = parseFloat(tot.total_gastos  || 0);
+    const totalGananciaBrut = parseFloat(vVend.ganancia    || 0);
+    const gananciaNeta      = totalGananciaBrut - totalGastosAnual;
+    const totalBancos       = parseFloat(tot.total_bancos  || 0);
+    const totalActivos      = parseFloat(tot.inventario_neto||0) + parseFloat(tot.creditos||0) + parseFloat(tot.efectivo||0);
+
+    const tiles = Array.from({length:12}, (_,i) => {
+        const n = i+1;
+        const m = mesMap[n];
+        return `
+        <div class="month-tile ${m ? 'has-data' : 'no-data'}" onclick="goToMonth(${n})">
+          <div class="month-tile-name">${MONTH_NAMES[n].slice(0,3)}</div>
+          ${m ? `
+          <div class="month-tile-amount">+${fmtShort(m.GANANCIA_NETA||0)}</div>
+          <div class="month-tile-gastos">-${fmtShort(m.TOTAL_GASTOS||0)}</div>
+          ` : `<div class="month-tile-amount">—</div>`}
+        </div>`;
+    }).join('');
+
+    return `
+    <!-- LEFT COL -->
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-blue"><i class="fas fa-calendar-alt"></i></div>
+          <div class="card-title">Meses ${state.year}</div>
+          <span style="font-size:12px; color:var(--text3);">${meses.length} con datos</span>
+        </div>
+        <div class="annual-grid">${tiles}</div>
+        <div style="padding: 12px 18px; border-top: 1px solid var(--border);">
+          <p style="font-size:12px; color:var(--text3);">
+            <i class="fas fa-info-circle"></i>
+            Haz clic en un mes para ver su detalle completo
+          </p>
+        </div>
+      </div>
+
+      <!-- VEHÍCULOS ANUALES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-cyan"><i class="fas fa-car"></i></div>
+          <div class="card-title">Vehículos del Año</div>
+        </div>
+        <div class="card-body">
+          <div class="summary-row">
+            <span class="summary-label">Comprados</span>
+            <span class="summary-value val-blue">${vComp.cantidad||0} unidades</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Monto Total Compras</span>
+            <span class="summary-value">${fmt(vComp.monto||0)}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Vendidos</span>
+            <span class="summary-value val-green">${vVend.cantidad||0} unidades</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="summary-label">Ganancia Bruta Ventas</span>
+            <span class="summary-value val-green">${fmt(totalGananciaBrut)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COL -->
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-yellow"><i class="fas fa-chart-bar"></i></div>
+          <div class="card-title">Resumen Anual ${state.year}</div>
+        </div>
+        <div class="annual-summary-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Total Gastos</div>
+            <div class="kpi-value val-red">${fmt(totalGastosAnual)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Ganancia Bruta</div>
+            <div class="kpi-value val-green">${fmt(totalGananciaBrut)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Total Bancos</div>
+            <div class="kpi-value val-cyan">${fmt(totalBancos)}</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Activos Totales</div>
+            <div class="kpi-value val-blue">${fmt(totalActivos)}</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-body">
+          <div class="result-row final-row" style="padding-top: 20px;">
+            <span class="result-label">GANANCIA NETA ANUAL</span>
+            <span class="result-value ${gananciaNeta >= 0 ? 'val-green' : 'val-red'}">${fmt(gananciaNeta)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GASTOS POR MES (tabla) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-red"><i class="fas fa-table"></i></div>
+          <div class="card-title">Gastos por Mes</div>
+        </div>
+        ${meses.length === 0 ? `<div class="empty-state"><i class="fas fa-box-open"></i><p>No hay datos guardados para ${state.year}</p></div>` : `
+        <table class="vehicle-table">
+          <thead><tr><th>Mes</th><th style="text-align:right;">Gastos</th><th style="text-align:right;">Ganancia Neta</th></tr></thead>
+          <tbody>
+            ${meses.map(m => `
+            <tr style="cursor:pointer;" onclick="goToMonth(${m.mes})">
+              <td>${MONTH_NAMES[m.mes]}</td>
+              <td class="amount-col val-red">${fmt(m.TOTAL_GASTOS||0)}</td>
+              <td class="amount-col ${parseFloat(m.GANANCIA_NETA||0) >= 0 ? 'val-green' : 'val-red'}">${fmt(m.GANANCIA_NETA||0)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`}
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INPUT LISTENERS
+// ══════════════════════════════════════════════════════════════
+function attachInputListeners() {
+    // Formatear al salir de campos de dinero
+    document.querySelectorAll('.editable-field').forEach(el => {
+        el.addEventListener('blur', () => {
+            const num = parseAmt(el.value);
+            el.value = num > 0 ? fmt(num) : '';
+            recalculate();
+        });
+    });
+}
+
+function onFieldChange() {
+    setDirty(true);
+    recalculate();
+}
+
+function onExpenseChange(el) {
+    const i     = parseInt(el.dataset.i);
+    const field = el.dataset.field;
+    if (field === 'descripcion') {
+        state.expenses[i].descripcion = el.value;
+    } else {
+        state.expenses[i].monto = parseAmt(el.value);
+    }
+    setDirty(true);
+    recalculate();
+}
+
+function fmtBlur(el) {
+    const num = parseAmt(el.value);
+    el.value = num > 0 ? fmt(num) : '';
+}
+
+function addExpenseRow() {
+    state.expenses.push({ descripcion: 'NUEVO GASTO', monto: 0 });
+    setDirty(true);
+    renderView();
+    // Enfocar último input de descripción
+    setTimeout(() => {
+        const rows = document.querySelectorAll('.exp-desc-input');
+        if (rows.length) rows[rows.length - 1].focus();
+    }, 50);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RECALCULATE
+// ══════════════════════════════════════════════════════════════
+function recalculate() {
+    if (state.month === 0) return;
+
+    const totalGastos = state.expenses.reduce((s,e) => s + (parseFloat(e.monto)||0), 0);
+    const plataIni    = parseAmt(document.getElementById('plataInicial')?.value || '0');
+    const invNeto     = parseAmt(document.getElementById('inventarioNeto')?.value || '0');
+    const cred        = parseAmt(document.getElementById('creditos')?.value || '0');
+    const efec        = parseAmt(document.getElementById('efectivo')?.value || '0');
+    const bcrCol      = parseAmt(document.getElementById('bcrColones')?.value || '0');
+    const bcrDol      = parseAmt(document.getElementById('bcrDolares')?.value || '0');
+    const bacCol      = parseAmt(document.getElementById('bacColones')?.value || '0');
+    const bacDol      = parseAmt(document.getElementById('bacDolares')?.value || '0');
+
+    const totalActivos = invNeto + cred + efec;
+    const totalBancos  = bcrCol + bcrDol + bacCol + bacDol;
+
+    const vd = state.data?.vehiculos?.vendidos || [];
+    const totalGanancia = vd.reduce((s,v) => s + parseFloat(v.ganancia||0), 0);
+    const gananciaNeta  = totalGanancia - totalGastos;
+
+    setEl('displayTotalGastos', fmt(totalGastos), true);
+    setEl('displaySaldo', fmt(plataIni - totalGastos));
+    setEl('displayTotalActivos', fmt(totalActivos));
+    setEl('displayTotalBancos', fmt(totalBancos));
+    setEl('footerTotalGastos', fmt(totalGastos));
+    setEl('resGanancia', fmt(totalGanancia));
+    setEl('resGastos', fmt(totalGastos), true);
+    if (document.getElementById('resNeta')) {
+        const el = document.getElementById('resNeta');
+        el.textContent = fmt(gananciaNeta);
+        el.className = 'result-value ' + (gananciaNeta >= 0 ? 'val-green' : 'val-red');
+    }
+}
+
+function setEl(id, val, red=false) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val; if(red) el.classList.add('val-red'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════════════════════════
+async function saveData() {
+    if (state.month === 0) {
+        showToast('El resumen anual se genera automáticamente de los meses guardados.', 'error');
+        return;
+    }
+
+    const ci = state.data?.cierre || {};
+    setStatus('loading', 'Guardando…');
+
+    const payload = {
+        year:           state.year,
+        month:          state.month,
+        plata_inicial:  parseAmt(document.getElementById('plataInicial')?.value || '0'),
+        bcr_colones:    parseAmt(document.getElementById('bcrColones')?.value || '0'),
+        bcr_dolares:    parseAmt(document.getElementById('bcrDolares')?.value || '0'),
+        bac_colones:    parseAmt(document.getElementById('bacColones')?.value || '0'),
+        bac_dolares:    parseAmt(document.getElementById('bacDolares')?.value || '0'),
+        inventario_neto: parseAmt(document.getElementById('inventarioNeto')?.value || '0'),
+        creditos:        parseAmt(document.getElementById('creditos')?.value || '0'),
+        efectivo:        parseAmt(document.getElementById('efectivo')?.value || '0'),
+        gastos: state.expenses
+    };
+
+    try {
+        const res = await fetch(`${API_BASE}/api/financiero/guardar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Error al guardar');
+
+        setDirty(false);
+        setStatus('saved', `Guardado · ${getPeriodLabel()}`);
+        showToast('Datos guardados correctamente', 'success');
+    } catch (err) {
+        setStatus('unsaved', 'Error al guardar');
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SYNC VEHICLES
+// ══════════════════════════════════════════════════════════════
+async function syncVehicles() {
+    setStatus('loading', 'Sincronizando vehículos…');
+    try {
+        const res = await fetch(`${API_BASE}/api/vehiculos?estado=COMPRADO`);
+        if (!res.ok) throw new Error('Error de red');
+        setStatus('saved', `Sincronizado · ${getPeriodLabel()}`);
+        showToast('Vehículos sincronizados', 'success');
+        await loadPeriod();
+    } catch (err) {
+        setStatus('unsaved', 'Error de sincronización');
+        showToast('No se pudo sincronizar: ' + err.message, 'error');
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NAVIGATE TO MONTH
+// ══════════════════════════════════════════════════════════════
+function goToMonth(m) {
+    document.getElementById('monthSelect').value = m;
+    loadPeriod();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════
+function fmt(num) {
+    const n = parseFloat(num) || 0;
+    return '₡' + n.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtShort(num) {
+    const n = Math.abs(parseFloat(num) || 0);
+    if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
+    if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+    if (n >= 1e3) return (n/1e3).toFixed(0)+'K';
+    return n.toFixed(0);
+}
+function fmtOrEmpty(num) {
+    const n = parseFloat(num) || 0;
+    return n > 0 ? n.toLocaleString('es-CR', {maximumFractionDigits:0}) : '';
+}
+function parseAmt(str) {
+    if (!str) return 0;
+    const n = parseFloat(str.toString().replace(/[^0-9.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+}
+
+function getPeriodLabel() {
+    if (state.month === 0) return `Anual ${state.year}`;
+    return `${MONTH_NAMES[state.month]} ${state.year}`;
+}
+
+function setStatus(type, text) {
+    const pill = document.getElementById('statusPill');
+    const span = document.getElementById('statusText');
+    pill.className = 'status-pill ' + type;
+    span.textContent = text;
+}
+
+function setDirty(val) {
+    state.dirty = val;
+    const btn = document.getElementById('saveBtn');
+    if (btn) {
+        btn.style.opacity = val ? '1' : '0.7';
+        btn.style.boxShadow = val ? '0 0 0 2px rgba(16,185,129,0.3)' : 'none';
+    }
+    if (!val) return;
+    const pill = document.getElementById('statusPill');
+    if (pill && !pill.classList.contains('loading')) {
+        setStatus('unsaved', 'Cambios sin guardar');
+    }
+}
+
+let toastTimer;
+function showToast(msg, type = 'success') {
+    const t  = document.getElementById('toast');
+    const ic = t.querySelector('i');
+    const sp = document.getElementById('toastMsg');
+    t.className = `show ${type}`;
+    ic.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    sp.textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+}
+
+function getDefaultExpenses() {
+    const descs = ['ALQUILER','ALQUILER','TEL 1','CEL 2','CEL 3','CEL 4',
+                   'CORRIENTE','AGUA Y BASURA','CABLE','CRAUTOS','INTERNET',
+                   'JARDIN','SEGURO CARROS','LIQUIDOS','SELCA','HERMANOS',
+                   'PAPI','MANFRED','NAZA','TAVITO','RAFITA','PAGO DE CARRO'];
+    return descs.map(d => ({ descripcion: d, monto: 0 }));
+}
+</script>
+</body>
+</html>

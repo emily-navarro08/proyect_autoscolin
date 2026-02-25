@@ -587,1178 +587,1360 @@ input:disabled, select:disabled, textarea:disabled {
     </style>
 </head>
 <body>
-
-<!-- Loading overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-</div>
-
-<!-- Toast notification -->
-<div class="toast" id="toast"></div>
-
-<!-- Botón para menú móvil -->
-<button class="menu-toggle" id="menuToggle">
-    <i class="fas fa-bars"></i>
-</button>
-
-<div class="overlay" id="overlay"></div>
-
-<header class="main-header">
-    <img src="/img/icon-192.png" alt="Logo Autos Colin">
-    <div class="usuario" id="usuarioInfo">🖥️ Nombre persona - GERENTE</div>
-</header>
-
-<div class="container">
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <h2>Autos Colín</h2>
-            <ul class="menu-items">
-                <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
-                <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
-                <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
-                <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
-                <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
-            </ul>
-            <div class="sidebar-buttons-section">
-                <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
-                <div class="sidebar-buttons">
-                    <a href="facturación.html" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
-                    <a href="#" class="sidebar-btn"><i class="fas fa-cash-register"></i><span>Recibos</span></a>
-                    <a href="inventario.html" class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
-                    <a href="clientes.html" class="sidebar-btn active"><i class="fas fa-users"></i><span>Clientes</span></a>
-                    <a href="certificado_garantia.html" class="sidebar-btn"><i class="fas fa-award"></i><span>Certificado</span></a>
-                    <a href="plan_venta.html" class="sidebar-btn"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
-                    <a href="cuentasxcobrar.html" class="sidebar-btn"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
-                    <a href="index.html" class="sidebar-salirbtn"><i class="fas fa-sign-out"></i><span>Salir</span></a>
-                </div>
-            </div>
-        </div>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
     </div>
 
-    <div class="main-content">
-        <div class="panel">
-            <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
 
-            <!-- Filtros -->
-            <div class="filter-container">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="filter-identificacion">Identificación:</label>
-                        <input type="text" id="filter-identificacion" placeholder="Buscar por identificación...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-nombre">Nombre:</label>
-                        <input type="text" id="filter-nombre" placeholder="Buscar por nombre...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-tipo">Tipo de Cliente:</label>
-                        <select id="filter-tipo">
-                            <option value="">Todos</option>
-                            <option value="1">Cliente Facturación</option>
-                            <option value="2">Cliente Inscripción</option>
-                            <option value="3">Cliente Ambos</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filter-estado">Estado:</label>
-                        <select id="filter-estado">
-                            <option value="">Todos</option>
-                            <option value="ACTIVO">Activo</option>
-                            <option value="INACTIVO">Inactivo</option>
-                        </select>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="overlay" id="overlay"></div>
+
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo">🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
+                        <a href="#" class="sidebar-btn"><i class="fas fa-cash-register"></i><span>Recibos</span></a>
+                        <a href="inventario.html" class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
+                        <a href="clientes.html" class="sidebar-btn active"><i class="fas fa-users"></i><span>Clientes</span></a>
+                        <a href="certificado_garantia.html" class="sidebar-btn"><i class="fas fa-award"></i><span>Certificado</span></a>
+                        <a href="plan_venta.html" class="sidebar-btn"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
+                        <a href="index.html" class="sidebar-salirbtn"><i class="fas fa-sign-out"></i><span>Salir</span></a>
                     </div>
                 </div>
-                <div class="filter-row" style="margin-top: 15px;">
-                    <div class="filter-group">
-                        <button class="btn btn-secondary" id="btn-limpiar-filtros">
-                            <i class="fas fa-times"></i> Limpiar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla -->
-            <div class="table-container">
-                <table id="tabla-clientes">
-                    <thead>
-                        <tr>
-                            <th>Cédula</th>
-                            <th>Nombre Cliente</th>
-                            <th>Teléfono 1</th>
-                            <th>Teléfono 2</th>
-                            <th>Email</th>
-                            <th>Tipo de cliente</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-clientes">
-                        <tr><td colspan="8" style="text-align:center;padding:30px;color:#718096;">Cargando clientes...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Botones acción -->
-            <div class="acciones">
-                <button class="btn-agregar" id="btn-agregar"><i class="fas fa-plus"></i> Agregar</button>
-                <button class="btn-anular"  id="btn-anular" ><i class="fas fa-ban"></i>  Anular</button>
-                <button class="btn-modificar" id="btn-modificar"><i class="fas fa-edit"></i> Modificar</button>
-                <button class="btn-pasarj"  id="btn-pasarj" ><i class="fas fa-file-export"></i> Pasar J</button>
-                <button class="btn-imprimir" id="btn-imprimir"><i class="fas fa-print"></i> Imprimir</button>
-                <button class="btn-listar"  id="btn-listar" ><i class="fas fa-list"></i> Listar</button>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- ════════════════════════════════════════
-     MODAL AGREGAR / MODIFICAR CLIENTE
-════════════════════════════════════════ -->
-<div class="modal" id="modal-cliente">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modal-title-cliente"><i class="fas fa-user-plus"></i> Nuevo Cliente</h2>
-            <button class="close-btn" id="close-modal-cliente">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="form-cliente">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cliente-tipo-documento">Tipo Documento:</label>
-                        <select id="cliente-tipo-documento" name="tipo_documento" required>
-                            <option value="">Seleccionar</option>
-                            <option value="Cedúla_Física">Cedúla Física</option>
-                            <option value="Cedúla_Jurídica">Cedúla Jurídica</option>
-                            <option value="DIMEX">DIMEX</option>
-                            <option value="NITE">NITE</option>
-                            <option value="Pasaporte">Pasaporte</option>
-                        </select>
+        <div class="main-content">
+            <div class="panel">
+                <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+                <!-- Filtros -->
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-identificacion">Identificación:</label>
+                            <input type="text" id="filter-identificacion" placeholder="Buscar por identificación...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-nombre">Nombre:</label>
+                            <input type="text" id="filter-nombre" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-tipo">Tipo de Cliente:</label>
+                            <select id="filter-tipo">
+                                <option value="">Todos</option>
+                                <option value="1">Cliente Facturación</option>
+                                <option value="2">Cliente Inscripción</option>
+                                <option value="3">Cliente Ambos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-estado">Estado:</label>
+                            <select id="filter-estado">
+                                <option value="">Todos</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="cliente-identificacion">Identificación:</label>
-                        <input type="text" id="cliente-identificacion" name="identificacion" required>
+                    <div class="filter-row" style="margin-top: 15px;">
+                        <div class="filter-group">
+                            <button class="btn btn-secondary" id="btn-limpiar-filtros">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="cliente-nombre">Nombre Completo:</label>
-                    <input type="text" id="cliente-nombre" name="nombre_completo" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cliente-nacionalidad">Nacionalidad:</label>
-                        <input type="text" id="cliente-nacionalidad" name="nacionalidad">
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-estado-civil">Estado Civil:</label>
-                        <select id="cliente-estado-civil" name="id_estado_civil">
-                            <option value="">Seleccionar</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cliente-ocupacion">Ocupación:</label>
-                        <input type="text" id="cliente-ocupacion" name="ocupacion">
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-telefono">Teléfono Principal:</label>
-                        <input type="text" id="cliente-telefono" name="telefono_principal">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cliente-telefono-sec">Teléfono Secundario:</label>
-                        <input type="text" id="cliente-telefono-sec" name="telefono_secundario">
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-email">Email:</label>
-                        <input type="email" id="cliente-email" name="email">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="cliente-direccion">Dirección:</label>
-                    <textarea id="cliente-direccion" name="direccion"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cliente-tipo-rol">Tipo de Cliente:</label>
-                        <select id="cliente-tipo-rol" name="tipo_cliente" required>
-                            <option value="">Seleccionar</option>
-                            <option value="1">Cliente Facturación</option>
-                            <option value="2">Cliente Inscripción</option>
-                            <option value="3">Cliente Ambos</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-observacion">Observación:</label>
-                        <textarea id="cliente-observacion" name="observacion"></textarea>
-                    </div>
-                </div>
-
-                <input type="hidden" id="cliente-id" name="id">
-                <input type="hidden" id="cliente-persona-rol-id" name="persona_rol_id">
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" id="cancel-btn-cliente">Cancelar</button>
-            <button class="btn btn-success"   id="save-btn-cliente">Guardar Cliente</button>
-        </div>
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════
-     MODAL VER CLIENTE (sobrio)
-════════════════════════════════════════ -->
-<div class="modal" id="modal-ver-cliente">
-    <div class="modal-content" style="max-width:1100px;">
-        <div class="ver-cliente-header">
-            <h2><i class="fas fa-id-card"></i> Expediente de Cliente</h2>
-            <button class="close-btn" id="close-modal-ver-cliente">&times;</button>
-        </div>
-
-        <div class="ver-body">
-            <!-- Nombre principal -->
-            <div class="ver-section">
-                <div class="ver-name-block">
-                    <div class="ver-name" id="ver-nombre-completo">—</div>
-                    <div class="ver-sub" id="ver-sub-info">—</div>
-                </div>
-                <div class="ver-grid">
-                    <div class="ver-field">
-                        <div class="ver-field-label">Tipo Documento</div>
-                        <div class="ver-field-value" id="ver-tipo-documento">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Identificación</div>
-                        <div class="ver-field-value" id="ver-identificacion">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Nacionalidad</div>
-                        <div class="ver-field-value" id="ver-nacionalidad">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Estado Civil</div>
-                        <div class="ver-field-value" id="ver-estado-civil">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Ocupación</div>
-                        <div class="ver-field-value" id="ver-ocupacion">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Tipo de Cliente</div>
-                        <div class="ver-field-value" id="ver-tipo-cliente">—</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contacto -->
-            <div class="ver-section">
-                <div class="ver-section-title"><i class="fas fa-address-book"></i> Contacto</div>
-                <div class="ver-grid">
-                    <div class="ver-field">
-                        <div class="ver-field-label">Teléfono Principal</div>
-                        <div class="ver-field-value" id="ver-telefono">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Teléfono Secundario</div>
-                        <div class="ver-field-value" id="ver-telefono-sec">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Email</div>
-                        <div class="ver-field-value" id="ver-email" style="word-break:break-all">—</div>
-                    </div>
-                    <div class="ver-field">
-                        <div class="ver-field-label">Estado</div>
-                        <div class="ver-field-value" id="ver-estado-cliente">—</div>
-                    </div>
-                </div>
-                <div class="ver-field-full">
-                    <div class="ver-field-label">Dirección</div>
-                    <div class="ver-field-value" id="ver-direccion">—</div>
-                </div>
-            </div>
-
-            <!-- Resumen financiero -->
-            <div class="ver-section">
-                <div class="ver-section-title"><i class="fas fa-chart-bar"></i> Resumen Financiero</div>
-                <div class="cards-financieras">
-                    <div class="card-fin">
-                        <div class="card-fin-label">Total Compras</div>
-                        <div class="card-fin-value" id="ver-total-compras">₡0</div>
-                    </div>
-                    <div class="card-fin">
-                        <div class="card-fin-label">Crédito Total</div>
-                        <div class="card-fin-value" id="ver-credito-total">₡0</div>
-                    </div>
-                    <div class="card-fin">
-                        <div class="card-fin-label">Pagado</div>
-                        <div class="card-fin-value" id="ver-total-pagado">₡0</div>
-                    </div>
-                    <div class="card-fin">
-                        <div class="card-fin-label">Saldo Pendiente</div>
-                        <div class="card-fin-value" id="ver-saldo-pendiente">₡0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Historial compras -->
-            <div class="ver-section">
-                <div class="ver-section-title"><i class="fas fa-history"></i> Historial de Compras</div>
-                <div style="overflow-x:auto; max-height:220px; overflow-y:auto;">
-                    <table class="historial-table">
+                <!-- Tabla -->
+                <div class="table-container">
+                    <table id="tabla-clientes">
                         <thead>
                             <tr>
-                                <th>Plan Venta</th>
-                                <th>Vehículo</th>
-                                <th>Fecha</th>
-                                <th>Monto</th>
+                                <th>Cédula</th>
+                                <th>Nombre Cliente</th>
+                                <th>Teléfono 1</th>
+                                <th>Teléfono 2</th>
+                                <th>Email</th>
+                                <th>Tipo de cliente</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="ver-historial-compras">
-                            <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>
+                        <tbody id="tbody-clientes">
+                            <tr><td colspan="8" style="text-align:center;padding:30px;color:#718096;">Cargando clientes...</td></tr>
                         </tbody>
                     </table>
                 </div>
+                <!-- Botones acción -->
+                <div class="acciones">
+                    <button class="btn-agregar" id="btn-agregar"><i class="fas fa-plus"></i> Agregar</button>
+                    <button class="btn-anular"  id="btn-anular" ><i class="fas fa-ban"></i>  Anular</button>
+                    <button class="btn-modificar" id="btn-modificar"><i class="fas fa-edit"></i> Modificar</button>
+                    <button class="btn-pasarj"  id="btn-pasarj" ><i class="fas fa-file-export"></i> Pasar J</button>
+                    <button class="btn-imprimir" id="btn-imprimir"><i class="fas fa-print"></i> Imprimir</button>
+                    <button class="btn-listar"  id="btn-listar" ><i class="fas fa-list"></i> Listar</button>
+                </div>
             </div>
-
-            <!-- Observaciones -->
-            <div class="ver-section">
-                <div class="ver-section-title"><i class="fas fa-sticky-note"></i> Observaciones</div>
-                <div class="obs-box" id="ver-observaciones">Sin observaciones</div>
-            </div>
-
-            <div style="text-align:right;font-size:0.72rem;color:#94a3b8;margin-top:6px;">
-                Consulta realizada: <span id="fechaConsultaCliente">—</span>
-            </div>
-        </div>
-
-        <div class="modal-footer" style="padding:16px 28px;">
-            <button class="btn btn-secondary" onclick="cerrarModalVerCliente()"><i class="fas fa-times"></i> Cerrar</button>
         </div>
     </div>
-</div>
 
-<!-- ════════════════════════════════════════
-     MODAL INFORMACIÓN DE VENTA
-════════════════════════════════════════ -->
-<div class="modal" id="modal-info-venta">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-car"></i> Información de Venta</h2>
-            <button class="close-btn" id="close-modal-info-venta">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="view-data">
-                <div class="data-section">
-                    <h3><i class="fas fa-car"></i> Características del Vehículo</h3>
-                    <div class="data-grid">
-                        <div class="data-row"><div class="data-label">Marca:</div><div class="data-value" id="info-marca">—</div></div>
-                        <div class="data-row"><div class="data-label">Modelo:</div><div class="data-value" id="info-modelo">—</div></div>
-                        <div class="data-row"><div class="data-label">Color:</div><div class="data-value" id="info-color">—</div></div>
-                        <div class="data-row"><div class="data-label">Placa:</div><div class="data-value" id="info-placa">—</div></div>
-                        <div class="data-row"><div class="data-label">Chasis:</div><div class="data-value" id="info-chasis">—</div></div>
-                        <div class="data-row"><div class="data-label">Motor:</div><div class="data-value" id="info-motor">—</div></div>
-                        <div class="data-row"><div class="data-label">Combustible:</div><div class="data-value" id="info-combustible">—</div></div>
-                        <div class="data-row"><div class="data-label">Transmisión:</div><div class="data-value" id="info-transmision">—</div></div>
+    <!-- MODAL AGREGAR / MODIFICAR CLIENTE -->
+    <div class="modal" id="modal-cliente">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-cliente"><i class="fas fa-user-plus"></i> Nuevo Cliente</h2>
+                <button class="close-btn" id="close-modal-cliente">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-cliente">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-tipo-documento">Tipo Documento:</label>
+                            <select id="cliente-tipo-documento" name="tipo_documento" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Cedúla_Física">Cedúla Física</option>
+                                <option value="Cedúla_Jurídica">Cedúla Jurídica</option>
+                                <option value="DIMEX">DIMEX</option>
+                                <option value="NITE">NITE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-identificacion">Identificación:</label>
+                            <input type="text" id="cliente-identificacion" name="identificacion" required>
+                        </div>
                     </div>
-                </div>
-                <div class="data-section">
-                    <h3><i class="fas fa-money-bill-wave"></i> Información Financiera</h3>
-                    <div class="data-grid">
-                        <div class="data-row"><div class="data-label">Precio Costo:</div><div class="data-value" id="info-precio-costo">—</div></div>
-                        <div class="data-row"><div class="data-label">Precio Venta:</div><div class="data-value" id="info-precio-venta">—</div></div>
-                        <div class="data-row"><div class="data-label">Utilidad:</div><div class="data-value" id="info-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
-                        <div class="data-row"><div class="data-label">% Utilidad:</div><div class="data-value" id="info-porcentaje-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
-                        <div class="data-row"><div class="data-label">Fecha Venta:</div><div class="data-value" id="info-fecha-venta">—</div></div>
-                        <div class="data-row"><div class="data-label">Vendedor:</div><div class="data-value" id="info-vendedor">—</div></div>
+
+                    <div class="form-group">
+                        <label for="cliente-nombre">Nombre Completo:</label>
+                        <input type="text" id="cliente-nombre" name="nombre_completo" required>
                     </div>
-                </div>
-                <div class="data-section">
-                    <h3><i class="fas fa-user"></i> Información del Cliente</h3>
-                    <div class="data-grid">
-                        <div class="data-row"><div class="data-label">Cliente Facturación:</div><div class="data-value" id="info-cliente-facturacion">—</div></div>
-                        <div class="data-row"><div class="data-label">Cédula Fact.:</div><div class="data-value" id="info-cedula-facturacion">—</div></div>
-                        <div class="data-row"><div class="data-label">Cliente Inscripción:</div><div class="data-value" id="info-cliente-inscripcion">—</div></div>
-                        <div class="data-row"><div class="data-label">Cédula Insc.:</div><div class="data-value" id="info-cedula-inscripcion">—</div></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-nacionalidad">Nacionalidad:</label>
+                            <input type="text" id="cliente-nacionalidad" name="nacionalidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-estado-civil">Estado Civil:</label>
+                            <select id="cliente-estado-civil" name="id_estado_civil">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-ocupacion">Ocupación:</label>
+                            <input type="text" id="cliente-ocupacion" name="ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-telefono">Teléfono Principal:</label>
+                            <input type="text" id="cliente-telefono" name="telefono_principal">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-telefono-sec">Teléfono Secundario:</label>
+                            <input type="text" id="cliente-telefono-sec" name="telefono_secundario">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-email">Email:</label>
+                            <input type="email" id="cliente-email" name="email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cliente-direccion">Dirección:</label>
+                        <textarea id="cliente-direccion" name="direccion"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-tipo-rol">Tipo de Cliente:</label>
+                            <select id="cliente-tipo-rol" name="tipo_cliente" required>
+                                <option value="">Seleccionar</option>
+                                <option value="1">Cliente Facturación</option>
+                                <option value="2">Cliente Inscripción</option>
+                                <option value="3">Cliente Ambos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-observacion">Observación:</label>
+                            <textarea id="cliente-observacion" name="observacion"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="cliente-id" name="id">
+                    <input type="hidden" id="cliente-persona-rol-id" name="persona_rol_id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn-cliente">Cancelar</button>
+                <button class="btn btn-success"   id="save-btn-cliente">Guardar Cliente</button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" id="close-btn-info-venta">Cerrar</button>
-            <button class="btn btn-success" id="print-btn-info-venta"><i class="fas fa-print"></i> Imprimir</button>
-        </div>
     </div>
-</div>
 
-<!-- ════════════════════════════════════════
-     MODAL COSTO Y VENTA
-════════════════════════════════════════ -->
-<div class="modal" id="modal-costo-venta">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-file-invoice-dollar"></i> Información de Costos y Ventas</h2>
-            <button class="close-btn" id="close-modal-costo-venta">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="view-data">
-                <div class="data-section">
-                    <h3><i class="fas fa-calculator"></i> Resumen Financiero</h3>
-                    <div class="data-grid">
-                        <div class="data-row"><div class="data-label">Total Factura:</div><div class="data-value" id="costo-total-factura">—</div></div>
-                        <div class="data-row"><div class="data-label">Plazo de Crédito:</div><div class="data-value" id="costo-plazo">—</div></div>
-                        <div class="data-row"><div class="data-label">Prima:</div><div class="data-value" id="costo-prima">—</div></div>
-                        <div class="data-row"><div class="data-label">Comisión:</div><div class="data-value" id="costo-comision">—</div></div>
-                        <div class="data-row"><div class="data-label">Saldo Pendiente:</div><div class="data-value" id="costo-saldo">—</div></div>
-                        <div class="data-row"><div class="data-label">Cuota Mensual:</div><div class="data-value" id="costo-cuota">—</div></div>
-                        <div class="data-row"><div class="data-label">Fecha Primer Pago:</div><div class="data-value" id="costo-primer-pago">—</div></div>
+    <!-- MODAL VER CLIENTE -->
+    <div class="modal" id="modal-ver-cliente">
+        <div class="modal-content" style="max-width:1100px;">
+            <div class="ver-cliente-header">
+                <h2><i class="fas fa-id-card"></i> Expediente de Cliente</h2>
+                <button class="close-btn" id="close-modal-ver-cliente">&times;</button>
+            </div>
+
+            <div class="ver-body">
+                <!-- Nombre principal -->
+                <div class="ver-section">
+                    <div class="ver-name-block">
+                        <div class="ver-name" id="ver-nombre-completo">—</div>
+                        <div class="ver-sub" id="ver-sub-info">—</div>
+                    </div>
+                    <div class="ver-grid">
+                        <div class="ver-field">
+                            <div class="ver-field-label">Tipo Documento</div>
+                            <div class="ver-field-value" id="ver-tipo-documento">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Identificación</div>
+                            <div class="ver-field-value" id="ver-identificacion">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Nacionalidad</div>
+                            <div class="ver-field-value" id="ver-nacionalidad">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Estado Civil</div>
+                            <div class="ver-field-value" id="ver-estado-civil">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Ocupación</div>
+                            <div class="ver-field-value" id="ver-ocupacion">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Tipo de Cliente</div>
+                            <div class="ver-field-value" id="ver-tipo-cliente">—</div>
+                        </div>
                     </div>
                 </div>
-                <div class="data-section">
-                    <h3><i class="fas fa-credit-card"></i> Formas de Pago</h3>
-                    <div class="data-grid">
-                        <div class="data-row"><div class="data-label">Tipo de Venta:</div><div class="data-value" id="costo-tipo-venta">—</div></div>
-                        <div class="data-row"><div class="data-label">Forma de Pago:</div><div class="data-value" id="costo-forma-pago">—</div></div>
-                        <div class="data-row"><div class="data-label">Entidad Financiera:</div><div class="data-value" id="costo-entidad">—</div></div>
-                        <div class="data-row"><div class="data-label">Interés Nominal:</div><div class="data-value" id="costo-interes">—</div></div>
-                        <div class="data-row"><div class="data-label">Interés Moratorio:</div><div class="data-value" id="costo-interes-moratorio">—</div></div>
+
+                <!-- Contacto -->
+                <div class="ver-section">
+                    <div class="ver-section-title"><i class="fas fa-address-book"></i> Contacto</div>
+                    <div class="ver-grid">
+                        <div class="ver-field">
+                            <div class="ver-field-label">Teléfono Principal</div>
+                            <div class="ver-field-value" id="ver-telefono">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Teléfono Secundario</div>
+                            <div class="ver-field-value" id="ver-telefono-sec">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Email</div>
+                            <div class="ver-field-value" id="ver-email" style="word-break:break-all">—</div>
+                        </div>
+                        <div class="ver-field">
+                            <div class="ver-field-label">Estado</div>
+                            <div class="ver-field-value" id="ver-estado-cliente">—</div>
+                        </div>
+                    </div>
+                    <div class="ver-field-full">
+                        <div class="ver-field-label">Dirección</div>
+                        <div class="ver-field-value" id="ver-direccion">—</div>
                     </div>
                 </div>
-                <div class="data-section">
-                    <h3><i class="fas fa-list"></i> Detalle de Pagos (Anticipos)</h3>
-                    <div class="table-container" style="margin-top:15px;">
-                        <table id="tabla-detalle-pagos">
+
+                <!-- Historial compras -->
+                <div class="ver-section">
+                    <div class="ver-section-title"><i class="fas fa-history"></i> Historial de Compras</div>
+                    <div style="overflow-x:auto; max-height:220px; overflow-y:auto;">
+                        <table class="historial-table">
                             <thead>
                                 <tr>
+                                    <th>Plan Venta</th>
+                                    <th>Vehículo</th>
                                     <th>Fecha</th>
-                                    <th>Monto</th>
-                                    <th>Forma</th>
-                                    <th>N° Documento</th>
-                                    <th>Saldo Pendiente</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-detalle-pagos">
-                                <tr><td colspan="5" style="text-align:center;color:#718096;">Sin pagos</td></tr>
+                            <tbody id="ver-historial-compras">
+                                <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="data-section">
-                    <h3><i class="fas fa-sticky-note"></i> Observaciones</h3>
-                    <div class="data-row">
-                        <div class="data-label">Observaciones:</div>
-                        <div class="data-value" id="costo-observaciones">—</div>
+
+                <!-- Observaciones -->
+                <div class="ver-section">
+                    <div class="ver-section-title"><i class="fas fa-sticky-note"></i> Observaciones</div>
+                    <div class="obs-box" id="ver-observaciones">Sin observaciones</div>
+                </div>
+
+                <div style="text-align:right;font-size:0.72rem;color:#94a3b8;margin-top:6px;">
+                    Consulta realizada: <span id="fechaConsultaCliente">—</span>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding:16px 28px;">
+                <button class="btn btn-secondary" onclick="cerrarModalVerCliente()"><i class="fas fa-times"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INFORMACIÓN DE VENTA -->
+    <div class="modal" id="modal-info-venta">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-car"></i> Información de Venta</h2>
+                <button class="close-btn" id="close-modal-info-venta">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="view-data">
+                    <div class="data-section">
+                        <h3><i class="fas fa-car"></i> Características del Vehículo</h3>
+                        <div class="data-grid">
+                            <div class="data-row"><div class="data-label">Marca:</div><div class="data-value" id="info-marca">—</div></div>
+                            <div class="data-row"><div class="data-label">Modelo:</div><div class="data-value" id="info-modelo">—</div></div>
+                            <div class="data-row"><div class="data-label">Color:</div><div class="data-value" id="info-color">—</div></div>
+                            <div class="data-row"><div class="data-label">Placa:</div><div class="data-value" id="info-placa">—</div></div>
+                            <div class="data-row"><div class="data-label">Chasis:</div><div class="data-value" id="info-chasis">—</div></div>
+                            <div class="data-row"><div class="data-label">Motor:</div><div class="data-value" id="info-motor">—</div></div>
+                            <div class="data-row"><div class="data-label">Combustible:</div><div class="data-value" id="info-combustible">—</div></div>
+                            <div class="data-row"><div class="data-label">Transmisión:</div><div class="data-value" id="info-transmision">—</div></div>
+                        </div>
+                    </div>
+                    <div class="data-section">
+                        <h3><i class="fas fa-money-bill-wave"></i> Información Financiera</h3>
+                        <div class="data-grid">
+                            <div class="data-row"><div class="data-label">Precio Costo:</div><div class="data-value" id="info-precio-costo">—</div></div>
+                            <div class="data-row"><div class="data-label">Precio Venta:</div><div class="data-value" id="info-precio-venta">—</div></div>
+                            <div class="data-row"><div class="data-label">Utilidad:</div><div class="data-value" id="info-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
+                            <div class="data-row"><div class="data-label">% Utilidad:</div><div class="data-value" id="info-porcentaje-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
+                            <div class="data-row"><div class="data-label">Fecha Venta:</div><div class="data-value" id="info-fecha-venta">—</div></div>
+                            <div class="data-row"><div class="data-label">Vendedor:</div><div class="data-value" id="info-vendedor">—</div></div>
+                        </div>
+                    </div>
+                    <div class="data-section">
+                        <h3><i class="fas fa-user"></i> Información del Cliente</h3>
+                        <div class="data-grid">
+                            <div class="data-row"><div class="data-label">Cliente Facturación:</div><div class="data-value" id="info-cliente-facturacion">—</div></div>
+                            <div class="data-row"><div class="data-label">Cédula Fact.:</div><div class="data-value" id="info-cedula-facturacion">—</div></div>
+                            <div class="data-row"><div class="data-label">Cliente Inscripción:</div><div class="data-value" id="info-cliente-inscripcion">—</div></div>
+                            <div class="data-row"><div class="data-label">Cédula Insc.:</div><div class="data-value" id="info-cedula-inscripcion">—</div></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" id="close-btn-costo-venta">Cerrar</button>
-            <button class="btn btn-success"   id="print-btn-costo-venta"><i class="fas fa-print"></i> Imprimir</button>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-btn-info-venta">Cerrar</button>
+                <button class="btn btn-success" id="print-btn-info-venta"><i class="fas fa-print"></i> Imprimir</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="cargar_usuario.js"></script>
-<script>
-// ══════════════════════════════════════════════════════
-//  CONFIGURACIÓN
-// ══════════════════════════════════════════════════════
-const API_BASE = '';  // misma origin; ajusta si el servidor corre en otro puerto
+    <!-- MODAL COSTO Y VENTA -->
+    <div class="modal" id="modal-costo-venta">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Información de Pago y Financiamiento</h2>
+                <button class="close-btn" id="close-modal-costo-venta">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="view-data">
+                    <!-- Resumen de la venta -->
+                    <div class="data-section">
+                        <h3><i class="fas fa-receipt"></i> Resumen de Venta</h3>
+                        <div class="data-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="data-row">
+                                <div class="data-label">Total Factura:</div>
+                                <div class="data-value" id="costo-total-factura" style="font-weight: bold; color: #2c3e50;">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Prima:</div>
+                                <div class="data-value" id="costo-prima">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Saldo Pendiente:</div>
+                                <div class="data-value" id="costo-saldo" style="font-weight: bold; color: #e53e3e;">—</div>
+                            </div>
+                        </div>
+                    </div>
 
-// Roles que corresponden a clientes
-const ROLES_CLIENTE = [1, 2, 3];
-const NOMBRES_ROLES = {
-    1: 'Cliente Facturación',
-    2: 'Cliente Inscripción',
-    3: 'Cliente Ambos'
-};
+                    <!-- Detalle de Pagos -->
+                    <div class="data-section">
+                        <h3><i class="fas fa-money-bill-wave"></i> Detalle de Pagos</h3>
+                        
+                        <!-- Efectivo -->
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
+                                <i class="fas fa-money-bill" style="color: #38a169;"></i> Efectivo
+                            </h4>
+                            <div class="data-grid" style="grid-template-columns: repeat(1, 1fr);">
+                                <div class="data-row">
+                                    <div class="data-label">Monto Efectivo:</div>
+                                    <div class="data-value" id="costo-efectivo" style="font-weight: bold; color: #38a169;">₡0</div>
+                                </div>
+                            </div>
+                        </div>
 
-// Cache de datos traídos de la API
-let personasCache   = [];
-let rolesCache      = [];
-let estadosCivCache = [];
+                        <!-- Transferencias -->
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
+                                <i class="fas fa-exchange-alt" style="color: #3182ce;"></i> Transferencias
+                            </h4>
+                            <div class="data-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                <div class="data-row">
+                                    <div class="data-label">Total Transferencias:</div>
+                                    <div class="data-value" id="costo-transferencia">₡0</div>
+                                </div>
+                                <div class="data-row">
+                                    <div class="data-label">N° Transferencia:</div>
+                                    <div class="data-value" id="costo-num-transferencia">—</div>
+                                </div>
+                                <div class="data-row">
+                                    <div class="data-label">Nombre Depositante:</div>
+                                    <div class="data-value" id="costo-nom-depositante">—</div>
+                                </div>
+                                <div class="data-row">
+                                    <div class="data-label">Banco:</div>
+                                    <div class="data-value" id="costo-banco">—</div>
+                                </div>
+                            </div>
+                        </div>
 
-// ══════════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════════
-function showLoading(v) {
-    document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
-}
+                        <!-- Tarjetas -->
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
+                                <i class="fas fa-credit-card" style="color: #805ad5;"></i> Tarjetas
+                            </h4>
+                            <div class="data-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                <div class="data-row">
+                                    <div class="data-label">Total Tarjeta:</div>
+                                    <div class="data-value" id="costo-tarjeta">₡0</div>
+                                </div>
+                                <div class="data-row">
+                                    <div class="data-label">N° Tarjeta:</div>
+                                    <div class="data-value" id="costo-num-tarjeta">—</div>
+                                </div>
+                                <div class="data-row">
+                                    <div class="data-label">Tipo Tarjeta:</div>
+                                    <div class="data-value" id="costo-tipo-tarjeta">—</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
-    setTimeout(() => t.className = 'toast', 3500);
-}
+                    <!-- Información de Financiamiento (si aplica) -->
+                    <div class="data-section" id="seccion-financiamiento">
+                        <h3><i class="fas fa-hand-holding-usd"></i> Información de Financiamiento</h3>
+                        <div class="data-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="data-row">
+                                <div class="data-label">Tipo de Venta:</div>
+                                <div class="data-value" id="costo-tipo-venta" style="font-weight: bold;">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Plazo:</div>
+                                <div class="data-value" id="costo-plazo">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Fecha Primer Pago:</div>
+                                <div class="data-value" id="costo-primer-pago">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Entidad Financiera:</div>
+                                <div class="data-value" id="costo-entidad">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Interés Nominal:</div>
+                                <div class="data-value" id="costo-interes">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Interés Moratorio:</div>
+                                <div class="data-value" id="costo-interes-moratorio">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Cuota Mensual:</div>
+                                <div class="data-value" id="costo-cuota">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Monto a Financiar:</div>
+                                <div class="data-value" id="costo-monto-financiar">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Total Financiamiento:</div>
+                                <div class="data-value" id="costo-total-financiamiento" style="font-weight: bold; color: #2c3e50;">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Honorarios:</div>
+                                <div class="data-value" id="costo-honorarios">—</div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Comisión:</div>
+                                <div class="data-value" id="costo-comision">—</div>
+                            </div>
+                        </div>
+                    </div>
 
-function fmtMoneda(v) {
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 0 }).format(v || 0);
-}
+                    <!-- Anticipos -->
+                    <div class="data-section">
+                        <h3><i class="fas fa-list"></i> Historial de Anticipos</h3>
+                        <div class="table-container" style="margin-top:15px;">
+                            <table id="tabla-detalle-pagos">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Forma de Pago</th>
+                                        <th>N° Documento</th>
+                                        <th>Saldo Pendiente</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-detalle-pagos">
+                                    <tr><td colspan="5" style="text-align:center;color:#718096;">Cargando anticipos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-function fmtFecha(f) {
-    if (!f) return '—';
-    return new Date(f).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
-}
+                    <!-- Observaciones -->
+                    <div class="data-section">
+                        <h3><i class="fas fa-sticky-note"></i> Observaciones</h3>
+                        <div class="obs-box" id="costo-observaciones" style="min-height: 60px;">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-btn-costo-venta"><i class="fas fa-times"></i> Cerrar</button>
+                <button class="btn btn-success" id="print-btn-costo-venta"><i class="fas fa-print"></i> Imprimir</button>
+            </div>
+        </div>
+    </div>
 
-async function apiFetch(url, options = {}) {
-    const res = await fetch(API_BASE + url, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error en el servidor');
-    return data;
-}
+    <script src="cargar_usuario.js"></script>
+    <script>
+    //  CONFIGURACIÓN
+    const API_BASE = '';
 
-// ══════════════════════════════════════════════════════
-//  CARGA INICIAL DE DATOS
-// ══════════════════════════════════════════════════════
-async function cargarDatosIniciales() {
-    try {
-        showLoading(true);
-        const [personas, roles, estadosCivil] = await Promise.all([
-            apiFetch('/api/personas'),
-            apiFetch('/api/personas-roles'),
-            apiFetch('/api/estados-civil')
-        ]);
+    // Roles que corresponden a clientes
+    const ROLES_CLIENTE = [1, 2, 3];
+    const NOMBRES_ROLES = {
+        1: 'Cliente Facturación',
+        2: 'Cliente Inscripción',
+        3: 'Cliente Ambos'
+    };
 
-        personasCache   = personas;
-        rolesCache      = roles;
-        estadosCivCache = estadosCivil;
+    // Cache de datos traídos de la API
+    let personasCache   = [];
+    let rolesCache      = [];
+    let estadosCivCache = [];
+    let ventasClienteActual = [];
 
-        // Cargar estados civiles en el select
-        const sel = document.getElementById('cliente-estado-civil');
-        sel.innerHTML = '<option value="">Seleccionar</option>';
-        estadosCivil.forEach(ec => {
-            const o = document.createElement('option');
-            o.value = ec.ID_ESTADO_CIVIL;
-            o.textContent = ec.NOMBRE;
-            sel.appendChild(o);
+    //  HELPERS
+    function showLoading(v) {
+        document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.className = 'toast', 3500);
+    }
+
+    function fmtMoneda(v) {
+        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 0 }).format(v || 0);
+    }
+
+    function fmtFecha(f) {
+        if (!f) return '—';
+        return new Date(f).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    }
+
+    async function apiFetch(url, options = {}) {
+        const res = await fetch(API_BASE + url, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error en el servidor');
+        return data;
+    }
+
+    //  CARGA INICIAL DE DATOS
+    async function cargarDatosIniciales() {
+        try {
+            showLoading(true);
+            const [personas, roles, estadosCivil] = await Promise.all([
+                apiFetch('/api/personas'),
+                apiFetch('/api/personas-roles'),
+                apiFetch('/api/estados-civil')
+            ]);
+
+            personasCache   = personas;
+            rolesCache      = roles;
+            estadosCivCache = estadosCivil;
+
+            // Cargar estados civiles en el select
+            const sel = document.getElementById('cliente-estado-civil');
+            sel.innerHTML = '<option value="">Seleccionar</option>';
+            estadosCivil.forEach(ec => {
+                const o = document.createElement('option');
+                o.value = ec.ID_ESTADO_CIVIL;
+                o.textContent = ec.NOMBRE;
+                sel.appendChild(o);
+            });
+
+            renderTabla();
+        } catch (err) {
+            showToast('Error al cargar datos: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    //  RENDER TABLA
+    function obtenerRolClienteDePersona(idPersona) {
+        // rolesCache es array de PERSONAS_ROLES con id_rol e id_persona
+        const pr = rolesCache.find(r =>
+            (r.ID_PERSONA === idPersona || r.id_persona === idPersona) &&
+            ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
+            (r.ESTADO || r.estado) === 'ACTIVO'
+        );
+        if (!pr) return null;
+        return pr.ID_ROL || pr.id_rol;
+    }
+
+    function renderTabla(filtros = {}) {
+        const tbody = document.getElementById('tbody-clientes');
+
+        // IDs de personas que son clientes
+        const clientesIds = new Set(
+            rolesCache
+                .filter(r => ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol))
+                .map(r => r.ID_PERSONA || r.id_persona)
+        );
+
+        let clientes = personasCache.filter(p => clientesIds.has(p.ID_PERSONA || p.id_persona));
+
+        // Aplicar filtros
+        if (filtros.identificacion) {
+            const b = filtros.identificacion.toLowerCase();
+            clientes = clientes.filter(p => (p.IDENTIFICACION || p.identificacion || '').toLowerCase().includes(b));
+        }
+        if (filtros.nombre) {
+            const b = filtros.nombre.toLowerCase();
+            clientes = clientes.filter(p => (p.NOMBRE_COMPLETO || p.nombre_completo || '').toLowerCase().includes(b));
+        }
+        if (filtros.tipo) {
+            const tipo = parseInt(filtros.tipo);
+            clientes = clientes.filter(p => obtenerRolClienteDePersona(p.ID_PERSONA || p.id_persona) === tipo);
+        }
+        if (filtros.estado) {
+            clientes = clientes.filter(p => (p.ESTADO || p.estado) === filtros.estado);
+        }
+
+        if (clientes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:#718096;">No se encontraron clientes</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        clientes.forEach(c => {
+            const id      = c.ID_PERSONA   || c.id_persona;
+            const idDoc   = c.IDENTIFICACION || c.identificacion || '—';
+            const nombre  = c.NOMBRE_COMPLETO || c.nombre_completo || '—';
+            const tel1    = c.TELEFONO_PRINCIPAL   || c.telefono_principal   || '—';
+            const tel2    = c.TELEFONO_SECUNDARIO  || c.telefono_secundario  || '—';
+            const email   = c.EMAIL || c.email || '—';
+            const estado  = c.ESTADO || c.estado || 'ACTIVO';
+            const idRol   = obtenerRolClienteDePersona(id);
+            const tipoNom = NOMBRES_ROLES[idRol] || '—';
+
+            const badgeColor = estado === 'ACTIVO' ? '#d1fae5' : '#fee2e2';
+            const badgeTxt   = estado === 'ACTIVO' ? 'Activo' : 'Inactivo';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${idDoc}</td>
+                <td>${nombre}</td>
+                <td>${tel1}</td>
+                <td>${tel2}</td>
+                <td>${email}</td>
+                <td>${tipoNom}</td>
+                <td>
+                    <span style="background:${badgeColor};color:#065f46;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;">
+                        ${badgeTxt}
+                    </span>
+                </td>
+                <td>
+                    <div class="acciones-tabla">
+                        <button class="btn-ver"         data-id="${id}"><i class="fas fa-eye"></i> Ver</button>
+                        <button class="btn-info-venta"  data-id="${id}"><i class="fas fa-file-alt"></i> Inf.Venta</button>
+                        <button class="btn-costo-venta" data-id="${id}"><i class="fas fa-file-invoice-dollar"></i> Costo y Venta</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
 
-        renderTabla();
-    } catch (err) {
-        showToast('Error al cargar datos: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ══════════════════════════════════════════════════════
-//  RENDER TABLA
-// ══════════════════════════════════════════════════════
-function obtenerRolClienteDePersona(idPersona) {
-    // rolesCache es array de PERSONAS_ROLES con id_rol e id_persona
-    const pr = rolesCache.find(r =>
-        (r.ID_PERSONA === idPersona || r.id_persona === idPersona) &&
-        ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
-        (r.ESTADO || r.estado) === 'ACTIVO'
-    );
-    if (!pr) return null;
-    return pr.ID_ROL || pr.id_rol;
-}
-
-function renderTabla(filtros = {}) {
-    const tbody = document.getElementById('tbody-clientes');
-
-    // IDs de personas que son clientes
-    const clientesIds = new Set(
-        rolesCache
-            .filter(r => ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol))
-            .map(r => r.ID_PERSONA || r.id_persona)
-    );
-
-    let clientes = personasCache.filter(p => clientesIds.has(p.ID_PERSONA || p.id_persona));
-
-    // Aplicar filtros
-    if (filtros.identificacion) {
-        const b = filtros.identificacion.toLowerCase();
-        clientes = clientes.filter(p => (p.IDENTIFICACION || p.identificacion || '').toLowerCase().includes(b));
-    }
-    if (filtros.nombre) {
-        const b = filtros.nombre.toLowerCase();
-        clientes = clientes.filter(p => (p.NOMBRE_COMPLETO || p.nombre_completo || '').toLowerCase().includes(b));
-    }
-    if (filtros.tipo) {
-        const tipo = parseInt(filtros.tipo);
-        clientes = clientes.filter(p => obtenerRolClienteDePersona(p.ID_PERSONA || p.id_persona) === tipo);
-    }
-    if (filtros.estado) {
-        clientes = clientes.filter(p => (p.ESTADO || p.estado) === filtros.estado);
+        // Eventos de botones de fila
+        tbody.querySelectorAll('.btn-ver').forEach(b =>
+            b.addEventListener('click', () => verCliente(parseInt(b.dataset.id))));
+        tbody.querySelectorAll('.btn-info-venta').forEach(b =>
+            b.addEventListener('click', () => mostrarInfoVenta(parseInt(b.dataset.id))));
+        tbody.querySelectorAll('.btn-costo-venta').forEach(b =>
+            b.addEventListener('click', () => mostrarCostoVenta(parseInt(b.dataset.id))));
     }
 
-    if (clientes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:#718096;">No se encontraron clientes</td></tr>`;
-        return;
-    }
+    //  VER CLIENTE
+    async function verCliente(id) {
+        const c = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === id);
+        if (!c) return;
 
-    tbody.innerHTML = '';
-    clientes.forEach(c => {
-        const id      = c.ID_PERSONA   || c.id_persona;
-        const idDoc   = c.IDENTIFICACION || c.identificacion || '—';
-        const nombre  = c.NOMBRE_COMPLETO || c.nombre_completo || '—';
-        const tel1    = c.TELEFONO_PRINCIPAL   || c.telefono_principal   || '—';
-        const tel2    = c.TELEFONO_SECUNDARIO  || c.telefono_secundario  || '—';
-        const email   = c.EMAIL || c.email || '—';
-        const estado  = c.ESTADO || c.estado || 'ACTIVO';
-        const idRol   = obtenerRolClienteDePersona(id);
-        const tipoNom = NOMBRES_ROLES[idRol] || '—';
+        const idRol = obtenerRolClienteDePersona(id);
+        const ecObj = estadosCivCache.find(e => e.ID_ESTADO_CIVIL === (c.ID_ESTADO_CIVIL || c.id_estado_civil));
+        const estado = c.ESTADO || c.estado || 'ACTIVO';
 
-        const badgeColor = estado === 'ACTIVO' ? '#d1fae5' : '#fee2e2';
-        const badgeTxt   = estado === 'ACTIVO' ? 'Activo' : 'Inactivo';
+        document.getElementById('ver-nombre-completo').textContent = c.NOMBRE_COMPLETO || c.nombre_completo || '—';
+        document.getElementById('ver-sub-info').textContent =
+            `${c.TIPO_DOCUMENTO || c.tipo_documento || ''} • Reg: ${fmtFecha(c.FECHA_REGISTRO || c.fecha_registro)}`;
+        document.getElementById('ver-tipo-documento').textContent = c.TIPO_DOCUMENTO   || c.tipo_documento   || '—';
+        document.getElementById('ver-identificacion').textContent = c.IDENTIFICACION   || c.identificacion   || '—';
+        document.getElementById('ver-nacionalidad').textContent   = c.NACIONALIDAD     || c.nacionalidad     || '—';
+        document.getElementById('ver-estado-civil').textContent   = ecObj ? ecObj.NOMBRE : '—';
+        document.getElementById('ver-ocupacion').textContent      = c.OCUPACION        || c.ocupacion        || '—';
+        document.getElementById('ver-tipo-cliente').textContent   = NOMBRES_ROLES[idRol] || '—';
+        document.getElementById('ver-telefono').textContent    = c.TELEFONO_PRINCIPAL  || c.telefono_principal  || '—';
+        document.getElementById('ver-telefono-sec').textContent = c.TELEFONO_SECUNDARIO || c.telefono_secundario || '—';
+        document.getElementById('ver-email').textContent       = c.EMAIL || c.email || '—';
+        document.getElementById('ver-direccion').textContent   = c.DIRECCION || c.direccion || '—';
+        document.getElementById('ver-observaciones').textContent = c.OBSERVACION || c.observacion || 'Sin observaciones';
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${idDoc}</td>
-            <td>${nombre}</td>
-            <td>${tel1}</td>
-            <td>${tel2}</td>
-            <td>${email}</td>
-            <td>${tipoNom}</td>
-            <td>
-                <span style="background:${badgeColor};color:#065f46;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;">
-                    ${badgeTxt}
-                </span>
-            </td>
-            <td>
-                <div class="acciones-tabla">
-                    <button class="btn-ver"         data-id="${id}"><i class="fas fa-eye"></i> Ver</button>
-                    <button class="btn-info-venta"  data-id="${id}"><i class="fas fa-file-alt"></i> Inf.Venta</button>
-                    <button class="btn-costo-venta" data-id="${id}"><i class="fas fa-file-invoice-dollar"></i> Costo y Venta</button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+        const badgeCls = estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo';
+        document.getElementById('ver-estado-cliente').innerHTML =
+            `<span class="badge-estado ${badgeCls}">${estado}</span>`;
 
-    // Eventos de botones de fila
-    tbody.querySelectorAll('.btn-ver').forEach(b =>
-        b.addEventListener('click', () => verCliente(parseInt(b.dataset.id))));
-    tbody.querySelectorAll('.btn-info-venta').forEach(b =>
-        b.addEventListener('click', () => mostrarInfoVenta(parseInt(b.dataset.id))));
-    tbody.querySelectorAll('.btn-costo-venta').forEach(b =>
-        b.addEventListener('click', () => mostrarCostoVenta(parseInt(b.dataset.id))));
-}
+        document.getElementById('fechaConsultaCliente').textContent =
+            new Date().toLocaleString('es-ES');
 
-// ══════════════════════════════════════════════════════
-//  VER CLIENTE
-// ══════════════════════════════════════════════════════
-async function verCliente(id) {
-    const c = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === id);
-    if (!c) return;
-
-    const idRol = obtenerRolClienteDePersona(id);
-    const ecObj = estadosCivCache.find(e => e.ID_ESTADO_CIVIL === (c.ID_ESTADO_CIVIL || c.id_estado_civil));
-    const estado = c.ESTADO || c.estado || 'ACTIVO';
-
-    document.getElementById('ver-nombre-completo').textContent = c.NOMBRE_COMPLETO || c.nombre_completo || '—';
-    document.getElementById('ver-sub-info').textContent =
-        `${c.TIPO_DOCUMENTO || c.tipo_documento || ''} • Reg: ${fmtFecha(c.FECHA_REGISTRO || c.fecha_registro)}`;
-    document.getElementById('ver-tipo-documento').textContent = c.TIPO_DOCUMENTO   || c.tipo_documento   || '—';
-    document.getElementById('ver-identificacion').textContent = c.IDENTIFICACION   || c.identificacion   || '—';
-    document.getElementById('ver-nacionalidad').textContent   = c.NACIONALIDAD     || c.nacionalidad     || '—';
-    document.getElementById('ver-estado-civil').textContent   = ecObj ? ecObj.NOMBRE : '—';
-    document.getElementById('ver-ocupacion').textContent      = c.OCUPACION        || c.ocupacion        || '—';
-    document.getElementById('ver-tipo-cliente').textContent   = NOMBRES_ROLES[idRol] || '—';
-    document.getElementById('ver-telefono').textContent    = c.TELEFONO_PRINCIPAL  || c.telefono_principal  || '—';
-    document.getElementById('ver-telefono-sec').textContent = c.TELEFONO_SECUNDARIO || c.telefono_secundario || '—';
-    document.getElementById('ver-email').textContent       = c.EMAIL || c.email || '—';
-    document.getElementById('ver-direccion').textContent   = c.DIRECCION || c.direccion || '—';
-    document.getElementById('ver-observaciones').textContent = c.OBSERVACION || c.observacion || 'Sin observaciones';
-
-    const badgeCls = estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo';
-    document.getElementById('ver-estado-cliente').innerHTML =
-        `<span class="badge-estado ${badgeCls}">${estado}</span>`;
-
-    document.getElementById('fechaConsultaCliente').textContent =
-        new Date().toLocaleString('es-ES');
-
-    // Info financiera desde la API
-    try {
-        const ventas = await apiFetch(`/api/vehiculos/vendidos/cliente/${id}`);
-        let totalCompras = 0, creditoTotal = 0, totalPagado = 0;
-        const compras = [];
-
-        // Traer formas de pago por cada venta
-        for (const v of ventas) {
-            const monto = parseFloat(v.precio_publico || 0);
-            totalCompras += monto;
-            // Buscar venta completa para forma de pago
-            compras.push({
-                codigo:   v.CODIGO_VENTA || '—',
-                vehiculo: `${v.marca_nombre || ''} ${v.ESTILO || ''} ${v.MODELO || ''}`.trim(),
-                fecha:    v.FECHA_VENTA,
-                monto:    monto,
-                estado:   'COMPLETADO'
-            });
-        }
-
-        // Intentar traer formas de pago para calcular saldo
+        // CORREGIDO: Obtener historial de compras
         try {
-            const personaRoles = rolesCache.filter(r =>
-                (r.ID_PERSONA || r.id_persona) === id);
-            // Buscar ventas del cliente via personas
-            const ventasData = await apiFetch(`/api/ventas/pendientes`).catch(() => []);
-            const misVentas = ventasData.filter(v =>
-                v.ID_CLIENTE_FACTURACION === id || v.ID_CLIENTE_INSCRIPCION === id);
-            misVentas.forEach(v => {
-                const saldo = parseFloat(v.SALDO || 0);
-                const prima = parseFloat(v.PRIMA || 0);
-                creditoTotal += saldo;
-                totalPagado  += prima;
-            });
-        } catch (_) { /* ignorar */ }
+            const ventas = await apiFetch(`/api/vehiculos/vendidos/cliente/${id}`);
+            const compras = [];
 
-        document.getElementById('ver-total-compras').textContent  = fmtMoneda(totalCompras);
-        document.getElementById('ver-credito-total').textContent  = fmtMoneda(creditoTotal);
-        document.getElementById('ver-total-pagado').textContent   = fmtMoneda(totalPagado);
-        document.getElementById('ver-saldo-pendiente').textContent = fmtMoneda(creditoTotal);
-
-        const tbody = document.getElementById('ver-historial-compras');
-        if (compras.length > 0) {
-            tbody.innerHTML = compras.map(cp => `
-                <tr>
-                    <td>${cp.codigo}</td>
-                    <td>${cp.vehiculo}</td>
-                    <td>${fmtFecha(cp.fecha)}</td>
-                    <td>${fmtMoneda(cp.monto)}</td>
-                    <td><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;">${cp.estado}</span></td>
-                </tr>
-            `).join('');
-        } else {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>`;
-        }
-    } catch (_) {
-        document.getElementById('ver-total-compras').textContent  = '—';
-        document.getElementById('ver-credito-total').textContent  = '—';
-        document.getElementById('ver-total-pagado').textContent   = '—';
-        document.getElementById('ver-saldo-pendiente').textContent = '—';
-    }
-
-    document.getElementById('modal-ver-cliente').classList.add('active');
-}
-
-function cerrarModalVerCliente() {
-    document.getElementById('modal-ver-cliente').classList.remove('active');
-}
-
-// ══════════════════════════════════════════════════════
-//  INFORMACIÓN DE VENTA
-// ══════════════════════════════════════════════════════
-async function mostrarInfoVenta(idCliente) {
-    try {
-        showLoading(true);
-        const vehiculos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
-
-        if (!vehiculos || vehiculos.length === 0) {
-            showToast('Este cliente no tiene ventas registradas.', 'error');
-            return;
-        }
-
-        const v = vehiculos[0]; // primera venta
-
-        document.getElementById('info-marca').textContent       = v.marca_nombre   || '—';
-        document.getElementById('info-modelo').textContent      = v.MODELO         || '—';
-        document.getElementById('info-color').textContent       = v.color_nombre   || '—';
-        document.getElementById('info-placa').textContent       = v.PLACA          || '—';
-        document.getElementById('info-chasis').textContent      = v.CHASIS         || '—';
-        document.getElementById('info-motor').textContent       = v.MOTOR          || '—';
-        document.getElementById('info-combustible').textContent = v.combustible_nombre || '—';
-        document.getElementById('info-transmision').textContent = v.transmision_nombre || '—';
-        document.getElementById('info-fecha-venta').textContent = fmtFecha(v.FECHA_VENTA);
-
-        // Traer costos del vehículo
-        try {
-            const costos = await apiFetch(`/api/vehiculos/${v.ID_VEHICULO}/costos`);
-            if (costos && costos.length > 0) {
-                const c = costos[0];
-                const precCosto  = parseFloat(c.PRECIO_COSTO    || 0);
-                const precPublic = parseFloat(c.PRECIO_PUBLICO  || 0);
-                const utilidad   = precPublic - precCosto;
-                const pctUt      = precCosto > 0 ? (utilidad / precCosto * 100).toFixed(1) : '0.0';
-                document.getElementById('info-precio-costo').textContent         = fmtMoneda(precCosto);
-                document.getElementById('info-precio-venta').textContent         = fmtMoneda(precPublic);
-                document.getElementById('info-utilidad').textContent             = fmtMoneda(utilidad);
-                document.getElementById('info-porcentaje-utilidad').textContent  = `${pctUt}%`;
+            for (const v of ventas) {
+                compras.push({
+                    codigo: v.CODIGO_VENTA || '—',
+                    vehiculo: `${v.marca_nombre || ''} ${v.MODELO || ''}`.trim() || 'Vehículo',
+                    fecha: v.FECHA_VENTA,
+                });
             }
-        } catch (_) {}
 
-        // Cliente facturación e inscripción desde la venta
-        const clienteFact = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === (v.id_cliente_facturacion || v.ID_CLIENTE_FACTURACION));
-        const clienteInsc = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === (v.id_cliente_inscripcion || v.ID_CLIENTE_INSCRIPCION));
-        const vendedor    = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === (v.id_vendedor || v.ID_VENDEDOR));
-
-        document.getElementById('info-cliente-facturacion').textContent = clienteFact ? (clienteFact.NOMBRE_COMPLETO || clienteFact.nombre_completo) : '—';
-        document.getElementById('info-cedula-facturacion').textContent  = clienteFact ? (clienteFact.IDENTIFICACION || clienteFact.identificacion) : '—';
-        document.getElementById('info-cliente-inscripcion').textContent = clienteInsc ? (clienteInsc.NOMBRE_COMPLETO || clienteInsc.nombre_completo) : 'No aplica';
-        document.getElementById('info-cedula-inscripcion').textContent  = clienteInsc ? (clienteInsc.IDENTIFICACION || clienteInsc.identificacion) : '—';
-        document.getElementById('info-vendedor').textContent            = vendedor ? (vendedor.NOMBRE_COMPLETO || vendedor.nombre_completo) : '—';
-
-        document.getElementById('modal-info-venta').classList.add('active');
-    } catch (err) {
-        showToast('Error al cargar información de venta: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ══════════════════════════════════════════════════════
-//  COSTO Y VENTA
-// ══════════════════════════════════════════════════════
-async function mostrarCostoVenta(idCliente) {
-    try {
-        showLoading(true);
-        const vehiculos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
-
-        if (!vehiculos || vehiculos.length === 0) {
-            showToast('Este cliente no tiene ventas registradas.', 'error');
-            return;
-        }
-
-        const v = vehiculos[0];
-
-        // Costos
-        const costos = await apiFetch(`/api/vehiculos/${v.ID_VEHICULO}/costos`);
-        const c = (costos && costos.length > 0) ? costos[0] : {};
-
-        document.getElementById('costo-total-factura').textContent = fmtMoneda(c.PRECIO_PUBLICO || 0);
-        document.getElementById('costo-prima').textContent         = fmtMoneda(c.PRIMA_FINANCIAMIENTO || 0);
-        document.getElementById('costo-comision').textContent      = fmtMoneda(c.COMISION || 0);
-        document.getElementById('costo-saldo').textContent         = fmtMoneda(c.SALDO || 0);
-        document.getElementById('costo-cuota').textContent         = fmtMoneda(c.CUOTA_FINANCIAMIENTO || 0);
-
-        // Forma de pago desde la venta completa
-        try {
-            const ventaCompleta = await apiFetch(`/api/ventas/${v.ID_VENTA || v.id_venta}/completo`);
-            const fp = ventaCompleta.FORMA_PAGO || {};
-            document.getElementById('costo-plazo').textContent         = fp.PLAZO_MESES ? `${fp.PLAZO_MESES} meses` : 'Contado';
-            document.getElementById('costo-primer-pago').textContent   = fmtFecha(fp.FECHA_PRIMER_PAGO) || '—';
-            document.getElementById('costo-tipo-venta').textContent    = fp.TIPO_VENTA         || 'Contado';
-            document.getElementById('costo-forma-pago').textContent    = fp.FORMA_PAGO         || '—';
-            document.getElementById('costo-entidad').textContent       = fp.ENTIDAD_FINANCIERA || '—';
-            document.getElementById('costo-interes').textContent       = fp.INTERES_NOMINAL    ? `${fp.INTERES_NOMINAL}%` : '—';
-            document.getElementById('costo-interes-moratorio').textContent = fp.INTERES_MORATORIO ? `${fp.INTERES_MORATORIO}%` : '—';
-            document.getElementById('costo-observaciones').textContent = ventaCompleta.OBSERVACIONES_VENTA || '—';
+            const tbody = document.getElementById('ver-historial-compras');
+            if (compras.length > 0) {
+                tbody.innerHTML = compras.map(cp => `
+                    <tr>
+                        <td>${cp.codigo}</td>
+                        <td>${cp.vehiculo}</td>
+                        <td>${fmtFecha(cp.fecha)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>`;
+            }
         } catch (_) {
-            document.getElementById('costo-plazo').textContent    = '—';
-            document.getElementById('costo-tipo-venta').textContent = '—';
-            document.getElementById('costo-observaciones').textContent = '—';
+            document.getElementById('ver-historial-compras').innerHTML = 
+                `<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Error al cargar historial</td></tr>`;
         }
 
-        // Anticipos
-        const idVenta = v.ID_VENTA || v.id_venta;
-        if (idVenta) {
-            const anticipos = await apiFetch(`/api/anticipos?id_venta=${idVenta}`).catch(() => []);
+        document.getElementById('modal-ver-cliente').classList.add('active');
+    }
+
+    function cerrarModalVerCliente() {
+        document.getElementById('modal-ver-cliente').classList.remove('active');
+    }
+
+    // INFORMACIÓN DE VENTA
+    async function mostrarInfoVenta(idCliente) {
+        try {
+            showLoading(true);
+            
+            // Usar el endpoint que YA EXISTE para obtener vehículos vendidos del cliente
+            const vehiculosVendidos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
+            
+            if (!vehiculosVendidos || vehiculosVendidos.length === 0) {
+                showToast('Este cliente no tiene vehículos comprados registrados.', 'error');
+                return;
+            }
+
+            // Tomar el primer vehículo vendido
+            const vehiculo = vehiculosVendidos[0];
+            
+            // Obtener costos del vehículo (endpoint que ya existe)
+            const costos = await apiFetch(`/api/vehiculos/${vehiculo.ID_VEHICULO}/costos`).catch(() => []);
+            
+            // Calcular utilidad
+            let precioCosto = 0;
+            let precioVenta = 0;
+            let utilidad = 0;
+            let porcentajeUtilidad = 0;
+            
+            if (costos && costos.length > 0) {
+                const costo = costos[0];
+                precioCosto = parseFloat(costo.PRECIO_COSTO || 0);
+                precioVenta = parseFloat(costo.PRECIO_PUBLICO || 0);
+                utilidad = precioVenta - precioCosto;
+                porcentajeUtilidad = precioCosto > 0 ? (utilidad / precioCosto * 100).toFixed(1) : '0.0';
+            }
+
+            // Actualizar campos del vehículo con los datos que tenemos
+            document.getElementById('info-marca').textContent = vehiculo.marca_nombre || '—';
+            document.getElementById('info-modelo').textContent = vehiculo.MODELO || '—';
+            document.getElementById('info-color').textContent = vehiculo.color_nombre || '—';
+            document.getElementById('info-placa').textContent = vehiculo.PLACA || '—';
+            document.getElementById('info-chasis').textContent = vehiculo.CHASIS || '—';
+            document.getElementById('info-motor').textContent = vehiculo.MOTOR || '—';
+            document.getElementById('info-combustible').textContent = vehiculo.combustible_nombre || '—';
+            document.getElementById('info-transmision').textContent = vehiculo.transmision_nombre || '—';
+            
+            // Actualizar información financiera
+            document.getElementById('info-precio-costo').textContent = fmtMoneda(precioCosto);
+            document.getElementById('info-precio-venta').textContent = fmtMoneda(precioVenta);
+            document.getElementById('info-utilidad').textContent = fmtMoneda(utilidad);
+            document.getElementById('info-porcentaje-utilidad').textContent = `${porcentajeUtilidad}%`;
+            document.getElementById('info-fecha-venta').textContent = fmtFecha(vehiculo.FECHA_VENTA);
+
+            // Información del vendedor (si está disponible en el endpoint)
+            document.getElementById('info-vendedor').textContent = vehiculo.vendedor_nombre || '—';
+
+            // Información del cliente (el mismo cliente)
+            const cliente = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === idCliente);
+            document.getElementById('info-cliente-facturacion').textContent = cliente ? (cliente.NOMBRE_COMPLETO || cliente.nombre_completo) : '—';
+            document.getElementById('info-cedula-facturacion').textContent = cliente ? (cliente.IDENTIFICACION || cliente.identificacion) : '—';
+            document.getElementById('info-cliente-inscripcion').textContent = 'Mismo que facturación';
+            document.getElementById('info-cedula-inscripcion').textContent = '—';
+
+            document.getElementById('modal-info-venta').classList.add('active');
+        } catch (err) {
+            showToast('Error al cargar información de venta: ' + err.message, 'error');
+            console.error(err);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    //  COSTO Y VENTA
+    async function mostrarCostoVenta(idCliente) {
+        try {
+            showLoading(true);
+            
+            // Obtener vehículos vendidos del cliente
+            const vehiculos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
+            
+            if (!vehiculos || vehiculos.length === 0) {
+                showToast('Este cliente no tiene vehículos comprados registrados.', 'error');
+                return;
+            }
+            
+            // Guardar las ventas en variable global
+            ventasClienteActual = vehiculos;
+            
+            if (vehiculos.length === 1) {
+                // Si solo hay una venta, mostrarla directamente
+                cargarDetallesVenta(vehiculos[0]);
+            } else {
+                // Si hay múltiples ventas, mostrar selector
+                mostrarSelectorVentas(vehiculos);
+            }
+            
+        } catch (err) {
+            showToast('Error al cargar información: ' + err.message, 'error');
+            console.error(err);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Función para mostrar el selector de ventas cuando hay múltiples vehículos vendidos
+    function mostrarSelectorVentas(ventas) {
+        // Guardar las ventas en variable global
+        ventasClienteActual = ventas;
+        
+        // Crear el selector
+        const selectorHTML = `
+            <div id="selector-venta-container" style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #2d3748;">
+                    <i class="fas fa-car"></i> Seleccione la venta a consultar:
+                </label>
+                <div style="display: flex; gap: 10px;">
+                    <select id="selector-venta" style="flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        ${ventas.map((v, index) => `
+                            <option value="${index}">
+                                ${v.marca_nombre} ${v.MODELO} - ${v.PLACA || 'Sin placa'} (${fmtFecha(v.FECHA_VENTA)})
+                            </option>
+                        `).join('')}
+                    </select>
+                    <button onclick="cargarVentaSeleccionada()" 
+                            style="padding: 10px 20px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-search"></i> Ver detalles
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Insertar el selector al principio del modal
+        const modalBody = document.querySelector('#modal-costo-venta .modal-body');
+        const existingSelector = document.getElementById('selector-venta-container');
+        
+        if (existingSelector) {
+            existingSelector.remove();
+        }
+        
+        modalBody.insertAdjacentHTML('afterbegin', selectorHTML);
+        
+        // Mostrar el modal
+        document.getElementById('modal-costo-venta').classList.add('active');
+    }
+
+    function cargarVentaSeleccionada() {
+        const select = document.getElementById('selector-venta');
+        if (select) {
+            const index = select.value;
+            cargarDetallesVenta(ventasClienteActual[index]);
+        }
+    }
+
+    async function cargarDetallesVenta(ventaSeleccionada) {
+        try {
+            showLoading(true);
+            
+            console.log('Venta seleccionada:', ventaSeleccionada);
+            
+            const idVenta = ventaSeleccionada.ID_VENTA;
+            
+            if (!idVenta) {
+                showToast('No se encontró información de venta para este vehículo.', 'error');
+                return;
+            }
+            
+            console.log('Cargando detalles para ID_VENTA:', idVenta);
+            
+            // Obtener información completa de la venta
+            const ventaCompleta = await apiFetch(`/api/ventas/completa/${idVenta}`);
+            
+            // Obtener costos del vehículo
+            const costos = await apiFetch(`/api/vehiculos/${ventaSeleccionada.ID_VEHICULO}/costos`).catch(() => []);
+            const costo = (costos && costos.length > 0) ? costos[0] : {};
+            
+            // Calcular totales
+            const totalFactura = parseFloat(ventaSeleccionada.costo?.PRECIO_PUBLICO || 0);
+            const prima = parseFloat(ventaCompleta.financiamiento?.PRIMA || costo.PRIMA_FINANCIAMIENTO || 0);
+            
+            // Calcular pagos por tipo
+            let totalEfectivo = 0;
+            let totalTransferencia = 0;
+            let totalTarjeta = 0;
+            let transferencias = [];
+            let tarjetas = [];
+            
+            if (ventaCompleta.detallesPago && ventaCompleta.detallesPago.length > 0) {
+                ventaCompleta.detallesPago.forEach(pago => {
+                    if (pago.EFECTIVO) totalEfectivo += parseFloat(pago.EFECTIVO);
+                    if (pago.TRANSFERENCIA) {
+                        totalTransferencia += parseFloat(pago.TRANSFERENCIA);
+                        transferencias.push({
+                            numero: pago.NUM_TRANSFERENCIA,
+                            depositante: pago.NOM_DEPOSITANTE,
+                            banco: pago.NOMBRE_BANCO || 'No especificado'
+                        });
+                    }
+                    if (pago.TARJETA) {
+                        totalTarjeta += parseFloat(pago.TARJETA);
+                        tarjetas.push({
+                            numero: pago.NUMERO_TARJETA,
+                            tipo: pago.TIPO_TARJETA
+                        });
+                    }
+                });
+            }
+            
+            const totalPagado = totalEfectivo + totalTransferencia + totalTarjeta;
+            const saldoPendiente = totalFactura - totalPagado;
+
+            // ACTUALIZAR los valores en el modal existente (NO reemplazar el HTML)
+            document.getElementById('costo-total-factura').textContent = fmtMoneda(totalFactura);
+            document.getElementById('costo-prima').textContent = fmtMoneda(prima);
+            document.getElementById('costo-saldo').textContent = fmtMoneda(saldoPendiente);
+            
+            // Efectivo
+            document.getElementById('costo-efectivo').textContent = fmtMoneda(totalEfectivo);
+            
+            // Transferencias
+            document.getElementById('costo-transferencia').textContent = fmtMoneda(totalTransferencia);
+            document.getElementById('costo-num-transferencia').textContent = transferencias.map(t => t.numero).filter(Boolean).join(', ') || '—';
+            document.getElementById('costo-nom-depositante').textContent = transferencias.map(t => t.depositante).filter(Boolean).join(', ') || '—';
+            document.getElementById('costo-banco').textContent = transferencias.map(t => t.banco).filter(Boolean).join(', ') || '—';
+            
+            // Tarjetas
+            document.getElementById('costo-tarjeta').textContent = fmtMoneda(totalTarjeta);
+            document.getElementById('costo-num-tarjeta').textContent = tarjetas.map(t => t.numero).filter(Boolean).join(', ') || '—';
+            document.getElementById('costo-tipo-tarjeta').textContent = tarjetas.map(t => t.tipo).filter(Boolean).join(', ') || '—';
+            
+            // Información del financiamiento
+            if (ventaCompleta.financiamiento) {
+                const f = ventaCompleta.financiamiento;
+                document.getElementById('costo-tipo-venta').textContent = 'CRÉDITO';
+                document.getElementById('costo-plazo').textContent = f.PLAZO_MESES ? `${f.PLAZO_MESES} meses` : '—';
+                document.getElementById('costo-primer-pago').textContent = fmtFecha(f.FECHA_PRIMERPAGO) || '—';
+                document.getElementById('costo-entidad').textContent = f.ENTIDAD_FINANCIERA || '—';
+                document.getElementById('costo-interes').textContent = f.TASA_NOMINAL ? `${f.TASA_NOMINAL}%` : '—';
+                document.getElementById('costo-interes-moratorio').textContent = f.INTERES_MORATORIO ? `${f.INTERES_MORATORIO}%` : '—';
+                document.getElementById('costo-cuota').textContent = fmtMoneda(f.CUOTA_MENSUAL || 0);
+                document.getElementById('costo-total-financiamiento').textContent = fmtMoneda(f.PRESTAMO_TOTAL || 0);
+                document.getElementById('costo-monto-financiar').textContent = fmtMoneda(f.MONTO_FINANCIAR || 0);
+                document.getElementById('costo-honorarios').textContent = fmtMoneda(f.HONORARIOS || 0);
+                document.getElementById('costo-comision').textContent = fmtMoneda(f.COMISION || 0);
+            } else {
+                document.getElementById('costo-tipo-venta').textContent = 'CONTADO';
+                document.getElementById('costo-plazo').textContent = 'Contado';
+                document.getElementById('costo-primer-pago').textContent = '—';
+                document.getElementById('costo-entidad').textContent = '—';
+                document.getElementById('costo-interes').textContent = '—';
+                document.getElementById('costo-interes-moratorio').textContent = '—';
+                document.getElementById('costo-cuota').textContent = '—';
+                document.getElementById('costo-total-financiamiento').textContent = '—';
+                document.getElementById('costo-monto-financiar').textContent = '—';
+                document.getElementById('costo-honorarios').textContent = '—';
+                document.getElementById('costo-comision').textContent = fmtMoneda(costo.COMISION || 0);
+            }
+            
+            document.getElementById('costo-observaciones').textContent = ventaSeleccionada.OBSERVACIONES_VENTA || costo.OBSERVACION || '—';
+
+            // Actualizar tabla de anticipos
             const tbodyPagos = document.getElementById('tbody-detalle-pagos');
-            if (anticipos.length > 0) {
-                tbodyPagos.innerHTML = anticipos.map(a => `
+            if (ventaCompleta.anticipos && ventaCompleta.anticipos.length > 0) {
+                tbodyPagos.innerHTML = ventaCompleta.anticipos.map(a => `
                     <tr>
                         <td>${fmtFecha(a.FECHA_ANTICIPO)}</td>
                         <td>${fmtMoneda(a.MONTO_COLONES)}</td>
                         <td>${a.FORMA_PAGO || '—'}</td>
                         <td>${a.NUM_DOCUMENTO || '—'}</td>
-                        <td>${fmtMoneda(a.SALDO_PENDIENTE)}</td>
+                        <td>${a.SALDO_PENDIENTE ? fmtMoneda(a.SALDO_PENDIENTE) : '—'}</td>
                     </tr>
                 `).join('');
             } else {
                 tbodyPagos.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#718096;">Sin anticipos registrados</td></tr>`;
             }
+
+            // Asegurar que el modal esté visible
+            document.getElementById('modal-costo-venta').classList.add('active');
+            
+        } catch (error) {
+            showToast('Error al cargar detalles de la venta: ' + error.message, 'error');
+            console.error(error);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    //  CRUD — AGREGAR
+    function mostrarAgregarCliente() {
+        document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-user-plus"></i> Nuevo Cliente`;
+        document.getElementById('form-cliente').reset();
+        document.getElementById('cliente-id').value = '';
+        document.getElementById('cliente-persona-rol-id').value = '';
+        document.getElementById('modal-cliente').classList.add('active');
+    }
+
+    async function guardarCliente() {
+        const id             = document.getElementById('cliente-id').value;
+        const tipoDocumento  = document.getElementById('cliente-tipo-documento').value;
+        const identificacion = document.getElementById('cliente-identificacion').value.trim();
+        const nombreCompleto = document.getElementById('cliente-nombre').value.trim();
+        const tipoCliente    = document.getElementById('cliente-tipo-rol').value;
+
+        if (!tipoDocumento || !identificacion || !nombreCompleto || !tipoCliente) {
+            showToast('Complete los campos obligatorios: Tipo Documento, Identificación, Nombre y Tipo de Cliente.', 'error');
+            return;
         }
 
-        document.getElementById('modal-costo-venta').classList.add('active');
-    } catch (err) {
-        showToast('Error al cargar costos: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
+        const body = {
+            TIPO_DOCUMENTO:      tipoDocumento,
+            IDENTIFICACION:      identificacion,
+            NOMBRE_COMPLETO:     nombreCompleto,
+            NACIONALIDAD:        document.getElementById('cliente-nacionalidad').value.trim() || null,
+            ID_ESTADO_CIVIL:     document.getElementById('cliente-estado-civil').value || null,
+            OCUPACION:           document.getElementById('cliente-ocupacion').value.trim()   || null,
+            DIRECCION:           document.getElementById('cliente-direccion').value.trim()   || null,
+            TELEFONO_PRINCIPAL:  document.getElementById('cliente-telefono').value.trim()    || null,
+            TELEFONO_SECUNDARIO: document.getElementById('cliente-telefono-sec').value.trim()|| null,
+            EMAIL:               document.getElementById('cliente-email').value.trim()       || null,
+            OBSERVACION:         document.getElementById('cliente-observacion').value.trim() || null,
+            ESTADO: 'ACTIVO'
+        };
 
-// ══════════════════════════════════════════════════════
-//  CRUD — AGREGAR
-// ══════════════════════════════════════════════════════
-function mostrarAgregarCliente() {
-    document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-user-plus"></i> Nuevo Cliente`;
-    document.getElementById('form-cliente').reset();
-    document.getElementById('cliente-id').value = '';
-    document.getElementById('cliente-persona-rol-id').value = '';
-    document.getElementById('modal-cliente').classList.add('active');
-}
+        try {
+            showLoading(true);
+            let idPersona;
 
-async function guardarCliente() {
-    const id             = document.getElementById('cliente-id').value;
-    const tipoDocumento  = document.getElementById('cliente-tipo-documento').value;
-    const identificacion = document.getElementById('cliente-identificacion').value.trim();
-    const nombreCompleto = document.getElementById('cliente-nombre').value.trim();
-    const tipoCliente    = document.getElementById('cliente-tipo-rol').value;
+            if (!id) {
+                // Crear persona
+                const resPersona = await apiFetch('/api/personas', { method: 'POST', body: JSON.stringify(body) });
+                idPersona = resPersona.id;
 
-    if (!tipoDocumento || !identificacion || !nombreCompleto || !tipoCliente) {
-        showToast('Complete los campos obligatorios: Tipo Documento, Identificación, Nombre y Tipo de Cliente.', 'error');
-        return;
-    }
+                // Asignar rol de cliente
+                await apiFetch('/api/personas-roles', {
+                    method: 'POST',
+                    body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: parseInt(tipoCliente), ESTADO: 'ACTIVO' })
+                });
+                showToast('Cliente creado correctamente.', 'success');
+            } else {
+                // Actualizar persona
+                await apiFetch(`/api/personas/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                idPersona = parseInt(id);
 
-    const body = {
-        TIPO_DOCUMENTO:      tipoDocumento,
-        IDENTIFICACION:      identificacion,
-        NOMBRE_COMPLETO:     nombreCompleto,
-        NACIONALIDAD:        document.getElementById('cliente-nacionalidad').value.trim() || null,
-        ID_ESTADO_CIVIL:     document.getElementById('cliente-estado-civil').value || null,
-        OCUPACION:           document.getElementById('cliente-ocupacion').value.trim()   || null,
-        DIRECCION:           document.getElementById('cliente-direccion').value.trim()   || null,
-        TELEFONO_PRINCIPAL:  document.getElementById('cliente-telefono').value.trim()    || null,
-        TELEFONO_SECUNDARIO: document.getElementById('cliente-telefono-sec').value.trim()|| null,
-        EMAIL:               document.getElementById('cliente-email').value.trim()       || null,
-        OBSERVACION:         document.getElementById('cliente-observacion').value.trim() || null,
-        ESTADO: 'ACTIVO'
-    };
+                // Actualizar rol: buscar el persona_rol existente y actualizar
+                const rolActual = rolesCache.find(r =>
+                    (r.ID_PERSONA || r.id_persona) === idPersona &&
+                    ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
+                    (r.ESTADO || r.estado) === 'ACTIVO'
+                );
 
-    try {
-        showLoading(true);
-        let idPersona;
-
-        if (!id) {
-            // Crear persona
-            const resPersona = await apiFetch('/api/personas', { method: 'POST', body: JSON.stringify(body) });
-            idPersona = resPersona.id;
-
-            // Asignar rol de cliente
-            await apiFetch('/api/personas-roles', {
-                method: 'POST',
-                body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: parseInt(tipoCliente), ESTADO: 'ACTIVO' })
-            });
-            showToast('Cliente creado correctamente.', 'success');
-        } else {
-            // Actualizar persona
-            await apiFetch(`/api/personas/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-            idPersona = parseInt(id);
-
-            // Actualizar rol: buscar el persona_rol existente y actualizar
-            const rolActual = rolesCache.find(r =>
-                (r.ID_PERSONA || r.id_persona) === idPersona &&
-                ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
-                (r.ESTADO || r.estado) === 'ACTIVO'
-            );
-
-            if (rolActual) {
-                const prId = rolActual.ID_PERSONA_ROL || rolActual.id_persona_rol;
-                const rolId = parseInt(tipoCliente);
-                if ((rolActual.ID_ROL || rolActual.id_rol) !== rolId) {
-                    // Desactivar el rol anterior
-                    await apiFetch(`/api/personas-roles/${prId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({ ESTADO: 'INACTIVO' })
-                    });
-                    // Crear el nuevo rol
-                    await apiFetch('/api/personas-roles', {
-                        method: 'POST',
-                        body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: rolId, ESTADO: 'ACTIVO' })
-                    }).catch(async () => {
-                        // Si ya existe desactivado, reactivarlo
+                if (rolActual) {
+                    const prId = rolActual.ID_PERSONA_ROL || rolActual.id_persona_rol;
+                    const rolId = parseInt(tipoCliente);
+                    if ((rolActual.ID_ROL || rolActual.id_rol) !== rolId) {
+                        // Desactivar el rol anterior
                         await apiFetch(`/api/personas-roles/${prId}`, {
                             method: 'PUT',
-                            body: JSON.stringify({ ESTADO: 'ACTIVO' })
+                            body: JSON.stringify({ ESTADO: 'INACTIVO' })
                         });
-                    });
+                        // Crear el nuevo rol
+                        await apiFetch('/api/personas-roles', {
+                            method: 'POST',
+                            body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: rolId, ESTADO: 'ACTIVO' })
+                        }).catch(async () => {
+                            // Si ya existe desactivado, reactivarlo
+                            await apiFetch(`/api/personas-roles/${prId}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({ ESTADO: 'ACTIVO' })
+                            });
+                        });
+                    }
                 }
+                showToast('Cliente actualizado correctamente.', 'success');
             }
-            showToast('Cliente actualizado correctamente.', 'success');
+
+            document.getElementById('modal-cliente').classList.remove('active');
+            await cargarDatosIniciales();
+        } catch (err) {
+            showToast('Error al guardar: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    //  CRUD — ANULAR
+    async function anularCliente() {
+        const identificacion = prompt('Ingrese la identificación del cliente a anular:');
+        if (!identificacion) return;
+
+        const cliente = personasCache.find(p =>
+            (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
+
+        if (!cliente) {
+            showToast('Cliente no encontrado.', 'error');
+            return;
         }
 
-        document.getElementById('modal-cliente').classList.remove('active');
-        await cargarDatosIniciales();
-    } catch (err) {
-        showToast('Error al guardar: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
+        const nombre = cliente.NOMBRE_COMPLETO || cliente.nombre_completo;
+        if (!confirm(`¿Está seguro de anular al cliente ${nombre}?`)) return;
+
+        try {
+            showLoading(true);
+            const id = cliente.ID_PERSONA || cliente.id_persona;
+            await apiFetch(`/api/personas/${id}/desactivar`, { method: 'PUT' });
+
+            // Desactivar sus roles de cliente
+            const rolesCliente = rolesCache.filter(r =>
+                (r.ID_PERSONA || r.id_persona) === id &&
+                ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol)
+            );
+            for (const rol of rolesCliente) {
+                const prId = rol.ID_PERSONA_ROL || rol.id_persona_rol;
+                await apiFetch(`/api/personas-roles/${prId}/desactivar`, { method: 'PUT' }).catch(() => {});
+            }
+
+            showToast('Cliente anulado correctamente.', 'success');
+            await cargarDatosIniciales();
+        } catch (err) {
+            showToast('Error al anular: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
+        }
     }
-}
 
-// ══════════════════════════════════════════════════════
-//  CRUD — ANULAR
-// ══════════════════════════════════════════════════════
-async function anularCliente() {
-    const identificacion = prompt('Ingrese la identificación del cliente a anular:');
-    if (!identificacion) return;
+    //  CRUD — MODIFICAR
+    async function modificarCliente() {
+        const identificacion = prompt('Ingrese la identificación del cliente a modificar:');
+        if (!identificacion) return;
 
-    const cliente = personasCache.find(p =>
-        (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
+        const cliente = personasCache.find(p =>
+            (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
 
-    if (!cliente) {
-        showToast('Cliente no encontrado.', 'error');
-        return;
-    }
-
-    const nombre = cliente.NOMBRE_COMPLETO || cliente.nombre_completo;
-    if (!confirm(`¿Está seguro de anular al cliente ${nombre}?`)) return;
-
-    try {
-        showLoading(true);
-        const id = cliente.ID_PERSONA || cliente.id_persona;
-        await apiFetch(`/api/personas/${id}/desactivar`, { method: 'PUT' });
-
-        // Desactivar sus roles de cliente
-        const rolesCliente = rolesCache.filter(r =>
-            (r.ID_PERSONA || r.id_persona) === id &&
-            ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol)
-        );
-        for (const rol of rolesCliente) {
-            const prId = rol.ID_PERSONA_ROL || rol.id_persona_rol;
-            await apiFetch(`/api/personas-roles/${prId}/desactivar`, { method: 'PUT' }).catch(() => {});
+        if (!cliente) {
+            showToast('Cliente no encontrado.', 'error');
+            return;
         }
 
-        showToast('Cliente anulado correctamente.', 'success');
-        await cargarDatosIniciales();
-    } catch (err) {
-        showToast('Error al anular: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
+        const id    = cliente.ID_PERSONA || cliente.id_persona;
+        const idRol = obtenerRolClienteDePersona(id);
 
-// ══════════════════════════════════════════════════════
-//  CRUD — MODIFICAR
-// ══════════════════════════════════════════════════════
-async function modificarCliente() {
-    const identificacion = prompt('Ingrese la identificación del cliente a modificar:');
-    if (!identificacion) return;
+        document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-edit"></i> Modificar Cliente`;
+        document.getElementById('cliente-id').value              = id;
+        document.getElementById('cliente-tipo-documento').value  = cliente.TIPO_DOCUMENTO || cliente.tipo_documento || '';
+        document.getElementById('cliente-identificacion').value  = cliente.IDENTIFICACION || cliente.identificacion || '';
+        document.getElementById('cliente-nombre').value          = cliente.NOMBRE_COMPLETO || cliente.nombre_completo || '';
+        document.getElementById('cliente-nacionalidad').value    = cliente.NACIONALIDAD  || cliente.nacionalidad  || '';
+        document.getElementById('cliente-estado-civil').value   = cliente.ID_ESTADO_CIVIL || cliente.id_estado_civil || '';
+        document.getElementById('cliente-ocupacion').value       = cliente.OCUPACION     || cliente.ocupacion     || '';
+        document.getElementById('cliente-direccion').value       = cliente.DIRECCION     || cliente.direccion     || '';
+        document.getElementById('cliente-telefono').value        = cliente.TELEFONO_PRINCIPAL   || cliente.telefono_principal   || '';
+        document.getElementById('cliente-telefono-sec').value    = cliente.TELEFONO_SECUNDARIO  || cliente.telefono_secundario  || '';
+        document.getElementById('cliente-email').value           = cliente.EMAIL         || cliente.email         || '';
+        document.getElementById('cliente-observacion').value     = cliente.OBSERVACION   || cliente.observacion   || '';
+        document.getElementById('cliente-tipo-rol').value        = idRol || '';
 
-    const cliente = personasCache.find(p =>
-        (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
-
-    if (!cliente) {
-        showToast('Cliente no encontrado.', 'error');
-        return;
+        document.getElementById('modal-cliente').classList.add('active');
     }
 
-    const id    = cliente.ID_PERSONA || cliente.id_persona;
-    const idRol = obtenerRolClienteDePersona(id);
-
-    document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-edit"></i> Modificar Cliente`;
-    document.getElementById('cliente-id').value              = id;
-    document.getElementById('cliente-tipo-documento').value  = cliente.TIPO_DOCUMENTO || cliente.tipo_documento || '';
-    document.getElementById('cliente-identificacion').value  = cliente.IDENTIFICACION || cliente.identificacion || '';
-    document.getElementById('cliente-nombre').value          = cliente.NOMBRE_COMPLETO || cliente.nombre_completo || '';
-    document.getElementById('cliente-nacionalidad').value    = cliente.NACIONALIDAD  || cliente.nacionalidad  || '';
-    document.getElementById('cliente-estado-civil').value   = cliente.ID_ESTADO_CIVIL || cliente.id_estado_civil || '';
-    document.getElementById('cliente-ocupacion').value       = cliente.OCUPACION     || cliente.ocupacion     || '';
-    document.getElementById('cliente-direccion').value       = cliente.DIRECCION     || cliente.direccion     || '';
-    document.getElementById('cliente-telefono').value        = cliente.TELEFONO_PRINCIPAL   || cliente.telefono_principal   || '';
-    document.getElementById('cliente-telefono-sec').value    = cliente.TELEFONO_SECUNDARIO  || cliente.telefono_secundario  || '';
-    document.getElementById('cliente-email').value           = cliente.EMAIL         || cliente.email         || '';
-    document.getElementById('cliente-observacion').value     = cliente.OBSERVACION   || cliente.observacion   || '';
-    document.getElementById('cliente-tipo-rol').value        = idRol || '';
-
-    document.getElementById('modal-cliente').classList.add('active');
-}
-
-// ══════════════════════════════════════════════════════
-//  FILTROS
-// ══════════════════════════════════════════════════════
-function aplicarFiltros() {
-    renderTabla({
-        identificacion: document.getElementById('filter-identificacion').value,
-        nombre:  document.getElementById('filter-nombre').value,
-        tipo:    document.getElementById('filter-tipo').value,
-        estado:  document.getElementById('filter-estado').value
-    });
-}
-
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', async () => {
-    // Menú móvil
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar    = document.getElementById('sidebar');
-    const overlay    = document.getElementById('overlay');
-
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    });
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    });
-
-    // Botones principales
-    document.getElementById('btn-agregar').addEventListener('click', mostrarAgregarCliente);
-    document.getElementById('btn-anular').addEventListener('click', anularCliente);
-    document.getElementById('btn-modificar').addEventListener('click', modificarCliente);
-    document.getElementById('btn-pasarj').addEventListener('click', () => showToast('Función "Pasar J" — En desarrollo', 'success'));
-    document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
-    document.getElementById('btn-listar').addEventListener('click', async () => {
-        await cargarDatosIniciales();
-        showToast('Lista actualizada.', 'success');
-    });
-
-    // Filtros
-    ['filter-identificacion', 'filter-nombre'].forEach(id =>
-        document.getElementById(id).addEventListener('input', aplicarFiltros));
-    ['filter-tipo', 'filter-estado'].forEach(id =>
-        document.getElementById(id).addEventListener('change', aplicarFiltros));
-
-    document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
-        ['filter-identificacion', 'filter-nombre'].forEach(id => document.getElementById(id).value = '');
-        ['filter-tipo', 'filter-estado'].forEach(id => document.getElementById(id).value = '');
-        renderTabla();
-    });
-
-    // Modal cliente
-    document.getElementById('close-modal-cliente').addEventListener('click', () =>
-        document.getElementById('modal-cliente').classList.remove('active'));
-    document.getElementById('cancel-btn-cliente').addEventListener('click', () =>
-        document.getElementById('modal-cliente').classList.remove('active'));
-    document.getElementById('save-btn-cliente').addEventListener('click', guardarCliente);
-
-    // Modal ver cliente
-    document.getElementById('close-modal-ver-cliente').addEventListener('click', cerrarModalVerCliente);
-    document.getElementById('modal-ver-cliente').addEventListener('click', e => {
-        if (e.target === e.currentTarget) cerrarModalVerCliente();
-    });
-
-    // Modal info venta
-    document.getElementById('close-modal-info-venta').addEventListener('click', () =>
-        document.getElementById('modal-info-venta').classList.remove('active'));
-    document.getElementById('close-btn-info-venta').addEventListener('click', () =>
-        document.getElementById('modal-info-venta').classList.remove('active'));
-    document.getElementById('print-btn-info-venta').addEventListener('click', () => window.print());
-
-    // Modal costo venta
-    document.getElementById('close-modal-costo-venta').addEventListener('click', () =>
-        document.getElementById('modal-costo-venta').classList.remove('active'));
-    document.getElementById('close-btn-costo-venta').addEventListener('click', () =>
-        document.getElementById('modal-costo-venta').classList.remove('active'));
-    document.getElementById('print-btn-costo-venta').addEventListener('click', () => window.print());
-
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal').forEach(m =>
-        m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
-
-    // Sidebar buttons active state
-    document.querySelectorAll('.sidebar-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            if (window.innerWidth <= 992) {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            }
+    //  FILTROS
+    function aplicarFiltros() {
+        renderTabla({
+            identificacion: document.getElementById('filter-identificacion').value,
+            nombre:  document.getElementById('filter-nombre').value,
+            tipo:    document.getElementById('filter-tipo').value,
+            estado:  document.getElementById('filter-estado').value
         });
-    });
+    }
 
-    // Cargar datos
-    await cargarDatosIniciales();
-});
-</script>
+    //  EVENTOS Y CARGA INICIAL
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Menú móvil
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar    = document.getElementById('sidebar');
+        const overlay    = document.getElementById('overlay');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Botones principales
+        document.getElementById('btn-agregar').addEventListener('click', mostrarAgregarCliente);
+        document.getElementById('btn-anular').addEventListener('click', anularCliente);
+        document.getElementById('btn-modificar').addEventListener('click', modificarCliente);
+        document.getElementById('btn-pasarj').addEventListener('click', () => showToast('Función "Pasar J" — En desarrollo', 'success'));
+        document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
+        document.getElementById('btn-listar').addEventListener('click', async () => {
+            await cargarDatosIniciales();
+            showToast('Lista actualizada.', 'success');
+        });
+
+        // Filtros
+        ['filter-identificacion', 'filter-nombre'].forEach(id =>
+            document.getElementById(id).addEventListener('input', aplicarFiltros));
+        ['filter-tipo', 'filter-estado'].forEach(id =>
+            document.getElementById(id).addEventListener('change', aplicarFiltros));
+
+        document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
+            ['filter-identificacion', 'filter-nombre'].forEach(id => document.getElementById(id).value = '');
+            ['filter-tipo', 'filter-estado'].forEach(id => document.getElementById(id).value = '');
+            renderTabla();
+        });
+
+        // Modal cliente
+        document.getElementById('close-modal-cliente').addEventListener('click', () =>
+            document.getElementById('modal-cliente').classList.remove('active'));
+        document.getElementById('cancel-btn-cliente').addEventListener('click', () =>
+            document.getElementById('modal-cliente').classList.remove('active'));
+        document.getElementById('save-btn-cliente').addEventListener('click', guardarCliente);
+
+        // Modal ver cliente
+        document.getElementById('close-modal-ver-cliente').addEventListener('click', cerrarModalVerCliente);
+        document.getElementById('modal-ver-cliente').addEventListener('click', e => {
+            if (e.target === e.currentTarget) cerrarModalVerCliente();
+        });
+
+        // Modal info venta
+        document.getElementById('close-modal-info-venta').addEventListener('click', () =>
+            document.getElementById('modal-info-venta').classList.remove('active'));
+        document.getElementById('close-btn-info-venta').addEventListener('click', () =>
+            document.getElementById('modal-info-venta').classList.remove('active'));
+        document.getElementById('print-btn-info-venta').addEventListener('click', () => window.print());
+
+        // Modal costo venta
+        document.getElementById('close-modal-costo-venta').addEventListener('click', () =>
+            document.getElementById('modal-costo-venta').classList.remove('active'));
+        document.getElementById('close-btn-costo-venta').addEventListener('click', () =>
+            document.getElementById('modal-costo-venta').classList.remove('active'));
+        document.getElementById('print-btn-costo-venta').addEventListener('click', () => window.print());
+
+        // Cerrar modales al hacer clic fuera
+        document.querySelectorAll('.modal').forEach(m =>
+            m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+
+        // Sidebar buttons active state
+        document.querySelectorAll('.sidebar-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (!href || href === '#') {
+                    e.preventDefault();
+                }
+                document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+        // Cargar datos
+        await cargarDatosIniciales();
+    });
+    </script>
 </body>
 </html>

@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutosColin · Estadísticas de Ventas</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════ */
+:root {
+  --bg:       #0a0c10;
+  --surface:  #111318;
+  --card:     #16191f;
+  --border:   #1e2230;
+  --accent:   #e8c547;
+  --accent2:  #3ecfb2;
+  --accent3:  #e85c47;
+  --accent4:  #7c6df5;
+  --text:     #eef0f7;
+  --muted:    #6b7280;
+  --glow:     rgba(232,197,71,.18);
+
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --radius: 14px;
+  --t: .22s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Grain overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: .6;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,12,16,.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; gap: 1.5rem;
+  height: 64px;
+}
+
+.logo {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -.02em;
+  display: flex; align-items: center; gap: .5rem;
+}
+.logo span { color: var(--accent); }
+
+.logo-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 var(--glow); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.header-badge {
+  margin-left: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: .3rem 1rem;
+  font-size: .78rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+/* ═══════════════════════════════════════════
+   NAV TABS
+═══════════════════════════════════════════ */
+.nav-wrap {
+  position: sticky; top: 64px; z-index: 90;
+  background: rgba(10,12,16,.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; gap: .25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-wrap::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  flex-shrink: 0;
+  padding: .9rem 1.3rem;
+  font-family: var(--font-head);
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none; border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--t);
+}
+.nav-tab::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--t);
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--accent); }
+.nav-tab.active::after { transform: scaleX(1); }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section { display: none; animation: fadeUp .35s ease; }
+.section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─ Section header ─ */
+.section-header {
+  display: flex; align-items: flex-end; gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+}
+.section-title em {
+  font-style: normal;
+  -webkit-text-stroke: 1.5px var(--accent);
+  color: transparent;
+}
+.section-sub {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-bottom: .25rem;
+}
+
+/* ─ Filters ─ */
+.filters {
+  display: flex; gap: .75rem; flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding: 1.2rem 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.filter-group { display: flex; flex-direction: column; gap: .35rem; min-width: 140px; }
+.filter-group label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  font-weight: 500;
+}
+.filter-group input,
+.filter-group select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  padding: .45rem .8rem;
+  outline: none;
+  transition: border-color var(--t);
+}
+.filter-group input:focus,
+.filter-group select:focus { border-color: var(--accent); }
+.filter-group select option { background: var(--surface); }
+
+.btn {
+  align-self: flex-end;
+  padding: .5rem 1.4rem;
+  border-radius: 8px;
+  border: none; cursor: pointer;
+  font-family: var(--font-head);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: all var(--t);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #111;
+}
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--t), transform var(--t);
+}
+.kpi:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.kpi::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--glow) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.kpi-label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: .5rem;
+  font-weight: 500;
+}
+.kpi-value {
+  font-family: var(--font-head);
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--text);
+}
+.kpi-value.accent  { color: var(--accent); }
+.kpi-value.accent2 { color: var(--accent2); }
+.kpi-value.accent3 { color: var(--accent3); }
+.kpi-value.accent4 { color: var(--accent4); }
+
+.kpi-trend {
+  margin-top: .5rem;
+  font-size: .75rem;
+  color: var(--muted);
+  display: flex; align-items: center; gap: .3rem;
+}
+.trend-up   { color: var(--accent2); }
+.trend-down { color: var(--accent3); }
+
+/* ═══════════════════════════════════════════
+   CHART CARDS
+═══════════════════════════════════════════ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: border-color var(--t);
+}
+.chart-card:hover { border-color: var(--border); }
+.chart-card.wide {
+  grid-column: 1 / -1;
+}
+
+.chart-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.chart-title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.chart-pill {
+  font-size: .7rem;
+  padding: .2rem .7rem;
+  border-radius: 99px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+canvas { max-height: 280px; }
+
+/* ═══════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════ */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem; flex-wrap: wrap;
+}
+.table-toolbar-title {
+  font-family: var(--font-head);
+  font-size: .95rem;
+  font-weight: 700;
+}
+.search-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: .85rem;
+  padding: .4rem .9rem;
+  outline: none;
+  width: 220px;
+  transition: border-color var(--t);
+}
+.search-input:focus { border-color: var(--accent); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+thead tr {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+thead th {
+  padding: .8rem 1rem;
+  text-align: left;
+  font-family: var(--font-head);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--t);
+}
+thead th:hover { color: var(--text); }
+thead th.sorted { color: var(--accent); }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t);
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(232,197,71,.04); }
+
+td {
+  padding: .75rem 1rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+td.wrap { white-space: normal; }
+
+.badge {
+  display: inline-block;
+  padding: .2rem .65rem;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.badge-green  { background: rgba(62,207,178,.15); color: var(--accent2); }
+.badge-yellow { background: rgba(232,197,71,.15);  color: var(--accent); }
+.badge-red    { background: rgba(232,92,71,.15);  color: var(--accent3); }
+.badge-purple { background: rgba(124,109,245,.15); color: var(--accent4); }
+
+.rank-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  font-family: var(--font-head);
+  font-size: .78rem;
+  font-weight: 800;
+}
+.rank-1 { background: var(--accent);  color: #111; }
+.rank-2 { background: var(--muted);   color: #111; }
+.rank-3 { background: #b45309;        color: #fff; }
+.rank-n { background: var(--surface); color: var(--muted); }
+
+/* bar cell */
+.bar-cell { display: flex; align-items: center; gap: .6rem; }
+.bar-track {
+  flex: 1; height: 5px; background: var(--surface);
+  border-radius: 99px; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 99px;
+  background: var(--accent);
+  transition: width .6s ease;
+}
+
+/* pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .8rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: .8rem;
+  color: var(--muted);
+}
+.pag-btns { display: flex; gap: .4rem; }
+.pag-btn {
+  padding: .35rem .7rem;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: none; color: var(--text);
+  cursor: pointer; font-size: .8rem;
+  transition: all var(--t);
+}
+.pag-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pag-btn.active { background: var(--accent); color: #111; border-color: var(--accent); }
+.pag-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════
+   LOADING & EMPTY
+═══════════════════════════════════════════ */
+.loading-row td,
+.empty-row td {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+}
+.spinner {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin-bottom: .5rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════
+   PROGRESS RING
+═══════════════════════════════════════════ */
+.ring-grid {
+  display: flex; gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.ring-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  flex: 1; min-width: 200px;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+  text-align: center;
+  transition: border-color var(--t), transform var(--t);
+}
+.ring-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.ring-label {
+  font-family: var(--font-head);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+.ring-value {
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .9rem 1.3rem;
+  font-size: .85rem;
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s ease;
+  max-width: 320px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.error { border-color: var(--accent3); }
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .main { padding: 1rem; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .section-title { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────────── HEADER ─────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Autos<span>Colin</span>
+  </div>
+  <span style="font-size:.8rem;color:var(--muted);">·&nbsp;&nbsp;Centro de Estadísticas</span>
+  <div class="header-badge" id="lastUpdate">Actualizando…</div>
+</header>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav class="nav-wrap">
+  <button class="nav-tab active" onclick="showSection('total')">Venta Total</button>
+  <button class="nav-tab" onclick="showSection('cliente')">Por Cliente</button>
+  <button class="nav-tab" onclick="showSection('producto')">Por Producto</button>
+  <button class="nav-tab" onclick="showSection('agente')">Por Agente</button>
+  <button class="nav-tab" onclick="showSection('agente-cliente')">Agente × Cliente</button>
+  <button class="nav-tab" onclick="showSection('agente-producto')">Agente × Producto</button>
+  <button class="nav-tab" onclick="showSection('triple')">Agente × Cliente × Producto</button>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN
+═══════════════════════════════════════ -->
+<main class="main">
+
+<!-- ════════════════════════════════
+     SECCIÓN 1 · VENTAS TOTALES
+════════════════════════════════ -->
+<section id="sec-total" class="section active">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Resumen general</div>
+      <h2 class="section-title">Ventas <em>Totales</em></h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="tot-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="tot-end">
+    </div>
+    <div class="filter-group">
+      <label>Estado</label>
+      <select id="tot-estado">
+        <option value="">Todos</option>
+        <option>PENDIENTE DE FACTURAR</option>
+        <option>YA FUE FACTURADA</option>
+        <option>FACTURA ANULADA</option>
+        <option>PLAN YA FUE ANULADO</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="loadTotal()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('tot'); loadTotal()">Limpiar</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="tot-kpis">
+    <div class="kpi"><div class="kpi-label">Total Ventas</div><div class="kpi-value accent" id="k-total-ventas">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ingresos (CRC)</div><div class="kpi-value" id="k-total-crc">—</div></div>
+    <div class="kpi"><div class="kpi-label">Promedio por Venta</div><div class="kpi-value accent2" id="k-promedio">—</div></div>
+    <div class="kpi"><div class="kpi-label">Contado</div><div class="kpi-value accent2" id="k-contado">—</div></div>
+    <div class="kpi"><div class="kpi-label">Crédito</div><div class="kpi-value accent4" id="k-credito">—</div></div>
+    <div class="kpi"><div class="kpi-label">Vehículos en Inventario</div><div class="kpi-value" id="k-inventario">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <span class="chart-title">Ventas por mes</span>
+        <span class="chart-pill">Últimos 12 meses</span>
+      </div>
+      <canvas id="ch-mensual"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Estado de pago</span>
+        <span class="chart-pill">Distribución</span>
+      </div>
+      <canvas id="ch-estado"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Contado vs Crédito</span>
+        <span class="chart-pill">Tipo de venta</span>
+      </div>
+      <canvas id="ch-tipo"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Detalle de Ventas</span>
+      <input class="search-input" placeholder="Buscar código, cliente…" id="tot-search" oninput="filterTable('tot-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="tot-table">
+        <thead><tr>
+          <th>Código</th><th>Fecha</th><th>Cliente</th><th>Vehículo</th>
+          <th>Agente</th><th>Tipo</th><th>Total</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="tot-tbody"><tr class="loading-row"><td colspan="8"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="tot-pag">
+      <span id="tot-pag-info"></span>
+      <div class="pag-btns" id="tot-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 2 · POR CLIENTE
+════════════════════════════════ -->
+<section id="sec-cliente" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Análisis individual</div>
+      <h2 class="section-title">Ventas por <em>Cliente</em></h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="cli-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="cli-end">
+    </div>
+    <div class="filter-group">
+      <label>Buscar cliente</label>
+      <input type="text" id="cli-nombre" placeholder="Nombre o cédula…">
+    </div>
+    <button class="btn btn-primary" onclick="loadCliente()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('cli'); loadCliente()">Limpiar</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Clientes Únicos</div><div class="kpi-value accent" id="k-cli-unicos">—</div></div>
+    <div class="kpi"><div class="kpi-label">Clientes Recurrentes</div><div class="kpi-value accent2" id="k-cli-recurrentes">—</div></div>
+    <div class="kpi"><div class="kpi-label">Mayor Compra</div><div class="kpi-value" id="k-cli-max">—</div></div>
+    <div class="kpi"><div class="kpi-label">Promedio por Cliente</div><div class="kpi-value accent4" id="k-cli-prom">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <span class="chart-title">Top 10 Clientes por Ventas</span>
+        <span class="chart-pill">Ranking</span>
+      </div>
+      <canvas id="ch-cli-top"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Distribución por Cantidad</span>
+        <span class="chart-pill">Frecuencia</span>
+      </div>
+      <canvas id="ch-cli-dist"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Clientes Activos por Mes</span>
+        <span class="chart-pill">Tendencia</span>
+      </div>
+      <canvas id="ch-cli-mes"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Ranking de Clientes</span>
+      <input class="search-input" placeholder="Buscar cliente…" oninput="filterTable('cli-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="cli-table">
+        <thead><tr>
+          <th>#</th><th>Cliente</th><th>Cédula</th><th>Teléfono</th>
+          <th>N° Compras</th><th>Total (CRC)</th><th>Últ. Compra</th><th>Tendencia</th>
+        </tr></thead>
+        <tbody id="cli-tbody"><tr class="loading-row"><td colspan="8"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="cli-pag">
+      <span id="cli-pag-info"></span>
+      <div class="pag-btns" id="cli-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 3 · POR PRODUCTO (VEHÍCULO)
+════════════════════════════════ -->
+<section id="sec-producto" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Análisis de inventario</div>
+      <h2 class="section-title">Ventas por <em>Producto</em></h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="prod-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="prod-end">
+    </div>
+    <div class="filter-group">
+      <label>Marca</label>
+      <select id="prod-marca"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Tipo de venta</label>
+      <select id="prod-tipo">
+        <option value="">Todos</option>
+        <option value="CONTADO">Contado</option>
+        <option value="CREDITO">Crédito</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="loadProducto()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('prod'); loadProducto()">Limpiar</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Vehículos Vendidos</div><div class="kpi-value accent" id="k-prod-total">—</div></div>
+    <div class="kpi"><div class="kpi-label">Marcas Distintas</div><div class="kpi-value accent2" id="k-prod-marcas">—</div></div>
+    <div class="kpi"><div class="kpi-label">Marca Líder</div><div class="kpi-value accent" id="k-prod-top-marca">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ganancia Estimada</div><div class="kpi-value accent2" id="k-prod-ganancia">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Ventas por Marca</span>
+        <span class="chart-pill">Unidades</span>
+      </div>
+      <canvas id="ch-prod-marca"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Ventas por Año/Modelo</span>
+        <span class="chart-pill">Distribución</span>
+      </div>
+      <canvas id="ch-prod-anio"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Tipo de Combustible</span>
+        <span class="chart-pill">Preferencias</span>
+      </div>
+      <canvas id="ch-prod-comb"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Transmisión</span>
+        <span class="chart-pill">Auto vs Manual</span>
+      </div>
+      <canvas id="ch-prod-trans"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Detalle por Vehículo</span>
+      <input class="search-input" placeholder="Buscar placa, marca…" oninput="filterTable('prod-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="prod-table">
+        <thead><tr>
+          <th>#</th><th>Placa</th><th>Marca</th><th>Modelo</th><th>Estilo</th>
+          <th>Combustible</th><th>Trans.</th><th>Precio Venta</th><th>Ganancia</th><th>Fecha</th>
+        </tr></thead>
+        <tbody id="prod-tbody"><tr class="loading-row"><td colspan="10"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="prod-pag">
+      <span id="prod-pag-info"></span>
+      <div class="pag-btns" id="prod-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 4 · POR AGENTE
+════════════════════════════════ -->
+<section id="sec-agente" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Desempeño del equipo</div>
+      <h2 class="section-title">Ventas por <em>Agente</em></h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="age-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="age-end">
+    </div>
+    <div class="filter-group">
+      <label>Agente</label>
+      <select id="age-vendedor"><option value="">Todos</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="loadAgente()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('age'); loadAgente()">Limpiar</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Agentes Activos</div><div class="kpi-value accent" id="k-age-total">—</div></div>
+    <div class="kpi"><div class="kpi-label">Agente Líder</div><div class="kpi-value accent2" id="k-age-lider">—</div></div>
+    <div class="kpi"><div class="kpi-label">Promedio Ventas</div><div class="kpi-value" id="k-age-prom">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total Comisiones Est.</div><div class="kpi-value accent4" id="k-age-comision">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <span class="chart-title">Ventas por Agente</span>
+        <span class="chart-pill">Comparativo</span>
+      </div>
+      <canvas id="ch-age-bar"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Participación de Mercado</span>
+        <span class="chart-pill">% del equipo</span>
+      </div>
+      <canvas id="ch-age-pie"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Rendimiento Mensual</span>
+        <span class="chart-pill">Tendencia</span>
+      </div>
+      <canvas id="ch-age-line"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Ranking de Agentes</span>
+      <input class="search-input" placeholder="Buscar agente…" oninput="filterTable('age-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="age-table">
+        <thead><tr>
+          <th>#</th><th>Agente</th><th>Cédula</th><th>N° Ventas</th>
+          <th>Total (CRC)</th><th>Promedio</th><th>Contado</th><th>Crédito</th><th>Cuota Mercado</th>
+        </tr></thead>
+        <tbody id="age-tbody"><tr class="loading-row"><td colspan="9"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="age-pag">
+      <span id="age-pag-info"></span>
+      <div class="pag-btns" id="age-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 5 · AGENTE × CLIENTE
+════════════════════════════════ -->
+<section id="sec-agente-cliente" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Relación cruzada</div>
+      <h2 class="section-title">Agente <em>×</em> Cliente</h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="ac-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="ac-end">
+    </div>
+    <div class="filter-group">
+      <label>Agente</label>
+      <select id="ac-vendedor"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Cliente</label>
+      <input type="text" id="ac-cliente" placeholder="Nombre o cédula…">
+    </div>
+    <button class="btn btn-primary" onclick="loadAgenteCliente()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('ac'); loadAgenteCliente()">Limpiar</button>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <span class="chart-title">Clientes por Agente (Top Agentes)</span>
+        <span class="chart-pill">Heatmap</span>
+      </div>
+      <canvas id="ch-ac-bar"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Relación Agente – Cliente</span>
+      <input class="search-input" placeholder="Buscar…" oninput="filterTable('ac-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="ac-table">
+        <thead><tr>
+          <th>Agente</th><th>Cliente</th><th>Cédula</th><th>Tel.</th>
+          <th>N° Compras</th><th>Total (CRC)</th><th>Última Venta</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="ac-tbody"><tr class="loading-row"><td colspan="8"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="ac-pag">
+      <span id="ac-pag-info"></span>
+      <div class="pag-btns" id="ac-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 6 · AGENTE × PRODUCTO
+════════════════════════════════ -->
+<section id="sec-agente-producto" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Preferencias por agente</div>
+      <h2 class="section-title">Agente <em>×</em> Producto</h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="ap-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="ap-end">
+    </div>
+    <div class="filter-group">
+      <label>Agente</label>
+      <select id="ap-vendedor"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Marca</label>
+      <select id="ap-marca"><option value="">Todas</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="loadAgenteProducto()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('ap'); loadAgenteProducto()">Limpiar</button>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <span class="chart-title">Marca más vendida por Agente</span>
+        <span class="chart-pill">Stacked</span>
+      </div>
+      <canvas id="ch-ap-stacked"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Agente – Vehículo Vendido</span>
+      <input class="search-input" placeholder="Buscar…" oninput="filterTable('ap-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="ap-table">
+        <thead><tr>
+          <th>Agente</th><th>Placa</th><th>Marca</th><th>Modelo</th><th>Estilo</th>
+          <th>Cliente</th><th>Precio Venta</th><th>Tipo</th><th>Fecha</th>
+        </tr></thead>
+        <tbody id="ap-tbody"><tr class="loading-row"><td colspan="9"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="ap-pag">
+      <span id="ap-pag-info"></span>
+      <div class="pag-btns" id="ap-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     SECCIÓN 7 · TRIPLE
+════════════════════════════════ -->
+<section id="sec-triple" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-sub">Vista completa</div>
+      <h2 class="section-title">Agente <em>×</em> Cliente <em>×</em> Producto</h2>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Fecha inicio</label>
+      <input type="date" id="tr-start">
+    </div>
+    <div class="filter-group">
+      <label>Fecha fin</label>
+      <input type="date" id="tr-end">
+    </div>
+    <div class="filter-group">
+      <label>Agente</label>
+      <select id="tr-vendedor"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Cliente</label>
+      <input type="text" id="tr-cliente" placeholder="Nombre o cédula…">
+    </div>
+    <div class="filter-group">
+      <label>Marca</label>
+      <select id="tr-marca"><option value="">Todas</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="loadTriple()">Filtrar</button>
+    <button class="btn btn-outline" onclick="clearFilters('tr'); loadTriple()">Limpiar</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Registros</div><div class="kpi-value accent" id="k-tr-total">—</div></div>
+    <div class="kpi"><div class="kpi-label">Agentes</div><div class="kpi-value accent2" id="k-tr-agentes">—</div></div>
+    <div class="kpi"><div class="kpi-label">Clientes</div><div class="kpi-value accent4" id="k-tr-clientes">—</div></div>
+    <div class="kpi"><div class="kpi-label">Marcas</div><div class="kpi-value" id="k-tr-marcas">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total (CRC)</div><div class="kpi-value accent" id="k-tr-monto">—</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <span class="table-toolbar-title">Vista Completa</span>
+      <input class="search-input" placeholder="Buscar en todos los campos…" oninput="filterTable('tr-table', this.value)">
+    </div>
+    <div style="overflow-x:auto">
+      <table id="tr-table">
+        <thead><tr>
+          <th>Código</th><th>Fecha</th><th>Agente</th>
+          <th>Cliente Facturación</th><th>Cliente Inscripción</th>
+          <th>Placa</th><th>Marca</th><th>Modelo</th><th>Estilo</th>
+          <th>Tipo</th><th>Total</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="tr-tbody"><tr class="loading-row"><td colspan="12"><div class="spinner"></div><br>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="tr-pag">
+      <span id="tr-pag-info"></span>
+      <div class="pag-btns" id="tr-pag-btns"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════ */
+const API = window.location.origin; // same origin
+
+/* ═══════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════ */
+const fmt = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtN = n => new Intl.NumberFormat('es-CR').format(Math.round(n));
+const fmtCRC = n => fmt.format(n || 0);
+const fmtDate = d => d ? new Date(d).toLocaleDateString('es-CR') : '—';
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (error ? ' error' : '');
+  setTimeout(() => t.className = '', 3500);
+}
+
+async function apiFetch(url) {
+  try {
+    const r = await fetch(API + url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    showToast('Error al conectar con el servidor: ' + e.message, true);
+    return null;
+  }
+}
+
+function getDateDefaults() {
+  const end = new Date();
+  const start = new Date(); start.setFullYear(start.getFullYear() - 1);
+  return {
+    start: start.toISOString().split('T')[0],
+    end:   end.toISOString().split('T')[0]
+  };
+}
+
+function setDefaultDates(...prefixes) {
+  const { start, end } = getDateDefaults();
+  prefixes.forEach(p => {
+    const s = document.getElementById(p + '-start');
+    const e = document.getElementById(p + '-end');
+    if (s && !s.value) s.value = start;
+    if (e && !e.value) e.value = end;
+  });
+}
+
+function clearFilters(prefix) {
+  document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => {
+    if (el.tagName === 'INPUT') el.value = '';
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+  });
+}
+
+function buildQS(obj) {
+  const p = new URLSearchParams();
+  Object.entries(obj).forEach(([k,v]) => { if (v) p.set(k, v); });
+  return p.toString() ? '?' + p.toString() : '';
+}
+
+/* ─ Section navigation ─ */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  loadSection(id);
+}
+
+const loaded = {};
+function loadSection(id) {
+  if (loaded[id]) return;
+  loaded[id] = true;
+  switch (id) {
+    case 'total':          loadTotal();         break;
+    case 'cliente':        loadCliente();       break;
+    case 'producto':       loadProducto();      break;
+    case 'agente':         loadAgente();        break;
+    case 'agente-cliente': loadAgenteCliente(); break;
+    case 'agente-producto':loadAgenteProducto();break;
+    case 'triple':         loadTriple();        break;
+  }
+}
+
+/* ─ Table filter ─ */
+function filterTable(tableId, q) {
+  const lq = q.toLowerCase();
+  document.querySelectorAll(`#${tableId} tbody tr`).forEach(tr => {
+    if (tr.classList.contains('loading-row') || tr.classList.contains('empty-row')) return;
+    tr.style.display = tr.textContent.toLowerCase().includes(lq) ? '' : 'none';
+  });
+}
+
+/* ─ Chart helpers ─ */
+const charts = {};
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const palette = ['#e8c547','#3ecfb2','#e85c47','#7c6df5','#f97316','#06b6d4','#ec4899','#84cc16','#f43f5e','#a78bfa'];
+
+function chartDefaults(type) {
+  Chart.defaults.color = '#6b7280';
+  Chart.defaults.borderColor = '#1e2230';
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+}
+
+/* ─ Pagination helper ─ */
+function paginate(data, prefix, renderFn, pageSize = 20) {
+  let page = 1;
+  const pages = Math.max(1, Math.ceil(data.length / pageSize));
+  function render() {
+    const slice = data.slice((page - 1) * pageSize, page * pageSize);
+    renderFn(slice);
+    // info
+    const info = document.getElementById(prefix + '-pag-info');
+    if (info) info.textContent = `Mostrando ${(page-1)*pageSize+1}–${Math.min(page*pageSize, data.length)} de ${data.length}`;
+    // buttons
+    const btns = document.getElementById(prefix + '-pag-btns');
+    if (!btns) return;
+    btns.innerHTML = '';
+    const prev = document.createElement('button');
+    prev.className = 'pag-btn'; prev.textContent = '←'; prev.disabled = page === 1;
+    prev.onclick = () => { page--; render(); };
+    btns.appendChild(prev);
+    const maxBtns = 5;
+    const start = Math.max(1, page - 2);
+    const end   = Math.min(pages, start + maxBtns - 1);
+    for (let i = start; i <= end; i++) {
+      const b = document.createElement('button');
+      b.className = 'pag-btn' + (i === page ? ' active' : '');
+      b.textContent = i;
+      const pi = i;
+      b.onclick = () => { page = pi; render(); };
+      btns.appendChild(b);
+    }
+    const next = document.createElement('button');
+    next.className = 'pag-btn'; next.textContent = '→'; next.disabled = page === pages;
+    next.onclick = () => { page++; render(); };
+    btns.appendChild(next);
+  }
+  render();
+}
+
+function emptyRow(cols, msg = 'Sin resultados') {
+  return `<tr class="empty-row"><td colspan="${cols}" style="text-align:center;padding:2.5rem;color:var(--muted)">${msg}</td></tr>`;
+}
+
+function stateBadge(estado) {
+  const map = {
+    'YA FUE FACTURADA':       'badge-green',
+    'PENDIENTE DE FACTURAR':  'badge-yellow',
+    'FACTURA ANULADA':        'badge-red',
+    'PLAN YA FUE ANULADO':    'badge-red',
+  };
+  return `<span class="badge ${map[estado] || 'badge-purple'}">${estado || '—'}</span>`;
+}
+
+function rankBadge(i) {
+  if (i === 0) return '<span class="rank-badge rank-1">1</span>';
+  if (i === 1) return '<span class="rank-badge rank-2">2</span>';
+  if (i === 2) return '<span class="rank-badge rank-3">3</span>';
+  return `<span class="rank-badge rank-n">${i+1}</span>`;
+}
+
+function barCell(val, max) {
+  const pct = max > 0 ? (val / max * 100).toFixed(1) : 0;
+  return `<div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span style="font-size:.8rem;color:var(--muted)">${pct}%</span></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   POPULATE SELECT: vendedores & marcas
+═══════════════════════════════════════════════════════ */
+async function populateSelects() {
+  const [vendedores, marcas] = await Promise.all([
+    apiFetch('/api/vendedores-activos'),
+    apiFetch('/api/marcas')
+  ]);
+
+  const vSelects = ['age-vendedor','ac-vendedor','ap-vendedor','tr-vendedor'];
+  const mSelects = ['prod-marca','ap-marca','tr-marca'];
+
+  vSelects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !vendedores) return;
+    vendedores.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.ID_PERSONA;
+      o.textContent = v.NOMBRE_COMPLETO;
+      el.appendChild(o);
+    });
+  });
+
+  mSelects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !marcas) return;
+    marcas.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.ID_MARCA;
+      o.textContent = m.NOMBRE;
+      el.appendChild(o);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 1 · VENTAS TOTALES
+═══════════════════════════════════════════════════════ */
+async function loadTotal() {
+  setDefaultDates('tot');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('tot-start').value,
+    fecha_fin:    document.getElementById('tot-end').value,
+    estado:       document.getElementById('tot-estado').value,
+  });
+
+  const [data, kpis, mensual] = await Promise.all([
+    apiFetch('/api/estadisticas/ventas-total' + qs),
+    apiFetch('/api/estadisticas/ventas-kpis' + qs),
+    apiFetch('/api/estadisticas/ventas-mensual' + qs),
+  ]);
+
+  if (!data || !kpis) return;
+
+  // KPIs
+  document.getElementById('k-total-ventas').textContent = fmtN(kpis.total_ventas || 0);
+  document.getElementById('k-total-crc').textContent    = fmtCRC(kpis.total_crc || 0);
+  document.getElementById('k-promedio').textContent     = fmtCRC(kpis.promedio || 0);
+  document.getElementById('k-contado').textContent      = fmtN(kpis.contado || 0);
+  document.getElementById('k-credito').textContent      = fmtN(kpis.credito || 0);
+  document.getElementById('k-inventario').textContent   = fmtN(kpis.inventario || 0);
+
+  // Chart mensual
+  if (mensual) {
+    destroyChart('ch-mensual');
+    chartDefaults();
+    charts['ch-mensual'] = new Chart(document.getElementById('ch-mensual'), {
+      type: 'bar',
+      data: {
+        labels: mensual.map(m => m.mes),
+        datasets: [{
+          label: 'Ventas',
+          data: mensual.map(m => m.cantidad),
+          backgroundColor: 'rgba(232,197,71,.7)',
+          borderColor: '#e8c547',
+          borderWidth: 1,
+          borderRadius: 5,
+        },{
+          label: 'Total CRC (millones)',
+          data: mensual.map(m => (m.total_crc || 0) / 1e6),
+          type: 'line',
+          borderColor: '#3ecfb2',
+          backgroundColor: 'rgba(62,207,178,.1)',
+          tension: .4,
+          fill: true,
+          yAxisID: 'y2',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index' },
+        plugins: { legend: { labels: { color: '#eef0f7' } } },
+        scales: {
+          x: { grid: { color: '#1e2230' } },
+          y:  { grid: { color: '#1e2230' }, beginAtZero: true, title: { display: true, text: 'Ventas', color: '#6b7280' } },
+          y2: { position: 'right', grid: { display: false }, title: { display: true, text: 'Millones CRC', color: '#6b7280' } }
+        }
+      }
+    });
+  }
+
+  // Chart estado
+  if (kpis.por_estado) {
+    destroyChart('ch-estado');
+    charts['ch-estado'] = new Chart(document.getElementById('ch-estado'), {
+      type: 'doughnut',
+      data: {
+        labels: kpis.por_estado.map(e => e.estado),
+        datasets: [{ data: kpis.por_estado.map(e => e.cantidad), backgroundColor: palette, borderWidth: 2, borderColor: '#111318' }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7', padding: 16 } } } }
+    });
+  }
+
+  // Chart tipo
+  destroyChart('ch-tipo');
+  charts['ch-tipo'] = new Chart(document.getElementById('ch-tipo'), {
+    type: 'pie',
+    data: {
+      labels: ['Contado', 'Crédito'],
+      datasets: [{ data: [kpis.contado || 0, kpis.credito || 0], backgroundColor: ['#3ecfb2','#7c6df5'], borderWidth: 2, borderColor: '#111318' }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7', padding: 16 } } } }
+  });
+
+  // Table
+  const tbody = document.getElementById('tot-tbody');
+  if (!data.length) { tbody.innerHTML = emptyRow(8); return; }
+  paginate(data, 'tot', rows => {
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${r.CODIGO_VENTA || '—'}</strong></td>
+        <td>${fmtDate(r.FECHA_VENTA)}</td>
+        <td class="wrap">${r.cliente_nombre || '—'}</td>
+        <td>${(r.marca_nombre || '') + ' ' + (r.MODELO || '')}</td>
+        <td>${r.vendedor_nombre || '—'}</td>
+        <td><span class="badge ${r.tipo === 'CREDITO' ? 'badge-purple' : 'badge-green'}">${r.tipo || 'CONTADO'}</span></td>
+        <td>${fmtCRC(r.TOTAL || r.precio_venta)}</td>
+        <td>${stateBadge(r.ESTADO_PAGO)}</td>
+      </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 2 · POR CLIENTE
+═══════════════════════════════════════════════════════ */
+async function loadCliente() {
+  setDefaultDates('cli');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('cli-start').value,
+    fecha_fin:    document.getElementById('cli-end').value,
+    nombre:       document.getElementById('cli-nombre').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-por-cliente' + qs);
+  if (!data) return;
+
+  const rows = data.clientes || data;
+  const maxT = Math.max(...rows.map(r => r.total_crc || 0), 1);
+
+  // KPIs
+  document.getElementById('k-cli-unicos').textContent      = fmtN(rows.length);
+  document.getElementById('k-cli-recurrentes').textContent = fmtN(rows.filter(r => r.num_compras > 1).length);
+  document.getElementById('k-cli-max').textContent         = fmtCRC(maxT);
+  const prom = rows.length ? rows.reduce((a,r) => a + (r.total_crc||0), 0) / rows.length : 0;
+  document.getElementById('k-cli-prom').textContent        = fmtCRC(prom);
+
+  // Chart top 10
+  const top10 = [...rows].sort((a,b) => b.total_crc - a.total_crc).slice(0,10);
+  destroyChart('ch-cli-top');
+  charts['ch-cli-top'] = new Chart(document.getElementById('ch-cli-top'), {
+    type: 'bar',
+    data: {
+      labels: top10.map(r => r.cliente_nombre),
+      datasets: [{
+        label: 'Total CRC',
+        data: top10.map(r => r.total_crc || 0),
+        backgroundColor: palette,
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#1e2230' }, ticks: { callback: v => fmtCRC(v) } },
+        y: { grid: { color: '#1e2230' } }
+      }
+    }
+  });
+
+  // Chart distribución
+  const buckets = { '1 compra': 0, '2 compras': 0, '3+': 0 };
+  rows.forEach(r => {
+    if (r.num_compras === 1) buckets['1 compra']++;
+    else if (r.num_compras === 2) buckets['2 compras']++;
+    else buckets['3+']++;
+  });
+  destroyChart('ch-cli-dist');
+  charts['ch-cli-dist'] = new Chart(document.getElementById('ch-cli-dist'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(buckets),
+      datasets: [{ data: Object.values(buckets), backgroundColor: ['#e8c547','#3ecfb2','#7c6df5'], borderWidth: 2, borderColor: '#111318' }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7', padding: 12 } } } }
+  });
+
+  // Chart activos por mes
+  const mesMapa = {};
+  rows.forEach(r => {
+    if (r.ultima_compra) {
+      const k = r.ultima_compra.substr(0,7);
+      mesMapa[k] = (mesMapa[k] || 0) + 1;
+    }
+  });
+  const meses = Object.keys(mesMapa).sort();
+  destroyChart('ch-cli-mes');
+  charts['ch-cli-mes'] = new Chart(document.getElementById('ch-cli-mes'), {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: [{
+        label: 'Clientes activos',
+        data: meses.map(m => mesMapa[m]),
+        borderColor: '#3ecfb2',
+        backgroundColor: 'rgba(62,207,178,.1)',
+        tension: .4, fill: true, pointRadius: 4,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e2230' } }, y: { grid: { color: '#1e2230' }, beginAtZero: true } } }
+  });
+
+  // Table
+  const tbody = document.getElementById('cli-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(8); return; }
+  const sorted = [...rows].sort((a,b) => b.total_crc - a.total_crc);
+  paginate(sorted, 'cli', slice => {
+    tbody.innerHTML = slice.map((r, i) => `
+      <tr>
+        <td>${rankBadge(sorted.indexOf(r))}</td>
+        <td class="wrap"><strong>${r.cliente_nombre || '—'}</strong></td>
+        <td>${r.IDENTIFICACION || '—'}</td>
+        <td>${r.TELEFONO_PRINCIPAL || '—'}</td>
+        <td style="text-align:center"><strong>${r.num_compras}</strong></td>
+        <td>${fmtCRC(r.total_crc)}</td>
+        <td>${fmtDate(r.ultima_compra)}</td>
+        <td>${barCell(r.total_crc, maxT)}</td>
+      </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 3 · POR PRODUCTO
+═══════════════════════════════════════════════════════ */
+async function loadProducto() {
+  setDefaultDates('prod');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('prod-start').value,
+    fecha_fin:    document.getElementById('prod-end').value,
+    id_marca:     document.getElementById('prod-marca').value,
+    tipo_venta:   document.getElementById('prod-tipo').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-por-producto' + qs);
+  if (!data) return;
+
+  const rows = data.vehiculos || data;
+  const marcasUnicas = [...new Set(rows.map(r => r.marca_nombre))].filter(Boolean);
+
+  document.getElementById('k-prod-total').textContent    = fmtN(rows.length);
+  document.getElementById('k-prod-marcas').textContent   = fmtN(marcasUnicas.length);
+  const topMarca = marcasUnicas.map(m => ({ m, c: rows.filter(r => r.marca_nombre === m).length })).sort((a,b) => b.c-a.c)[0];
+  document.getElementById('k-prod-top-marca').textContent = topMarca?.m || '—';
+  const totalGanancia = rows.reduce((a, r) => a + (r.ganancia || 0), 0);
+  document.getElementById('k-prod-ganancia').textContent = fmtCRC(totalGanancia);
+
+  // Chart marcas
+  const marcaCounts = {};
+  rows.forEach(r => marcaCounts[r.marca_nombre] = (marcaCounts[r.marca_nombre] || 0) + 1);
+  const sortedMarcas = Object.entries(marcaCounts).sort((a,b) => b[1]-a[1]);
+  destroyChart('ch-prod-marca');
+  charts['ch-prod-marca'] = new Chart(document.getElementById('ch-prod-marca'), {
+    type: 'bar',
+    data: {
+      labels: sortedMarcas.map(e => e[0]),
+      datasets: [{ label: 'Unidades', data: sortedMarcas.map(e => e[1]), backgroundColor: palette, borderRadius: 5 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e2230' } }, y: { grid: { color: '#1e2230' }, beginAtZero: true } } }
+  });
+
+  // Chart año
+  const anioCounts = {};
+  rows.forEach(r => { const k = r.MODELO || 'N/A'; anioCounts[k] = (anioCounts[k] || 0) + 1; });
+  const sortedAnios = Object.entries(anioCounts).sort((a,b) => a[0]-b[0]);
+  destroyChart('ch-prod-anio');
+  charts['ch-prod-anio'] = new Chart(document.getElementById('ch-prod-anio'), {
+    type: 'bar',
+    data: {
+      labels: sortedAnios.map(e => e[0]),
+      datasets: [{ label: 'Unidades', data: sortedAnios.map(e => e[1]), backgroundColor: 'rgba(124,109,245,.7)', borderColor: '#7c6df5', borderWidth: 1, borderRadius: 4 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e2230' } }, y: { grid: { color: '#1e2230' }, beginAtZero: true } } }
+  });
+
+  // Chart combustible
+  const combCounts = {};
+  rows.forEach(r => { const k = r.combustible_nombre || 'N/D'; combCounts[k] = (combCounts[k] || 0) + 1; });
+  destroyChart('ch-prod-comb');
+  charts['ch-prod-comb'] = new Chart(document.getElementById('ch-prod-comb'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(combCounts),
+      datasets: [{ data: Object.values(combCounts), backgroundColor: ['#e8c547','#3ecfb2'], borderWidth: 2, borderColor: '#111318' }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7' } } } }
+  });
+
+  // Chart transmisión
+  const transCounts = {};
+  rows.forEach(r => { const k = r.transmision_nombre || 'N/D'; transCounts[k] = (transCounts[k] || 0) + 1; });
+  destroyChart('ch-prod-trans');
+  charts['ch-prod-trans'] = new Chart(document.getElementById('ch-prod-trans'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(transCounts),
+      datasets: [{ data: Object.values(transCounts), backgroundColor: ['#7c6df5','#e85c47'], borderWidth: 2, borderColor: '#111318' }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7' } } } }
+  });
+
+  // Table
+  const tbody = document.getElementById('prod-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(10); return; }
+  paginate(rows, 'prod', slice => {
+    tbody.innerHTML = slice.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${r.PLACA || '—'}</strong></td>
+        <td>${r.marca_nombre || '—'}</td>
+        <td>${r.MODELO || '—'}</td>
+        <td>${r.ESTILO || '—'}</td>
+        <td>${r.combustible_nombre || '—'}</td>
+        <td>${r.transmision_nombre || '—'}</td>
+        <td>${fmtCRC(r.precio_venta)}</td>
+        <td style="color:${(r.ganancia||0)>=0?'var(--accent2)':'var(--accent3)'}"><strong>${fmtCRC(r.ganancia)}</strong></td>
+        <td>${fmtDate(r.FECHA_VENTA)}</td>
+      </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 4 · POR AGENTE
+═══════════════════════════════════════════════════════ */
+async function loadAgente() {
+  setDefaultDates('age');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('age-start').value,
+    fecha_fin:    document.getElementById('age-end').value,
+    id_vendedor:  document.getElementById('age-vendedor').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-por-agente' + qs);
+  if (!data) return;
+  const rows = data.agentes || data;
+  const totalVentas = rows.reduce((a,r) => a + (r.num_ventas||0), 0);
+  const totalCRC    = rows.reduce((a,r) => a + (r.total_crc||0), 0);
+
+  // KPIs
+  document.getElementById('k-age-total').textContent = fmtN(rows.length);
+  const lider = rows.sort((a,b) => b.num_ventas - a.num_ventas)[0];
+  document.getElementById('k-age-lider').textContent = lider?.vendedor_nombre || '—';
+  document.getElementById('k-age-prom').textContent  = fmtN(rows.length ? totalVentas / rows.length : 0);
+  document.getElementById('k-age-comision').textContent = fmtCRC(rows.reduce((a,r) => a + (r.total_comision||0), 0));
+
+  // Chart bar
+  const sorted = [...rows].sort((a,b) => b.num_ventas - a.num_ventas);
+  destroyChart('ch-age-bar');
+  charts['ch-age-bar'] = new Chart(document.getElementById('ch-age-bar'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(r => r.vendedor_nombre),
+      datasets: [
+        { label: 'N° Ventas', data: sorted.map(r => r.num_ventas||0), backgroundColor: 'rgba(232,197,71,.75)', borderRadius: 5 },
+        { label: 'Total Millones CRC', data: sorted.map(r => (r.total_crc||0)/1e6), type: 'line', borderColor: '#3ecfb2', backgroundColor: 'rgba(62,207,178,.1)', tension: .4, fill: false, yAxisID: 'y2', pointRadius: 5 }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index' },
+      plugins: { legend: { labels: { color: '#eef0f7' } } },
+      scales: {
+        x: { grid: { color: '#1e2230' } },
+        y:  { grid: { color: '#1e2230' }, beginAtZero: true, title: { display: true, text: 'Ventas', color: '#6b7280' } },
+        y2: { position: 'right', grid: { display: false }, title: { display: true, text: 'Millones CRC', color: '#6b7280' } }
+      }
+    }
+  });
+
+  // Chart pie
+  destroyChart('ch-age-pie');
+  charts['ch-age-pie'] = new Chart(document.getElementById('ch-age-pie'), {
+    type: 'doughnut',
+    data: {
+      labels: sorted.map(r => r.vendedor_nombre),
+      datasets: [{ data: sorted.map(r => r.num_ventas||0), backgroundColor: palette, borderWidth: 2, borderColor: '#111318' }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eef0f7', padding: 10, boxWidth: 12 } } } }
+  });
+
+  // Chart line mensual por agente (top 5)
+  const top5 = sorted.slice(0,5);
+  const mesesSet = new Set();
+  top5.forEach(r => (r.por_mes||[]).forEach(m => mesesSet.add(m.mes)));
+  const meses = [...mesesSet].sort();
+  destroyChart('ch-age-line');
+  charts['ch-age-line'] = new Chart(document.getElementById('ch-age-line'), {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: top5.map((r,i) => ({
+        label: r.vendedor_nombre,
+        data: meses.map(m => { const found = (r.por_mes||[]).find(x => x.mes === m); return found ? found.cantidad : 0; }),
+        borderColor: palette[i],
+        backgroundColor: 'transparent',
+        tension: .4, pointRadius: 4,
+      }))
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#eef0f7', padding: 10 } } }, scales: { x: { grid: { color: '#1e2230' } }, y: { grid: { color: '#1e2230' }, beginAtZero: true } } }
+  });
+
+  // Table
+  const tbody = document.getElementById('age-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(9); return; }
+  paginate(sorted, 'age', slice => {
+    tbody.innerHTML = slice.map((r,i) => {
+      const pct = totalVentas > 0 ? (r.num_ventas / totalVentas * 100).toFixed(1) : 0;
+      return `<tr>
+        <td>${rankBadge(sorted.indexOf(r))}</td>
+        <td class="wrap"><strong>${r.vendedor_nombre}</strong></td>
+        <td>${r.IDENTIFICACION || '—'}</td>
+        <td style="text-align:center"><strong>${r.num_ventas}</strong></td>
+        <td>${fmtCRC(r.total_crc)}</td>
+        <td>${fmtCRC(r.num_ventas ? r.total_crc / r.num_ventas : 0)}</td>
+        <td>${fmtN(r.contado||0)}</td>
+        <td>${fmtN(r.credito||0)}</td>
+        <td>${barCell(r.num_ventas, totalVentas)}</td>
+      </tr>`;
+    }).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 5 · AGENTE × CLIENTE
+═══════════════════════════════════════════════════════ */
+async function loadAgenteCliente() {
+  setDefaultDates('ac');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('ac-start').value,
+    fecha_fin:    document.getElementById('ac-end').value,
+    id_vendedor:  document.getElementById('ac-vendedor').value,
+    cliente:      document.getElementById('ac-cliente').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-agente-cliente' + qs);
+  if (!data) return;
+  const rows = data.rows || data;
+
+  // Chart stacked bar top 5 agentes
+  const agentesMap = {};
+  rows.forEach(r => {
+    if (!agentesMap[r.vendedor_nombre]) agentesMap[r.vendedor_nombre] = {};
+    agentesMap[r.vendedor_nombre][r.cliente_nombre] = (agentesMap[r.vendedor_nombre][r.cliente_nombre] || 0) + (r.num_compras || 1);
+  });
+  const topAgentes = Object.entries(agentesMap).sort((a,b) => Object.values(b[1]).reduce((x,y)=>x+y,0) - Object.values(a[1]).reduce((x,y)=>x+y,0)).slice(0,6);
+  const allClientes = [...new Set(rows.map(r => r.cliente_nombre))].slice(0,8);
+
+  destroyChart('ch-ac-bar');
+  charts['ch-ac-bar'] = new Chart(document.getElementById('ch-ac-bar'), {
+    type: 'bar',
+    data: {
+      labels: topAgentes.map(([a]) => a),
+      datasets: allClientes.map((cli, i) => ({
+        label: cli,
+        data: topAgentes.map(([ag, clientes]) => clientes[cli] || 0),
+        backgroundColor: palette[i % palette.length],
+        borderRadius: 3,
+        stack: 'a',
+      }))
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#eef0f7', padding: 10, boxWidth: 12 } } },
+      scales: { x: { stacked: true, grid: { color: '#1e2230' } }, y: { stacked: true, grid: { color: '#1e2230' }, beginAtZero: true } }
+    }
+  });
+
+  // Table
+  const tbody = document.getElementById('ac-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(8); return; }
+  paginate(rows, 'ac', slice => {
+    tbody.innerHTML = slice.map(r => `<tr>
+      <td class="wrap"><strong>${r.vendedor_nombre || '—'}</strong></td>
+      <td class="wrap">${r.cliente_nombre || '—'}</td>
+      <td>${r.cliente_cedula || '—'}</td>
+      <td>${r.telefono || '—'}</td>
+      <td style="text-align:center"><strong>${r.num_compras}</strong></td>
+      <td>${fmtCRC(r.total_crc)}</td>
+      <td>${fmtDate(r.ultima_venta)}</td>
+      <td>${stateBadge(r.ultimo_estado)}</td>
+    </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 6 · AGENTE × PRODUCTO
+═══════════════════════════════════════════════════════ */
+async function loadAgenteProducto() {
+  setDefaultDates('ap');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('ap-start').value,
+    fecha_fin:    document.getElementById('ap-end').value,
+    id_vendedor:  document.getElementById('ap-vendedor').value,
+    id_marca:     document.getElementById('ap-marca').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-agente-producto' + qs);
+  if (!data) return;
+  const rows = data.rows || data;
+
+  // Stacked chart
+  const agentesMap = {};
+  rows.forEach(r => {
+    if (!agentesMap[r.vendedor_nombre]) agentesMap[r.vendedor_nombre] = {};
+    agentesMap[r.vendedor_nombre][r.marca_nombre] = (agentesMap[r.vendedor_nombre][r.marca_nombre] || 0) + 1;
+  });
+  const topAgentes = Object.entries(agentesMap).sort((a,b) => Object.values(b[1]).reduce((x,y)=>x+y,0)-Object.values(a[1]).reduce((x,y)=>x+y,0)).slice(0,8);
+  const allMarcas = [...new Set(rows.map(r => r.marca_nombre))].filter(Boolean);
+
+  destroyChart('ch-ap-stacked');
+  charts['ch-ap-stacked'] = new Chart(document.getElementById('ch-ap-stacked'), {
+    type: 'bar',
+    data: {
+      labels: topAgentes.map(([a]) => a),
+      datasets: allMarcas.map((m, i) => ({
+        label: m,
+        data: topAgentes.map(([ag, marcas]) => marcas[m] || 0),
+        backgroundColor: palette[i % palette.length],
+        borderRadius: 3,
+        stack: 'a',
+      }))
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#eef0f7', padding: 10, boxWidth: 12 } } },
+      scales: { x: { stacked: true, grid: { color: '#1e2230' } }, y: { stacked: true, grid: { color: '#1e2230' }, beginAtZero: true } }
+    }
+  });
+
+  // Table
+  const tbody = document.getElementById('ap-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(9); return; }
+  paginate(rows, 'ap', slice => {
+    tbody.innerHTML = slice.map(r => `<tr>
+      <td class="wrap"><strong>${r.vendedor_nombre || '—'}</strong></td>
+      <td>${r.PLACA || '—'}</td>
+      <td>${r.marca_nombre || '—'}</td>
+      <td>${r.MODELO || '—'}</td>
+      <td>${r.ESTILO || '—'}</td>
+      <td class="wrap">${r.cliente_nombre || '—'}</td>
+      <td>${fmtCRC(r.precio_venta)}</td>
+      <td><span class="badge ${r.tipo==='CREDITO'?'badge-purple':'badge-green'}">${r.tipo||'CONTADO'}</span></td>
+      <td>${fmtDate(r.FECHA_VENTA)}</td>
+    </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN 7 · TRIPLE
+═══════════════════════════════════════════════════════ */
+async function loadTriple() {
+  setDefaultDates('tr');
+  const qs = buildQS({
+    fecha_inicio: document.getElementById('tr-start').value,
+    fecha_fin:    document.getElementById('tr-end').value,
+    id_vendedor:  document.getElementById('tr-vendedor').value,
+    cliente:      document.getElementById('tr-cliente').value,
+    id_marca:     document.getElementById('tr-marca').value,
+  });
+
+  const data = await apiFetch('/api/estadisticas/ventas-completo' + qs);
+  if (!data) return;
+  const rows = data.rows || data;
+
+  // KPIs
+  document.getElementById('k-tr-total').textContent   = fmtN(rows.length);
+  document.getElementById('k-tr-agentes').textContent = fmtN(new Set(rows.map(r=>r.id_vendedor)).size);
+  document.getElementById('k-tr-clientes').textContent= fmtN(new Set(rows.map(r=>r.id_cliente)).size);
+  document.getElementById('k-tr-marcas').textContent  = fmtN(new Set(rows.map(r=>r.marca_nombre)).size);
+  document.getElementById('k-tr-monto').textContent   = fmtCRC(rows.reduce((a,r)=>a+(r.TOTAL||0),0));
+
+  // Table
+  const tbody = document.getElementById('tr-tbody');
+  if (!rows.length) { tbody.innerHTML = emptyRow(12); return; }
+  paginate(rows, 'tr', slice => {
+    tbody.innerHTML = slice.map(r => `<tr>
+      <td><strong>${r.CODIGO_VENTA||'—'}</strong></td>
+      <td>${fmtDate(r.FECHA_VENTA)}</td>
+      <td class="wrap">${r.vendedor_nombre||'—'}</td>
+      <td class="wrap">${r.cliente_facturacion||'—'}</td>
+      <td class="wrap">${r.cliente_inscripcion||'—'}</td>
+      <td>${r.PLACA||'—'}</td>
+      <td>${r.marca_nombre||'—'}</td>
+      <td>${r.MODELO||'—'}</td>
+      <td>${r.ESTILO||'—'}</td>
+      <td><span class="badge ${r.tipo==='CREDITO'?'badge-purple':'badge-green'}">${r.tipo||'CONTADO'}</span></td>
+      <td>${fmtCRC(r.TOTAL)}</td>
+      <td>${stateBadge(r.ESTADO_PAGO)}</td>
+    </tr>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+(async function init() {
+  await populateSelects();
+  setDefaultDates('tot','cli','prod','age','ac','ap','tr');
+  await loadTotal();
+  document.getElementById('lastUpdate').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CR');
+})();
+</script>
+</body>
+</html>

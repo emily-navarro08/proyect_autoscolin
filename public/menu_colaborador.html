@@ -7,6 +7,64 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style_componentes.css">
     <link rel="stylesheet" href="/css/style_menu.css">
+    <style>
+        /* Estilo para el mensaje flotante */
+        .mensaje-flotante {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            border-left: 5px solid #ffeb3b;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto visual para elementos restringidos */
+        .card.restringido {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card.restringido::after {
+            content: "🔒";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 
 <body>
@@ -21,7 +79,7 @@
     <!-- Header principal -->
     <header class="main-header">
         <img src="/img/icon-192.png" alt="Logo Autos Colin">
-        <div class="usuario"> 🖥️ Nombre persona - GERENTE</div>
+        <div class="usuario" id="usuarioInfo"> 🖥️ Cargando...</div>
     </header>
 
     <!-- Contenedor principal -->
@@ -31,11 +89,14 @@
             <div class="sidebar-content">
                 <h2>Autos Colín</h2>
                 <ul class="menu-items">
-                    <li class="active">
-                        <a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a>
-                    </li>
+                    <li class="active"><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+
                 </ul>   
-                <button class="salir" onclick="location.href='index.html'">
+                <button class="salir" id="btnSalir">
                     <i class="fas fa-sign-out"></i> Salir
                 </button>
             </div>       
@@ -50,24 +111,144 @@
 
             <!-- Tarjetas de funciones -->
             <div class="grid">
-                <div class="card" onclick="location.href=''"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Facturación</div>
-                <div class="card" onclick="location.href=''"><i class="fas fa-cash-register" aria-hidden="true"></i> Recibos</div>
-                <div class="card" onclick="location.href='inventario.html'"><i class="fas fa-car" aria-hidden="true"></i> Inventario</div>
-                <div class="card" onclick="location.href=''"><i class="fas fa-users" aria-hidden="true"></i> Clientes </div>
-                <div class="card" onclick="location.href='certificado_garantia.html'"><i class="fas fa-award" aria-hidden="true"></i> Certificado</div>
-                <div class="card" onclick="location.href='plan_venta.html'"><i class="fas fa-calendar-alt"></i> Plan Venta</div>
+                <div class="card" data-href="#"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Facturación</div>
+                <div class="card" data-href="#"><i class="fas fa-cash-register" aria-hidden="true"></i> Recibos</div>
+                <div class="card" data-href="inventario_colab.html"><i class="fas fa-car" aria-hidden="true"></i> Inventario</div>
+                <div class="card" data-href="#"><i class="fas fa-money-bill-wave" aria-hidden="true"></i> Cuentas X Cobrar</div>
+                <div class="card" data-href="#"><i class="fas fa-users" aria-hidden="true"></i> Clientes </div>
+                <div class="card" data-href="certificado_garantiacolab.html"><i class="fas fa-award" aria-hidden="true"></i> Certificado</div>
+                <div class="card" data-href="plan_ventacolab.html"><i class="fas fa-calendar-alt"></i> Plan Venta</div>
+                <div class="card" data-href="#"><i class="fas fa-coins" aria-hidden="true"></i> Respaldos</div>
             </div>
         </div>
     </div>
 
     <script src="/funcion_movil.js"></script>
+    <script src="cargar_usuario.js"></script>
+
     <script>
-        // Botón de salir
-        const salirBtn = document.querySelector('.salir');
-        salirBtn.addEventListener('click', () => {
-            if (confirm('¿Está seguro que desea salir del sistema?')) {
-                alert('Saliendo del sistema...');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener datos del usuario
+            const usuarioRol = sessionStorage.getItem('usuarioRol');
+            const usuarioNombre = sessionStorage.getItem('usuarioNombre');
+            
+            // Actualizar nombre del usuario
+            if (usuarioNombre && usuarioRol) {
+                document.getElementById('usuarioInfo').innerHTML = `🖥️ ${usuarioNombre} - ${usuarioRol.toUpperCase()}`;
             }
+            
+            // Verificar si hay sesión activa
+            if (!sessionStorage.getItem('usuarioId')) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Definir módulos permitidos para colaboradores
+            const MODULOS_PERMITIDOS = [
+                'inventario', 'certificado', 'plan venta'
+            ];
+
+            // Función para mostrar mensaje
+            function mostrarMensajeDenegado(modulo) {
+                // Crear elemento de mensaje
+                const mensaje = document.createElement('div');
+                mensaje.className = 'mensaje-flotante';
+                mensaje.innerHTML = `
+                    <i class="fas fa-lock" style="font-size: 20px;"></i>
+                    <div>
+                        <strong>Acceso Denegado</strong><br>
+                        No tienes permisos para acceder a ${modulo}
+                    </div>
+                `;
+                
+                document.body.appendChild(mensaje);
+                
+                // Eliminar después de 3 segundos
+                setTimeout(() => {
+                    mensaje.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(mensaje);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Función para verificar acceso
+            function verificarAcceso(href, modulo) {
+                // Si es gerente, permitir todo
+                if (usuarioRol && usuarioRol.toLowerCase().includes('gerente')) {
+                    window.location.href = href;
+                    return true;
+                }
+                
+                // Verificar si el módulo está permitido para colaboradores
+                const moduloLower = modulo.toLowerCase();
+                const tienePermiso = MODULOS_PERMITIDOS.some(m => moduloLower.includes(m));
+                
+                if (tienePermiso) {
+                    window.location.href = href;
+                    return true;
+                } else {
+                    mostrarMensajeDenegado(modulo);
+                    return false;
+                }
+            }
+
+            // Configurar eventos para las tarjetas
+            const tarjetas = document.querySelectorAll('.card');
+            tarjetas.forEach(tarjeta => {
+                const href = tarjeta.getAttribute('data-href');
+                const modulo = tarjeta.textContent.trim();
+                
+                // Para colaboradores, marcar visualmente los módulos restringidos
+                if (usuarioRol && !usuarioRol.toLowerCase().includes('gerente')) {
+                    const moduloLower = modulo.toLowerCase();
+                    const esPermitido = MODULOS_PERMITIDOS.some(m => moduloLower.includes(m));
+                    
+                    if (!esPermitido && href) {
+                        tarjeta.classList.add('restringido');
+                    }
+                }
+                
+                // Agregar evento click
+                tarjeta.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (href) {
+                        verificarAcceso(href, modulo);
+                    }
+                });
+            });
+
+            // Configurar eventos para los enlaces del menú lateral
+            const enlacesMenu = document.querySelectorAll('.sidebar a');
+            enlacesMenu.forEach(enlace => {
+                const href = enlace.getAttribute('href');
+                const modulo = enlace.textContent.trim();
+                
+                // Solo procesar enlaces que no sean "#" y no sean "Inicio"
+                if (href && href !== '#' && !href.includes('menu_admi')) {
+                    enlace.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Si es gerente, permitir todo
+                        if (usuarioRol && usuarioRol.toLowerCase().includes('gerente')) {
+                            window.location.href = href;
+                            return;
+                        }
+                        
+                        // Para colaboradores, mostrar mensaje en todas las opciones del menú
+                        mostrarMensajeDenegado(modulo);
+                    });
+                }
+            });
+
+            // Botón de salir
+            document.getElementById('btnSalir').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('¿Está seguro que desea salir del sistema?')) {
+                    sessionStorage.clear();
+                    window.location.href = 'index.html';
+                }
+            });
         });
     </script>
 </body>
