@@ -457,7 +457,7 @@ function generarCertificadoHTML(datos) {
         
         <p>AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA no presta servicio de Grúa, si el mismo se requiere tendrá que ser pagado por el cliente.</p>
         
-        <p>En cumplimiento a lo que indica el artículo 108, son derechos del titular durante la vigencia de la garantía los siguientes:</p>
+        <p>En cumplimiento a lo que indica el artículo 108, son derechos del titular durante la vigencia </br> de la garantía los siguientes:</p>
         
         <p>A) La garantía comprenderá los vicios o defectos que afecten la identidad entre lo ofrecido y lo entregado, y su correcto funcionamiento, salvo que estos se hayan informado previamente y consten por escrito, en la factura o en un documento aparte, en el momento de la contratación y el consumidor los acepte.</p>
         
@@ -550,93 +550,334 @@ garantiaForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Evento para imprimir el certificado
-printBtn.addEventListener('click', () => {
+// ================================================================
+//  FUNCIÓN PARA GENERAR PDF DEL CERTIFICADO DE GARANTÍA
+// ================================================================
+async function generarPDFCertificado() {
+    // Verificar que hay datos del certificado
     if (!certificadoGenerado) {
         showMessage('Primero debe generar un certificado', 'error');
         return;
     }
-    
-    const ventanaImpresion = window.open('', '_blank');
-    const contenido = certificatePreview.innerHTML;
-    
-    ventanaImpresion.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Certificado de Garantía - Autos Colin SRL</title>
-            <style>
-                @media print {
-                    @page {
-                        size: letter;
-                        margin: 15mm;
-                    }
-                }
-                body { 
-                    font-family: 'Times New Roman', Times, serif; 
-                    line-height: 1.5; 
-                    color: #000; 
-                    margin: 0;
-                    padding: 20px;
-                    background-image: url('/img/icon-192.png');
-                    background-repeat: no-repeat;
-                    background-position: center top 20px;
-                    background-size: 120px 120px;
-                    padding-top: 140px;
-                }
-                .certificate-header {
-                    text-align: center; 
-                    margin-bottom: 20px;
-                }
-                .certificate-header h2 {
-                    text-decoration: underline;
-                }
-                .company-name { font-weight: bold; }
-                .data-table { 
-                    width: 100%; 
-                    border-collapse: collapse; 
-                    margin: 15px 0; 
-                }
-                .data-table td, .data-table th { 
-                    border: 1px solid #000; 
-                    padding: 8px; 
-                    text-align: center; 
-                }
-                .data-table th { background-color: #f0f0f0; }
-                .client-info { 
-                    margin: 15px 0; 
-                    padding: 10px; 
-                    border: 1px dashed #ccc; 
-                }
-                .signature-section { 
-                    margin-top: 40px; 
-                    text-align: center; 
-                    padding-top: 20px; 
-                    border-top: 1px solid #000; 
-                }
-                @media print {
-                    body { font-size: 12pt; }
-                    .no-print { display: none; }
-                }
-            </style>
-        </head>
-        <body>
-            ${contenido}
-            <div class="no-print" style="text-align: center; margin-top: 30px;">
-                <button onclick="window.print();window.close()" style="padding: 10px 20px; background: #1a5276; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Imprimir
-                </button>
-            </div>
-        </body>
-        </html>
-    `);
-    
-    ventanaImpresion.document.close();
-});
+
+    try {
+        showMessage('Generando PDF...', 'info');
+
+        // Obtener datos del formulario
+        const datos = {
+            nombreCliente: document.getElementById('nombreCliente').value,
+            cedula: document.getElementById('cedula').value,
+            marca: document.getElementById('marca').value,
+            modelo: document.getElementById('modelo').value,
+            estilo: document.getElementById('estilo').value,
+            traccion: document.getElementById('traccion').value,
+            color: document.getElementById('color').value,
+            motor: document.getElementById('motor').value,
+            chasis: document.getElementById('chasis').value,
+            transmision: document.getElementById('transmision').value,
+            combustible: document.getElementById('combustible').value,
+            carroceria: document.getElementById('carroceria').value,
+            kilometraje: document.getElementById('kilometraje').value,
+            placa: document.getElementById('placa').value,
+            cc: document.getElementById('cc').value,
+            cilindrados: document.getElementById('cilindrados').value
+        };
+
+        // Crear nuevo documento PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'letter'
+        });
+
+        // Configurar fuentes
+        doc.setFont('helvetica');
+        
+        // Variables de posición
+        let yPos = 20;
+        const margenIzq = 20;
+        const margenDer = 190;
+        const anchoLinea = 170;
+        const colorAzul = [0, 51, 102]; // Azul oscuro corporativo
+        const colorGris = [80, 80, 80];
+
+        // ===== LOGO =====
+        try {
+            // Intentar cargar el logo desde diferentes rutas posibles
+            const logoUrl = window.location.origin + '/img/icon-192.png';
+            const logoImg = await loadImage(logoUrl);
+            
+            // Calcular dimensiones proporcionales (ancho máximo 40mm)
+            const logoAncho = 30;
+            const logoAlto = 30;
+            const logoX = 105 - (logoAncho / 2); // Centrado
+            
+            doc.addImage(logoImg, 'PNG', logoX, yPos, logoAncho, logoAlto);
+            yPos += logoAlto + 5;
+        } catch (e) {
+            console.log('No se pudo cargar el logo:', e);
+            // Si no hay logo, mostrar texto del nombre de la empresa
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+            doc.text('AUTOS COLIN S.R.L.', 105, yPos, { align: 'center' });
+            yPos += 8;
+        }
+
+        // ===== TÍTULO CON RECUADRO =====
+        yPos += 5;
+
+        doc.setDrawColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+        doc.setLineWidth(0.5);
+        doc.rect(margenIzq - 2, yPos - 5, anchoLinea + 4, 12);
+        
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+        doc.text('CERTIFICADO DE GARANTÍA', 105, yPos+3, { align: 'center' });
+        yPos += 12;
+        
+        // Línea decorativa
+        doc.setDrawColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+        doc.setLineWidth(0.2);
+        doc.line(margenIzq, yPos - 3, margenDer, yPos - 3);
+        
+        yPos += 5;
+        
+        // ===== TEXTO INTRODUCTORIO =====
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        
+        const texto1 = `Este documento constituye el Certificado de Garantía de AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA, para su vehículo usado, ésta corresponde a inconvenientes que afecten el buen funcionamiento del vehículo, velando porque su utilización y desempeño sea idóneo conforme a las funciones para las que fue creado y en consecuencia, se den de conformidad con su naturaleza particular. Debe tomar en consideración que es un vehículo usado en buen estado de conservación y funcionamiento y que tiene algún grado de desgaste debido al tiempo de uso que ha tenido. Sin que represente una evasión de responsabilidad por parte del vendedor, se realizará una prueba de manejo con el cliente el cual comprobará el buen funcionamiento del vehículo y al cual se le informa las condiciones de la garantía, precio del vehículo y realiza las consultas del mismo, revisando y probando el bien. De conformidad con el artículo 43 de la ley de promoción de la competencia y defensa efectiva del consumidor, por lo que: AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA, otorga el presente certificado de garantía a:`;
+        
+        const lineas1 = doc.splitTextToSize(texto1, anchoLinea);
+        doc.text(lineas1, margenIzq, yPos);
+        yPos += (lineas1.length * 4) + 8;
+
+        // ===== DATOS DEL CLIENTE (CON RECUADRO) =====
+        doc.setFillColor(245, 245, 250);
+        doc.rect(margenIzq - 2, yPos - 4, anchoLinea + 4, 12, 'F');
+        doc.setDrawColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+        doc.rect(margenIzq - 2, yPos - 4, anchoLinea + 4, 12);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Cliente: ${datos.nombreCliente}`, margenIzq + 2, yPos+3);
+        doc.text(`Cédula: ${datos.cedula}`, margenIzq + 50, yPos+3);
+        yPos += 8;
+
+        yPos += 8;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text(`Por la compra del vehículo usado con las siguientes características:`, margenIzq, yPos);
+        yPos += 8;
+
+        // ===== TABLA DE CARACTERÍSTICAS DEL VEHÍCULO =====
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+
+        // PRIMERA TABLA - Encabezados en azul
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 51, 102); // Azul
+
+        // Fila 1: Encabezados
+        doc.text('Marca', 25, yPos);
+        doc.text('Modelo', 60, yPos);
+        doc.text('Estilo', 95, yPos);
+        doc.text('Color', 130, yPos);
+        doc.text('Placa', 165, yPos);
+
+        yPos += 5;
+
+        // Fila 2: Datos en negro
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0); // Negro
+        doc.text(datos.marca || '-', 25, yPos);
+        doc.text(datos.modelo || '-', 60, yPos);
+        doc.text(datos.estilo || '-', 95, yPos);
+        doc.text(datos.color || '-', 130, yPos);
+        doc.text(datos.placa || '-', 165, yPos);
+
+        // Línea inferior
+        doc.line(20, yPos + 1, 190, yPos + 1);
+        yPos += 8;
+
+        // SEGUNDA TABLA - Encabezados en azul
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 51, 102); // Azul
+        doc.text('Motor', 25, yPos);
+        doc.text('Chasis', 60, yPos);
+        doc.text('Transmisión', 95, yPos);
+        doc.text('Combustible', 130, yPos);
+        doc.text('Carrocería', 165, yPos);
+
+        yPos += 5;
+
+        // Fila 4: Datos en negro
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0); // Negro
+        doc.text(datos.motor || '-', 25, yPos);
+        doc.text(datos.chasis || '-', 60, yPos);
+        doc.text(datos.transmision || '-', 95, yPos);
+        doc.text(datos.combustible || '-', 130, yPos);
+        doc.text(datos.carroceria || '-', 165, yPos);
+
+        doc.line(20, yPos + 1, 190, yPos + 1);
+        yPos += 8;
+
+        // TERCERA TABLA - Encabezados en azul
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 51, 102); // Azul
+        doc.text('Kilometraje', 25, yPos);
+        doc.text('Tracción', 60, yPos);
+        doc.text('C.C.', 95, yPos);
+        doc.text('Cilindrados', 130, yPos);
+
+        yPos += 5;
+
+        // Fila 6: Datos en negro
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0); // Negro
+        doc.text(datos.kilometraje || '-', 25, yPos);
+        doc.text(datos.traccion || '-', 60, yPos);
+        doc.text(datos.cc || '-', 95, yPos);
+        doc.text(datos.cilindrados || '-', 130, yPos);
+
+        doc.line(20, yPos + 1, 190, yPos + 1);
+        yPos += 10;
+
+        // ===== TEXTO LEGAL =====
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        // Función para agregar texto con control de página
+        const agregarTexto = (texto, espaciado = 4) => {
+            if (yPos > 260) {
+                doc.addPage();
+                yPos = 20;
+            }
+            const lineas = doc.splitTextToSize(texto, anchoLinea);
+            doc.text(lineas, margenIzq, yPos);
+            yPos += (lineas.length * 4) + espaciado;
+        };
+
+        const agregarTitulo = (titulo) => {
+            if (yPos > 260) {
+                doc.addPage();
+                yPos = 10;
+            }
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(colorAzul[0], colorAzul[1], colorAzul[2]);
+            doc.text(titulo, margenIzq, yPos);
+            yPos += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+        };
+
+        // Texto legal con formato mejorado
+        agregarTexto('Todo bien que se venda o servicio que se preste, debe ser implícitamente garantizado en cuanto al cumplimiento de estándares de calidad y los requerimientos técnicos que por razones de salud, medio ambiente y seguridad establezca.', 5);
+        
+        agregarTitulo('ALCANCE:');
+        agregarTexto('De conformidad con lo que indica el artículo 107 del DE-37899-MEIC inciso a), esta garantía cubre a nivel nacional de Costa Rica, sobre el vehículo ya descrito, y por el tiempo establecido de treinta días hábiles a partir de la fecha de entrega del mismo, indiferentemente del titular.', 5);
+        
+        agregarTitulo('DURACIÓN:');
+        agregarTexto('La garantía tiene un plazo de treinta días hábiles a partir de la fecha de entrega del vehículo.', 5);
+        
+        agregarTexto('Se le entregará al cliente una copia del documento de verificación de funcionamiento del vehículo, para que tenga conocimiento del mismo.', 4);
+        agregarTexto('La sociedad responsable de brindar la garantía es AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA, cédula jurídica 3-102-722004.', 4);
+        agregarTexto('Las reparaciones y cambio de piezas que se realicen por garantía no tiene por efecto la prolongación de la garantía total, solamente sobre la reparación realizada.', 4);
+        agregarTexto('AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA no tiene la obligación de prestar ninguno de sus vehículos, en el tiempo que se realice una reparación por garantía, salvo que por la situación el tiempo sea mayor a los 15 días naturales.', 4);
+        agregarTexto('AUTOS COLIN SOCIEDAD DE RESPONSABILIDAD LIMITADA no presta servicio de Grúa, si el mismo se requiere tendrá que ser pagado por el cliente.', 8);
+        
+        agregarTitulo('En cumplimiento a lo que indica el artículo 108, son derechos del titular durante la vigencia');
+        agregarTitulo(' de la garantía los siguientes:');
+       
+        agregarTexto('A) La garantía comprenderá los vicios o defectos que afecten la identidad entre lo ofrecido y lo entregado, y su correcto funcionamiento, salvo que estos se hayan informado previamente y consten por escrito, en la factura o en un documento aparte, en el momento de la contratación y el consumidor los acepte.', 4);
+        
+        agregarTexto('B) Durante el período de vigencia de la garantía, su titular tendrá derecho como mínimo, y según corresponda a:', 2);
+        agregarTexto('Durante el tiempo en que dure esta garantía, el derecho y según corresponda a lo siguiente:', 2);
+        agregarTexto('1. La devolución del precio pagado.', 2);
+        agregarTexto('2. Al cambio del bien por otro de la misma especie, similares características o especificaciones técnicas, las cuales en ningún caso podrán ser inferiores a las del producto que dio lugar a la garantía.', 2);
+        agregarTexto('3. A la reparación gratuita del bien.', 4);
+        
+        agregarTexto('C) Se entiende por consumidor al titular del bien y los sucesivos adquirentes del derecho.', 4);
+        agregarTexto('D) Cuando la garantía se satisfaga mediante la devolución del dinero, tendrá derecho al reintegro del valor efectivamente recibido por el comerciante. En el caso que corresponda, se deberán reintegrar las comisiones, los gastos de la operación, gastos asociados y los intereses.', 4);
+        agregarTexto('E) En caso de que opere la sustitución del bien, se entenderá renovada la garantía por el plazo inicialmente otorgado y correrá a partir de la entrega del bien.', 4);
+        
+        if (yPos > 260) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        agregarTexto('Cuando la garantía se aplique mediante la devolución del precio pagado, la sustitución o reposición del bien por otro de idénticas características, el consumidor deberá restituir el bien al comerciante con todos sus accesorios cuando así corresponda, y sin más deterioro que el normalmente previsto por el uso o disfrute.', 4);
+        agregarTexto('Si se trata de la prestación de un servicio, la garantía dará derecho al consumidor de exigir que el resultado coincida con lo ofertado. De no ser así, el consumidor podrá exigir la devolución de lo pagado o si lo prefiera, nuevamente la prestación del servicio, total o parcial, según los términos pactados. Los gastos que se ocasionen correrán por cuenta del obligado a prestar la garantía. Cuando el servicio sea de nuevo prestado como parte del cumplimiento de la garantía, esta iniciará de nuevo.', 4);
+        agregarTexto('El comerciante o proveedor que ofrece un bien o servicio queda obligado jurídicamente no sólo a lo establecido en el documento o contrato de garantía, sino también en la oferta, promoción o publicidad que realice de conformidad con los artículos 34 y 37 de la Ley, y lo dispuesto en el presente reglamento."', 8);
+        
+        agregarTitulo('PROCEDIMIENTO PARA HACERLA EFECTIVA:');
+        agregarTexto('De conformidad con lo que indica el artículo 107 del DE-37899-MEIC inciso e), para hacer efectiva esta garantía el consumidor debe presentarse ante el comerciante con el citado vehículo en el establecimiento de venta para que el comerciante realice un diagnostico del bien, el estado del mismo así como del daño. Si por algún motivo el establecimiento se encontrara cerrado, imposibilitando que le consumidor haga su reclamo, se entenderá que puede hacerlo en el momento que el comercio re establezca sus funciones, o bien se establezcan mecanismos alternos que le faciliten al comprador hacer su reclamo.', 15);
+
+        // ===== FIRMA Y FECHA =====
+        const fechaActual = new Date().toLocaleDateString('es-CR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const centerX = pageWidth / 2;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text('______________________________________________________', centerX, yPos, { align: 'center' });
+        yPos += 5;
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Costa Rica, Cartago, ${fechaActual}`, centerX, yPos, { align: 'center' });
+
+        // ===== GUARDAR PDF =====
+        const nombreArchivo = `CERTIFICADO_GARANTIA_${datos.placa || 'VEHICULO'}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(nombreArchivo);
+        
+        showMessage('PDF generado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        showMessage('Error al generar el PDF: ' + error.message, 'error');
+    }
+}
+
+// ================================================================
+//  FUNCIÓN AUXILIAR PARA CARGAR IMÁGENES
+// ================================================================
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+// ================================================================
+//  MODIFICAR EL BOTÓN DE IMPRIMIR PARA USAR PDF
+// ================================================================
+// Reemplazar el evento del botón printBtn
+printBtn.removeEventListener('click', printBtn.click);
+printBtn.addEventListener('click', generarPDFCertificado);
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Sistema de certificados cargado');
+    
+    // Cambiar el texto del botón
+    if (printBtn) {
+        printBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Generar PDF';
+    }
     
     // Permitir buscar con Enter
     searchCedula.addEventListener('keypress', (e) => {
@@ -646,4 +887,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
-
