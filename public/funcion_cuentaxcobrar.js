@@ -366,83 +366,84 @@ async function procesarPagoCuota() {
     const fechaPago    = document.getElementById('pagoFecha').value;
     const realizadoPor = document.getElementById('pagoRealizadoPor').value.trim();
 
-    // Validaciones
     if (!formaPago || !documento || !monto || !fechaPago || !realizadoPor) {
-        mostrarToast('Complete todos los campos', 'warning'); 
-        return;
+        mostrarToast('Complete todos los campos', 'warning'); return;
     }
     if (monto <= 0) {
-        mostrarToast('El monto debe ser mayor a cero', 'warning'); 
-        return;
+        mostrarToast('El monto debe ser mayor a cero', 'warning'); return;
     }
 
-    const saldoPendiente = cuentaSeleccionada.SALDO_PENDIENTE || cuentaSeleccionada.monto_cuota || 0;
-    if (monto > saldoPendiente) {
-        mostrarToast('El monto no puede superar el saldo pendiente', 'warning'); 
-        return;
-    }
-
-    const numeroRecibo = generarNumeroRecibo();
-
-    // Preparar observación actualizada
-    const nuevaObservacion = cuentaSeleccionada.OBSERVACIONES || 
-        `Cuota ${cuentaSeleccionada.NUMERO_CUOTA} | Vence: ${formatFecha(cuentaSeleccionada.FECHA_VENCIMIENTO)} | Pagado: ${fechaPago} | Recibo: ${numeroRecibo}`;
-
-    // Payload para la API
-    const payload = {
-        id_anticipo:        cuentaSeleccionada.ID_ANTICIPO,
-        id_financiamiento:  cuentaSeleccionada.ID_FINANCIAMIENTO,
-        forma_pago:         formaPago,
-        num_documento:      documento,
-        monto_colones:      Math.round(monto),
-        monto_dolares:      0,
-        moneda:             'CRC',
-        tipo_cambio:        1,
-        realizado_por:      realizadoPor,
-        fecha_anticipo:     fechaPago,
-        saldo_pendiente:    Math.round(saldoPendiente - monto),
-        observaciones:      nuevaObservacion,
-        estado_anticipo:    (saldoPendiente - monto) <= 0 ? 'COMPLETADO' : 'PAGADO'
-    };
+    const saldoPendiente = parseFloat(cuentaSeleccionada.saldo_pendiente || cuentaSeleccionada.monto_cuota || 0);
+    const numeroRecibo   = generarNumeroRecibo();
 
     try {
-        // Llamada a la API para actualizar el anticipo
-        await apiFetch(`${API_CXC.anticipos}/${cuentaSeleccionada.ID_ANTICIPO}`, {
-            method: 'PUT',
-            body: JSON.stringify(payload)
-        });
+        // ── Rama según tipo de registro ──────────────────────────────────
+        if (cuentaSeleccionada.tipo_registro === 'detalle_pago') {
+            // Marcar el DETALLE_PAGO como completado
+            await apiFetch(`${API_BASE_URL}/detalle-pagos/${cuentaSeleccionada.id}/pagar`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    estado_pago:   'COMPLETADO',
+                    fecha_pago:    fechaPago,
+                    realizado_por: realizadoPor,
+                    num_documento: documento
+                })
+            });
+        } else {
+            // Flujo original para ANTICIPOS
+            const nuevaObservacion = cuentaSeleccionada.observaciones ||
+                `Cuota ${cuentaSeleccionada.numero_cuota} | Vence: ${formatFecha(cuentaSeleccionada.fecha_vencimiento)} | Pagado: ${fechaPago} | Recibo: ${numeroRecibo}`;
+
+            const payload = {
+                id_anticipo:       cuentaSeleccionada.id,
+                id_financiamiento: cuentaSeleccionada.ID_FINANCIAMIENTO,
+                forma_pago:        formaPago,
+                num_documento:     documento,
+                monto_colones:     Math.round(monto),
+                monto_dolares:     0,
+                moneda:            'CRC',
+                tipo_cambio:       1,
+                realizado_por:     realizadoPor,
+                fecha_anticipo:    fechaPago,
+                saldo_pendiente:   Math.round(saldoPendiente - monto),
+                observaciones:     nuevaObservacion,
+                estado_anticipo:   (saldoPendiente - monto) <= 0 ? 'COMPLETADO' : 'PAGADO'
+            };
+
+            await apiFetch(`${API_CXC.anticipos}/${cuentaSeleccionada.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+        }
 
         mostrarToast('Pago registrado exitosamente', 'success');
 
-        // Preparar datos para la factura
         const datosFactura = {
-            numero_recibo:    numeroRecibo,
-            plan_venta:       cuentaSeleccionada.CODIGO_VENTA || '-',
-            numero_cuota:     cuentaSeleccionada.NUMERO_CUOTA || '-',
-            cliente:          cuentaSeleccionada.NOMBRE_COMPLETO || '-',
-            cedula:           cuentaSeleccionada.IDENTIFICACION || '-',
-            telefono:         cuentaSeleccionada.TELEFONO_PRINCIPAL || 'N/A',
-            direccion:        cuentaSeleccionada.DIRECCION || 'N/A',
-            vehiculo:         cuentaSeleccionada.VEHICULO || '-',
-            monto_pagado:     monto,
-            saldo_anterior:   saldoPendiente,
-            interes_nominal:  cuentaSeleccionada.interes_nominal || '0.00',
+            numero_recibo:     numeroRecibo,
+            plan_venta:        cuentaSeleccionada.plan_venta || '-',
+            numero_cuota:      cuentaSeleccionada.numero_cuota || '1',
+            cliente:           cuentaSeleccionada.cliente || '-',
+            cedula:            cuentaSeleccionada.cedula || '-',
+            telefono:          cuentaSeleccionada.telefono || 'N/A',
+            direccion:         'N/A',
+            vehiculo:          cuentaSeleccionada.vehiculo || '-',
+            monto_pagado:      monto,
+            saldo_anterior:    saldoPendiente,
+            interes_nominal:   cuentaSeleccionada.interes_nominal || '0.00',
             interes_moratorio: '0.00',
             interes_adicional: '0.00',
-            pago_intereses:   cuentaSeleccionada.pagoIntereses || 0,
-            amortizacion:     cuentaSeleccionada.amortizacion || 0,
-            capital:          cuentaSeleccionada.capital || 0,
-            saldo_nuevo:      Math.round(saldoPendiente - monto),
-            saldo_actual:     Math.round(saldoPendiente - monto),
-            realizado_por:    realizadoPor,
-            fecha:            fechaPago,
+            pago_intereses:    cuentaSeleccionada.pagoIntereses || 0,
+            amortizacion:      cuentaSeleccionada.amortizacion  || 0,
+            capital:           cuentaSeleccionada.capital       || 0,
+            saldo_nuevo:       Math.round(saldoPendiente - monto),
+            saldo_actual:      Math.round(saldoPendiente - monto),
+            realizado_por:     realizadoPor,
+            fecha:             fechaPago,
         };
 
         generarFactura(datosFactura);
         cerrarModalPago();
         document.getElementById('modalFacturaPago').style.display = 'flex';
-
-        // Recargar tabla
         await cargarCuentasPorCobrar();
 
     } catch (e) {
@@ -751,4 +752,5 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('filtroEstado')?.addEventListener('change', aplicarFiltros);
 
 });
+
 
