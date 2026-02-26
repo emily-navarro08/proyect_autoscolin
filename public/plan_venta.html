@@ -1156,11 +1156,10 @@
             </div>
         </div>
     </div>
-
+    
+    <script src="cargar_usuario.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="cargar_usuario.js"></script>
-    <script src="pdfplan_venta.js"></script>
 
     <script>
     // URLs base de las APIs
@@ -1575,6 +1574,7 @@
                 tr.addEventListener('click', () => seleccionarPlan(tr, v.ID_VENTA));
                 tbody.appendChild(tr);
             });
+            document.dispatchEvent(new Event('planesCargados'));
         } catch (e) {
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;">Error al cargar planes: ${e.message}</td></tr>`;
         }
@@ -1594,6 +1594,7 @@
         document.querySelectorAll('#tbody-planes tr').forEach(r => r.classList.remove('selected-row'));
         tr.classList.add('selected-row');
         selectedVentaId = ventaId;
+        window.selectedVentaId = ventaId; 
 
         mostrarLoading(true);
         try {
@@ -1824,6 +1825,7 @@
     //  NUEVO PLAN
     function nuevoplan() {
         selectedVentaId = null;
+        window.selectedVentaId = null;
         planActual = null;
         financiamientoActual = null;
         anticiposLocales = [];
@@ -2760,7 +2762,10 @@
     });
 
     </script>
+    <script src="pdfplan_venta.js"></script>
+    
 </body>
 
 </html>
+
 
