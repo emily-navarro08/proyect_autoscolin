@@ -1128,6 +1128,87 @@ app.get('/api/vehiculos', async (req, res) => {
     }
 });
 
+// ESPECÍFICO PARA BÚSQUEDA CON COSTOS
+app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
+    try {
+        const { placa } = req.query;
+        
+        if (!placa || placa.length < 2) {
+            return res.json([]);
+        }
+        
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const query = `
+            SELECT 
+                v.ID_VEHICULO,
+                v.PLACA,
+                v.CHASIS,
+                v.MOTOR,
+                v.ID_MARCA,
+                v.MODELO,
+                v.ID_COLOR,
+                v.ID_COMBUSTIBLE,
+                v.ID_TRANSMISION,
+                v.ESTILO,
+                v.TRACCION,
+                v.CARROCERIA,
+                v.C_C,
+                v.CILINDROS,
+                v.KILOMETRAJE_ACTUAL,
+                v.KILOMETRAJE_ANTERIOR,
+                v.PV,
+                v.OBSERVACIONES,
+                v.ESTADO,
+                m.NOMBRE as marca_nombre,
+                col.NOMBRE as color_nombre,
+                comb.NOMBRE as combustible_nombre,
+                trans.NOMBRE as transmision_nombre,
+                -- Datos de COSTOS_VEHICULO
+                cv.PRECIO_PUBLICO as monto_venta,
+                cv.MONTO_TRANSPASO as monto_traspaso,
+                cv.PRECIO_COMPRA,
+                cv.PRECIO_COSTO,
+                cv.PRIMA,
+                cv.COMISION,
+                cv.TOTAL_INVERSION,
+                cv.PRIMA_FINANCIAMIENTO,
+                cv.CUOTA_FINANCIAMIENTO,
+                cv.SALDO,
+                cv.MONEDA,
+                cv.TIPO_CAMBIO_COMPRA
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES col ON v.ID_COLOR = col.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES trans ON v.ID_TRANSMISION = trans.ID_TRANSMISION
+            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+            WHERE v.PLACA LIKE ? 
+            AND v.ESTADO = 'COMPRADO'
+            ORDER BY v.FECHA_INGRESO DESC, cv.FECHA_CALCULO DESC
+            LIMIT 10
+        `;
+        
+        const [rows] = await connection.execute(query, [`%${placa}%`]);
+        await connection.end();
+        
+        // Procesar para evitar duplicados
+        const vehiculosMap = new Map();
+        rows.forEach(row => {
+            if (!vehiculosMap.has(row.ID_VEHICULO)) {
+                vehiculosMap.set(row.ID_VEHICULO, row);
+            }
+        });
+        
+        const vehiculosUnicos = Array.from(vehiculosMap.values());
+        res.json(vehiculosUnicos);
+        
+    } catch (error) {
+        console.error('Error en búsqueda de vehículo con costos:', error);
+        res.status(500).json({ error: 'Error al buscar vehículo' });
+    }
+});
+
 // Obtener un vehículo por ID
 app.get('/api/vehiculos/:id', async (req, res) => {
     try {
@@ -7123,4 +7204,5 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
