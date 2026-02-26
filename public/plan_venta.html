@@ -1998,7 +1998,21 @@
                     interes_nominal: tipoVenta === 'credito' ? parseFloat(document.getElementById('interes-nominal').value) : null,
                     interes_moratorio: tipoVenta === 'credito' ? parseFloat(document.getElementById('interes-moratorio').value) : null,
                     fecha_primer_pago: tipoVenta === 'credito' ? document.getElementById('fecha-primer-pago').value : null,
-                    prima: parseFloat(document.getElementById('prima').value) || 0
+                    prima: parseFloat(document.getElementById('prima').value) || 0,
+                    
+                    fecha_pago: document.getElementById('fecha_pago').value,
+                    forma_pago_pago: document.getElementById('forma_pago_pago').value,
+                    monto_total: parseFloat(document.getElementById('monto_pago').value) || 0,
+                    
+                    // Detalles del pago
+                    efectivo: parseFloat(document.getElementById('contado-efectivo').value) || 0,
+                    transferencia: parseFloat(document.getElementById('contado-transferencia').value) || 0,
+                    num_transferencia: document.getElementById('contado-num-transferencia').value,
+                    nom_deposita: document.getElementById('contado-nom-deposita').value,
+                    id_banco: document.getElementById('contado-banco-select').value,
+                    tarjeta: parseFloat(document.getElementById('contado-tarjeta').value) || 0,
+                    num_tarjeta: document.getElementById('contado-num-tarjeta').value,
+                    tipo_tarjeta: document.getElementById('contado-tipo-tarjeta').value
                 }
             };
 
@@ -2822,6 +2836,7 @@
 </body>
 
 </html>
+
 
 
 
