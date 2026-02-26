@@ -4577,8 +4577,11 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
             id: result.insertId || existentes[0]?.ID_COSTO
         });
     } catch (err) {
-        console.error('Error al guardar costos:', err);
-        res.status(500).json({ error: 'Error en el servidor' });
+        console.error('Error detallado al guardar costos:', err.message, err.sqlMessage);
+        res.status(500).json({ 
+            error: 'Error en el servidor',
+            detalles: err.sqlMessage || err.message
+        });
     }
 });
 
@@ -4734,7 +4737,7 @@ app.get('/api/vehiculos/:id/extras', async (req, res) => {
 app.post('/api/vehiculos/:id/extras', async (req, res) => {
     try {
         const {
-            EXTRAS_DETALLE, OBSERVACIONES, PRECIO, MONEDA, TIPO_CAMBIO_COMPRA
+            ARREGLO, EXTRAS_DETALLE, OBSERVACIONES, PRECIO, MONEDA, TIPO_CAMBIO_COMPRA
         } = req.body;
 
         const connection = await mysql.createConnection(dbConfig);
@@ -4790,6 +4793,22 @@ app.put('/api/extras/:id', async (req, res) => {
         res.json({ success: true, message: 'Extra actualizado exitosamente' });
     } catch (err) {
         console.error('Error al actualizar extra:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Eliminar TODOS los extras de un vehículo
+app.delete('/api/vehiculos/:id/extras', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'DELETE FROM EXTRAS_VEHICULO WHERE ID_VEHICULO = ?',
+            [req.params.id]
+        );
+        await connection.end();
+        res.json({ success: true, message: 'Extras eliminados' });
+    } catch (err) {
+        console.error('Error al eliminar extras del vehículo:', err);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
@@ -5028,7 +5047,7 @@ app.get('/api/ventas/pendientes', async (req, res) => {
     }
 });
 
-// ===== API PARA OBTENER VENTA COMPLETA (ACTUALIZADA) =====
+// ===== API PARA OBTENER VENTA COMPLETA  =====
 app.get('/api/ventas/:id/completo', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -7220,6 +7239,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
