@@ -1132,9 +1132,9 @@
 
     async function cargarCatalogos() {
         try {      
-            // Cargar estados civiles - CORREGIDO
-            const ecRes = await fetch(`${API_BASE_URL}'/estados-civil');
-            estadosCivil = await ecRes.json(); // Asignar a la variable GLOBAL
+            // Cargar estados civiles
+            const ecRes = await fetch(`${API_BASE_URL}/estados-civil`);
+            estadosCivil = await ecRes.json();
             const selectEstadoCivil = document.getElementById('modalProvEstadoCivil');
             
             // Limpiar opciones existentes
@@ -1146,7 +1146,7 @@
             });       
             
             // Cargar marcas
-            const marcasRes = await fetch(`${API_BASE_URL}/marcas');
+            const marcasRes = await fetch(`${API_BASE_URL}/marcas`);
             marcas = await marcasRes.json();
             const selectMarca = document.getElementById('modalMarca');
             const filtroMarca = document.getElementById('filtroMarca');
@@ -1155,40 +1155,40 @@
                 selectMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
                 filtroMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
             });
-
+    
             // Cargar colores
-            const coloresRes = await fetch(`${API_BASE_URL}/colores');
+            const coloresRes = await fetch(`${API_BASE_URL}/colores`);
             colores = await coloresRes.json();
             const selectColor = document.getElementById('modalColor');
             colores.forEach(c => {
                 selectColor.innerHTML += `<option value="${c.ID_COLOR}">${c.NOMBRE}</option>`;
             });
-
+    
             // Cargar combustibles
-            const combRes = await fetch(`${API_BASE_URL}/combustibles');
+            const combRes = await fetch(`${API_BASE_URL}/combustibles`);
             combustibles = await combRes.json();
             const selectComb = document.getElementById('modalCombustible');
             combustibles.forEach(c => {
                 selectComb.innerHTML += `<option value="${c.ID_COMBUSTIBLE}">${c.NOMBRE}</option>`;
             });
-
+    
             // Cargar transmisiones
-            const transRes = await fetch(`${API_BASE_URL}/transmisiones');
+            const transRes = await fetch(`${API_BASE_URL}/transmisiones`);
             transmisiones = await transRes.json();
             const selectTrans = document.getElementById('modalTransmision');
             transmisiones.forEach(t => {
                 selectTrans.innerHTML += `<option value="${t.ID_TRANSMISION}">${t.NOMBRE}</option>`;
             });
-
+    
             // Cargar proveedores
-            const provRes = await fetch(`${API_BASE_URL}/proveedores');
+            const provRes = await fetch(`${API_BASE_URL}/proveedores`);
             proveedores = await provRes.json();
             const selectProv = document.getElementById('modalProveedor');
             
             proveedores.forEach(p => {
                 selectProv.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO}</option>`;
             });
-
+    
         } catch (error) {
             console.error('Error cargando catálogos:', error);
             mostrarAlerta('error', 'Error cargando catálogos');
@@ -1197,7 +1197,7 @@
 
     async function cargarVehiculos() {
         try {
-            const response = await fetch(`${API_BASE_URL}/vehiculos');
+            const response = await fetch(`${API_BASE_URL}/vehiculos`);
             vehiculos = await response.json();
             actualizarTabla(vehiculos);
         } catch (error) {
@@ -2073,14 +2073,15 @@
                   throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
               }
             } else {
-                const response = await fetch(`${API_BASE_URL}/vehiculos', {
+                // ✅ CORREGIDO: Quitar la comilla extra después de /vehiculos
+                const response = await fetch(`${API_BASE_URL}/vehiculos`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(vehiculoData)
                 });
                 const result = await response.json();
                 vehiculoId = result.id;
-            }
+            }          
 
             // Guardar costos
             await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/costos`, {
@@ -2170,3 +2171,4 @@
 </body>
 
 </html>
+
