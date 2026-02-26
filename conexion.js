@@ -1168,7 +1168,7 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
                 comb.NOMBRE as combustible_nombre,
                 trans.NOMBRE as transmision_nombre,
                 cv.PRECIO_PUBLICO as monto_venta,
-                cv.MONTO_TRANSPASO as monto_traspaso,
+                cv.MONTO_TRASPASO as monto_traspaso,
                 cv.PRECIO_COMPRA,
                 cv.PRECIO_COSTO,
                 cv.PRIMA,
@@ -7220,6 +7220,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
