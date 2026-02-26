@@ -983,12 +983,30 @@
         if (moneda === 'USD') {
             return numero.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         } else {
-            // Formato costarricense: puntos para miles, coma para decimales
             return numero.toFixed(2)
                 .replace('.', ',')
                 .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
     }
+
+    // ===== FUNCIÓN PARA CONVERTIR DE FORMATO A NÚMERO =====
+    function desformatearNumero(textoFormateado) {
+        if (!textoFormateado) return 0;
+        
+        let limpio = textoFormateado.toString().replace(/[₡$\s]/g, '');
+        
+        if (limpio.includes(',') && limpio.includes('.')) {
+            limpio = limpio.replace(/\./g, '').replace(',', '.');
+        } 
+        else if (limpio.includes(',') && !limpio.includes('.')) {
+            limpio = limpio.replace(/,/g, '');
+        }
+        else if (limpio.includes(',')) {
+            limpio = limpio.replace(',', '.');
+        }
+        
+        return parseFloat(limpio) || 0;
+    }    
 
     function formatearFecha(fechaStr) {
         if (!fechaStr) return '';
@@ -1527,21 +1545,22 @@
 
     function calcularTotales() {
         if (!ventaSeleccionada) return;
-
+    
         let subtotal = 0;
         ventaSeleccionada.items.forEach(item => {
             subtotal += item.total;
         });
-
+    
         const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
         const descuentoMonto = subtotal * (descuentoGlobal / 100);
         const subtotalConDescuento = subtotal - descuentoMonto;
-
+    
         const exonerar = document.getElementById('exonerarVenta').checked;
         const impuestos = exonerar ? 0 : subtotalConDescuento * 0.13;
         
         const total = subtotalConDescuento + impuestos;
-
+    
+        // Mostrar con formato
         document.getElementById('detalleSubtotal').textContent = formatearNumero(subtotal);
         document.getElementById('detalleDescuentoGlobal').textContent = formatearNumero(descuentoMonto);
         document.getElementById('detalleImpuestos').textContent = formatearNumero(impuestos);
@@ -1583,11 +1602,12 @@
         if (!ventaSeleccionada) return;
         
         try {
-            // Obtener los valores actuales del detalle
-            const subtotal = parseFloat(document.getElementById('detalleSubtotal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
-            const descuentoMonto = parseFloat(document.getElementById('detalleDescuentoGlobal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
-            const impuestos = parseFloat(document.getElementById('detalleImpuestos').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
-            const total = parseFloat(document.getElementById('detalleTotal').textContent.replace(/[₡\s]/g, '').replace(',', '')) || 0;
+            // USAR LA NUEVA FUNCIÓN desformatearNumero() EN VEZ DE PARSEAR DIRECTAMENTE
+            const subtotal = desformatearNumero(document.getElementById('detalleSubtotal').textContent);
+            const descuentoMonto = desformatearNumero(document.getElementById('detalleDescuentoGlobal').textContent);
+            const impuestos = desformatearNumero(document.getElementById('detalleImpuestos').textContent);
+            const total = desformatearNumero(document.getElementById('detalleTotal').textContent);
+            
             const exonerar = document.getElementById('exonerarVenta').checked;
             const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
             
@@ -1598,6 +1618,15 @@
                 mostrarNotificacion('No hay sesión activa', 'error');
                 return;
             }
+            
+            console.log('Enviando datos:', {
+                subtotal,
+                descuentoMonto,
+                impuestos,
+                total,
+                exonerar,
+                descuentoGlobal
+            });
             
             const response = await fetch(`/api/ventas/${ventaSeleccionada.ID_VENTA}/aprobar`, {
                 method: 'PUT',
@@ -1614,13 +1643,10 @@
                     id_aprobador: idPersona
                 })
             });
-
+    
             if (response.ok) {
                 mostrarNotificacion('Venta aprobada exitosamente', 'success');
-                
-                // Recargar ventas pendientes
                 await cargarVentasPendientes();
-                
                 cerrarDetalle();
             } else {
                 const error = await response.json();
@@ -1787,4 +1813,5 @@
     document.head.appendChild(style);
 </script>
 </body>
+
 </html>
