@@ -1901,14 +1901,12 @@ input:disabled, select:disabled, textarea:disabled {
             document.getElementById('modal-info-venta').classList.remove('active'));
         document.getElementById('close-btn-info-venta').addEventListener('click', () =>
             document.getElementById('modal-info-venta').classList.remove('active'));
-        document.getElementById('print-btn-info-venta').addEventListener('click', () => window.print());
 
         // Modal costo venta
         document.getElementById('close-modal-costo-venta').addEventListener('click', () =>
             document.getElementById('modal-costo-venta').classList.remove('active'));
         document.getElementById('close-btn-costo-venta').addEventListener('click', () =>
             document.getElementById('modal-costo-venta').classList.remove('active'));
-        document.getElementById('print-btn-costo-venta').addEventListener('click', () => window.print());
 
         // Cerrar modales al hacer clic fuera
         document.querySelectorAll('.modal').forEach(m =>
@@ -1939,3 +1937,4 @@ input:disabled, select:disabled, textarea:disabled {
 </body>
 
 </html>
+
