@@ -785,13 +785,14 @@ function agregarBotonesPDF() {
 }
 
 // Función para actualizar el estado de los botones (habilitado/deshabilitado)
-function actualizarEstadoBotonesPDF() {
+window.cargarPlanesDesdeAPI = cargarPlanesDesdeAPI;
+window.seleccionarPlan = seleccionarPlan;
+window.selectedVentaId = selectedVentaId;
+window.actualizarEstadoBotonesPDF = function() {
     const btnPDFIndice = document.getElementById('btn-pdf-indice');
     const btnPDFPago = document.getElementById('btn-pdf-pago');
     
     const hayPlanSeleccionado = selectedVentaId ? true : false;
-    
-    console.log('Actualizando botones PDF. Plan seleccionado:', hayPlanSeleccionado);
     
     [btnPDFIndice, btnPDFPago].forEach(btn => {
         if (btn) {
@@ -806,7 +807,7 @@ function actualizarEstadoBotonesPDF() {
             }
         }
     });
-}
+};
 
 // Interceptar la función seleccionarPlan original sin sobrescribirla
 document.addEventListener('click', function(e) {
@@ -839,4 +840,5 @@ const originalCargarPlanes = cargarPlanesDesdeAPI;
 cargarPlanesDesdeAPI = async function() {
     await originalCargarPlanes.apply(this, arguments);
     setTimeout(actualizarEstadoBotonesPDF, 500);
+
 };
