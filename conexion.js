@@ -6539,81 +6539,6 @@ app.post('/api/anticipos/:id/pagar', async (req, res) => {
     }
 });
 
-// ===== API PARA CUENTAS POR COBRAR =====
-app.get('/api/cuentas-cobrar', async (req, res) => {
-    try {
-        const { plan_venta, cliente, estado } = req.query;
-
-        let query = `
-            SELECT
-                a.ID_ANTICIPO                           AS id,
-                a.ID_ANTICIPO                           AS id_cuenta,
-                f.ID_VENTA                               AS id_venta,
-                v.CODIGO_VENTA                          AS plan_venta,
-                pf.NOMBRE_COMPLETO                      AS cliente,
-                pf.IDENTIFICACION                       AS cedula,
-                pf.TELEFONO_PRINCIPAL                   AS telefono,
-                CONCAT(IFNULL(m.NOMBRE,''), ' ', IFNULL(ve.ESTILO,'')) AS vehiculo,
-                ve.PLACA                                AS placa,
-                -- El número de cuota se extrae del campo NUM_DOCUMENTO
-                CAST(
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(a.NUM_DOCUMENTO, '-', 2), '-', -1)
-                AS UNSIGNED)                            AS numero_cuota,
-                a.FECHA_VENCIMIENTO                     AS fecha_vencimiento,
-                a.MONTO_COLONES                          AS monto_cuota,
-                a.SALDO_PENDIENTE                       AS saldo_pendiente,
-                f.TASA_NOMINAL                           AS interes_nominal,
-                f.INTERES_MORATORIO                      AS interes_moratorio,
-                -- Estado
-                CASE
-                    WHEN a.ESTADO_ANTICIPO = 'COMPLETADO' THEN 'pagado'
-                    WHEN a.FECHA_VENCIMIENTO < CURDATE() AND a.SALDO_PENDIENTE > 0 THEN 'atrasado'
-                    WHEN a.SALDO_PENDIENTE > 0 THEN 'pendiente'
-                    ELSE 'pendiente'
-                END                                     AS estado,
-                a.OBSERVACIONES                         AS observaciones
-            FROM ANTICIPOS a
-            JOIN FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
-            JOIN VENTAS v ON f.ID_VENTA = v.ID_VENTA
-            LEFT JOIN PERSONAS pf ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
-            LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
-            LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
-            WHERE 1=1
-            -- Solo mostrar anticipos de ventas facturadas
-            AND v.ESTADO_PAGO = 'YA FUE FACTURADA'
-        `;
-
-        const params = [];
-
-        if (plan_venta) {
-            query += ' AND v.CODIGO_VENTA LIKE ?';
-            params.push(`%${plan_venta}%`);
-        }
-        if (cliente) {
-            query += ' AND (pf.NOMBRE_COMPLETO LIKE ? OR pf.IDENTIFICACION LIKE ?)';
-            params.push(`%${cliente}%`, `%${cliente}%`);
-        }
-        if (estado === 'pagado') {
-            query += ' AND a.ESTADO_ANTICIPO = "COMPLETADO"';
-        } else if (estado === 'pendiente') {
-            query += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE", "PARCIAL") AND a.FECHA_VENCIMIENTO >= CURDATE()';
-        } else if (estado === 'atrasado') {
-            query += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE", "PARCIAL") AND a.FECHA_VENCIMIENTO < CURDATE()';
-        }
-
-        query += ' ORDER BY v.CODIGO_VENTA, numero_cuota ASC';
-
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(query, params);
-        await connection.end();
-
-        res.json(rows);
-    } catch (err) {
-        console.error('Error al obtener cuentas por cobrar:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
-    }
-});
-
 // ===== API PARA DETALLE DE PAGOS =====
 app.get('/api/detalle-pagos', async (req, res) => {
     try {
@@ -6643,6 +6568,162 @@ app.get('/api/detalle-pagos', async (req, res) => {
     } catch (err) {
         console.error('Error al obtener detalle de pagos:', err);
         res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// ===== API PARA CUENTAS POR COBRAR =====
+app.get('/api/cuentas-cobrar', async (req, res) => {
+    try {
+        const { plan_venta, cliente, estado } = req.query;
+
+        // ── PARTE 1: ANTICIPOS (créditos) ─────────────────────────────────
+        let qAnticipos = `
+            SELECT
+                a.ID_ANTICIPO AS id,
+                a.ID_ANTICIPO AS id_cuenta,
+                'anticipo'    AS tipo_registro,
+                f.ID_VENTA    AS id_venta,
+                v.CODIGO_VENTA AS plan_venta,
+                pf.NOMBRE_COMPLETO AS cliente,
+                pf.IDENTIFICACION  AS cedula,
+                pf.TELEFONO_PRINCIPAL AS telefono,
+                CONCAT(IFNULL(m.NOMBRE,''), ' ', IFNULL(ve.ESTILO,'')) AS vehiculo,
+                ve.PLACA AS placa,
+                CAST(
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(a.NUM_DOCUMENTO, '-', 2), '-', -1)
+                AS UNSIGNED) AS numero_cuota,
+                a.FECHA_VENCIMIENTO AS fecha_vencimiento,
+                a.MONTO_COLONES     AS monto_cuota,
+                a.SALDO_PENDIENTE   AS saldo_pendiente,
+                f.TASA_NOMINAL      AS interes_nominal,
+                f.INTERES_MORATORIO AS interes_moratorio,
+                CASE
+                    WHEN a.ESTADO_ANTICIPO = 'COMPLETADO'                              THEN 'pagado'
+                    WHEN a.FECHA_VENCIMIENTO < CURDATE() AND a.SALDO_PENDIENTE > 0     THEN 'atrasado'
+                    WHEN a.SALDO_PENDIENTE > 0                                         THEN 'pendiente'
+                    ELSE 'pendiente'
+                END AS estado,
+                a.OBSERVACIONES AS observaciones
+            FROM ANTICIPOS a
+            JOIN  FINANCIAMIENTOS f ON a.ID_FINANCIAMIENTO = f.ID_FINANCIAMIENTOS
+            JOIN  VENTAS v          ON f.ID_VENTA = v.ID_VENTA
+            LEFT JOIN PERSONAS pf   ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
+            LEFT JOIN VEHICULOS ve  ON v.ID_VEHICULO = ve.ID_VEHICULO
+            LEFT JOIN CAT_MARCAS m  ON ve.ID_MARCA = m.ID_MARCA
+            WHERE v.ESTADO_PAGO = 'YA FUE FACTURADA'
+        `;
+
+        // ── PARTE 2: DETALLE_PAGOS pendientes (contado sin anticipo) ──────
+        let qDetalle = `
+            SELECT
+                dp.ID_DETALLE_PAGO AS id,
+                dp.ID_DETALLE_PAGO AS id_cuenta,
+                'detalle_pago'     AS tipo_registro,
+                v.ID_VENTA         AS id_venta,
+                v.CODIGO_VENTA     AS plan_venta,
+                pf.NOMBRE_COMPLETO AS cliente,
+                pf.IDENTIFICACION  AS cedula,
+                pf.TELEFONO_PRINCIPAL AS telefono,
+                CONCAT(IFNULL(m.NOMBRE,''), ' ', IFNULL(ve.ESTILO,'')) AS vehiculo,
+                ve.PLACA AS placa,
+                1        AS numero_cuota,
+                dp.FECHA_PAGO AS fecha_vencimiento,
+                (dp.EFECTIVO + dp.TRANSFERENCIA + dp.TARJETA) AS monto_cuota,
+                (dp.EFECTIVO + dp.TRANSFERENCIA + dp.TARJETA) AS saldo_pendiente,
+                0 AS interes_nominal,
+                0 AS interes_moratorio,
+                CASE
+                    WHEN dp.FECHA_PAGO < CURDATE() THEN 'atrasado'
+                    ELSE 'pendiente'
+                END AS estado,
+                dp.OBSERVACIONES AS observaciones
+            FROM DETALLE_PAGOS dp
+            JOIN  VENTAS v         ON dp.ID_VENTA = v.ID_VENTA
+            LEFT JOIN PERSONAS pf  ON v.ID_CLIENTE_FACTURACION = pf.ID_PERSONA
+            LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
+            LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
+            WHERE v.ESTADO_PAGO  = 'YA FUE FACTURADA'
+              AND dp.ESTADO_PAGO = 'PENDIENTE'
+              AND dp.ID_ANTICIPO IS NULL
+        `;
+
+        const pA = [];   // params anticipos
+        const pD = [];   // params detalle_pagos
+
+        // Filtros compartidos
+        if (plan_venta) {
+            qAnticipos += ' AND v.CODIGO_VENTA LIKE ?';   pA.push(`%${plan_venta}%`);
+            qDetalle   += ' AND v.CODIGO_VENTA LIKE ?';   pD.push(`%${plan_venta}%`);
+        }
+        if (cliente) {
+            qAnticipos += ' AND (pf.NOMBRE_COMPLETO LIKE ? OR pf.IDENTIFICACION LIKE ?)';
+            pA.push(`%${cliente}%`, `%${cliente}%`);
+            qDetalle   += ' AND (pf.NOMBRE_COMPLETO LIKE ? OR pf.IDENTIFICACION LIKE ?)';
+            pD.push(`%${cliente}%`, `%${cliente}%`);
+        }
+
+        // Filtro de estado
+        if (estado === 'pagado') {
+            qAnticipos += ' AND a.ESTADO_ANTICIPO = "COMPLETADO"';
+            qDetalle   += ' AND 1=0';   // detalle_pagos pendientes nunca son "pagado"
+        } else if (estado === 'pendiente') {
+            qAnticipos += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE","PARCIAL") AND a.FECHA_VENCIMIENTO >= CURDATE()';
+            qDetalle   += ' AND dp.FECHA_PAGO >= CURDATE()';
+        } else if (estado === 'atrasado') {
+            qAnticipos += ' AND a.ESTADO_ANTICIPO IN ("PENDIENTE","PARCIAL") AND a.FECHA_VENCIMIENTO < CURDATE()';
+            qDetalle   += ' AND dp.FECHA_PAGO < CURDATE()';
+        }
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [rowsA] = await connection.execute(qAnticipos, pA);
+        const [rowsD] = await connection.execute(qDetalle,   pD);
+        await connection.end();
+
+        // Combinar y ordenar
+        const rows = [...rowsA, ...rowsD].sort((a, b) => {
+            if (a.plan_venta < b.plan_venta) return -1;
+            if (a.plan_venta > b.plan_venta) return  1;
+            return (a.numero_cuota || 0) - (b.numero_cuota || 0);
+        });
+
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener cuentas por cobrar:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+    }
+});
+
+// Marcar un DETALLE_PAGO como completado
+app.put('/api/detalle-pagos/:id/pagar', async (req, res) => {
+    try {
+        const { estado_pago, fecha_pago, realizado_por, num_documento } = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+
+        const [result] = await connection.execute(
+            `UPDATE DETALLE_PAGOS
+             SET ESTADO_PAGO = ?,
+                 FECHA_PAGO  = ?,
+                 OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Cobrado por: ', ?, ' Doc: ', ?)
+             WHERE ID_DETALLE_PAGO = ?`,
+            [
+                estado_pago    || 'COMPLETADO',
+                fecha_pago     || new Date().toISOString().split('T')[0],
+                realizado_por  || 'Sistema',
+                num_documento  || '',
+                req.params.id
+            ]
+        );
+
+        await connection.end();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Detalle de pago no encontrado' });
+        }
+
+        res.json({ message: 'Pago marcado como completado' });
+    } catch (err) {
+        console.error('Error al marcar pago:', err);
+        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
     }
 });
 
@@ -7268,6 +7349,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
