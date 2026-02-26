@@ -6228,7 +6228,7 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
                         dp.moneda || 'CRC',
                         parseFloat(dp.tipo_cambio) || 1,
                         dp.fecha_pago || new Date().toISOString().split('T')[0],
-                        'COMPLETADO',
+                        'PENDIENTE',
                         dp.observaciones || null
                     ]
                 );
@@ -7268,6 +7268,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
