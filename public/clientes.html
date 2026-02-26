@@ -146,8 +146,6 @@ tr:hover {
 .btn-modificar:hover { background: linear-gradient(to right, #b7791f, #d69e2e); }
 .btn-pasarj    { background: linear-gradient(to right, #3182ce, #63b3ed); color: white; }
 .btn-pasarj:hover { background: linear-gradient(to right, #2c75c1, #4299e1); }
-.btn-imprimir  { background: linear-gradient(to right, #718096, #a0aec0); color: white; }
-.btn-imprimir:hover { background: linear-gradient(to right, #636c7e, #718096); }
 .btn-listar    { background: linear-gradient(to right, #805ad5, #b794f4); color: white; }
 .btn-listar:hover { background: linear-gradient(to right, #724bc1, #9f7aea); }
 
@@ -701,7 +699,6 @@ input:disabled, select:disabled, textarea:disabled {
                     <button class="btn-anular"  id="btn-anular" ><i class="fas fa-ban"></i>  Anular</button>
                     <button class="btn-modificar" id="btn-modificar"><i class="fas fa-edit"></i> Modificar</button>
                     <button class="btn-pasarj"  id="btn-pasarj" ><i class="fas fa-file-export"></i> Pasar J</button>
-                    <button class="btn-imprimir" id="btn-imprimir"><i class="fas fa-print"></i> Imprimir</button>
                     <button class="btn-listar"  id="btn-listar" ><i class="fas fa-list"></i> Listar</button>
                 </div>
             </div>
@@ -959,7 +956,6 @@ input:disabled, select:disabled, textarea:disabled {
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="close-btn-info-venta">Cerrar</button>
-                <button class="btn btn-success" id="print-btn-info-venta"><i class="fas fa-print"></i> Imprimir</button>
             </div>
         </div>
     </div>
@@ -1137,7 +1133,6 @@ input:disabled, select:disabled, textarea:disabled {
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="close-btn-costo-venta"><i class="fas fa-times"></i> Cerrar</button>
-                <button class="btn btn-success" id="print-btn-costo-venta"><i class="fas fa-print"></i> Imprimir</button>
             </div>
         </div>
     </div>
@@ -1871,7 +1866,6 @@ input:disabled, select:disabled, textarea:disabled {
         document.getElementById('btn-anular').addEventListener('click', anularCliente);
         document.getElementById('btn-modificar').addEventListener('click', modificarCliente);
         document.getElementById('btn-pasarj').addEventListener('click', () => showToast('Función "Pasar J" — En desarrollo', 'success'));
-        document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
         document.getElementById('btn-listar').addEventListener('click', async () => {
             await cargarDatosIniciales();
             showToast('Lista actualizada.', 'success');
@@ -1943,4 +1937,5 @@ input:disabled, select:disabled, textarea:disabled {
     });
     </script>
 </body>
+
 </html>
