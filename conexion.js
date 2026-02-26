@@ -1129,15 +1129,18 @@ app.get('/api/vehiculos', async (req, res) => {
 });
 
 // ESPECÍFICO PARA BÚSQUEDA CON COSTOS
+// ENDPOINT DE DIAGNÓSTICO - Reemplaza el endpoint actual con este
 app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
     try {
         const { placa } = req.query;
+        console.log('🔍 Búsqueda de vehículo con placa:', placa);
         
         if (!placa || placa.length < 2) {
             return res.json([]);
         }
-        
+
         const connection = await mysql.createConnection(dbConfig);
+        console.log('✅ Conectado a DB');
         
         const query = `
             SELECT 
@@ -1164,7 +1167,6 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
                 col.NOMBRE as color_nombre,
                 comb.NOMBRE as combustible_nombre,
                 trans.NOMBRE as transmision_nombre,
-                -- Datos de COSTOS_VEHICULO
                 cv.PRECIO_PUBLICO as monto_venta,
                 cv.MONTO_TRANSPASO as monto_traspaso,
                 cv.PRECIO_COMPRA,
@@ -1189,10 +1191,13 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
             LIMIT 10
         `;
         
+        console.log('📝 Ejecutando query con placa:', `%${placa}%`);
         const [rows] = await connection.execute(query, [`%${placa}%`]);
+        console.log(`📊 Resultados encontrados: ${rows.length}`);
+        
         await connection.end();
         
-        // Procesar para evitar duplicados
+        // Evitar duplicados
         const vehiculosMap = new Map();
         rows.forEach(row => {
             if (!vehiculosMap.has(row.ID_VEHICULO)) {
@@ -1201,11 +1206,22 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
         });
         
         const vehiculosUnicos = Array.from(vehiculosMap.values());
+        console.log(`✅ Enviando ${vehiculosUnicos.length} vehículos únicos`);
+        
         res.json(vehiculosUnicos);
         
     } catch (error) {
-        console.error('Error en búsqueda de vehículo con costos:', error);
-        res.status(500).json({ error: 'Error al buscar vehículo' });
+        console.error('❌ ERROR DETALLADO:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+            sqlMessage: error.sqlMessage
+        });
+        res.status(500).json({ 
+            error: 'Error al buscar vehículo', 
+            detalles: error.message,
+            sqlError: error.sqlMessage 
+        });
     }
 });
 
@@ -7204,5 +7220,6 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
