@@ -2044,6 +2044,7 @@
                 SALDO: saldoCRC / tipoCambio,
                 MONEDA: 'USD',
                 TIPO_CAMBIO_COMPRA: tipoCambio,
+                OBSERVACION: document.getElementById('modalObservaciones').value || null, // ← CAMPO FALTANTE
                 
                 // Valores en colones (moneda principal)
                 PRECIO_COMPRA_CRC: precioCompraCRC,
@@ -2171,4 +2172,5 @@
 </body>
 
 </html>
+
 
