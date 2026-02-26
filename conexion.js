@@ -6434,6 +6434,8 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
             LEFT JOIN VEHICULOS ve ON v.ID_VEHICULO = ve.ID_VEHICULO
             LEFT JOIN CAT_MARCAS m ON ve.ID_MARCA = m.ID_MARCA
             WHERE 1=1
+            -- Solo mostrar anticipos de ventas facturadas
+            AND v.ESTADO_PAGO = 'YA FUE FACTURADA'
         `;
 
         const params = [];
@@ -7121,3 +7123,4 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
