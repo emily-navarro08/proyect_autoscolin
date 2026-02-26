@@ -1759,6 +1759,8 @@
                 else el.value = val || '';
             }
         };
+        
+        // Datos básicos
         set(`${p}-id`, v.ID_VEHICULO);
         set(`${p}-estilo`, v.ESTILO);
         set(`${p}-traccion`, v.TRACCION);
@@ -2279,40 +2281,73 @@
     async function buscarVehiculoVendido() {
         const placa = document.getElementById('buscar-placa-vendido').value.trim().toUpperCase();
         const cont = document.getElementById('resultados-vehiculos-vendido');
+        
         if (!placa || placa.length < 2) {
             cont.style.display = 'none';
             return;
         }
-
+    
         try {
-            const vehiculos = await apiFetch(`${API_ENDPOINTS.vehiculos}?placa=${encodeURIComponent(placa)}&estado=COMPRADO`);
+            // Usar el NUEVO endpoint específico con costos
+            const vehiculos = await apiFetch(`${API_BASE_URL}/vehiculos/buscar-con-costos?placa=${encodeURIComponent(placa)}`);
             const lista = Array.isArray(vehiculos) ? vehiculos : [];
-
+    
             if (lista.length === 0) {
                 cont.innerHTML = '<div style="padding:12px;color:#6b7280;font-size:.88rem;">No se encontraron vehículos con esa placa</div>';
                 cont.style.display = 'block';
                 return;
             }
+            
             cont.innerHTML = '';
             lista.slice(0, 6).forEach(v => {
-                const marcaNombre = v.marca_nombre || catalogoMarcas.find(m => m.ID_MARCA == v.ID_MARCA)?.NOMBRE || '';
+                const marcaNombre = v.marca_nombre || '';
                 const div = document.createElement('div');
                 div.className = 'search-result-item';
+                
+                // Mostrar montos si están disponibles
+                const montosInfo = (v.monto_venta || v.monto_traspaso) ? 
+                    `<br><small style="color:#059669;">💰 Monto venta: ${formatMoney(v.monto_venta || 0)} | Traspaso: ${formatMoney(v.monto_traspaso || 0)}</small>` : 
+                    '<br><small style="color:#9ca3af;">⏳ Sin costos registrados</small>';
+                
                 div.innerHTML = `
                     <div class="result-info">
                         <strong>${v.PLACA}</strong>
                         <small>${marcaNombre} ${v.ESTILO || ''} ${v.MODELO || ''} &bull; Chasis: ${v.CHASIS || ''}</small>
+                        ${montosInfo}
                     </div>
                     <button class="btn-select-person">Seleccionar</button>`;
+                
                 div.querySelector('button').addEventListener('click', () => {
+                    // Poblar campos del vehículo
                     poblarCamposVehiculo('vendido', v);
+                    
+                    // Asignar montos específicos
+                    if (v.monto_venta) {
+                        document.getElementById('vehiculo-vendido-monto-venta').value = v.monto_venta;
+                    }
+                    if (v.monto_traspaso) {
+                        document.getElementById('vehiculo-vendido-monto-traspaso').value = v.monto_traspaso;
+                    }
+                    
+                    // Actualizar moneda y tipo de cambio
+                    if (v.MONEDA) {
+                        const radio = document.querySelector(`input[name="moneda"][value="${v.MONEDA}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                    if (v.TIPO_CAMBIO_COMPRA) {
+                        document.getElementById('tipo_cambio').value = v.TIPO_CAMBIO_COMPRA;
+                        propagarMonedaYTipoCambio();
+                    }
+                    
                     cont.style.display = 'none';
-                    mostrarNotificacion(`Vehículo ${v.PLACA} seleccionado`, 'success');
+                    mostrarNotificacion(`Vehículo ${v.PLACA} cargado con ${v.monto_venta ? 'costos' : 'datos básicos'}`, 'success');
                 });
+                
                 cont.appendChild(div);
             });
             cont.style.display = 'block';
         } catch (e) {
+            console.error('Error en búsqueda:', e);
             cont.innerHTML = `<div style="padding:12px;color:#dc2626;font-size:.88rem;">Error: ${e.message}</div>`;
             cont.style.display = 'block';
         }
@@ -2767,5 +2802,6 @@
 </body>
 
 </html>
+
 
 
