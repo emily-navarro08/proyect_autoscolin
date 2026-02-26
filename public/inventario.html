@@ -984,6 +984,27 @@
     <script src="pdfdatos_vehiculo.js"></script>
 
   <script>
+    // URLs base de las APIs
+    const API_BASE_URL = (() => {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+            
+        // En producción 
+        if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+            return `${protocol}//${hostname}/api`;
+        }
+            
+        // En desarrollo local
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+            
+        // Fallback a ruta relativa
+        return '/api';
+    })();
+        
+    console.log('🌐 API Base URL:', API_BASE_URL); // Para depuración
+    
     // ===== VARIABLES GLOBALES =====
     let vehiculos = [];
     let marcas = [];
@@ -1112,7 +1133,7 @@
     async function cargarCatalogos() {
         try {      
             // Cargar estados civiles - CORREGIDO
-            const ecRes = await fetch('/api/estados-civil');
+            const ecRes = await fetch(`${API_BASE_URL}'/estados-civil');
             estadosCivil = await ecRes.json(); // Asignar a la variable GLOBAL
             const selectEstadoCivil = document.getElementById('modalProvEstadoCivil');
             
@@ -1125,7 +1146,7 @@
             });       
             
             // Cargar marcas
-            const marcasRes = await fetch('/api/marcas');
+            const marcasRes = await fetch(`${API_BASE_URL}/marcas');
             marcas = await marcasRes.json();
             const selectMarca = document.getElementById('modalMarca');
             const filtroMarca = document.getElementById('filtroMarca');
@@ -1136,7 +1157,7 @@
             });
 
             // Cargar colores
-            const coloresRes = await fetch('/api/colores');
+            const coloresRes = await fetch(`${API_BASE_URL}/colores');
             colores = await coloresRes.json();
             const selectColor = document.getElementById('modalColor');
             colores.forEach(c => {
@@ -1144,7 +1165,7 @@
             });
 
             // Cargar combustibles
-            const combRes = await fetch('/api/combustibles');
+            const combRes = await fetch(`${API_BASE_URL}/combustibles');
             combustibles = await combRes.json();
             const selectComb = document.getElementById('modalCombustible');
             combustibles.forEach(c => {
@@ -1152,7 +1173,7 @@
             });
 
             // Cargar transmisiones
-            const transRes = await fetch('/api/transmisiones');
+            const transRes = await fetch(`${API_BASE_URL}/transmisiones');
             transmisiones = await transRes.json();
             const selectTrans = document.getElementById('modalTransmision');
             transmisiones.forEach(t => {
@@ -1160,7 +1181,7 @@
             });
 
             // Cargar proveedores
-            const provRes = await fetch('/api/proveedores');
+            const provRes = await fetch(`${API_BASE_URL}/proveedores');
             proveedores = await provRes.json();
             const selectProv = document.getElementById('modalProveedor');
             
@@ -1176,7 +1197,7 @@
 
     async function cargarVehiculos() {
         try {
-            const response = await fetch('/api/vehiculos');
+            const response = await fetch(`${API_BASE_URL}/vehiculos');
             vehiculos = await response.json();
             actualizarTabla(vehiculos);
         } catch (error) {
@@ -1303,7 +1324,7 @@
 
     async function editarVehiculo(id) {
         try {
-            const response = await fetch(`/api/vehiculos/${id}/completo`);
+            const response = await fetch(`${API_BASE_URL}/vehiculos/${id}/completo`);
             const data = await response.json();
             
             vehiculoActual = data.vehiculo;
@@ -1684,7 +1705,7 @@
             document.getElementById('modalProvNombre').value = 'Cargando...';
             
             // Buscar la persona (puede ser proveedor o cliente)
-            const response = await fetch(`/api/personas/${proveedorId}`);
+            const response = await fetch(`${API_BASE_URL}/personas/${proveedorId}`);
             if (!response.ok) {
                 throw new Error('No se pudo cargar la información');
             }
@@ -2042,13 +2063,17 @@
             let vehiculoId = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
             
             if (vehiculoId) {
-                await fetch(`/api/vehiculos/${vehiculoId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(vehiculoData)
-                });
+              const res = await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(vehiculoData)
+              });
+              if (!res.ok) {
+                  const err = await res.json().catch(() => ({}));
+                  throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
+              }
             } else {
-                const response = await fetch('/api/vehiculos', {
+                const response = await fetch(`${API_BASE_URL}/vehiculos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(vehiculoData)
@@ -2058,7 +2083,7 @@
             }
 
             // Guardar costos
-            await fetch(`/api/vehiculos/${vehiculoId}/costos`, {
+            await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/costos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(costosData)
@@ -2066,7 +2091,7 @@
 
             // Primero, eliminar los extras existentes si estamos editando
             if (vehiculoActual) {
-                await fetch(`/api/vehiculos/${vehiculoId}/extras`, {
+                await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
                     method: 'DELETE'
                 });
             }
@@ -2085,7 +2110,7 @@
                         PRECIO_USD: montoCRC / tipoCambio // Opcional: guardar también en USD
                     };
                     
-                    await fetch(`/api/vehiculos/${vehiculoId}/extras`, {
+                    await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(extraData)
@@ -2107,7 +2132,7 @@
         if (!confirm('¿Está seguro de eliminar este vehículo?')) return;
         
         try {
-            const response = await fetch(`/api/vehiculos/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/vehiculos/${id}`, {
                 method: 'DELETE'
             });
             
@@ -2143,4 +2168,5 @@
     }
   </script>
 </body>
+
 </html>
