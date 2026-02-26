@@ -6396,31 +6396,56 @@ app.put('/api/anticipos/:id', async (req, res) => {
 
     try {
         const connection = await mysql.createConnection(dbConfig);
+
+        // ── Obtener el anticipo actual para usar sus valores como fallback ──
+        const [actual] = await connection.execute(
+            'SELECT * FROM ANTICIPOS WHERE ID_ANTICIPO = ?', [id]
+        );
+        if (actual.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Anticipo no encontrado' });
+        }
+        const ant = actual[0];
+
         await connection.execute(
             `UPDATE ANTICIPOS SET
-             FORMA_PAGO=?, NUM_DOCUMENTO=?, MONTO_COLONES=?,
-             MONTO_DOLARES=?, MONEDA=?, TIPO_CAMBIO=?, REALIZADO_POR=?,
-             SALDO_PENDIENTE=?, FECHA_ANTICIPO=?, FECHA_VENCIMIENTO=?,
-             OBSERVACIONES=?, ESTADO_ANTICIPO=?
-             WHERE ID_ANTICIPO=?`,
+             FORMA_PAGO        = ?,
+             NUM_DOCUMENTO     = ?,
+             MONTO_COLONES     = ?,
+             MONTO_DOLARES     = ?,
+             MONEDA            = ?,
+             TIPO_CAMBIO       = ?,
+             REALIZADO_POR     = ?,
+             SALDO_PENDIENTE   = ?,
+             FECHA_ANTICIPO    = ?,
+             FECHA_VENCIMIENTO = ?,
+             OBSERVACIONES     = ?,
+             ESTADO_ANTICIPO   = ?
+             WHERE ID_ANTICIPO = ?`,
             [
-                forma_pago,
-                num_documento,
-                parseFloat(monto_colones) || 0,
-                parseFloat(monto_dolares) || 0,
-                moneda || 'CRC',
-                parseFloat(tipo_cambio)   || 1,
-                realizado_por || '',
-                parseFloat(saldo_pendiente) || 0,
-                fecha_anticipo,
-                fecha_vencimiento,
-                observaciones || null,
-                estado_anticipo || 'PENDIENTE',
+                forma_pago      ?? ant.FORMA_PAGO      ?? 'EFECTIVO',
+                num_documento   ?? ant.NUM_DOCUMENTO   ?? '',
+                parseFloat(monto_colones)   || parseFloat(ant.MONTO_COLONES)   || 0,
+                parseFloat(monto_dolares)   || parseFloat(ant.MONTO_DOLARES)   || 0,
+                moneda          ?? ant.MONEDA          ?? 'CRC',
+                parseFloat(tipo_cambio)     || parseFloat(ant.TIPO_CAMBIO)     || 1,
+                realizado_por   ?? ant.REALIZADO_POR   ?? '',
+                parseFloat(saldo_pendiente) !== undefined
+                    ? parseFloat(saldo_pendiente)
+                    : parseFloat(ant.SALDO_PENDIENTE)  || 0,
+                fecha_anticipo  ?? ant.FECHA_ANTICIPO  ?? new Date().toISOString().split('T')[0],
+                fecha_vencimiento != null
+                    ? fecha_vencimiento
+                    : ant.FECHA_VENCIMIENTO ?? null,
+                observaciones   ?? ant.OBSERVACIONES   ?? null,
+                estado_anticipo ?? ant.ESTADO_ANTICIPO ?? 'PENDIENTE',
                 id
             ]
         );
+
         await connection.end();
         res.json({ message: 'Anticipo actualizado' });
+
     } catch (err) {
         console.error('Error al actualizar anticipo:', err);
         res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
@@ -7349,6 +7374,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
