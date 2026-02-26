@@ -3957,7 +3957,7 @@ app.post('/api/usuarios', async (req, res) => {
         }
         
         // Encriptar contraseña
-        const hashedPassword = await bcrypt.hash(PASSWORD, 10);
+        const hashedPassword = await bcrypt.hash(PASSWORD, 12);
         
         // Insertar usuario
         const [result] = await connection.execute(
@@ -7404,3 +7404,4 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
