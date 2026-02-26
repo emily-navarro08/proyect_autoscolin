@@ -1984,7 +1984,7 @@
                     chasis: document.getElementById('vehiculo-recibir-chasis').value,
                     carroceria: document.getElementById('vehiculo-recibir-carroceria').value,
                     extras: document.getElementById('vehiculo-recibir-extras').value,
-                    observaciones: 'VEHÍCULO RECIBIDO A CAMBIO. ' + document.getElementById('vehiculo-recibir-observaciones').value,
+                    observaciones: 'VEHÍCULO RECIBIDO A CAMBIO. ' + (document.getElementById('vehiculo-recibir-extras')?.value || ''),
                     monto_recibido: parseFloat(document.getElementById('vehiculo-recibir-monto-recibido').value) || 0,
                     monto_traspaso: parseFloat(document.getElementById('vehiculo-recibir-monto-traspaso').value) || 0
                 },
@@ -2822,6 +2822,7 @@
 </body>
 
 </html>
+
 
 
 
