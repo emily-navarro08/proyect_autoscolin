@@ -1233,14 +1233,34 @@
 
     async function apiFetch(url, opts = {}) {
         try {
+            console.log(`🌐 API Fetch: ${opts.method || 'GET'} ${url}`);
+            
             const res = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 ...opts
             });
+            
+            // Verificar si la respuesta es JSON
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await res.text();
+                console.error('❌ Respuesta no JSON:', text.substring(0, 200));
+                throw new Error(`Respuesta no válida del servidor: ${res.status} ${res.statusText}`);
+            }
+            
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+            
+            if (!res.ok) {
+                console.error('❌ Error en respuesta:', data);
+                throw new Error(data.error || data.message || `Error ${res.status}`);
+            }
+            
             return data;
         } catch (e) {
+            console.error('❌ Error en apiFetch:', e);
             throw e;
         }
     }
@@ -2802,6 +2822,7 @@
 </body>
 
 </html>
+
 
 
 
