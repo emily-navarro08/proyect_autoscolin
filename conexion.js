@@ -562,14 +562,14 @@ app.put('/api/transmisiones/:id', async (req, res) => {
     }
 });
 
-// Ruta de login actualizada para tu estructura
+// Ruta de login actualizada
 app.post('/api/login', async (req, res) => {
     const { correo, contrasena } = req.body;
 
     try {
         const connection = await mysql.createConnection(dbConfig);
         
-        // Consulta actualizada según tu estructura
+        // 1. PRIMERO obtener el usuario por email (sin comparar contraseña)
         const [rows] = await connection.execute(
             `
             SELECT 
@@ -577,6 +577,7 @@ app.post('/api/login', async (req, res) => {
                 p.NOMBRE_COMPLETO,
                 p.EMAIL,
                 u.USERNAME,
+                u.PASSWORD_HASH,  -- Necesitamos el hash para comparar
                 r.NOMBRE AS rol,
                 u.ESTADO as estado_usuario,
                 u.INTENTOS_FALLIDOS,
@@ -586,16 +587,15 @@ app.post('/api/login', async (req, res) => {
             INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
             INNER JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
             WHERE p.EMAIL = ? 
-            AND u.PASSWORD_HASH = ?
             AND u.ESTADO = 'ACTIVO'
             AND pr.ESTADO = 'ACTIVO'
             LIMIT 1
             `,
-            [correo, contrasena]
+            [correo]  // Solo buscamos por email, no por contraseña
         );
-        await connection.end();
 
         if (rows.length === 0) {
+            await connection.end();
             return res.status(401).json({ 
                 error: 'Credenciales incorrectas o usuario inactivo' 
             });
@@ -603,16 +603,45 @@ app.post('/api/login', async (req, res) => {
 
         const usuario = rows[0];
         
-        // Verificar si el usuario está bloqueado
+        // 2. VERIFICAR la contraseña con bcrypt.compare
+        const contrasenaValida = await bcrypt.compare(contrasena, usuario.PASSWORD_HASH);
+        
+        if (!contrasenaValida) {
+            // Incrementar intentos fallidos
+            await connection.execute(
+                `UPDATE USUARIOS 
+                 SET INTENTOS_FALLIDOS = INTENTOS_FALLIDOS + 1 
+                 WHERE ID_PERSONA = ?`,
+                [usuario.ID_PERSONA]
+            );
+            
+            await connection.end();
+            return res.status(401).json({ 
+                error: 'Credenciales incorrectas' 
+            });
+        }
+
+        // 3. Verificar si el usuario está bloqueado
         if (usuario.FECHA_BLOQUEO && new Date(usuario.FECHA_BLOQUEO) > new Date()) {
+            await connection.end();
             return res.status(403).json({ 
                 error: 'Usuario bloqueado temporalmente' 
             });
         }
 
-        // Actualizar último acceso (opcional)
-        await actualizarUltimoAcceso(usuario.ID_PERSONA);
+        // 4. Actualizar último acceso y resetear intentos fallidos
+        await connection.execute(
+            `UPDATE USUARIOS 
+             SET ULTIMO_ACCESO = NOW(), 
+                 INTENTOS_FALLIDOS = 0,
+                 FECHA_BLOQUEO = NULL 
+             WHERE ID_PERSONA = ?`,
+            [usuario.ID_PERSONA]
+        );
 
+        await connection.end();
+
+        // 5. Enviar respuesta exitosa (sin incluir el hash)
         res.json({ 
             id_persona: usuario.ID_PERSONA,
             nombre: usuario.NOMBRE_COMPLETO, 
@@ -621,9 +650,10 @@ app.post('/api/login', async (req, res) => {
             username: usuario.USERNAME
         });
         
-        console.log(`Usuario logueado: ${usuario.NOMBRE_COMPLETO} - ${usuario.rol}`);
+        console.log(`✅ Usuario logueado: ${usuario.NOMBRE_COMPLETO} - ${usuario.rol}`);
+        
     } catch (err) {
-        console.error('Error de servidor:', err);
+        console.error('❌ Error de servidor:', err);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
@@ -7374,14 +7404,3 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
-
-
-
-
-
-
-
-
-
-
-
