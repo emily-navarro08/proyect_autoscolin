@@ -2027,38 +2027,24 @@
             const totalInversionCRC = costoTotalCRC + comisionCRC + totalObservacionesCRC;
             const saldoCRC = costoTotalCRC - primaCRC;
 
-            // Costos del vehículo - Guardar TODO en colones y también en dólares para compatibilidad
+            // Costos del vehículo
             const costosData = {
-                // Valores en dólares (calculados)
-                PRECIO_COMPRA: precioCompraCRC / tipoCambio,
-                PRECIO_TRANSPASO: precioTraspasoCRC / tipoCambio,
-                COSTO: costoTotalCRC / tipoCambio,
-                PRIMA: primaCRC / tipoCambio,
-                COMISION: comisionCRC / tipoCambio,
-                TOTAL_INVERSION: totalInversionCRC / tipoCambio,
-                PRECIO_COSTO: totalInversionCRC / tipoCambio, // Es igual a total inversión
-                PRECIO_PUBLICO: parsearNumero(document.getElementById('modalPPrecio').value) / tipoCambio,
-                PRECIO_DESCUENTO: parsearNumero(document.getElementById('modalPCDescuento').value) / tipoCambio,
-                PRIMA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalPrimaFinanc').value) / tipoCambio,
-                CUOTA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalCuotaFinanc').value) / tipoCambio,
-                SALDO: saldoCRC / tipoCambio,
-                MONEDA: 'USD',
+                // TODOS los valores en COLONES (moneda principal)
+                PRECIO_COMPRA: precioCompraCRC,
+                PRECIO_TRANSPASO: precioTraspasoCRC,
+                COSTO: costoTotalCRC,
+                PRIMA: primaCRC,
+                COMISION: comisionCRC,
+                TOTAL_INVERSION: totalInversionCRC,
+                PRECIO_COSTO: totalInversionCRC,
+                PRECIO_PUBLICO: parsearNumero(document.getElementById('modalPPrecio').value),
+                PRECIO_DESCUENTO: parsearNumero(document.getElementById('modalPCDescuento').value),
+                PRIMA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalPrimaFinanc').value),
+                CUOTA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalCuotaFinanc').value),
+                SALDO: saldoCRC,
+                MONEDA: 'CRC',
                 TIPO_CAMBIO_COMPRA: tipoCambio,
-                OBSERVACION: document.getElementById('modalObservaciones').value || null, // ← CAMPO FALTANTE
-                
-                // Valores en colones (moneda principal)
-                PRECIO_COMPRA_CRC: precioCompraCRC,
-                PRECIO_TRANSPASO_CRC: precioTraspasoCRC,
-                COSTO_CRC: costoTotalCRC,
-                PRIMA_CRC: primaCRC,
-                COMISION_CRC: comisionCRC,
-                TOTAL_INVERSION_CRC: totalInversionCRC,
-                PRECIO_COSTO_CRC: totalInversionCRC,
-                PRECIO_PUBLICO_CRC: parsearNumero(document.getElementById('modalPPrecio').value),
-                PRECIO_DESCUENTO_CRC: parsearNumero(document.getElementById('modalPCDescuento').value),
-                PRIMA_FINANCIAMIENTO_CRC: parsearNumero(document.getElementById('modalPrimaFinanc').value),
-                CUOTA_FINANCIAMIENTO_CRC: parsearNumero(document.getElementById('modalCuotaFinanc').value),
-                SALDO_CRC: saldoCRC
+                OBSERVACION: document.getElementById('modalObservaciones').value || null
             };
 
             let vehiculoId = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
@@ -2172,5 +2158,6 @@
 </body>
 
 </html>
+
 
 
