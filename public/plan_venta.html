@@ -342,13 +342,13 @@
                         <div class="form-group">
                             <label>Moneda:</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="moneda" value="CRC"> COLONES</label>
+                                <label><input type="radio" name="moneda" value="CRC" checked> COLONES</label>
                                 <label><input type="radio" name="moneda" value="USD"> DÓLARES</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Tipo Cambio:</label>
-                            <input type="number" id="tipo_cambio" step="0.01" value="1.00">
+                            <input type="number" id="tipo_cambio" step="0.01" value="500.00">
                         </div>
 
                         <!-- BÚSQUEDA VENDEDOR -->
@@ -789,7 +789,7 @@
                         <div class="form-group">
                             <label>Tipo de Venta:</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="tipo_venta" value="contado"> Contado</label>
+                                <label><input type="radio" name="tipo_venta" value="contado" checked> Contado</label>
                                 <label><input type="radio" name="tipo_venta" value="credito"> Crédito</label>
                             </div>
                         </div>
@@ -2494,7 +2494,7 @@
         const dolar = parseFloat(document.getElementById('monto_dolar_anticipo').value) || 0;
         const editarIdx = document.getElementById('anticipo-editar-id').value;
 
-        if (!financiamientoActual && !editarIdx) {
+        if (!financiamientoActual && !editarIdx && !selectedVentaId) {
             mostrarNotificacion('Primero debe guardar el plan para poder agregar anticipos', 'warning');
             return;
         }
@@ -2822,6 +2822,7 @@
 </body>
 
 </html>
+
 
 
 
