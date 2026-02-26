@@ -6096,7 +6096,7 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
             }
         }
 
-        // ─── 7. MANEJAR ANTICIPOS (cuotas) ───────────────────────
+        // ─── 7. MANEJAR ANTICIPOS (cuotas) ───────────────────────        
         if (Array.isArray(anticipos) && anticipos.length > 0 && idFinanciamiento) {
             // Obtener anticipos existentes para este financiamiento
             const [anticiposExistentes] = await connection.execute(
@@ -6170,11 +6170,40 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
         }
 
         // ─── 8. DETALLE_PAGOS (pagos iniciales) ───────────────────
-        if (Array.isArray(detalle_pagos) && detalle_pagos.length > 0) {
-            // Eliminar detalles de pago existentes para esta venta (opcional)
-            // await connection.execute('DELETE FROM DETALLE_PAGOS WHERE ID_VENTA = ?', [ventaId]);
+        let detallesPagoFinal = detalle_pagos;
+        
+        if ((!detallesPagoFinal || detallesPagoFinal.length === 0) && forma_pago) {
+            const montoTotal = parseFloat(forma_pago.monto_total) || 0;
+            const efectivo   = parseFloat(forma_pago.efectivo)    || 0;
+            const transferencia = parseFloat(forma_pago.transferencia) || 0;
+            const tarjeta    = parseFloat(forma_pago.tarjeta)     || 0;
+        
+            // Solo crear detalle si hay algún monto
+            if (montoTotal > 0 || efectivo > 0 || transferencia > 0 || tarjeta > 0) {
+                detallesPagoFinal = [{
+                    tipo_venta:       forma_pago.tipo_venta || 'CONTADO',
+                    forma_pago:       forma_pago.forma_pago_pago || 'Efectivo',
+                    id_banco:         forma_pago.id_banco || null,
+                    efectivo:         efectivo,
+                    transferencia:    transferencia,
+                    num_transferencia: forma_pago.num_transferencia || null,
+                    nom_deposita:     forma_pago.nom_deposita || null,
+                    tarjeta:          tarjeta,
+                    num_tarjeta:      forma_pago.num_tarjeta || null,
+                    tipo_tarjeta:     forma_pago.tipo_tarjeta || null,
+                    moneda:           forma_pago.moneda || 'CRC',
+                    tipo_cambio:      parseFloat(forma_pago.tipo_cambio) || 1,
+                    fecha_pago:       forma_pago.fecha_pago || new Date().toISOString().split('T')[0],
+                    observaciones:    `Pago contado - ${forma_pago.forma_pago_pago || 'Efectivo'}`
+                }];
+            }
+        }
+        
+        if (Array.isArray(detallesPagoFinal) && detallesPagoFinal.length > 0) {
+            // Primero eliminar detalles anteriores para no duplicar
+            await connection.execute('DELETE FROM DETALLE_PAGOS WHERE ID_VENTA = ?', [ventaId]);
             
-            for (const dp of detalle_pagos) {
+            for (const dp of detallesPagoFinal) {
                 await connection.execute(
                     `INSERT INTO DETALLE_PAGOS (
                         ID_VENTA, ID_ANTICIPO, TIPO_VENTA, FORMA_PAGO,
@@ -6185,7 +6214,7 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
                     [
                         ventaId,
                         dp.id_anticipo || null,
-                        forma_pago?.tipo_venta || 'CONTADO',
+                        dp.tipo_venta || forma_pago?.tipo_venta || 'CONTADO',
                         dp.forma_pago || null,
                         dp.id_banco || null,
                         parseFloat(dp.efectivo) || 0,
@@ -7239,6 +7268,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
