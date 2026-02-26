@@ -6616,8 +6616,8 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
         // ── PARTE 2: DETALLE_PAGOS pendientes (contado sin anticipo) ──────
         let qDetalle = `
             SELECT
-                dp.ID_DETALLE_PAGO AS id,
-                dp.ID_DETALLE_PAGO AS id_cuenta,
+                dp.ID_DETALLEPAGO AS id,
+                dp.ID_DETALLEPAGO AS id_cuenta,
                 'detalle_pago'     AS tipo_registro,
                 v.ID_VENTA         AS id_venta,
                 v.CODIGO_VENTA     AS plan_venta,
@@ -6704,7 +6704,7 @@ app.put('/api/detalle-pagos/:id/pagar', async (req, res) => {
              SET ESTADO_PAGO = ?,
                  FECHA_PAGO  = ?,
                  OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Cobrado por: ', ?, ' Doc: ', ?)
-             WHERE ID_DETALLE_PAGO = ?`,
+             WHERE ID_DETALLEPAGO = ?`,
             [
                 estado_pago    || 'COMPLETADO',
                 fecha_pago     || new Date().toISOString().split('T')[0],
@@ -7349,6 +7349,7 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
 
 
 
