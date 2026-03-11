@@ -5,7 +5,7 @@
             padding: 30px;
             overflow-y: auto;
             background-color: #f8f9fa;
-            background: url("/img/logo.jpg") center / cover no-repeat;
+            background: url("/img/logoss.jpeg") center / cover no-repeat;
         }
 
         .main-content header {
@@ -14,28 +14,28 @@
 
         .main-content h1 {
             font-size: 28px;
-            color: #34495e;
+            color: #b69e24;
             margin-bottom: 10px;
         }
 
         .main-content p {
-            color: #7f8c8d;
+            color: #ffffff;
         }
 
         /* Grid de tarjetas */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
             gap: 20px;
         }
 
         .card {
-            background-color: rgba(228, 236, 255, 0.714);
+            background-color: rgba(73, 73, 73, 0.548);
             border: 1px solid #ddd;
             padding: 10px 5px;
             text-align: center;
             font-weight: bold;
-            color: #2c3e50;
+            color: #ffffff;
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -54,8 +54,8 @@
         }
 
         .card i {
-            font-size: 3rem;
-            color: #2c3e50;
+            font-size: 2.5rem;
+            color: #b69e24;
             margin-bottom: 15px;
         }
 
