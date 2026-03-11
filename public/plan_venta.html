@@ -676,85 +676,122 @@
                 <!-- ======= VEHÍCULO A RECIBIR ======= -->
                 <section id="recibir" class="panel">
                     <h2><i class="fas fa-truck"></i> Vehículo a recibir</h2>
-                    <div class="grid">
-                        <div class="form-group">
-                            <label>Placa:</label>
-                            <input type="text" id="vehiculo-recibir-placa">
-                        </div>
-                        <div class="form-group">
-                            <label>Marca:</label>
-                            <select id="vehiculo-recibir-marca"><option value="">Seleccionar Marca</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Estilo:</label>
-                            <input type="text" id="vehiculo-recibir-estilo">
-                        </div>
-                        <div class="form-group">
-                            <label>Tracción:</label>
-                            <input type="text" id="vehiculo-recibir-traccion">
-                        </div>
-                        <div class="form-group">
-                            <label>Color:</label>
-                            <select id="vehiculo-recibir-color"><option value="">Seleccionar Color</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Modelo (Año):</label>
-                            <select id="vehiculo-recibir-modelo"><option value="">Seleccionar Año</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Kilometraje Anterior:</label>
-                            <input type="number" id="vehiculo-recibir-km-anterior" step="0.01" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Kilometraje Actual:</label>
-                            <input type="number" id="vehiculo-recibir-km-actual" step="0.01" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Motor:</label>
-                            <input type="text" id="vehiculo-recibir-motor">
-                        </div>
-                        <div class="form-group">
-                            <label>C.C:</label>
-                            <input type="number" id="vehiculo-recibir-cc" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Cilindros:</label>
-                            <input type="number" id="vehiculo-recibir-cilindros" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Combustible:</label>
-                            <select id="vehiculo-recibir-combustible"><option value="">Seleccionar Combustible</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Transmisión:</label>
-                            <select id="vehiculo-recibir-transmision"><option value="">Seleccionar Transmisión</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>P.V:</label>
-                            <input type="text" id="vehiculo-recibir-pv">
-                        </div>
-                        <div class="form-group">
-                            <label>Chasis:</label>
-                            <input type="text" id="vehiculo-recibir-chasis">
-                        </div>
-                        <div class="form-group">
-                            <label>Carrocería:</label>
-                            <input type="text" id="vehiculo-recibir-carroceria">
-                        </div>
-                        <div class="form-group">
-                            <label>Monto Recibido:</label>
-                            <input type="number" id="vehiculo-recibir-monto-recibido">
-                        </div>
-                        <div class="form-group">
-                            <label>Monto Traspaso:</label>
-                            <input type="number" id="vehiculo-recibir-monto-traspaso">
-                        </div>
-                        <div class="form-group">
-                            <label>Extras:</label>
-                            <textarea type="text" id="vehiculo-recibir-extras"></textarea>
-                        </div>                                                
+                    <!-- Contenedor para todos los vehículos -->
+                    <div id="vehiculos-recibir-container">
+                        <!-- Aquí se insertarán dinámicamente los vehículos -->
                     </div>
+                    <!-- Botón para agregar nuevo vehículo -->
+                    <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
+                        <button type="button" id="btnAgregarVehiculoRecibir" class="btn-filter btn-filter-primary">
+                            <i class="fas fa-plus-circle"></i> Agregar otro vehículo a recibir
+                        </button>
+                        <span style="margin-left: 15px; color: #6b7280; font-size: 0.85rem; display: flex; align-items: center;">
+                            <i class="fas fa-info-circle"></i> Puede agregar hasta 3 vehículos de intercambio
+                        </span>
+                    </div>
+                    <!-- Resumen de totales de intercambio -->
+                    <div class="selected-person-card" style="background: linear-gradient(135deg,#1e40af,#3b82f6); margin-top: 10px;">
+                        <h4><i class="fas fa-calculator"></i> Resumen de Intercambios</h4>
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                            <p><strong>Total vehículos:</strong> <span id="total-vehiculos-recibir">0</span></p>
+                            <p><strong>Total Monto Recibido:</strong> <span id="total-monto-recibido">₡ 0.00</span></p>
+                            <p><strong>Total Monto Traspaso:</strong> <span id="total-monto-traspaso">₡ 0.00</span></p>
+                        </div>
+                    </div>                                       
                 </section>
+                <!-- ======= Plantilla para un vehículo a recibir ======= -->
+                <div id="vehiculo-recibir-template" style="display: none;">
+                    <div class="vehiculo-recibir-item" style="border: 1px solid #e5e0ff; border-radius: 10px; padding: 15px; margin-bottom: 20px; background: #fafafa; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; color: #4c1d95; font-size: 1rem;">
+                                <i class="fas fa-car"></i> Vehículo de Intercambio #<span class="vehiculo-numero">1</span>
+                            </h3>
+                            <button type="button" class="btn-eliminar-vehiculo" style="background: none; border: none; color: #dc2626; font-size: 1.2rem; cursor: pointer;" title="Eliminar vehículo">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid">
+                            <div class="form-group">
+                                <label>Placa:</label>
+                                <input type="text" class="vehiculo-recibir-placa">
+                            </div>
+                            <div class="form-group">
+                                <label>Marca:</label>
+                                <select class="vehiculo-recibir-marca"><option value="">Seleccionar Marca</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estilo:</label>
+                                <input type="text" class="vehiculo-recibir-estilo">
+                            </div>
+                            <div class="form-group">
+                                <label>Tracción:</label>
+                                <input type="text" class="vehiculo-recibir-traccion">
+                            </div>
+                            <div class="form-group">
+                                <label>Color:</label>
+                                <select class="vehiculo-recibir-color"><option value="">Seleccionar Color</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo (Año):</label>
+                                <select class="vehiculo-recibir-modelo"><option value="">Seleccionar Año</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometraje Anterior:</label>
+                                <input type="number" class="vehiculo-recibir-km-anterior" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometraje Actual:</label>
+                                <input type="number" class="vehiculo-recibir-km-actual" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Motor:</label>
+                                <input type="text" class="vehiculo-recibir-motor">
+                            </div>
+                            <div class="form-group">
+                                <label>C.C:</label>
+                                <input type="number" class="vehiculo-recibir-cc" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Cilindros:</label>
+                                <input type="number" class="vehiculo-recibir-cilindros" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Combustible:</label>
+                                <select class="vehiculo-recibir-combustible"><option value="">Seleccionar Combustible</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Transmisión:</label>
+                                <select class="vehiculo-recibir-transmision"><option value="">Seleccionar Transmisión</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>P.V:</label>
+                                <input type="text" class="vehiculo-recibir-pv">
+                            </div>
+                            <div class="form-group">
+                                <label>Chasis:</label>
+                                <input type="text" class="vehiculo-recibir-chasis">
+                            </div>
+                            <div class="form-group">
+                                <label>Carrocería:</label>
+                                <input type="text" class="vehiculo-recibir-carroceria">
+                            </div>
+                            <div class="form-group">
+                                <label>Monto Recibido:</label>
+                                <input type="number" class="vehiculo-recibir-monto-recibido" step="0.01" min="0" value="0" oninput="actualizarTotalesRecibir()">
+                            </div>
+                            <div class="form-group">
+                                <label>Monto Traspaso:</label>
+                                <input type="number" class="vehiculo-recibir-monto-traspaso" step="0.01" min="0" value="0" oninput="actualizarTotalesRecibir()">
+                            </div>
+                            <div class="form-group">
+                                <label>Extras:</label>
+                                <textarea class="vehiculo-recibir-extras"></textarea>
+                            </div>                                                
+                        </div>
+                    </div>
+                </div>        
+
                 <!-- ======= ANTICIPOS ======= -->
                 <section id="anticipos" class="panel">
                     <h2><i class="fas fa-money-bill-wave"></i> Anticipos</h2>
@@ -1208,6 +1245,8 @@
     let anticiposLocales = [];
     let financiamientoActual = null;
     let anticipo_fila_seleccionada = null;
+    let vehiculosRecibir = [];
+    const MAX_VEHICULOS = 3;    
 
     let catalogoEstadosCivil = [];
     let catalogoMarcas = [];
@@ -1334,6 +1373,7 @@
                 inicializarFiltros(),
                 cargarPlanesDesdeAPI()
             ]);
+            inicializarVehiculosRecibir();
             inicializarUbicaciones('fact');
             inicializarUbicaciones('ins');
             inicializarCalculadoraCredito();
@@ -1690,14 +1730,10 @@
             }
 
             // Cargar vehículo a recibir
-            if (data.VEHICULO_RECIBIDO) {
-                poblarCamposVehiculoRecibido(data.VEHICULO_RECIBIDO);
+            if (data.VEHICULOS_RECIBIDOS && data.VEHICULOS_RECIBIDOS.length > 0) {
+                cargarVehiculosRecibirExistente(data.VEHICULOS_RECIBIDOS);
             } else {
-                document.querySelectorAll('#recibir input, #recibir select, #recibir textarea').forEach(el => {
-                    if (el.type === 'number') el.value = '0';
-                    else if (el.tagName === 'SELECT') el.value = '';
-                    else el.value = '';
-                });
+                inicializarVehiculosRecibir();
             }
 
             // Cargar financiamiento si existe
@@ -1873,6 +1909,173 @@
         mostrarNotificacion('Nuevo plan iniciado', 'info');
     }
 
+    // Inicializar el primer vehículo al cargar la página
+    function inicializarVehiculosRecibir() {
+        const container = document.getElementById('vehiculos-recibir-container');
+        if (!container) return;
+        
+        // Limpiar contenedor
+        container.innerHTML = '';
+        vehiculosRecibir = [];
+        
+        // Agregar primer vehículo
+        agregarVehiculoRecibir();
+        
+        // Configurar event listener para el botón de agregar
+        document.getElementById('btnAgregarVehiculoRecibir').addEventListener('click', function(e) {
+            e.preventDefault();
+            agregarVehiculoRecibir();
+        });
+    }
+
+    // Función para agregar un nuevo vehículo
+    function agregarVehiculoRecibir() {
+        if (vehiculosRecibir.length >= MAX_VEHICULOS) {
+            mostrarNotificacion(`Solo puede agregar hasta ${MAX_VEHICULOS} vehículos de intercambio`, 'warning');
+            return;
+        }
+        
+        const template = document.getElementById('vehiculo-recibir-template');
+        const container = document.getElementById('vehiculos-recibir-container');
+        
+        // Clonar el template
+        const nuevoVehiculo = template.cloneNode(true);
+        nuevoVehiculo.style.display = 'block';
+        nuevoVehiculo.id = ''; // Remover ID para evitar duplicados
+        
+        // Asignar número de vehículo
+        const numero = vehiculosRecibir.length + 1;
+        nuevoVehiculo.querySelector('.vehiculo-numero').textContent = numero;
+        
+        // Configurar IDs únicos para los campos (opcional, pero útil para debugging)
+        const inputs = nuevoVehiculo.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            const clase = input.className;
+            if (clase) {
+                // Agregar data-vehiculo-index para identificar el vehículo
+                input.dataset.vehiculoIndex = numero - 1;
+            }
+        });
+        
+        // Agregar evento al botón de eliminar
+        const btnEliminar = nuevoVehiculo.querySelector('.btn-eliminar-vehiculo');
+        btnEliminar.addEventListener('click', function() {
+            eliminarVehiculoRecibir(this);
+        });
+        
+        // Agregar eventos para actualizar totales
+        const montos = nuevoVehiculo.querySelectorAll('.vehiculo-recibir-monto-recibido, .vehiculo-recibir-monto-traspaso');
+        montos.forEach(input => {
+            input.addEventListener('input', actualizarTotalesRecibir);
+        });
+        
+        // Agregar al contenedor
+        container.appendChild(nuevoVehiculo);
+        
+        // Actualizar array de vehículos
+        vehiculosRecibir.push({
+            index: numero - 1,
+            elemento: nuevoVehiculo
+        });
+        
+        actualizarTotalesRecibir();
+    }
+
+    // Función para eliminar un vehículo
+    function eliminarVehiculoRecibir(btnElement) {
+        const vehiculoItem = btnElement.closest('.vehiculo-recibir-item');
+        if (!vehiculoItem) return;
+        
+        if (vehiculosRecibir.length <= 1) {
+            mostrarNotificacion('Debe haber al menos un vehículo de intercambio', 'warning');
+            return;
+        }
+        
+        if (confirm('¿Está seguro de eliminar este vehículo de intercambio?')) {
+            vehiculoItem.remove();
+            
+            // Reconstruir array de vehículos y reenumerar
+            reconstruirArrayVehiculosRecibir();
+            
+            actualizarTotalesRecibir();
+        }
+    }
+
+    // Reconstruir el array después de eliminar
+    function reconstruirArrayVehiculosRecibir() {
+        const container = document.getElementById('vehiculos-recibir-container');
+        const items = container.querySelectorAll('.vehiculo-recibir-item');
+        
+        vehiculosRecibir = [];
+        
+        items.forEach((item, index) => {
+            // Actualizar número mostrado
+            item.querySelector('.vehiculo-numero').textContent = index + 1;
+            
+            // Actualizar data-index en inputs
+            item.querySelectorAll('input, select, textarea').forEach(input => {
+                input.dataset.vehiculoIndex = index;
+            });
+            
+            vehiculosRecibir.push({
+                index: index,
+                elemento: item
+            });
+        });
+    }
+
+    // Calcular y mostrar totales
+    function actualizarTotalesRecibir() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        let totalRecibido = 0;
+        let totalTraspaso = 0;
+        
+        items.forEach(item => {
+            const montoRecibido = parseFloat(item.querySelector('.vehiculo-recibir-monto-recibido')?.value) || 0;
+            const montoTraspaso = parseFloat(item.querySelector('.vehiculo-recibir-monto-traspaso')?.value) || 0;
+            
+            totalRecibido += montoRecibido;
+            totalTraspaso += montoTraspaso;
+        });
+        
+        document.getElementById('total-vehiculos-recibir').textContent = items.length;
+        document.getElementById('total-monto-recibido').textContent = formatMoney(totalRecibido);
+        document.getElementById('total-monto-traspaso').textContent = formatMoney(totalTraspaso);
+    }
+
+    // Función para obtener los datos de todos los vehículos a recibir (para guardar)
+    function obtenerVehiculosRecibirData() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        const vehiculos = [];
+        
+        items.forEach((item, index) => {
+            vehiculos.push({
+                placa: item.querySelector('.vehiculo-recibir-placa')?.value || '',
+                id_marca: item.querySelector('.vehiculo-recibir-marca')?.value || null,
+                estilo: item.querySelector('.vehiculo-recibir-estilo')?.value || '',
+                traccion: item.querySelector('.vehiculo-recibir-traccion')?.value || '',
+                id_color: item.querySelector('.vehiculo-recibir-color')?.value || null,
+                modelo: item.querySelector('.vehiculo-recibir-modelo')?.value || null,
+                kilometraje_anterior: parseFloat(item.querySelector('.vehiculo-recibir-km-anterior')?.value) || 0,
+                kilometraje_actual: parseFloat(item.querySelector('.vehiculo-recibir-km-actual')?.value) || 0,
+                motor: item.querySelector('.vehiculo-recibir-motor')?.value || '',
+                cc: parseFloat(item.querySelector('.vehiculo-recibir-cc')?.value) || null,
+                cilindros: parseInt(item.querySelector('.vehiculo-recibir-cilindros')?.value) || null,
+                id_combustible: item.querySelector('.vehiculo-recibir-combustible')?.value || null,
+                id_transmision: item.querySelector('.vehiculo-recibir-transmision')?.value || null,
+                pv: item.querySelector('.vehiculo-recibir-pv')?.value || '',
+                chasis: item.querySelector('.vehiculo-recibir-chasis')?.value || '',
+                carroceria: item.querySelector('.vehiculo-recibir-carroceria')?.value || '',
+                extras: item.querySelector('.vehiculo-recibir-extras')?.value || '',
+                observaciones: `VEHÍCULO ${index + 1} RECIBIDO A CAMBIO. ${item.querySelector('.vehiculo-recibir-extras')?.value || ''}`,
+                monto_recibido: parseFloat(item.querySelector('.vehiculo-recibir-monto-recibido')?.value) || 0,
+                monto_traspaso: parseFloat(item.querySelector('.vehiculo-recibir-monto-traspaso')?.value) || 0
+            });
+        });
+        
+        return vehiculos;
+    }
+
     //  GUARDAR PLAN COMPLETO
     async function guardarPlanCompleto() {
         mostrarLoading(true);
@@ -1960,34 +2163,12 @@
                     monto_traspaso: montoTraspaso, // MONTO_TRANSPASO en COSTOS_VEHICULO
                     moneda: moneda,
                     tipo_cambio_compra: tipoCambio,
-                    // Calcular otros costos según necesites
                     costo: montoVenta,
                     precio_costo: montoVenta,
                     saldo: montoVenta
                 },
 
-                vehiculo_recibir: {
-                    placa: document.getElementById('vehiculo-recibir-placa').value,
-                    id_marca: document.getElementById('vehiculo-recibir-marca').value || null,
-                    estilo: document.getElementById('vehiculo-recibir-estilo').value,
-                    traccion: document.getElementById('vehiculo-recibir-traccion').value,
-                    id_color: document.getElementById('vehiculo-recibir-color').value || null,
-                    modelo: document.getElementById('vehiculo-recibir-modelo').value || null,
-                    kilometraje_anterior: parseFloat(document.getElementById('vehiculo-recibir-km-anterior').value) || 0,
-                    kilometraje_actual: parseFloat(document.getElementById('vehiculo-recibir-km-actual').value) || 0,
-                    motor: document.getElementById('vehiculo-recibir-motor').value,
-                    cc: parseFloat(document.getElementById('vehiculo-recibir-cc').value) || null,
-                    cilindros: parseInt(document.getElementById('vehiculo-recibir-cilindros').value) || null,
-                    id_combustible: document.getElementById('vehiculo-recibir-combustible').value || null,
-                    id_transmision: document.getElementById('vehiculo-recibir-transmision').value || null,
-                    pv: document.getElementById('vehiculo-recibir-pv').value,
-                    chasis: document.getElementById('vehiculo-recibir-chasis').value,
-                    carroceria: document.getElementById('vehiculo-recibir-carroceria').value,
-                    extras: document.getElementById('vehiculo-recibir-extras').value,
-                    observaciones: 'VEHÍCULO RECIBIDO A CAMBIO. ' + (document.getElementById('vehiculo-recibir-extras')?.value || ''),
-                    monto_recibido: parseFloat(document.getElementById('vehiculo-recibir-monto-recibido').value) || 0,
-                    monto_traspaso: parseFloat(document.getElementById('vehiculo-recibir-monto-traspaso').value) || 0
-                },
+                vehiculos_recibir: obtenerVehiculosRecibirData(),
 
                 forma_pago: {
                     tipo_venta: tipoVenta.toUpperCase(),
@@ -2138,6 +2319,143 @@
         } finally {
             mostrarLoading(false);
         }
+    }
+    
+
+    // También necesitas cargar los catálogos en los selects de los nuevos vehículos
+    function llenarCatalogosVehiculosRecibir() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        
+        items.forEach(item => {
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-marca'), catalogoMarcas, 'ID_MARCA', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-color'), catalogoColores, 'ID_COLOR', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-combustible'), catalogoCombustibles, 'ID_COMBUSTIBLE', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-transmision'), catalogoTransmisiones, 'ID_TRANSMISION', 'NOMBRE');
+            
+            // Llenar años
+            const selectModelo = item.querySelector('.vehiculo-recibir-modelo');
+            if (selectModelo) {
+                const anioActual = new Date().getFullYear();
+                for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+                    selectModelo.appendChild(new Option(y, y));
+                }
+            }
+        });
+    }
+
+    // Versión de llenarSelect para elementos específicos
+    function llenarSelectMultiple(selectElement, datos, valKey, texKey) {
+        if (!selectElement) return;
+        const current = selectElement.value;
+        selectElement.innerHTML = '<option value="">Seleccionar</option>';
+        filtrarActivos(datos).forEach(item => {
+            const opt = new Option(obtV(item, texKey, texKey.toLowerCase()), obtV(item, valKey, valKey.toLowerCase()));
+            selectElement.appendChild(opt);
+        });
+        if (current) selectElement.value = current;
+    }
+
+    // Llamar a esta función después de agregar un vehículo
+    function actualizarCatalogosNuevoVehiculo(nuevoElemento) {
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-marca'), catalogoMarcas, 'ID_MARCA', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-color'), catalogoColores, 'ID_COLOR', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-combustible'), catalogoCombustibles, 'ID_COMBUSTIBLE', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-transmision'), catalogoTransmisiones, 'ID_TRANSMISION', 'NOMBRE');
+        
+        const selectModelo = nuevoElemento.querySelector('.vehiculo-recibir-modelo');
+        if (selectModelo) {
+            const anioActual = new Date().getFullYear();
+            for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+                selectModelo.appendChild(new Option(y, y));
+            }
+        }
+    }
+
+    // Modificar agregarVehiculoRecibir para actualizar catálogos
+    function agregarVehiculoRecibir() {
+        if (vehiculosRecibir.length >= MAX_VEHICULOS) {
+            mostrarNotificacion(`Solo puede agregar hasta ${MAX_VEHICULOS} vehículos de intercambio`, 'warning');
+            return;
+        }
+        
+        const template = document.getElementById('vehiculo-recibir-template');
+        const container = document.getElementById('vehiculos-recibir-container');
+        
+        const nuevoVehiculo = template.cloneNode(true);
+        nuevoVehiculo.style.display = 'block';
+        nuevoVehiculo.id = '';
+        
+        const numero = vehiculosRecibir.length + 1;
+        nuevoVehiculo.querySelector('.vehiculo-numero').textContent = numero;
+        
+        const btnEliminar = nuevoVehiculo.querySelector('.btn-eliminar-vehiculo');
+        btnEliminar.addEventListener('click', function() {
+            eliminarVehiculoRecibir(this);
+        });
+        
+        const montos = nuevoVehiculo.querySelectorAll('.vehiculo-recibir-monto-recibido, .vehiculo-recibir-monto-traspaso');
+        montos.forEach(input => {
+            input.addEventListener('input', actualizarTotalesRecibir);
+        });
+        
+        container.appendChild(nuevoVehiculo);
+        
+        // Actualizar catálogos para este nuevo vehículo
+        actualizarCatalogosNuevoVehiculo(nuevoVehiculo);
+        
+        vehiculosRecibir.push({
+            index: numero - 1,
+            elemento: nuevoVehiculo
+        });
+        
+        actualizarTotalesRecibir();
+    }
+
+    // Función para cargar datos existentes (cuando se selecciona un plan)
+    function cargarVehiculosRecibirExistente(vehiculosData) {
+        if (!vehiculosData || vehiculosData.length === 0) return;
+        
+        const container = document.getElementById('vehiculos-recibir-container');
+        container.innerHTML = '';
+        vehiculosRecibir = [];
+        
+        vehiculosData.forEach((v, index) => {
+            agregarVehiculoRecibir();
+            
+            // Esperar un momento para que se creen los elementos
+            setTimeout(() => {
+                const items = container.querySelectorAll('.vehiculo-recibir-item');
+                const item = items[index];
+                if (!item) return;
+                
+                // Llenar datos
+                item.querySelector('.vehiculo-recibir-placa').value = v.PLACA || '';
+                item.querySelector('.vehiculo-recibir-estilo').value = v.ESTILO || '';
+                item.querySelector('.vehiculo-recibir-traccion').value = v.TRACCION || '';
+                item.querySelector('.vehiculo-recibir-chasis').value = v.CHASIS || '';
+                item.querySelector('.vehiculo-recibir-motor').value = v.MOTOR || '';
+                item.querySelector('.vehiculo-recibir-carroceria').value = v.CARROCERIA || '';
+                item.querySelector('.vehiculo-recibir-cc').value = v.C_C || '';
+                item.querySelector('.vehiculo-recibir-cilindros').value = v.CILINDROS || '';
+                item.querySelector('.vehiculo-recibir-km-anterior').value = v.KILOMETRAJE_ANTERIOR || 0;
+                item.querySelector('.vehiculo-recibir-km-actual').value = v.KILOMETRAJE_ACTUAL || 0;
+                item.querySelector('.vehiculo-recibir-pv').value = v.PV || '';
+                item.querySelector('.vehiculo-recibir-extras').value = v.OBSERVACIONES || '';
+                item.querySelector('.vehiculo-recibir-monto-recibido').value = v.monto_recibido || 0;
+                item.querySelector('.vehiculo-recibir-monto-traspaso').value = v.monto_traspaso || 0;
+                
+                // Seleccionar valores en selects (necesita setTimeout para que los catálogos estén listos)
+                setTimeout(() => {
+                    if (v.ID_MARCA) item.querySelector('.vehiculo-recibir-marca').value = v.ID_MARCA;
+                    if (v.ID_COLOR) item.querySelector('.vehiculo-recibir-color').value = v.ID_COLOR;
+                    if (v.ID_COMBUSTIBLE) item.querySelector('.vehiculo-recibir-combustible').value = v.ID_COMBUSTIBLE;
+                    if (v.ID_TRANSMISION) item.querySelector('.vehiculo-recibir-transmision').value = v.ID_TRANSMISION;
+                    if (v.MODELO) item.querySelector('.vehiculo-recibir-modelo').value = v.MODELO;
+                }, 300);
+            }, 100);
+        });
+        
+        actualizarTotalesRecibir();
     }
 
     function generarCodigo() {
@@ -2834,13 +3152,4 @@
     <script src="pdfplan_venta.js"></script>
     
 </body>
-
 </html>
-
-
-
-
-
-
-
-
