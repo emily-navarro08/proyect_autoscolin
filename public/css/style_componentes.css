@@ -3,7 +3,6 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
-    font-size: 13px;
 }
 
 body {
@@ -62,7 +61,7 @@ body {
 
 /* ===== COMPONENTE: HEADER PRINCIPAL ===== */
 .main-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(135deg, #0b0f14 0%, #15171a 100%);
     color: white;
     display: flex;
     justify-content: space-between;
@@ -110,7 +109,7 @@ body {
 /* ===== COMPONENTE: SIDEBAR / MENÚ ===== */
 .sidebar {
     width: 250px;
-    background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+    background: linear-gradient(180deg, #0b0f14 0%, #15171a 100%);
     color: white;
     padding: 15px;
     display: flex;
@@ -147,7 +146,7 @@ body {
 }
 
 .sidebar h2 i {
-    color: #4dabf7;
+    color: #b69e24;
     font-size: 22px;
 }
 
@@ -165,12 +164,12 @@ body {
 }
 
 .menu-items li:hover {
-    background: linear-gradient(90deg, rgba(77, 171, 247, 0.2), rgba(77, 171, 247, 0.1));
+    background: linear-gradient(90deg, rgba(104, 104, 104, 0.2), rgba(3, 49, 87, 0.1));
 }
 
 .menu-items li.active {
-    background: linear-gradient(90deg, rgba(77, 171, 247, 0.3), rgba(77, 171, 247, 0.15));
-    border-left: 4px solid #4dabf7;
+    background: linear-gradient(90deg, rgba(104, 104, 104, 0.3), rgba(1, 95, 171, 0.1));
+    border-left: 4px solid #a8a8a8;
 }
 
 .menu-items li a {
@@ -194,7 +193,7 @@ body {
     width: 20px;
     text-align: center;
     font-size: 15px;
-    color: #4dabf7;
+    color: #b69e24;
 }
 
 /* Submenú */
@@ -212,7 +211,7 @@ body {
 .submenu li a {
     padding: 8px 15px;
     font-size: 14px;
-    color: #b8d4f0;
+    color: #b69e24;
 }
 
 .dropdown.active .submenu {
@@ -248,7 +247,7 @@ body {
 
 .sidebar-buttons-section h3 i {
     font-size: 14px;
-    color: #4dabf7;
+    color: #b69e24;
 }
 
 .sidebar-buttons {
@@ -276,8 +275,8 @@ body {
 }
 
 .sidebar-btn:hover {
-    background: rgba(77, 171, 247, 0.2);
-    border-color: #4dabf7;
+    background: #0000004d(77, 171, 247, 0.2);
+    border-color: #636363;
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(77, 171, 247, 0.2);
     color: white;
@@ -286,7 +285,7 @@ body {
 .sidebar-btn i {
     font-size: 15px;
     margin-bottom: 8px;
-    color: #4dabf7;
+    color: #b69e24;
     transition: color 0.3s ease;
 }
 
@@ -297,8 +296,8 @@ body {
 }
 
 .sidebar-btn.active {
-    background: rgba(77, 171, 247, 0.3);
-    border-color: #4dabf7;
+    background: rgba(255, 229, 123, 0.3);
+    border-color: #f7d84d;
     color: white;
 }
 
