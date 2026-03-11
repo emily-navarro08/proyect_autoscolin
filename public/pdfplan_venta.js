@@ -1,6 +1,13 @@
-// ================================================================
-//  FUNCIÓN PARA GENERAR PDF CON DATOS DEL PLAN SELECCIONADO (VERSIÓN MEJORADA)
-// ================================================================
+// Función auxiliar para verificar espacio en página
+function verificarEspacio(doc, yPos, espacioNecesario, margenInferior = 30) {
+    if (yPos + espacioNecesario > 280) { // 280 es cerca del final de la página
+        doc.addPage();
+        return 20; // Reiniciar Y en nueva página
+    }
+    return yPos;
+}
+
+//  FUNCIÓN PARA GENERAR PDF CON DATOS DEL PLAN SELECCIONADO
 async function generarPDFPlanVenta() {
     mostrarLoading(true);
     
@@ -139,19 +146,22 @@ async function generarPDFPlanVenta() {
         
         let yPos = 60;
         const col1X = 20;
-        const col2X = 70;
+        const col2X = 50;
         const col3X = 120;
-        const col4X = 170;
+        const col4X = 140;
         
         // Fila 1 - Cliente y Código
         doc.setFont('helvetica', 'bold');
         doc.text('Cliente:', col1X, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(factNombre, col2X, yPos);
+        const yDespuesCliente = textoAjustado(doc, factNombre, col2X, yPos, 35, 5);
+
         doc.setFont('helvetica', 'bold');
         doc.text('Código:', col3X, yPos);
         doc.setFont('helvetica', 'normal');
         doc.text(factCodigo.toString(), col4X, yPos);
+
+        yPos = Math.max(yDespuesCliente, yPos) + 6;
         
         // Fila 2 - Cédula y Tipo Cliente
         yPos += 6;
@@ -201,12 +211,11 @@ async function generarPDFPlanVenta() {
         yPos += 6;
         doc.setFont('helvetica', 'bold');
         doc.text('Dirección:', col1X, yPos);
-        let direccionTexto = factDireccion;
-        if (direccionTexto.length > 70) {
-            direccionTexto = direccionTexto.substring(0, 67) + '...';
-        }
         doc.setFont('helvetica', 'normal');
-        doc.text(direccionTexto, col2X, yPos);
+        const nuevoY = textoAjustado(doc, factDireccion, col2X, yPos, 70);
+        if (nuevoY > yPos) {
+            yPos = nuevoY;
+        }
         
         // Línea separadora
         yPos += 6;
@@ -218,7 +227,7 @@ async function generarPDFPlanVenta() {
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 51, 102);
-        doc.text('2. DATOS DEL CLIENTE PARA INSCRIBIR', 15, yPos);
+        doc.text('2. DATOS DEL CLIENTE A TRASPASAR', 15, yPos);
         doc.setTextColor(0, 0, 0);
         
         // Extraer datos del cliente de inscripción desde la API
@@ -249,11 +258,14 @@ async function generarPDFPlanVenta() {
         doc.setFont('helvetica', 'bold');
         doc.text('Cliente:', col1X, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(insNombre, col2X, yPos);
+        const DespuesCliente = textoAjustado(doc, insNombre, col2X, yPos, 35, 5);
+
         doc.setFont('helvetica', 'bold');
         doc.text('Código:', col3X, yPos);
         doc.setFont('helvetica', 'normal');
         doc.text(insCodigo.toString(), col4X, yPos);
+
+        yPos = Math.max(DespuesCliente, yPos) + 6;
         
         // Fila 2 - Cédula y Tipo Cliente
         yPos += 6;
@@ -400,36 +412,88 @@ async function generarPDFPlanVenta() {
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.3);
         doc.line(15, yPos-2, 195, yPos-2);
-        
+
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 51, 102);
         doc.text('DETALLE DE PRECIOS:', 20, yPos+4);
         doc.setTextColor(0, 0, 0);
-        
+
         yPos += 10;
+
+        // Precio de Venta
         doc.setFont('helvetica', 'bold');
-        doc.text('Precio de Venta:', 50, yPos);
+        doc.text('Precio de Venta:', 20, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(precioVenta)}`, 90, yPos);
-        
-        yPos += 10;
+        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(precioVenta)}`, 60, yPos);
+        yPos += 8;
+
+        // Monto Traspaso
         doc.setFont('helvetica', 'bold');
-        doc.text('Monto Traspaso:', 50, yPos);
+        doc.text('Monto Traspaso:', 20, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(montoTraspaso)}`, 90, yPos);
-        
-        yPos += 10;
+        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(montoTraspaso)}`, 60, yPos);
+        yPos += 8;
+
+        // TOTAL VEHÍCULO
         doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL VEHÍCULO:', 50, yPos);
+        doc.text('TOTAL VEHÍCULO:', 20, yPos);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 102, 0);
-        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(montoVenta)}`, 90, yPos);
+        doc.text(`${moneda === 'COLONES' ? 'CRC' : '$'} ${formatNumber(montoVenta)}`, 60, yPos);
         doc.setTextColor(0, 0, 0);
-        
+        yPos += 12;
+
+        // ===== SECCIÓN PAGADO POR =====
+        yPos += 4; // Espacio antes del recuadro
+
+        // Dibujar rectángulo
+        doc.setDrawColor(0, 51, 102);
+        doc.setLineWidth(0.5);
+        doc.rect(20, yPos-2, 160, 12); // Rectángulo más compacto
+
+        // Título "PAGADO POR" centrado verticalmente
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 51, 102);
+        doc.text('PAGADO POR:', 25, yPos+4); // Ajustado para centrar verticalmente
+        doc.setTextColor(0, 0, 0);
+
+        // Checkbox 1: Cliente - centrado verticalmente
+        const checkboxY = yPos+2; // Posición Y para centrar checkbox
+
+        // Cuadro del cliente
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.rect(60, checkboxY-2, 4, 4); // Movido más a la derecha
+
+        const clienteMarcado = data.PAGADO_POR_CLIENTE || false;
+        if (clienteMarcado) {
+            doc.setLineWidth(0.5);
+            doc.line(60, checkboxY-2, 64, checkboxY+2);
+            doc.line(64, checkboxY-2, 60, checkboxY+2);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.text('Cliente', 66, checkboxY+1);
+
+        // Checkbox 2: Autos Colin
+        doc.rect(100, checkboxY-2, 4, 4);
+
+        const autosColinMarcado = data.PAGADO_POR_AUTOSCOLIN || false;
+        if (autosColinMarcado) {
+            doc.setLineWidth(0.5);
+            doc.line(100, checkboxY-2, 104, checkboxY+2);
+            doc.line(104, checkboxY-2, 100, checkboxY+2);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.text('Autos Colin', 106, checkboxY+1);
+
+        yPos += 15; // Espacio después de los checkboxes
+
         // Línea separadora
-        yPos += 8;
         doc.setDrawColor(220, 220, 220);
         doc.line(15, yPos, 195, yPos);
+        yPos = verificarEspacio(doc, yPos, 40)
         
         // ===== 4. VEHÍCULO A RECIBIR =====
         yPos += 8;
@@ -497,7 +561,7 @@ async function generarPDFPlanVenta() {
             anticipos.forEach((anticipo, index) => {
                 if (yPos > 260) {
                     doc.addPage();
-                    yPos = 20;
+                    yPos = 30;
                 }
                 const docNum = anticipo.NUM_DOCUMENTO || '';
                 const monto = anticipo.MONTO_COLONES || 0;
@@ -633,7 +697,7 @@ async function generarPDFPlanVenta() {
             yPos += 6;
             
             const entidad = detallePagos[0]?.FORMA_PAGO || 'EFECTIVO';
-            let montoPago = 0;
+            let montoPago = montoVenta;
             if (detallePagos.length > 0) {
                 montoPago = detallePagos[0].TRANSFERENCIA || detallePagos[0].EFECTIVO || detallePagos[0].TARJETA || montoVenta;
             } else {
@@ -708,9 +772,60 @@ async function generarPDFPlanVenta() {
     }
 }
 
-// ================================================================
+// Función mejorada para texto con ajuste de línea (versión universal)
+function textoAjustado(doc, texto, x, y, maxLength = 40, lineHeight = 5) {
+    if (!texto || texto === '') {
+        doc.text('', x, y);
+        return y;
+    }
+    
+    // Convertir a string y limpiar
+    texto = String(texto).trim();
+    
+    if (texto.length <= maxLength) {
+        doc.text(texto, x, y);
+        return y;
+    }
+    
+    const palabras = texto.split(' ');
+    let linea = '';
+    let lineas = [];
+    let lineaActual = '';
+    
+    for (let palabra of palabras) {
+        let prueba = lineaActual ? `${lineaActual} ${palabra}` : palabra;
+        
+        if (prueba.length <= maxLength) {
+            lineaActual = prueba;
+        } else {
+            if (lineaActual) lineas.push(lineaActual);
+            lineaActual = palabra;
+        }
+    }
+    if (lineaActual) lineas.push(lineaActual);
+    
+    // Imprimir líneas
+    lineas.forEach((linea, index) => {
+        doc.text(linea, x, y + (index * lineHeight));
+    });
+    
+    return y + ((lineas.length - 1) * lineHeight);
+}
+
+// Función específica para pares clave-valor
+function escribirParConAjuste(doc, clave, valor, xClave, xValor, y, maxLength = 40) {
+    // Escribir la clave (negrita)
+    doc.setFont('helvetica', 'bold');
+    doc.text(clave, xClave, y);
+    
+    // Escribir el valor con ajuste
+    doc.setFont('helvetica', 'normal');
+    const nuevaY = textoAjustado(doc, valor, xValor, y, maxLength, 5);
+    
+    return nuevaY;
+}
+
 //  FUNCIÓN AUXILIAR PARA FORMATEAR NÚMEROS
-// ================================================================
 function formatNumber(num) {
     if (num === undefined || num === null || num === '') return '0.00';
     
@@ -724,9 +839,7 @@ function formatNumber(num) {
     });
 }
 
-// ================================================================
 //  AGREGAR BOTONES PARA GENERAR PDF EN LA INTERFAZ
-// ================================================================
 function agregarBotonesPDF() {
     // Ejecutar inmediatamente y también después de un tiempo
     function agregar() {
