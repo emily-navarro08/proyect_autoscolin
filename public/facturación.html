@@ -703,11 +703,11 @@
                         
                         <!-- Opciones de venta (se mantienen igual) -->
                         <div class="venta-opciones">
-                            <div class="opcion-item">
+                            <!--<div class="opcion-item">
                                 <label>
                                     <input type="checkbox" id="exonerarVenta" onchange="calcularTotales()"> Exonerar Venta (0% IVA)
                                 </label>
-                            </div>
+                            </div> -->
                             <div class="opcion-item descuento-global">
                                 <label>Descuento Global:</label>
                                 <input type="number" id="descuentoGlobal" value="0" min="0" max="100" step="0.1" onchange="calcularTotales()">
@@ -887,6 +887,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         cargarCatalogos();
         cargarVentasPendientes();
+        inicializarExoneracion();
         
         // Activar el tab "Todas"
         document.querySelectorAll('.tab-venta').forEach(t => t.classList.remove('active'));
@@ -918,6 +919,20 @@
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
+    }
+
+    // ===== INICIALIZAR OPCIÓN DE EXONERACIÓN =====
+    function inicializarExoneracion() {
+        const exonerarCheckbox = document.getElementById('exonerarVenta');
+        if (exonerarCheckbox) {
+            exonerarCheckbox.checked = true;
+            exonerarCheckbox.disabled = true;
+        }
+        
+        const impuestosRow = document.querySelector('tr:has(td:contains("Impuestos"))');
+        if (impuestosRow) {
+            impuestosRow.style.display = 'none';
+        }
     }
 
     // ===== CARGA DE CATÁLOGOS =====
@@ -1442,9 +1457,6 @@
             // Resetear opciones
             const exonerarVenta = document.getElementById('exonerarVenta');
             if (exonerarVenta) exonerarVenta.checked = false;
-            
-            const descuentoGlobal = document.getElementById('descuentoGlobal');
-            if (descuentoGlobal) descuentoGlobal.value = 0;
 
             // ===== CREAR ITEMS (SOLO PRECIO PÚBLICO) =====
             const items = [];
@@ -1469,6 +1481,19 @@
             };
             
             refrescarTablaItems();
+
+            // Forzar exoneración de impuestos
+            const exonerarCheckbox = document.getElementById('exonerarVenta');
+            if (exonerarCheckbox) {
+                exonerarCheckbox.checked = true;
+                exonerarCheckbox.disabled = true; // Opcional: deshabilitar
+            }
+
+            const descuentoGlobal = document.getElementById('descuentoGlobal');
+            if (descuentoGlobal) descuentoGlobal.value = 0;
+
+            // Recalcular totales con impuestos en 0
+            calcularTotales();            
             
         } catch (error) {
             console.error('Error en llenarDetalleVenta:', error);
@@ -1545,21 +1570,26 @@
 
     function calcularTotales() {
         if (!ventaSeleccionada) return;
-    
+
         let subtotal = 0;
         ventaSeleccionada.items.forEach(item => {
             subtotal += item.total;
         });
-    
+
         const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
         const descuentoMonto = subtotal * (descuentoGlobal / 100);
         const subtotalConDescuento = subtotal - descuentoMonto;
-    
-        const exonerar = document.getElementById('exonerarVenta').checked;
-        const impuestos = exonerar ? 0 : subtotalConDescuento * 0.13;
+
+        const impuestos = 0;
+        
+        const exonerarCheckbox = document.getElementById('exonerarVenta');
+        if (exonerarCheckbox) {
+            exonerarCheckbox.checked = true;
+            exonerarCheckbox.disabled = true;
+        }
         
         const total = subtotalConDescuento + impuestos;
-    
+
         // Mostrar con formato
         document.getElementById('detalleSubtotal').textContent = formatearNumero(subtotal);
         document.getElementById('detalleDescuentoGlobal').textContent = formatearNumero(descuentoMonto);
@@ -1602,31 +1632,22 @@
         if (!ventaSeleccionada) return;
         
         try {
-            // USAR LA NUEVA FUNCIÓN desformatearNumero() EN VEZ DE PARSEAR DIRECTAMENTE
             const subtotal = desformatearNumero(document.getElementById('detalleSubtotal').textContent);
             const descuentoMonto = desformatearNumero(document.getElementById('detalleDescuentoGlobal').textContent);
-            const impuestos = desformatearNumero(document.getElementById('detalleImpuestos').textContent);
+            // Impuestos siempre 0
+            const impuestos = 0;
             const total = desformatearNumero(document.getElementById('detalleTotal').textContent);
             
-            const exonerar = document.getElementById('exonerarVenta').checked;
+            // Exonerar siempre true
+            const exonerar = true;
             const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
             
-            // Obtener el ID de la persona que aprueba desde sessionStorage
             const idPersona = sessionStorage.getItem('usuarioId');
             
             if (!idPersona) {
                 mostrarNotificacion('No hay sesión activa', 'error');
                 return;
             }
-            
-            console.log('Enviando datos:', {
-                subtotal,
-                descuentoMonto,
-                impuestos,
-                total,
-                exonerar,
-                descuentoGlobal
-            });
             
             const response = await fetch(`/api/ventas/${ventaSeleccionada.ID_VENTA}/aprobar`, {
                 method: 'PUT',
@@ -1636,14 +1657,14 @@
                     observaciones: 'Venta aprobada desde facturación',
                     subtotal: subtotal,
                     descuento_global: descuentoMonto,
-                    impuestos: impuestos,
+                    impuestos: impuestos, // Siempre 0
                     total: total,
-                    exonerar_imp: exonerar,
+                    exonerar_imp: exonerar, // Siempre true
                     items: ventaSeleccionada.items,
                     id_aprobador: idPersona
                 })
             });
-    
+
             if (response.ok) {
                 mostrarNotificacion('Venta aprobada exitosamente', 'success');
                 await cargarVentasPendientes();
