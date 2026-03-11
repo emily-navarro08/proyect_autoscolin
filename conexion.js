@@ -76,7 +76,7 @@ async function testDBConnection() {
 }
 
 // Probar conexión al iniciar
-testDBConnection();
+testDBConnection()
 
 // ===== CRUD-CATALOGOS =====
 // Obtener todos los roles
@@ -892,80 +892,6 @@ app.delete('/api/proveedores/:id', async (req, res) => {
 });
 
 // APIs PARA VEHÍCULOS
-// GET /api/vehiculos/lista-colaborador
-app.get('/api/vehiculos/lista-colaborador', async (req, res) => {
-    console.log('✅ EJECUTANDO /api/vehiculos/lista-colaborador');
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        
-        const query = `
-            SELECT 
-                v.ID_VEHICULO,
-                v.PLACA,
-                v.ESTILO,
-                v.TRACCION,
-                v.MODELO,
-                v.KILOMETRAJE_ACTUAL,
-                v.KILOMETRAJE_ANTERIOR,
-                v.ESTADO,
-                v.OBSERVACIONES,
-                v.CHASIS,
-                v.MOTOR,
-                v.PV,
-                v.C_C,
-                v.CILINDROS,
-                v.CARROCERIA,
-                v.FECHA_INGRESO,
-                
-                -- Datos de catálogos
-                m.ID_MARCA,
-                m.NOMBRE as marca_nombre,
-                c.ID_COLOR,
-                c.NOMBRE as color_nombre,
-                comb.ID_COMBUSTIBLE,
-                comb.NOMBRE as combustible_nombre,
-                t.ID_TRANSMISION,
-                t.NOMBRE as transmision_nombre,
-                
-                -- Datos del proveedor
-                p.ID_PERSONA as ID_PROVEEDOR,
-                p.NOMBRE_COMPLETO as proveedor_nombre,
-                
-                -- DATOS DE COSTOS (con el nombre CORRECTO de la columna)
-                cv.PRECIO_PUBLICO,           -- Precio Público
-                cv.PRECIO_DESCUENTO,          -- Precio con Descuento
-                cv.MONTO_TRASPASO,             -- Monto Traspaso (con UNA 'S')
-                
-                -- Otros costos por si los necesitas
-                cv.PRECIO_COMPRA,
-                cv.PRIMA,
-                cv.COMISION,
-                cv.TOTAL_INVERSION,
-                cv.SALDO,
-                cv.TIPO_CAMBIO_COMPRA
-                
-            FROM VEHICULOS v
-            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
-            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
-            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
-            WHERE 1=1
-            ORDER BY v.FECHA_INGRESO DESC
-        `;
-        
-        const [vehiculos] = await connection.execute(query);
-        await connection.end();
-        
-        console.log(`📊 Enviando ${vehiculos.length} vehículos`);
-        res.json(vehiculos);
-    } catch (error) {
-        console.error('Error en /api/vehiculos/lista-colaborador:', error);
-        res.status(500).json({ error: 'Error al obtener vehículos' });
-    }
-});
-
 // GET /api/vehiculos/:id/detalle-colaborador
 app.get('/api/vehiculos/:id/detalle-colaborador', async (req, res) => {
     console.log(`✅ EJECUTANDO /api/vehiculos/${req.params.id}/detalle-colaborador`);
@@ -1004,7 +930,7 @@ app.get('/api/vehiculos/:id/detalle-colaborador', async (req, res) => {
         const [costos] = await connection.execute(`
             SELECT 
                 *,
-                MONTO_TRASPASO  -- Asegúrate que aquí también esté correcto
+                MONTO_TRASPASO
             FROM COSTOS_VEHICULO 
             WHERE ID_VEHICULO = ?
         `, [id]);
@@ -1121,9 +1047,17 @@ app.get('/api/vehiculos', async (req, res) => {
             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
             LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
             LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
-            WHERE 1=1
-        `;
-        
+            WHERE (
+                    (v.ES_INTERCAMBIO = FALSE AND v.ESTADO = 'COMPRADO')
+                    OR
+                    (v.ES_INTERCAMBIO = TRUE AND v.ESTADO = 'COMPRADO'
+                    AND v.ID_VENTA_ORIGEN IS NOT NULL
+                    AND (
+                        SELECT vt.ESTADO_PAGO FROM VENTAS vt 
+                        WHERE vt.ID_VENTA = v.ID_VENTA_ORIGEN
+                    ) = 'YA FUE FACTURADA')
+                )
+            `;
         const params = [];
         
         if (req.query.placa) {
@@ -1159,7 +1093,6 @@ app.get('/api/vehiculos', async (req, res) => {
 });
 
 // ESPECÍFICO PARA BÚSQUEDA CON COSTOS
-// ENDPOINT DE DIAGNÓSTICO - Reemplaza el endpoint actual con este
 app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
     try {
         const { placa } = req.query;
@@ -1252,6 +1185,89 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
             detalles: error.message,
             sqlError: error.sqlMessage 
         });
+    }
+});
+
+// APIs PARA VEHÍCULOS
+// GET /api/vehiculos/lista-colaborador
+app.get('/api/vehiculos/lista-colaborador', async (req, res) => {
+    console.log('✅ EJECUTANDO /api/vehiculos/lista-colaborador');
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        
+        const query = `
+            SELECT 
+                v.ID_VEHICULO,
+                v.PLACA,
+                v.ESTILO,
+                v.TRACCION,
+                v.MODELO,
+                v.KILOMETRAJE_ACTUAL,
+                v.KILOMETRAJE_ANTERIOR,
+                v.ESTADO,
+                v.OBSERVACIONES,
+                v.CHASIS,
+                v.MOTOR,
+                v.PV,
+                v.C_C,
+                v.CILINDROS,
+                v.CARROCERIA,
+                v.FECHA_INGRESO,
+                
+                -- Datos de catálogos
+                m.ID_MARCA,
+                m.NOMBRE as marca_nombre,
+                c.ID_COLOR,
+                c.NOMBRE as color_nombre,
+                comb.ID_COMBUSTIBLE,
+                comb.NOMBRE as combustible_nombre,
+                t.ID_TRANSMISION,
+                t.NOMBRE as transmision_nombre,
+                
+                -- Datos del proveedor
+                p.ID_PERSONA as ID_PROVEEDOR,
+                p.NOMBRE_COMPLETO as proveedor_nombre,
+                
+                -- DATOS DE COSTOS (con el nombre CORRECTO de la columna)
+                cv.PRECIO_PUBLICO,           -- Precio Público
+                cv.PRECIO_DESCUENTO,          -- Precio con Descuento
+                cv.MONTO_TRASPASO,             -- Monto Traspaso 
+                
+                -- Otros costos por si los necesitas
+                cv.PRECIO_COMPRA,
+                cv.PRIMA,
+                cv.COMISION,
+                cv.TOTAL_INVERSION,
+                cv.SALDO,
+                cv.TIPO_CAMBIO_COMPRA
+                
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
+            LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+            WHERE (
+                    (v.ES_INTERCAMBIO = FALSE AND v.ESTADO = 'COMPRADO')
+                    OR
+                    (v.ES_INTERCAMBIO = TRUE AND v.ESTADO = 'COMPRADO'
+                    AND v.ID_VENTA_ORIGEN IS NOT NULL
+                    AND (
+                        SELECT vt.ESTADO_PAGO FROM VENTAS vt 
+                        WHERE vt.ID_VENTA = v.ID_VENTA_ORIGEN
+                    ) = 'YA FUE FACTURADA')
+                )
+        `;
+        
+        const [vehiculos] = await connection.execute(query);
+        await connection.end();
+        
+        console.log(`📊 Enviando ${vehiculos.length} vehículos`);
+        res.json(vehiculos);
+    } catch (error) {
+        console.error('Error en /api/vehiculos/lista-colaborador:', error);
+        res.status(500).json({ error: 'Error al obtener vehículos' });
     }
 });
 
@@ -1406,6 +1422,100 @@ app.put('/api/vehiculos/:id', async (req, res) => {
             }
         }
         
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// PUT específico para colaborador (actualiza vehiculo + costos)
+app.put('/api/vehiculos/:id/colaborador', async (req, res) => {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        await connection.beginTransaction();
+
+        const {
+            PLACA, ID_MARCA, MODELO, ESTILO, TRACCION,
+            ID_COLOR, ID_TRANSMISION, ID_COMBUSTIBLE,
+            MOTOR, CHASIS, CILINDROS, CARROCERIA, C_C, PV,
+            KILOMETRAJE_ANTERIOR, KILOMETRAJE_ACTUAL, OBSERVACIONES,
+            // Campos de costos
+            PRECIO_PUBLICO, PRECIO_TRANSPASO, PRECIO_DESCUENTO,
+            PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO
+        } = req.body;
+
+        // 1. Actualizar datos del vehículo
+        await connection.execute(
+            `UPDATE VEHICULOS SET
+                PLACA = ?, ID_MARCA = ?, MODELO = ?, ESTILO = ?, TRACCION = ?,
+                ID_COLOR = ?, ID_TRANSMISION = ?, ID_COMBUSTIBLE = ?,
+                MOTOR = ?, CHASIS = ?, CILINDROS = ?, CARROCERIA = ?,
+                C_C = ?, PV = ?,
+                KILOMETRAJE_ANTERIOR = ?, KILOMETRAJE_ACTUAL = ?,
+                OBSERVACIONES = ?
+            WHERE ID_VEHICULO = ?`,
+            [
+                PLACA || null, ID_MARCA, MODELO,
+                ESTILO || null, TRACCION || null,
+                ID_COLOR || null, ID_TRANSMISION || null, ID_COMBUSTIBLE || null,
+                MOTOR || null, CHASIS, CILINDROS || null, CARROCERIA || null,
+                C_C || null, PV || null,
+                KILOMETRAJE_ANTERIOR || 0, KILOMETRAJE_ACTUAL || 0,
+                OBSERVACIONES || null,
+                req.params.id
+            ]
+        );
+
+        // 2. Actualizar solo los campos de costos que el colaborador puede editar
+        const [existeCosto] = await connection.execute(
+            'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
+            [req.params.id]
+        );
+
+        if (existeCosto.length > 0) {
+            await connection.execute(
+                `UPDATE COSTOS_VEHICULO SET
+                    PRECIO_PUBLICO = ?,
+                    PRECIO_TRANSPASO = ?,
+                    PRECIO_DESCUENTO = ?,
+                    PRIMA_FINANCIAMIENTO = ?,
+                    CUOTA_FINANCIAMIENTO = ?
+                WHERE ID_VEHICULO = ?`,
+                [
+                    PRECIO_PUBLICO || 0,
+                    PRECIO_TRANSPASO || 0,
+                    PRECIO_DESCUENTO || 0,
+                    PRIMA_FINANCIAMIENTO || 0,
+                    CUOTA_FINANCIAMIENTO || 0,
+                    req.params.id
+                ]
+            );
+        } else {
+            await connection.execute(
+                `INSERT INTO COSTOS_VEHICULO
+                    (ID_VEHICULO, PRECIO_PUBLICO, PRECIO_TRANSPASO,
+                     PRECIO_DESCUENTO, PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    req.params.id,
+                    PRECIO_PUBLICO || 0,
+                    PRECIO_TRANSPASO || 0,
+                    PRECIO_DESCUENTO || 0,
+                    PRIMA_FINANCIAMIENTO || 0,
+                    CUOTA_FINANCIAMIENTO || 0
+                ]
+            );
+        }
+
+        await connection.commit();
+        await connection.end();
+        res.json({ message: 'Vehículo actualizado exitosamente' });
+
+    } catch (err) {
+        await connection.rollback();
+        await connection.end();
+        console.error('Error al actualizar vehículo (colaborador):', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Placa o chasis ya registrado' });
+        }
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
@@ -5164,8 +5274,7 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
              LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
              LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
              WHERE v.ES_INTERCAMBIO = TRUE 
-             AND v.ID_VENTA_ORIGEN = ? 
-             LIMIT 1`,
+             AND v.ID_VENTA_ORIGEN = ?`,
             [ventaId]
         );
         
@@ -5230,8 +5339,9 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
             VENDEDOR: vendedores[0] || null,
             APROBADOR: aprobador, // <-- NUEVO: Aprobador
             VEHICULO: vehiculos[0] || null,
-            VEHICULO_RECIBIDO: vehiculoRecibido,
-            ES_INTERCAMBIO: vehiculoRecibido !== null,
+            VEHICULOS_RECIBIDOS: vehiculosRecibidos,
+            VEHICULO_RECIBIDO: vehiculosRecibidos[0] || null,
+            ES_INTERCAMBIO: vehiculosRecibidos.length > 0,
             COSTOS: costos[0] || null, // Cambiado a objeto en lugar de array
             EXTRAS: extras,
             FINANCIAMIENTO: financiamientos[0] || null,
@@ -5262,51 +5372,142 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
         
         const connection = await mysql.createConnection(dbConfig);
         
-        const [result] = await connection.execute(
-            `UPDATE VENTAS 
-             SET ESTADO_PAGO = ?, 
-                 OBSERVACIONES_VENTA = CONCAT(COALESCE(OBSERVACIONES_VENTA, ''), '\n', ?),
-                 FECHA_APROBACION = NOW(),
-                 ID_APROBADOR = ?,
-                 SUB_TOTAL = ?,
-                 DESCUENTO_GLOBAL = ?,
-                 TOTAL = ?,
-                 EXONERAR_IMP = ?
-             WHERE ID_VENTA = ?`,
-            [
-                estado || 'YA FUE FACTURADA', 
-                observaciones || 'Aprobada en facturación',
-                id_aprobador,  // ← Usamos el ID que viene del frontend
-                subtotal || 0,
-                descuento_global || 0,
-                total || 0,
-                exonerar_imp || false,
-                req.params.id
-            ]
-        );
+        // Iniciar transacción
+        await connection.beginTransaction();
         
-        if (result.affectedRows === 0) {
+        try {
+            // PRIMERO: Obtener información completa de la venta
+            const [ventaInfo] = await connection.execute(
+                `SELECT v.ID_VEHICULO, v.ES_INTERCAMBIO, v.ID_VENTA_ORIGEN,
+                        v2.ID_VEHICULO AS VEHICULO_RECIBIDO_ID
+                 FROM VENTAS v
+                 LEFT JOIN VEHICULOS v2 ON v2.ID_VENTA_ORIGEN = v.ID_VENTA
+                 WHERE v.ID_VENTA = ?`,
+                [req.params.id]
+            );
+            
+            if (ventaInfo.length === 0) {
+                await connection.rollback();
+                await connection.end();
+                return res.status(404).json({ error: 'Venta no encontrada' });
+            }
+            
+            const idVehiculoVendido = ventaInfo[0].ID_VEHICULO;
+            const esIntercambio = ventaInfo[0].ES_INTERCAMBIO === 1;
+            const idVehiculoRecibido = ventaInfo[0].VEHICULO_RECIBIDO_ID;
+            
+            console.log('Procesando venta:', {
+                idVehiculoVendido,
+                esIntercambio,
+                idVehiculoRecibido
+            });
+            
+            // SEGUNDO: Actualizar el estado de la venta
+            const [result] = await connection.execute(
+                `UPDATE VENTAS 
+                 SET ESTADO_PAGO = ?, 
+                     OBSERVACIONES_VENTA = CONCAT(COALESCE(OBSERVACIONES_VENTA, ''), '\n', ?),
+                     FECHA_APROBACION = NOW(),
+                     ID_APROBADOR = ?,
+                     SUB_TOTAL = ?,
+                     DESCUENTO_GLOBAL = ?,
+                     TOTAL = ?,
+                     EXONERAR_IMP = ?
+                 WHERE ID_VENTA = ?`,
+                [
+                    estado || 'YA FUE FACTURADA', 
+                    observaciones || 'Aprobada en facturación',
+                    id_aprobador,
+                    subtotal || 0,
+                    descuento_global || 0,
+                    total || 0,
+                    exonerar_imp || false,
+                    req.params.id
+                ]
+            );
+            
+            if (result.affectedRows === 0) {
+                await connection.rollback();
+                await connection.end();
+                return res.status(404).json({ error: 'Venta no encontrada' });
+            }
+            
+            // TERCERO: Actualizar SOLO el vehículo VENDIDO a estado VENDIDO
+            if (idVehiculoVendido) {
+                const [vehiculoResult] = await connection.execute(
+                    `UPDATE VEHICULOS 
+                     SET ESTADO = 'VENDIDO',
+                         ID_VENTA_ORIGEN = ?,
+                         FECHA_RECEPCION = NOW()
+                     WHERE ID_VEHICULO = ?`,
+                    [req.params.id, idVehiculoVendido]
+                );
+                
+                if (vehiculoResult.affectedRows > 0) {
+                    console.log(`Vehículo vendido ${idVehiculoVendido} actualizado a VENDIDO`);
+                }
+            }
+            
+            // CUARTO: Si hay un vehículo recibido por intercambio, NO cambiar su estado
+            // Se mantiene como COMPRADO porque ahora es parte del inventario
+            if (esIntercambio && idVehiculoRecibido) {
+                console.log(`Vehículo recibido por intercambio ${idVehiculoRecibido} se mantiene como COMPRADO`);
+                
+                // Opcional: Actualizar algún campo adicional si es necesario
+                await connection.execute(
+                    `UPDATE VEHICULOS 
+                     SET OBSERVACIONES = CONCAT(COALESCE(OBSERVACIONES, ''), 
+                         '\nVehículo recibido por intercambio en venta ', ?)
+                     WHERE ID_VEHICULO = ?`,
+                    [req.params.id, idVehiculoRecibido]
+                );
+            }
+            
+            // QUINTO: Registrar en auditoría
+            let descripcionAuditoria = `Venta ${req.params.id} aprobada. `;
+            descripcionAuditoria += `Vehículo vendido ID: ${idVehiculoVendido} marcado como VENDIDO. `;
+            
+            if (esIntercambio) {
+                descripcionAuditoria += `Vehículo recibido por intercambio ID: ${idVehiculoRecibido} se mantiene como COMPRADO. `;
+            }
+            
+            descripcionAuditoria += `Total: ${total}`;
+            
+            await connection.execute(
+                `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) 
+                 VALUES (?, 'APROBAR_VENTA', ?)`,
+                [id_aprobador, descripcionAuditoria]
+            );
+            
+            // Confirmar transacción
+            await connection.commit();
             await connection.end();
-            return res.status(404).json({ error: 'Venta no encontrada' });
+            
+            res.json({ 
+                message: 'Venta aprobada exitosamente',
+                success: true,
+                id_aprobador: id_aprobador,
+                fecha_aprobacion: new Date(),
+                id_vehiculo_vendido: idVehiculoVendido,
+                estado_vehiculo_vendido: 'VENDIDO',
+                es_intercambio: esIntercambio,
+                id_vehiculo_recibido: idVehiculoRecibido,
+                estado_vehiculo_recibido: esIntercambio ? 'COMPRADO' : null
+            });
+            
+        } catch (error) {
+            await connection.rollback();
+            await connection.end();
+            throw error;
         }
-        
-        // Registrar en auditoría
-        await connection.execute(
-            `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) 
-             VALUES (?, 'APROBAR_VENTA', ?)`,
-            [id_aprobador, `Venta ${req.params.id} aprobada. Total: ${total}`]
-        );
-        
-        await connection.end();
-        res.json({ 
-            message: 'Venta aprobada exitosamente',
-            id_aprobador: id_aprobador,
-            fecha_aprobacion: new Date()
-        });
         
     } catch (err) {
         console.error('Error al aprobar venta:', err);
-        res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
+        res.status(500).json({ 
+            error: 'Error en el servidor', 
+            success: false,
+            detalles: err.message 
+        });
     }
 });
 
@@ -5358,6 +5559,8 @@ app.post('/api/plan-ventas', async (req, res) => {
         cliente_inscribir,
         vehiculo,
         vehiculo_recibir,
+        vehiculos_recibir,
+        costos_vehiculo,
         forma_pago,
         financiamiento,
         anticipos,
@@ -5476,135 +5679,98 @@ app.post('/api/plan-ventas', async (req, res) => {
             throw new Error('No se pudo determinar el vehículo');
         }
 
-        // ─── VEHÍCULO A RECIBIR (INTERCAMBIO) ──────────────────────────
-        let idVehRecibir = null;
-        const vr = vehiculo_recibir;
+        // ─── VEHÍCULO(S) A RECIBIR (INTERCAMBIO) ─────────────────────────
+        const listaVehiculos = (vehiculos_recibir && vehiculos_recibir.length > 0)
+            ? vehiculos_recibir
+            : (vehiculo_recibir ? [vehiculo_recibir] : []);
 
-        const tieneIntercambio = vr && (
-            (vr.placa && vr.placa.trim() !== '') || 
-            (vr.chasis && vr.chasis.trim() !== '')
-        );
+        for (const vr of listaVehiculos) {
+            const tieneIntercambio = vr && (
+                (vr.placa && vr.placa.trim() !== '') ||
+                (vr.chasis && vr.chasis.trim() !== '')
+            );
+            if (!tieneIntercambio) continue;
 
-        if (tieneIntercambio) {
             console.log('Procesando intercambio - Vehículo recibido:', vr);
-            
+
             const idClienteOrigen = idClienteInscribir || idClienteFacturar;
-            
-            if (!idClienteOrigen) {
-                throw new Error('Para un intercambio se requiere un cliente');
-            }
-            
-            // Buscar si el vehículo ya existe por chasis o placa
+            if (!idClienteOrigen) throw new Error('Para un intercambio se requiere un cliente');
+
+            let idVehRecibir = null;
+
             if (vr.chasis) {
                 const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', 
-                    [vr.chasis]
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', [vr.chasis]
                 );
                 if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
             }
-            
+
             if (!idVehRecibir && vr.placa) {
                 const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', 
-                    [vr.placa]
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', [vr.placa]
                 );
                 if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
             }
-            
+
             if (!idVehRecibir) {
-                // Es un vehículo nuevo en el sistema
                 const [rVR] = await connection.execute(
                     `INSERT INTO VEHICULOS (
                         ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
                         ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
-                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV, 
+                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV,
                         ESTADO, OBSERVACIONES,
                         ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION
                     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                     [
                         idClienteOrigen,
-                        vr.chasis||null, 
-                        vr.motor||null, 
-                        vr.placa||null,
-                        vr.id_marca||1, 
-                        vr.modelo||new Date().getFullYear(),
-                        vr.id_color||null, 
-                        vr.id_combustible||null, 
-                        vr.id_transmision||null,
-                        vr.estilo||null, 
-                        vr.traccion||null, 
-                        vr.carroceria||null,
-                        vr.cc||null, 
-                        vr.cilindros||null,
-                        vr.kilometraje_actual||0, 
-                        vr.kilometraje_anterior||0,
-                        vr.pv||null, 
-                        'COMPRADO',
+                        vr.chasis||null, vr.motor||null, vr.placa||null,
+                        vr.id_marca||1, vr.modelo||new Date().getFullYear(),
+                        vr.id_color||null, vr.id_combustible||null, vr.id_transmision||null,
+                        vr.estilo||null, vr.traccion||null, vr.carroceria||null,
+                        vr.cc||null, vr.cilindros||null,
+                        vr.kilometraje_actual||0, vr.kilometraje_anterior||0,
+                        vr.pv||null, 'COMPRADO',
                         vr.observaciones || 'Vehículo recibido en intercambio.',
-                        true,
-                        idClienteOrigen,
-                        new Date()
+                        true, idClienteOrigen, new Date()
                     ]
                 );
                 idVehRecibir = rVR.insertId;
             } else {
-                // El vehículo ya existía, actualizamos su estado
                 await connection.execute(
-                    `UPDATE VEHICULOS SET 
-                        ESTADO = 'COMPRADO',
-                        ES_INTERCAMBIO = TRUE,
-                        ID_CLIENTE_ORIGEN = ?,
-                        FECHA_RECEPCION = ?,
+                    `UPDATE VEHICULOS SET
+                        ESTADO = 'COMPRADO', ES_INTERCAMBIO = TRUE,
+                        ID_CLIENTE_ORIGEN = ?, FECHA_RECEPCION = ?,
                         KILOMETRAJE_ACTUAL = ?,
                         OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
                     WHERE ID_VEHICULO = ?`,
-                    [
-                        idClienteOrigen,
-                        new Date(),
-                        vr.kilometraje_actual || 0,
-                        idVehRecibir
-                    ]
+                    [idClienteOrigen, new Date(), vr.kilometraje_actual||0, idVehRecibir]
                 );
             }
-            
-            // Guardar el monto del intercambio en COSTOS_VEHICULO
+
             if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
                 const [costoExistente] = await connection.execute(
-                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
-                    [idVehRecibir]
+                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?', [idVehRecibir]
                 );
-                
                 if (costoExistente.length === 0) {
                     await connection.execute(
-                        `INSERT INTO COSTOS_VEHICULO (
-                            ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO
-                        ) VALUES (?,?,?,?,?)`,
-                        [
-                            idVehRecibir, 
-                            vr.monto_recibido, 
-                            vr.monto_traspaso || 0,
-                            vr.monto_recibido,
-                            vr.monto_recibido
-                        ]
+                        `INSERT INTO COSTOS_VEHICULO (ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO)
+                         VALUES (?,?,?,?,?)`,
+                        [idVehRecibir, vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido]
                     );
                 } else {
                     await connection.execute(
-                        `UPDATE COSTOS_VEHICULO SET 
-                            PRECIO_COMPRA = ?,
-                            PRECIO_TRANSPASO = ?,
-                            TOTAL_INVERSION = ?,
-                            PRECIO_COSTO = ?
-                        WHERE ID_VEHICULO = ?`,
-                        [
-                            vr.monto_recibido,
-                            vr.monto_traspaso || 0,
-                            vr.monto_recibido,
-                            vr.monto_recibido,
-                            idVehRecibir
-                        ]
+                        `UPDATE COSTOS_VEHICULO SET PRECIO_COMPRA=?, PRECIO_TRANSPASO=?, TOTAL_INVERSION=?, PRECIO_COSTO=?
+                         WHERE ID_VEHICULO=?`,
+                        [vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido, idVehRecibir]
                     );
                 }
             }
+
+            // Vincular vehículo recibido a esta venta
+            await connection.execute(
+                'UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?',
+                [idVenta, idVehRecibir]
+            );
         }
 
         // ─── 4. CREAR VENTA ───────────────────────────────────────
@@ -5633,14 +5799,6 @@ app.post('/api/plan-ventas', async (req, res) => {
             ]
         );
         const idVenta = rv.insertId;
-
-        // Si hay intercambio, actualizar ID_VENTA_ORIGEN en el vehículo recibido
-        if (idVehRecibir) {
-            await connection.execute(
-                `UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?`,
-                [idVenta, idVehRecibir]
-            );
-        }
 
         // ─── 5. FINANCIAMIENTO (si es crédito) ────────────────────
         let idFinanciamiento = null;
@@ -5885,131 +6043,98 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
             );
         }
 
-        // ─── 3. VEHÍCULO A RECIBIR (INTERCAMBIO) ─────────────────
-        let idVehRecibir = null;
-        const vr = vehiculo_recibir;
+        // ─── 3. VEHÍCULO(s) A RECIBIR (INTERCAMBIO) ─────────────────
+        const listaVehiculos = (vehiculos_recibir && vehiculos_recibir.length > 0)
+            ? vehiculos_recibir
+            : (vehiculo_recibir ? [vehiculo_recibir] : []);
 
-        const tieneIntercambio = vr && (
-            (vr.placa && vr.placa.trim() !== '') || 
-            (vr.chasis && vr.chasis.trim() !== '')
-        );
+        for (const vr of listaVehiculos) {
+            const tieneIntercambio = vr && (
+                (vr.placa && vr.placa.trim() !== '') ||
+                (vr.chasis && vr.chasis.trim() !== '')
+            );
+            if (!tieneIntercambio) continue;
 
-        if (tieneIntercambio) {
             console.log('Procesando intercambio - Vehículo recibido:', vr);
-            
+
             const idClienteOrigen = idClienteInscribir || idClienteFacturar;
-            
-            if (!idClienteOrigen) {
-                throw new Error('Para un intercambio se requiere un cliente');
-            }
-            
+            if (!idClienteOrigen) throw new Error('Para un intercambio se requiere un cliente');
+
+            let idVehRecibir = null;
+
             if (vr.chasis) {
                 const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', 
-                    [vr.chasis]
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', [vr.chasis]
                 );
                 if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
             }
-            
+
             if (!idVehRecibir && vr.placa) {
                 const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', 
-                    [vr.placa]
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', [vr.placa]
                 );
                 if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
             }
-            
+
             if (!idVehRecibir) {
                 const [rVR] = await connection.execute(
                     `INSERT INTO VEHICULOS (
                         ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
                         ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
-                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV, 
+                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV,
                         ESTADO, OBSERVACIONES,
                         ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION
                     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                     [
                         idClienteOrigen,
-                        vr.chasis||null, 
-                        vr.motor||null, 
-                        vr.placa||null,
-                        vr.id_marca||1, 
-                        vr.modelo||new Date().getFullYear(),
-                        vr.id_color||null, 
-                        vr.id_combustible||null, 
-                        vr.id_transmision||null,
-                        vr.estilo||null, 
-                        vr.traccion||null, 
-                        vr.carroceria||null,
-                        vr.cc||null, 
-                        vr.cilindros||null,
-                        vr.kilometraje_actual||0, 
-                        vr.kilometraje_anterior||0,
-                        vr.pv||null, 
-                        'COMPRADO',
+                        vr.chasis||null, vr.motor||null, vr.placa||null,
+                        vr.id_marca||1, vr.modelo||new Date().getFullYear(),
+                        vr.id_color||null, vr.id_combustible||null, vr.id_transmision||null,
+                        vr.estilo||null, vr.traccion||null, vr.carroceria||null,
+                        vr.cc||null, vr.cilindros||null,
+                        vr.kilometraje_actual||0, vr.kilometraje_anterior||0,
+                        vr.pv||null, 'COMPRADO',
                         vr.observaciones || 'Vehículo recibido en intercambio.',
-                        true,
-                        idClienteOrigen,
-                        new Date()
+                        true, idClienteOrigen, new Date()
                     ]
                 );
                 idVehRecibir = rVR.insertId;
             } else {
                 await connection.execute(
-                    `UPDATE VEHICULOS SET 
-                        ESTADO = 'COMPRADO',
-                        ES_INTERCAMBIO = TRUE,
-                        ID_CLIENTE_ORIGEN = ?,
-                        FECHA_RECEPCION = ?,
+                    `UPDATE VEHICULOS SET
+                        ESTADO = 'COMPRADO', ES_INTERCAMBIO = TRUE,
+                        ID_CLIENTE_ORIGEN = ?, FECHA_RECEPCION = ?,
                         KILOMETRAJE_ACTUAL = ?,
                         OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
                     WHERE ID_VEHICULO = ?`,
-                    [
-                        idClienteOrigen,
-                        new Date(),
-                        vr.kilometraje_actual || 0,
-                        idVehRecibir
-                    ]
+                    [idClienteOrigen, new Date(), vr.kilometraje_actual||0, idVehRecibir]
                 );
             }
-            
+
             if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
                 const [costoExistente] = await connection.execute(
-                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
-                    [idVehRecibir]
+                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?', [idVehRecibir]
                 );
-                
                 if (costoExistente.length === 0) {
                     await connection.execute(
-                        `INSERT INTO COSTOS_VEHICULO (
-                            ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO
-                        ) VALUES (?,?,?,?,?)`,
-                        [
-                            idVehRecibir, 
-                            vr.monto_recibido, 
-                            vr.monto_traspaso || 0,
-                            vr.monto_recibido,
-                            vr.monto_recibido
-                        ]
+                        `INSERT INTO COSTOS_VEHICULO (ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO)
+                         VALUES (?,?,?,?,?)`,
+                        [idVehRecibir, vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido]
                     );
                 } else {
                     await connection.execute(
-                        `UPDATE COSTOS_VEHICULO SET 
-                            PRECIO_COMPRA = ?,
-                            PRECIO_TRANSPASO = ?,
-                            TOTAL_INVERSION = ?,
-                            PRECIO_COSTO = ?
-                        WHERE ID_VEHICULO = ?`,
-                        [
-                            vr.monto_recibido,
-                            vr.monto_traspaso || 0,
-                            vr.monto_recibido,
-                            vr.monto_recibido,
-                            idVehRecibir
-                        ]
+                        `UPDATE COSTOS_VEHICULO SET PRECIO_COMPRA=?, PRECIO_TRANSPASO=?, TOTAL_INVERSION=?, PRECIO_COSTO=?
+                         WHERE ID_VEHICULO=?`,
+                        [vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido, idVehRecibir]
                     );
                 }
             }
+
+            // Vincular vehículo recibido a esta venta
+            await connection.execute(
+                'UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?',
+                [idVenta, idVehRecibir]
+            );
         }
 
         // ─── 4. ACTUALIZAR DATOS DE LA VENTA ─────────────────────
@@ -6028,14 +6153,6 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
                 ventaId
             ]
         );
-
-        // Si hay intercambio, actualizar ID_VENTA_ORIGEN en el vehículo recibido
-        if (idVehRecibir) {
-            await connection.execute(
-                `UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?`,
-                [ventaId, idVehRecibir]
-            );
-        }
 
         // ─── 5. VERIFICAR SI YA EXISTE FINANCIAMIENTO ────────────
         const [financiamientoExistente] = await connection.execute(
@@ -7404,4 +7521,3 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
-
