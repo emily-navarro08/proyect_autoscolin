@@ -89,7 +89,7 @@
     .modal {
       display: none;
       position: fixed;
-      z-index: 1000;
+      z-index: 3000;
       left: 0;
       top: 0;
       width: 100%;
@@ -627,10 +627,6 @@
                                 <div class="info-label">COSTO ₡</div>
                                 <input type="text" class="info-value price-input" id="modalCostoColones" value="0.00" readonly>
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">IMP</div>
-                                <input type="text" class="info-value" id="modalImp" value="N" style="width: 100px;">
-                            </div>
                         </div>
 
                         <!-- Exchange Rate -->
@@ -643,7 +639,7 @@
                                 </div>
                             </div>
                             <div class="exchange-box">
-                                <div class="info-label">Tipo de cambio Prov.</div>
+                                <div class="info-label">Tipo de cambio fecha</div>
                                 <div style="display: flex; gap: 5px;">
                                     <div class="price-input-wrapper" style="flex: 1;">
                                         <span class="currency-symbol">$</span>
@@ -1058,6 +1054,9 @@
         camposPrecio.forEach(id => {
             const campo = document.getElementById(id);
             if (campo) {
+                campo.addEventListener('focus', function() {
+                    if (parsearNumero(this.value) === 0) this.value = '';
+                });
                 campo.addEventListener('blur', function() {
                     const valor = parsearNumero(this.value);
                     this.value = formatearNumero(valor);
@@ -1067,6 +1066,20 @@
         
         // Cambio de proveedor
         document.getElementById('modalProveedor').addEventListener('change', cargarDatosProveedor);
+
+        // ENTER para pasar al siguiente campo
+        document.querySelectorAll('.modal-body input, .modal-body select').forEach(el => {
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const focusables = [...document.querySelectorAll(
+                        '#vehiculoModal input:not([disabled]), #vehiculoModal select:not([disabled])'
+                    )];
+                    const idx = focusables.indexOf(this);
+                    if (idx > -1 && idx < focusables.length - 1) focusables[idx + 1].focus();
+                }
+            });
+        });
     });
 
     // ===== FUNCIÓN PARA OBTENER TIPO DE CAMBIO ACTUAL =====
@@ -1082,14 +1095,10 @@
             
             if (data && data.venta) {
                 const tipoCambio = parseFloat(data.venta.valor);
-                
-                // Actualizar AMBOS campos
-                document.getElementById('modalTipoCambio').value = tipoCambio.toFixed(2);
+                // Actualizar campos 
                 document.getElementById('modalTipoCambioProv').value = tipoCambio.toFixed(2);
-                
-                // Recalcular todo, INCLUYENDO OBSERVACIONES
-                recalcularTodosLosDolares(); // Esta función ahora incluye observaciones
-                
+                // Recalcular todo usando el nuevo tipo de cambio
+                recalcularTodosLosDolares();
                 campo.style.backgroundColor = '#d4edda';
                 setTimeout(() => campo.style.backgroundColor = '', 1000);
             }
@@ -1267,9 +1276,9 @@
         if (typeof str === 'string') {
             // Limpiar el string: eliminar espacios y el símbolo de moneda si existe
             let limpio = str.toString()
-                .replace(/[₡$€\s]/g, '')  // Eliminar símbolos de moneda y espacios
-                .replace(/\./g, '')        // Eliminar puntos de miles
-                .replace(',', '.');         // Reemplazar coma decimal por punto
+                .replace(/[₡$€\s]/g, '')
+                .replace(/\./g, '')   
+                .replace(',', '.'); 
             const numero = parseFloat(limpio);
             return isNaN(numero) ? 0 : numero;
         }
@@ -1350,14 +1359,14 @@
                         id_extra: extra.ID_EXTRA,
                         description: extra.EXTRAS_DETALLE || 'Extra',
                         amountCRC: formatearNumero(valorCRC),
-                        amountUSD: formatearNumero(valorCRC / tipoCambio) // ✅ Ahora sí calcula USD
+                        amountUSD: formatearNumero(valorCRC / tipoCambio)
                     };
                 });
             } else {
                 observations = [{
                     id: observationCounter++,
-                    description: "Gastos iniciales",
-                    amountCRC: "0.00",
+                    description: "",
+                    amountCRC: "",
                     amountUSD: "0.00"
                 }];
             }
@@ -1410,7 +1419,6 @@
         document.getElementById('modalDescripcion').value = '';
         document.getElementById('modalCostoDolar').value = '0.00';
         document.getElementById('modalCostoColones').value = '0.00';
-        document.getElementById('modalImp').value = 'N';
         document.getElementById('modalTipoCambio').value = '500.00';
         document.getElementById('modalTipoCambioProv').value = '500.00';
         document.getElementById('modalPrecioCompraDolar').value = '0.00';
@@ -1471,9 +1479,9 @@
         // Reiniciar observaciones
         observations = [{
             id: observationCounter++,
-            description: "Gastos iniciales",
-            amountUSD: "0.00",
-            amountCRC: "0.00"
+            description: "",
+            amountUSD: "",
+            amountCRC: ""
         }];
         loadObservations();
     }
@@ -1832,14 +1840,15 @@
         
         // Cálculos en colones
         const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
-        const totalInversionCRC = costoCompraCRC + comisionCRC + totalObservacionesCRC;
+        const totalInversionCRC = primaCRC + comisionCRC + totalObservacionesCRC;
         const saldoCRC = costoCompraCRC - primaCRC;
+        const precioCostoCRC = costoCompraCRC + totalInversionCRC;
         
         // Actualizar campos en COLONES
         document.getElementById('modalCostoColones2').value = formatearNumero(costoCompraCRC);
         document.getElementById('modalCostoColones').value = formatearNumero(costoCompraCRC);
         document.getElementById('modalTotalInversionColon').value = formatearNumero(totalInversionCRC);
-        document.getElementById('modalPrecioCostoColon').value = formatearNumero(totalInversionCRC);
+        document.getElementById('modalPrecioCostoColon').value = formatearNumero(precioCostoCRC);
         document.getElementById('modalSaldoColon').value = formatearNumero(saldoCRC);
         
         // Actualizar campos en DÓLARES
@@ -1872,30 +1881,30 @@
             `;
             
             div.innerHTML = `
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; gap: 10px; margin-right: auto; margin-bottom: 5px;">
                     <input type="text" class="observation-input" value="${obs.description}" 
                         data-id="${obs.id}" placeholder="Descripción del extra"
-                        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        style="width: 50px; border: 1px solid #ddd; border-radius: 4px; padding: 8px;">                       
                     <button class="delete-btn" data-id="${obs.id}" 
                             style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
-                        <i class="fas fa-trash"></i> Eliminar
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
-                        <div class="price-input-wrapper">
-                            <span class="currency-symbol">₡</span>
-                            <input type="text" class="price-input price-colon observation-crc" value="${obs.amountCRC}" 
-                                data-id="${obs.id}" data-currency="CRC" placeholder="Monto en colones"
-                                style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
-                        </div>
-                    </div>
-                    <div style="flex: 1;">
                         <div class="price-input-wrapper">                        
                             <span class="currency-symbol">$</span>
                             <input type="text" class="price-input price-dolar observation-usd" value="${obs.amountUSD}" 
-                                data-id="${obs.id}" data-currency="USD" placeholder="Monto en dólares"
-                                style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 4px;" readonly>
+                                data-id="${obs.id}" data-currency="USD"
+                                style="width: 100%; padding: 10px 10px 10px 25px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>                    
+                    <div style="flex: 1;">
+                        <div class="price-input-wrapper">
+                            <span class="currency-symbol">₡</span>
+                            <input type="text" class="price-input price-colon observation-crc" value="${obs.amountCRC}" 
+                                data-id="${obs.id}" data-currency="CRC"
+                                style="width: 100%; padding: 10px 10px 10px 25px; border: 1px solid #ddd; border-radius: 4px;">
                         </div>
                     </div>
                 </div>
@@ -1959,9 +1968,9 @@
         
         observations.push({
             id: observationCounter++,
-            description: "Nuevo gasto",
-            amountUSD: "0.00",
-            amountCRC: "0.00"
+            description: "",
+            amountUSD: "",
+            amountCRC: ""
         });
         
         loadObservations();
@@ -2146,19 +2155,6 @@
         
         setTimeout(() => alerta.remove(), 3000);
     }
-
-    // Cerrar modal al hacer clic fuera
-    window.onclick = function(event) {
-        const modal = document.getElementById('vehiculoModal');
-        if (event.target == modal) {
-            cerrarModal();
-        }
-    }
   </script>
 </body>
-
 </html>
-
-
-
-
