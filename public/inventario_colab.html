@@ -64,6 +64,12 @@
         border-color: #e2e8f0;
     }
 
+    #modalExtras[readonly] {
+        background-color: #f8f9fa;
+        border-color: #e2e8f0;
+        color: #6c757d;
+    }
+
     .placa {
       font-weight: 600;
       color: #2c3e50;
@@ -661,7 +667,7 @@
                             <div class="card">
                                 <div class="detail-item" style="margin-bottom: 10px;">
                                     <div class="detail-label">Extras</div>
-                                    <textarea type="text" class="detail-input" id="modalExtras"></textarea>
+                                    <textarea type="text" class="detail-input" id="modalExtras" readonly></textarea>
                                 </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Observaciones</div>
@@ -682,7 +688,7 @@
                                         <div class="detail-label">P-Público</div>
                                         <div class="price-input-wrapper">
                                             <span class="currency-symbol">₡</span>
-                                            <input type="text" class="price-input price-colon" id="modalPPrecio" value="0.00" data-currency="CRC">
+                                            <input type="text" class="price-input price-colon" id="modalPPrecio" value="0.00" data-currency="CRC" readonly>
                                         </div>
                                     </div>
                                     <div class="detail-field">
@@ -851,7 +857,7 @@
                 <td>${v.MODELO || '-'}</td>
                 <td class="currency-usd">$${formatearNumero(v.PRECIO_PUBLICO || 0)}</td>
                 <td class="currency-usd">$${formatearNumero(v.PRECIO_DESCUENTO || 0)}</td>
-                <td class="currency-crc">₡${formatearNumero(v.MONTO_TRANSPASO || 0)}</td>
+                <td class="currency-crc">₡${formatearNumero(v.MONTO_TRASPASO || 0)}</td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-icon view" onclick="verVehiculo(${v.ID_VEHICULO})" title="Ver">
@@ -989,14 +995,16 @@
             // ===== CARGAR PRECIOS (desde COSTOS_VEHICULO) =====
             setValue('modalPPrecio', formatearNumero(costos.PRECIO_PUBLICO || 0));
             setValue('modalPCDescuento', formatearNumero(costos.PRECIO_DESCUENTO || 0));
-            setValue('modalMontoTraspaso', formatearNumero(costos.MONTO_TRANSPASO || 0));
+            setValue('modalMontoTraspaso', formatearNumero(costos.PRECIO_TRANSPASO || 0));
             setValue('modalPrimaFinanc', formatearNumero(costos.PRIMA_FINANCIAMIENTO || 0));
             setValue('modalCuotaFinanc', formatearNumero(costos.CUOTA_FINANCIAMIENTO || 0));
             
             // ===== CARGAR EXTRAS =====
             if (extras.length > 0) {
-                // Si hay múltiples extras, los concatenamos
-                const extrasText = extras.map(e => e.ARREGLO || e.OBSERVACIONES || 'Extra').join('\n');
+                const extrasText = extras
+                    .map(e => e.EXTRAS_DETALLE || '')
+                    .filter(linea => linea.trim() !== '')
+                    .join('\n');
                 setValue('modalExtras', extrasText);
             } else {
                 setValue('modalExtras', '');
@@ -1054,7 +1062,7 @@
 
             console.log('Guardando vehículo:', vehiculoActual.ID_VEHICULO, vehiculoData);
 
-            const response = await fetch(`/api/vehiculos/${vehiculoActual.ID_VEHICULO}`, {
+            const response = await fetch(`/api/vehiculos/${vehiculoActual.ID_VEHICULO}/colaborador`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(vehiculoData)
@@ -1082,11 +1090,6 @@
         alerta.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${mensaje}`;
         document.body.appendChild(alerta);
         setTimeout(() => alerta.remove(), 3000);
-    }
-
-    window.onclick = function(event) {
-        const modal = document.getElementById('vehiculoModal');
-        if (event.target == modal) cerrarModal();
     }
 </script>
 </body> 
