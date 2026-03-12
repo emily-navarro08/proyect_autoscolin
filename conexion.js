@@ -1032,12 +1032,12 @@ app.get('/api/vehiculos', async (req, res) => {
                 comb.NOMBRE as combustible_nombre,
                 t.NOMBRE as transmision_nombre,
                 p.NOMBRE_COMPLETO as proveedor_nombre,
-                -- Estos ya están en COLONES en la BD
-                cv.PRECIO_COMPRA as PRECIO_COMPRA_CRC,
+                cv.PRECIO_COSTO as PRECIO_COMPRA_CRC,
                 cv.TOTAL_INVERSION as INVERSION_CRC,
                 cv.SALDO as SALDO_CRC,
-                -- Calcular dólares (opcional, si los necesitas)
-                ROUND(cv.PRECIO_COMPRA / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as PRECIO_COMPRA_USD,
+                cv.FECHA_CANCELACION, -- AGREGAR ESTA LÍNEA
+                -- Calcular dólares
+                ROUND(cv.PRECIO_COSTO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as PRECIO_COMPRA_USD,
                 ROUND(cv.TOTAL_INVERSION / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as INVERSION_USD,
                 ROUND(cv.SALDO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as SALDO_USD
             FROM VEHICULOS v
