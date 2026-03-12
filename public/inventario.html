@@ -8,17 +8,59 @@
   <link rel="stylesheet" href="/css/style_componentes.css">
   <link rel="stylesheet" href="css/style_modalinventario.css">
   <style>
+    /* Estilos para la fila de totales */
+    .totals-row {
+        background: #2c3e50;
+        color: white;
+        font-weight: bold;
+        border-top: 2px solid #34495e;
+    }
+
+    .totals-row td {
+        color: white !important;
+        font-weight: bold !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .totals-row .currency-usd {
+        color: #fff !important;
+    }
+
+    .totals-row .currency-crc {
+        color: #fff !important;
+    }
+
+    /* Hover effect para la fila de totales (deshabilitado) */
+    .totals-row:hover {
+        background: #2c3e50 !important;
+        transform: none !important;
+        box-shadow: none !important;
+        cursor: default !important;
+    }
+
+    /* Separador visual */
+    .totals-row td:first-child {
+        border-radius: 0 0 0 8px;
+    }
+
+    .totals-row td:last-child {
+        border-radius: 0 0 8px 0;
+    }
+
     .table-container {
       background: white;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
+      overflow-x: auto;
       margin-bottom: 30px;
+      width: 100%;
+      position: relative;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 1400px;
     }
 
     thead {
@@ -579,12 +621,13 @@
                             <th><i class="fas fa-colon-sign"></i> Invertido CRC</th>
                             <th><i class="fas fa-dollar-sign"></i> Saldo USD</th>
                             <th><i class="fas fa-colon-sign"></i> Saldo CRC</th>
+                            <th><i class="fas fa-calendar-times"></i> Fec. Cancelación</th>
                             <th><i class="fas fa-calendar-check"></i> Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTableBody">
                         <tr>
-                            <td colspan="12" class="loading">
+                            <td colspan="13" class="loading">
                                 <i class="fas fa-spinner fa-spin"></i>
                                 <p>Cargando vehículos...</p>
                             </td>
@@ -1204,6 +1247,32 @@
         }
     }
 
+    // Función para formatear fecha de YYYY-MM-DD a DD/MM/YYYY para mostrar
+    function formatearFechaParaMostrar(fecha) {
+        if (!fecha) return '-';
+        
+        try {
+            // Si viene como objeto Date o string ISO
+            let fechaStr = fecha;
+            if (fecha instanceof Date) {
+                fechaStr = fecha.toISOString().split('T')[0];
+            } else if (typeof fecha === 'string' && fecha.includes('T')) {
+                fechaStr = fecha.split('T')[0];
+            }
+            
+            // Validar formato YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+                const [year, month, day] = fechaStr.split('-');
+                return `${day}/${month}/${year}`;
+            }
+            
+            return fechaStr;
+        } catch (error) {
+            console.error('Error formateando fecha:', error);
+            return '-';
+        }
+    }    
+
     async function cargarVehiculos() {
         try {
             const response = await fetch(`${API_BASE_URL}/vehiculos`);
@@ -1222,13 +1291,54 @@
         }
     }
 
+    // ===== FUNCIÓN PARA CALCULAR TOTALES DE LA TABLA =====
+    function calcularTotalesTabla(vehiculosList) {
+        if (!vehiculosList || vehiculosList.length === 0) {
+            return {
+                totalUSD: 0,
+                totalCRC: 0,
+                totalInversionUSD: 0,
+                totalInversionCRC: 0,
+                totalSaldoUSD: 0,
+                totalSaldoCRC: 0,
+                cantidad: 0
+            };
+        }
+
+        let totalCostoUSD = 0;
+        let totalCostoCRC = 0;
+        let totalInversionUSD = 0;
+        let totalInversionCRC = 0;
+        let totalSaldoUSD = 0;
+        let totalSaldoCRC = 0;
+
+        vehiculosList.forEach(v => {
+            totalCostoUSD += parseFloat(v.PRECIO_COMPRA_USD) || 0;
+            totalCostoCRC += parseFloat(v.PRECIO_COMPRA_CRC) || 0;
+            totalInversionUSD += parseFloat(v.INVERSION_USD) || 0;
+            totalInversionCRC += parseFloat(v.INVERSION_CRC) || 0;
+            totalSaldoUSD += parseFloat(v.SALDO_USD) || 0;
+            totalSaldoCRC += parseFloat(v.SALDO_CRC) || 0;
+        });
+
+        return {
+            totalCostoUSD,
+            totalCostoCRC,
+            totalInversionUSD,
+            totalInversionCRC,
+            totalSaldoUSD,
+            totalSaldoCRC,
+            cantidad: vehiculosList.length
+        };
+    }
+
     function actualizarTabla(vehiculosList) {
         const tbody = document.getElementById('inventoryTableBody');
         
         if (!vehiculosList || vehiculosList.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="12" style="text-align: center; padding: 50px;">
+                    <td colspan="13" style="text-align: center; padding: 50px;">
                         <i class="fas fa-car" style="font-size: 3rem; color: #bdc3c7;"></i>
                         <p>No hay vehículos registrados</p>
                     </td>
@@ -1237,37 +1347,62 @@
             return;
         }
 
-        tbody.innerHTML = vehiculosList.map(v => `
-            <tr onclick="editarVehiculo(${v.ID_VEHICULO})" style="cursor: pointer;">
-                <td><span class="placa">${v.PLACA || 'S/N'}</span></td>
-                <td>${v.marca_nombre || '-'}</td>
-                <td>${v.ESTILO || '-'}</td>
-                <td>${v.TRACCION || '-'}</td>
-                <td>${v.MODELO || '-'}</td>
-                <td class="currency currency-usd">$${formatearNumero(v.PRECIO_COMPRA_USD || 0)}</td>
-                <td class="currency currency-usd">$${formatearNumero(v.INVERSION_USD || 0)}</td>
-                <td class="currency currency-crc">₡${formatearNumero(v.PRECIO_COMPRA_CRC || 0)}</td>
-                <td class="currency currency-crc">₡${formatearNumero(v.INVERSION_CRC || 0)}</td>
-                <td class="currency currency-usd">$${formatearNumero(v.SALDO_USD || 0)}</td>
-                <td class="currency currency-crc">₡${formatearNumero(v.SALDO_CRC || 0)}</td>
-                <td>
-                    <div class="action-buttons" onclick="event.stopPropagation()">
-                        <button class="btn-icon view" onclick="verVehiculo(${v.ID_VEHICULO})" title="Ver detalles">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-icon edit" onclick="editarVehiculo(${v.ID_VEHICULO})" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon" style="background: #f39c12;" onclick="generarPDFVehiculo(${v.ID_VEHICULO})" title="Descargar PDF">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
-                        <button class="btn-icon delete" onclick="eliminarVehiculo(${v.ID_VEHICULO})" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
+        // Calcular totales
+        const totales = calcularTotalesTabla(vehiculosList);
+
+        // Generar filas de vehículos
+        const filasVehiculos = vehiculosList.map(v => {
+            const fechaCancelacion = v.FECHA_CANCELACION ? formatearFechaParaMostrar(v.FECHA_CANCELACION) : '-';
+            
+            return `
+                <tr onclick="editarVehiculo(${v.ID_VEHICULO})" style="cursor: pointer;">
+                    <td><span class="placa">${v.PLACA || 'S/N'}</span></td>
+                    <td>${v.marca_nombre || '-'}</td>
+                    <td>${v.ESTILO || '-'}</td>
+                    <td>${v.TRACCION || '-'}</td>
+                    <td>${v.MODELO || '-'}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.PRECIO_COMPRA_USD || 0)}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.INVERSION_USD || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.PRECIO_COMPRA_CRC || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.INVERSION_CRC || 0)}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.SALDO_USD || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.SALDO_CRC || 0)}</td>
+                    <td>${fechaCancelacion}</td>
+                    <td>
+                        <div class="action-buttons" onclick="event.stopPropagation()">
+                            <button class="btn-icon view" onclick="verVehiculo(${v.ID_VEHICULO})" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon edit" onclick="editarVehiculo(${v.ID_VEHICULO})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" style="background: #f39c12;" onclick="generarPDFVehiculo(${v.ID_VEHICULO})" title="Descargar PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-icon delete" onclick="eliminarVehiculo(${v.ID_VEHICULO})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Generar fila de totales
+        const filaTotales = `
+            <tr class="totals-row" style="background: #2c3e50; color: white; font-weight: bold; border-top: 2px solid #34495e;">
+                <td colspan="5" style="text-align: right; font-size: 1rem; background: #34495e;">TOTALES (${totales.cantidad} vehículos):</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalCostoUSD)}</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalInversionUSD)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalCostoCRC)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalInversionCRC)}</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalSaldoUSD)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalSaldoCRC)}</td>
+                <td colspan="2" style="background: #34495e;"></td>
             </tr>
-        `).join('');
+        `;
+
+        tbody.innerHTML = filasVehiculos + filaTotales;
     }
 
     function parsearNumero(str) {
@@ -1840,9 +1975,9 @@
         
         // Cálculos en colones
         const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
-        const totalInversionCRC = primaCRC + comisionCRC + totalObservacionesCRC;
+        const totalInversionCRC = primaCRC + precioTraspasoCRC + totalObservacionesCRC;
         const saldoCRC = costoCompraCRC - primaCRC;
-        const precioCostoCRC = costoCompraCRC + totalInversionCRC;
+        const precioCostoCRC = costoCompraCRC + totalObservacionesCRC;
         
         // Actualizar campos en COLONES
         document.getElementById('modalCostoColones2').value = formatearNumero(costoCompraCRC);
@@ -1855,7 +1990,7 @@
         document.getElementById('modalCostoDolar2').value = formatearNumero(costoCompraCRC / tipoCambio);
         document.getElementById('modalCostoDolar').value = formatearNumero(costoCompraCRC / tipoCambio);
         document.getElementById('modalTotalInversionDolar').value = formatearNumero(totalInversionCRC / tipoCambio);
-        document.getElementById('modalPrecioCostoDolar').value = formatearNumero(totalInversionCRC / tipoCambio);
+        document.getElementById('modalPrecioCostoDolar').value = formatearNumero(precioCostoCRC / tipoCambio);
         document.getElementById('modalSaldoDolar').value = formatearNumero(saldoCRC / tipoCambio);
     }
     
@@ -2033,7 +2168,8 @@
 
             // Cálculos en colones
             const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
-            const totalInversionCRC = costoTotalCRC + comisionCRC + totalObservacionesCRC;
+            const totalInversionCRC = primaCRC + precioTraspasoCRC + totalObservacionesCRC;
+            const precioCostoCRC = costoTotalCRC + totalObservacionesCRC;
             const saldoCRC = costoTotalCRC - primaCRC;
 
             // Costos del vehículo
@@ -2045,7 +2181,7 @@
                 PRIMA: primaCRC,
                 COMISION: comisionCRC,
                 TOTAL_INVERSION: totalInversionCRC,
-                PRECIO_COSTO: totalInversionCRC,
+                PRECIO_COSTO: precioCostoCRC,
                 PRECIO_PUBLICO: parsearNumero(document.getElementById('modalPPrecio').value),
                 PRECIO_DESCUENTO: parsearNumero(document.getElementById('modalPCDescuento').value),
                 PRIMA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalPrimaFinanc').value),
