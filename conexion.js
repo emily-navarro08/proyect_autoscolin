@@ -1035,7 +1035,7 @@ app.get('/api/vehiculos', async (req, res) => {
                 cv.PRECIO_COSTO as PRECIO_COMPRA_CRC,
                 cv.TOTAL_INVERSION as INVERSION_CRC,
                 cv.SALDO as SALDO_CRC,
-                venta.FECHA_CANCELACION,
+                cv.FECHA_CANCELACION,
                 ROUND(cv.PRECIO_COSTO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as PRECIO_COMPRA_USD,
                 ROUND(cv.TOTAL_INVERSION / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as INVERSION_USD,
                 ROUND(cv.SALDO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as SALDO_USD
@@ -4662,7 +4662,7 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
             PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA, COMISION,
             TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO, PRECIO_DESCUENTO,
             PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO, SALDO, MONEDA,
-            TIPO_CAMBIO_COMPRA, OBSERVACION
+            TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CANCELACION
         } = req.body;
 
         const connection = await mysql.createConnection(dbConfig);
@@ -4682,14 +4682,14 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
                     COMISION = ?, TOTAL_INVERSION = ?, PRECIO_COSTO = ?,
                     PRECIO_PUBLICO = ?, PRECIO_DESCUENTO = ?,
                     PRIMA_FINANCIAMIENTO = ?, CUOTA_FINANCIAMIENTO = ?, SALDO = ?,
-                    MONEDA = ?, TIPO_CAMBIO_COMPRA = ?, OBSERVACION = ?,
+                    MONEDA = ?, TIPO_CAMBIO_COMPRA = ?, OBSERVACION = ?, FECHA_CANCELACION = ?,
                     FECHA_CALCULO = CURDATE()
                 WHERE ID_VEHICULO = ?`,
                 [
                     PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA, COMISION,
                     TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO, PRECIO_DESCUENTO,
                     PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO, SALDO,
-                    MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, req.params.id
+                    MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CANCELACION, req.params.id
                 ]
             );
         } else {
@@ -4699,16 +4699,16 @@ app.post('/api/vehiculos/:id/costos', async (req, res) => {
                     ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA,
                     COMISION, TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO,
                     PRECIO_DESCUENTO, PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO,
-                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CALCULO
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
+                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CALCULO, FECHA_CANCELACION
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,CURDATE())`,
                 [
                     req.params.id, PRECIO_COMPRA, PRECIO_TRANSPASO, COSTO, PRIMA,
                     COMISION, TOTAL_INVERSION, PRECIO_COSTO, PRECIO_PUBLICO,
                     PRECIO_DESCUENTO, PRIMA_FINANCIAMIENTO, CUOTA_FINANCIAMIENTO,
-                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION
+                    SALDO, MONEDA, TIPO_CAMBIO_COMPRA, OBSERVACION, FECHA_CANCELACION
                 ]
             );
-        }
+        }        
 
         await connection.end();
         res.json({ 
@@ -7521,4 +7521,3 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
-
