@@ -1035,8 +1035,7 @@ app.get('/api/vehiculos', async (req, res) => {
                 cv.PRECIO_COSTO as PRECIO_COMPRA_CRC,
                 cv.TOTAL_INVERSION as INVERSION_CRC,
                 cv.SALDO as SALDO_CRC,
-                cv.FECHA_CANCELACION, -- AGREGAR ESTA LÍNEA
-                -- Calcular dólares
+                venta.FECHA_CANCELACION,
                 ROUND(cv.PRECIO_COSTO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as PRECIO_COMPRA_USD,
                 ROUND(cv.TOTAL_INVERSION / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as INVERSION_USD,
                 ROUND(cv.SALDO / COALESCE(cv.TIPO_CAMBIO_COMPRA, 515), 2) as SALDO_USD
@@ -1047,17 +1046,18 @@ app.get('/api/vehiculos', async (req, res) => {
             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
             LEFT JOIN PERSONAS p ON v.ID_PROVEEDOR = p.ID_PERSONA
             LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
+            LEFT JOIN VENTAS venta ON v.ID_VEHICULO = venta.ID_VEHICULO
             WHERE (
-                    (v.ES_INTERCAMBIO = FALSE AND v.ESTADO = 'COMPRADO')
-                    OR
-                    (v.ES_INTERCAMBIO = TRUE AND v.ESTADO = 'COMPRADO'
-                    AND v.ID_VENTA_ORIGEN IS NOT NULL
-                    AND (
-                        SELECT vt.ESTADO_PAGO FROM VENTAS vt 
-                        WHERE vt.ID_VENTA = v.ID_VENTA_ORIGEN
-                    ) = 'YA FUE FACTURADA')
-                )
-            `;
+                (v.ES_INTERCAMBIO = FALSE AND v.ESTADO = 'COMPRADO')
+                OR
+                (v.ES_INTERCAMBIO = TRUE AND v.ESTADO = 'COMPRADO'
+                AND v.ID_VENTA_ORIGEN IS NOT NULL
+                AND (
+                    SELECT v2.ESTADO_PAGO FROM VENTAS v2
+                    WHERE v2.ID_VENTA = v.ID_VENTA_ORIGEN
+                ) = 'YA FUE FACTURADA')
+            )
+        `;
         const params = [];
         
         if (req.query.placa) {
@@ -7521,3 +7521,4 @@ process.on('unhandledRejection', (err) => {
   console.error('❌ Error no manejado:', err);
   process.exit(1);
 });
+
