@@ -2189,7 +2189,8 @@
                 SALDO: saldoCRC,
                 MONEDA: 'CRC',
                 TIPO_CAMBIO_COMPRA: tipoCambio,
-                OBSERVACION: document.getElementById('modalObservaciones').value || null
+                OBSERVACION: document.getElementById('modalObservaciones').value || null,
+                FECHA_CANCELACION: document.getElementById('modalFechaCancelacion').value || null            
             };
 
             let vehiculoId = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
@@ -2205,7 +2206,6 @@
                   throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
               }
             } else {
-                // ✅ CORREGIDO: Quitar la comilla extra después de /vehiculos
                 const response = await fetch(`${API_BASE_URL}/vehiculos`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
