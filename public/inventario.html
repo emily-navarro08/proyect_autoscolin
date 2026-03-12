@@ -857,56 +857,114 @@
                             </div>
                             
                             <div class="card">
-                                <div class="card-title">Especificaciones Técnicas</div>       
-                                <table class="vehicle-details">
-                                    <tr>
-                                        <td>Marca <select class="vehicle-input" id="modalMarca">
-                                            <option value="">Seleccione marca</option>
-                                        </select></td>
-                                        <td>Kilom. Anterior <input type="text" class="vehicle-input" id="modalKmAnterior" value="0"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Estilo <input type="text" class="vehicle-input" id="modalEstilo" value=""></td>
-                                        <td>Kilom. Actual <input type="text" class="vehicle-input" id="modalKmActual" value="0"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tracción <input type="text" class="vehicle-input" id="modalTraccion" value=""></td>
-                                        <td>Color <select class="vehicle-input" id="modalColor">
-                                            <option value="">Seleccione color</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Modelo <input type="text" class="vehicle-input" id="modalModelo" value=""></td>
-                                        <td>Transmisión <select class="vehicle-input" id="modalTransmision">
-                                            <option value="">Seleccione transmisión</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td>PV# <input type="text" class="vehicle-input" id="modalPV" value=""></td>
-                                        <td>Combustible <select class="vehicle-input" id="modalCombustible">
-                                            <option value="">Seleccione combustible</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td># Motor <input type="text" class="vehicle-input" id="modalMotor" value=""></td>
-                                        <td>C.C. <input type="text" class="vehicle-input" id="modalCC" value=""></td>
-                                    </tr>
-                                    <tr>
-                                        <td># Chasis <input type="text" class="vehicle-input" id="modalChasis" value=""></td>
-                                        <td>Cilindros <input type="text" class="vehicle-input" id="modalCilindros" value=""></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Carrocería <input type="text" class="vehicle-input" id="modalCarroceria" value=""></td>
-                                        <td>Estado <select class="vehicle-input" id="modalEstado">
-                                            <option value="COMPRADO">COMPRADO</option>
-                                            <option value="VENDIDO">VENDIDO</option>
-                                            <option value="DEVUELTO">DEVUELTO</option>
-                                        </select></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Fec. Ingreso <input type="date" class="vehicle-input" id="modalFechaIngreso"></td>
-                                    </tr>
-                                </table>
+                                <div class="card-title">Especificaciones Técnicas</div>
+                                
+                                <div class="two-tables-container">
+                                    <!-- TABLA IZQUIERDA -->
+                                    <table class="vehicle-details-left">
+                                        <tr>
+                                            <td class="input-cell"> Marca
+                                                <select class="vehicle-input" id="modalMarca">
+                                                    <option value="">Seleccione marca</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Estilo
+                                                <input type="text" class="vehicle-input" id="modalEstilo">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Tracción
+                                                <input type="text" class="vehicle-input" id="modalTraccion">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Modelo
+                                                <input type="text" class="vehicle-input" id="modalModelo">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">PV#
+                                                <input type="text" class="vehicle-input" id="modalPV">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"># Motor
+                                                <input type="text" class="vehicle-input" id="modalMotor">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"># Chasis
+                                                <input type="text" class="vehicle-input" id="modalChasis">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Carrocería
+                                                <input type="text" class="vehicle-input" id="modalCarroceria">
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- TABLA DERECHA -->
+                                    <table class="vehicle-details-right">
+                                        <tr>
+                                            <td class="input-cell">Kilometraje Ant
+                                                <input type="text" class="vehicle-input" id="modalKmAnterior" value="0">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Kilometraje Act
+                                                <input type="text" class="vehicle-input" id="modalKmActual" value="0">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Color
+                                                <select class="vehicle-input" id="modalColor">
+                                                    <option value="">Seleccione color</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Transmisión
+                                                <select class="vehicle-input" id="modalTransmision">
+                                                    <option value="">Seleccione transmisión</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Combustible
+                                                <select class="vehicle-input" id="modalCombustible">
+                                                    <option value="">Seleccione combustible</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">C.C
+                                                <input type="text" class="vehicle-input" id="modalCC">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Cilindros
+                                                <input type="text" class="vehicle-input" id="modalCilindros">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Estado
+                                                <select class="vehicle-input" id="modalEstado">
+                                                    <option value="COMPRADO">COMPRADO</option>
+                                                    <option value="VENDIDO">VENDIDO</option>
+                                                    <option value="DEVUELTO">DEVUELTO</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Fec. Ingreso
+                                                <input type="date" class="vehicle-input" id="modalFechaIngreso">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                             
                             <div class="card">
@@ -1888,9 +1946,9 @@
                 const proveedorSection = document.querySelector('.supplier-details');
                 if (proveedorSection) {
                     if (esProveedor) {
-                        proveedorSection.style.borderLeft = '4px solid #3498db'; // Azul para proveedores
+                        proveedorSection.style.borderLeft = '4px solid #3498db'; 
                     } else {
-                        proveedorSection.style.borderLeft = '4px solid #f39c12'; // Naranja para clientes/intercambio
+                        proveedorSection.style.borderLeft = '4px solid #f39c12';
                     }
                 }
             }
@@ -1975,9 +2033,9 @@
         
         // Cálculos en colones
         const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
-        const totalInversionCRC = primaCRC + precioTraspasoCRC + totalObservacionesCRC;
+        const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
         const saldoCRC = costoCompraCRC - primaCRC;
-        const precioCostoCRC = costoCompraCRC + totalObservacionesCRC;
+        const precioCostoCRC = comisionCRC + costoCompraCRC + totalObservacionesCRC;
         
         // Actualizar campos en COLONES
         document.getElementById('modalCostoColones2').value = formatearNumero(costoCompraCRC);
@@ -2168,8 +2226,8 @@
 
             // Cálculos en colones
             const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
-            const totalInversionCRC = primaCRC + precioTraspasoCRC + totalObservacionesCRC;
-            const precioCostoCRC = costoTotalCRC + totalObservacionesCRC;
+            const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
+            const precioCostoCRC = comisionCRC + costoTotalCRC + totalObservacionesCRC;
             const saldoCRC = costoTotalCRC - primaCRC;
 
             // Costos del vehículo
