@@ -1,4 +1,4 @@
-                /* HEADER MEJORADO */
+/* HEADER MEJORADO */
         .header {
             text-align: center;
             margin-bottom: 25px;
@@ -77,13 +77,14 @@
         .three-column-layout {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
+            gap: 15px;
             margin-bottom: 25px;
         }
         
         .column {
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
         
         /* SECCIONES COMUNES */
@@ -98,13 +99,16 @@
             text-align: center;
         }
         
-        .card {
+        #vehiculoModal .card {
             background-color: #f8f9fa;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
             border-left: 4px solid #3498db;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: visible;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .card-title {
@@ -247,33 +251,73 @@
         }
         
         /* TABLA DE DETALLES DEL VEHÍCULO */
-        .vehicle-details {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-        }
-        
-        .vehicle-details td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            vertical-align: top;
-            font-weight: bold;
-            background-color: #f0f8ff;
-            width: 20%;
-        }
-        
-        .vehicle-input {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            background-color: white;
-            min-height: 38px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-        }
+/* ===== DOS TABLAS PARA ESPECIFICACIONES TÉCNICAS ===== */
+.two-tables-container {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vehicle-details-left,
+.vehicle-details-right {
+    flex: 1;
+    min-width: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.vehicle-details-left td,
+.vehicle-details-right td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.vehicle-details-left .label-cell,
+.vehicle-details-right .label-cell {
+    width: 40%;
+    background-color: #eef2f7;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 11px;
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 6px;
+}
+
+.vehicle-details-left .input-cell,
+.vehicle-details-right .input-cell {
+    width: 80%;
+}
+
+.vehicle-details-left .vehicle-input,
+.vehicle-details-right .vehicle-input {
+    width: 100%;
+    padding: 3px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    background-color: white;
+    box-sizing: border-box;
+    height: 24px;
+}
+
+.vehicle-details-left select.vehicle-input,
+.vehicle-details-right select.vehicle-input {
+    height: 24px;
+    padding: 2px 3px;
+    font-size: 13px;
+}
+
+/* Responsive para móviles */
+@media (max-width: 900px) {
+    .two-tables-container {
+        flex-direction: column;
+    }
+}
         
         /* SECCIÓN DE PROVEEDOR */
         .supplier-details {
@@ -295,6 +339,19 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            width: 100%;          /* ← agregar */
+            box-sizing: border-box;
+        }
+
+        .detail-grids .price-input-wrapper {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .detail-grids .price-input {
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .detail-field {
