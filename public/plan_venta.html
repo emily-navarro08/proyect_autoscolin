@@ -1,1 +1,3197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Plan de Ventas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style_componentes.css">
+    <link rel="stylesheet" href="/css/style_plan_venta.css">
+    <link rel="stylesheet" href="/css/style_modal.css">
+    <link rel="stylesheet" href="/css/style_plan.css">
+    <link rel="stylesheet" href="/css/calculo_prestamo.css">
+    <style>
+        /* =============================================
+           ESTILOS ADICIONALES PARA INTEGRACIÓN API
+           ============================================= */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+        .loading-spinner {
+            width: 54px; height: 54px;
+            border: 5px solid #fff3;
+            border-top-color: #5b21b6;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
+        .notification {
+            position: fixed;
+            top: 20px; right: 20px;
+            padding: 14px 22px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: .92rem;
+            z-index: 8000;
+            box-shadow: 0 6px 24px rgba(0,0,0,.22);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn .3s ease;
+            max-width: 380px;
+        }
+        @keyframes slideIn { from { transform: translateX(120%); opacity:0; } to { transform: none; opacity:1; } }
+        .notification.success { background: #16a34a; }
+        .notification.error   { background: #dc2626; }
+        .notification.warning { background: #d97706; }
+        .notification.info    { background: #2563eb; }
+        .notification i { font-size: 1.1rem; }
+
+        /* Tabla plan seleccionada */
+        #indice table tbody tr.selected-row {
+            background: #ede9fe !important;
+            outline: 2px solid #7c3aed;
+        }
+        #indice table tbody tr { cursor: pointer; }
+        #indice table tbody tr:hover { background: #f5f3ff; }
+
+        /* Badges de estado */
+        .estado-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .3px;
+        }
+        .estado-pendiente   { background: #fef3c7; color: #92400e; }
+        .estado-facturado   { background: #d1fae5; color: #065f46; }
+        .estado-anulado     { background: #fee2e2; color: #991b1b; }
+        .estado-plan-anulado{ background: #e5e7eb; color: #374151; }
+
+        /* Filtros */
+        .filter-container {
+            background: #f8f7ff;
+            border: 1px solid #e5e0ff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 18px;
+        }
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .filter-header h3 { margin: 0; font-size: .98rem; color: #4c1d95; }
+        .filter-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px; }
+        .filter-group label { font-size: .78rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; }
+        .filter-group input, .filter-group select {
+            padding: 7px 10px;
+            border: 1.5px solid #ddd6fe;
+            border-radius: 7px;
+            font-size: .88rem;
+            background: #fff;
+            transition: border-color .2s;
+        }
+        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #7c3aed; }
+        .filter-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-filter {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: .88rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-filter-primary   { background: #7c3aed; color: #fff; }
+        .btn-filter-primary:hover { background: #5b21b6; }
+        .btn-filter-secondary { background: #e5e7eb; color: #374151; }
+        .btn-filter-secondary:hover { background: #d1d5db; }
+
+        /* Persona seleccionada card */
+        .selected-person-card {
+            background: linear-gradient(135deg,#5b21b6,#2563eb);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #fff;
+            margin-top: 10px;
+        }
+        .selected-person-card h4 { margin: 0 0 10px; font-size: .92rem; }
+        .selected-person-card p  { margin: 4px 0; font-size: .86rem; }
+        .selected-person-card button {
+            margin-top: 10px;
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.5);
+            border-radius: 6px;
+            color: #fff;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: .82rem;
+            transition: background .2s;
+        }
+        .selected-person-card button:hover { background: rgba(255,255,255,.35); }
+
+        /* Resultados de búsqueda */
+        .search-results-dropdown {
+            border: 1.5px solid #ddd6fe;
+            border-radius: 8px;
+            background: #fff;
+            max-height: 240px;
+            overflow-y: auto;
+            margin-top: 4px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.1);
+        }
+        .search-result-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f3f0ff;
+            transition: background .15s;
+        }
+        .search-result-item:hover { background: #f5f3ff; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item .result-info strong { display: block; font-size: .9rem; color: #1f2937; }
+        .search-result-item .result-info small  { color: #6b7280; font-size: .8rem; }
+        .btn-select-person {
+            background: #7c3aed; color: #fff;
+            border: none; border-radius: 6px;
+            padding: 5px 12px; font-size: .8rem;
+            cursor: pointer; white-space: nowrap;
+            transition: background .2s;
+        }
+        .btn-select-person:hover { background: #5b21b6; }
+
+        /* Transferir amortización */
+        .transferencia-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .btn-transferir {
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px rgba(124,58,237,.35);
+            transition: all .25s;
+        }
+        .btn-transferir:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,.5); }
+        .transferencia-ayuda {
+            font-size: .78rem;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+        .transferencia-ayuda i { color: #7c3aed; }
+
+        /* Cuotas en tabla anticipos */
+        .cuota-row td:first-child .badge-info {
+            background: #dbeafe; color: #1e40af;
+            padding: 3px 8px; border-radius: 6px;
+            font-size: .77rem; font-weight: 600;
+        }
+        tr.cuota-row { background: #fafafa; }
+
+        /* Detalles cuota panel */
+        #detalles-cuota-panel { animation: fadeIn .3s ease; }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+
+        /* Estado cuotas */
+        .estado-cuota-pagada   { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size:.78rem; font-weight:700; }
+        .estado-cuota-pendiente{ background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size:.78rem; font-weight:700; }
+        .estado-cuota-vencida  { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size:.78rem; font-weight:700; }
+
+        /* Sección vehículo recibido — placa search igual que vendido */
+        .vehiculo-item { transition: background .15s; }
+        .vehiculo-item:hover { background: #f5f3ff; }
+
+        /* Botones guardar plan */
+        .btn-guardar-plan {
+            background: linear-gradient(135deg,#16a34a,#15803d);
+            color: #fff; border: none; border-radius: 8px;
+            padding: 10px 22px; font-weight: 700; font-size: .9rem;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 3px 12px rgba(22,163,74,.3); transition: all .2s;
+        }
+        .btn-guardar-plan:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(22,163,74,.45); }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="globalLoading" class="loading-overlay" style="display:none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo">🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                </ul>
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
+                        <a href="recibos.html" class="sidebar-btn"><i class="fas fa-cash-register"></i><span>Recibos</span></a>
+                        <a href="inventario.html" class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
+                        <a href="clientes.html" class="sidebar-btn"><i class="fas fa-users"></i><span>Clientes</span></a>
+                        <a href="certificado_garantia.html" class="sidebar-btn"><i class="fas fa-award"></i><span>Certificado</span></a>
+                        <a href="plan_venta.html" class="sidebar-btn active"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
+                        <a href="index.html" class="sidebar-salirbtn"><i class="fas fa-sign-out"></i><span>Salir</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <div class="plan-container">
+                <nav class="tabs">
+                    <button class="active" onclick="mostrar('indice',event)"><i class="fas fa-list"></i> INDICE PLANES</button>
+                    <button onclick="mostrar('general',event)"><i class="fas fa-cogs"></i> GENERAL</button>
+                    <button onclick="mostrar('facturar',event)"><i class="fas fa-user-tie"></i> DATOS CLIENTE FACTURAR</button>
+                    <button onclick="mostrar('inscribir',event)"><i class="fas fa-address-card"></i> DATOS CLIENTE INSCRIBIR</button>
+                    <button onclick="mostrar('vendido',event)"><i class="fas fa-car"></i> VEHÍCULO VENDIDO</button>
+                    <button onclick="mostrar('recibir',event)"><i class="fas fa-truck"></i> VEHÍCULO A RECIBIR</button>
+                    <button onclick="mostrar('anticipos',event)"><i class="fas fa-money-bill-wave"></i> ANTICIPOS</button>
+                    <button onclick="mostrar('pago',event)"><i class="fas fa-credit-card"></i> FORMA DE PAGO</button>
+                </nav>
+                <!-- ======= ÍNDICE DE PLANES ======= -->
+                <section id="indice" class="panel" style="display:block;">
+                    <h2><i class="fas fa-list-ol"></i> Índice de Planes</h2>
+                    <!-- Filtros se insertan aquí dinámicamente -->
+                    <div id="filtros-container"></div>
+                    <table id="tabla-planes">
+                        <thead>
+                            <tr>
+                                <th># Plan Venta</th>
+                                <th>Cédula</th>
+                                <th>Nombre Cliente</th>
+                                <th># Placa</th>
+                                <th>Marca</th>
+                                <th>Estilo</th>
+                                <th>Tracción</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-planes">
+                            <tr><td colspan="8" style="text-align:center;padding:30px;color:#9ca3af;"><i class="fas fa-spinner fa-spin"></i> Cargando planes...</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="acciones">
+                        <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                        <button id="btn-anular-plan" onclick="anularPlanSeleccionado()"><i class="fas fa-ban"></i> Anular</button>
+                    </div>
+                </section>
+                <!-- ======= GENERAL ======= -->
+                <section id="general" class="panel">
+                    <h2><i class="fas fa-cogs"></i> General</h2>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>Num. Plan:</label>
+                            <input type="text" id="num_plan" value="0" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha:</label>
+                            <input type="date" id="fecha_plan">
+                        </div>
+                        <div class="form-group">
+                            <label>Moneda:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="moneda" value="CRC" checked> COLONES</label>
+                                <label><input type="radio" name="moneda" value="USD"> DÓLARES</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo Cambio:</label>
+                            <input type="number" id="tipo_cambio" step="0.01" value="500.00">
+                        </div>
+
+                        <!-- BÚSQUEDA VENDEDOR -->
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Vendedor:</label>
+                            <div class="search-container">
+                                <input type="text" id="buscar-vendedor-input" class="search-input"
+                                    placeholder="Buscar por nombre o cédula..." autocomplete="off">
+                                <button type="button" class="btn btn-info btn-sm" onclick="buscarVendedor()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="resultados-vendedor" class="search-results-dropdown" style="display:none;"></div>
+                            <div id="vendedor-seleccionado-container" style="display:none;">
+                                <div class="selected-person-card">
+                                    <h4><i class="fas fa-user-check"></i> Vendedor Seleccionado</h4>
+                                    <p><strong>Nombre:</strong> <span id="vendedor-nombre"></span></p>
+                                    <p><strong>Cédula:</strong> <span id="vendedor-cedula"></span></p>
+                                    <p><strong>Email:</strong> <span id="vendedor-email"></span></p>
+                                    <input type="hidden" id="vendedor-id">
+                                    <button type="button" onclick="limpiarVendedor()"><i class="fas fa-times"></i> Cambiar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BÚSQUEDA APROBADOR -->
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Aprobado por:</label>
+                            <div class="search-container">
+                                <input type="text" id="buscar-aprobador-input" class="search-input"
+                                    placeholder="Buscar por nombre o cédula..." autocomplete="off">
+                                <button type="button" class="btn btn-info btn-sm" onclick="buscarAprobador()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="resultados-aprobador" class="search-results-dropdown" style="display:none;"></div>
+                            <div id="aprobador-seleccionado-container" style="display:none;">
+                                <div class="selected-person-card">
+                                    <h4><i class="fas fa-user-check"></i> Aprobador Seleccionado</h4>
+                                    <p><strong>Nombre:</strong> <span id="aprobador-nombre"></span></p>
+                                    <p><strong>Cédula:</strong> <span id="aprobador-cedula"></span></p>
+                                    <input type="hidden" id="aprobador-id">
+                                    <button type="button" onclick="limpiarAprobador()"><i class="fas fa-times"></i> Cambiar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notario:</label>
+                            <input type="text" id="notario">
+                        </div>
+                    </div>
+                </section>
+                <!-- ======= DATOS CLIENTE FACTURAR ======= -->
+                <section id="facturar" class="panel">
+                    <h2><i class="fas fa-user-tie"></i> Datos cliente facturar</h2>
+
+                    <!-- Búsqueda de cliente para facturar -->
+                    <div style="background:#f8f7ff;border:1px solid #e5e0ff;border-radius:10px;padding:14px 18px;margin-bottom:18px;">
+                        <label style="font-weight:700;color:#4c1d95;font-size:.9rem;"><i class="fas fa-search"></i> Buscar cliente existente:</label>
+                        <div style="display:flex;gap:10px;margin-top:8px;">
+                            <input type="text" id="buscar-cliente-fact-input" placeholder="Nombre o cédula..."
+                                style="flex:1;padding:8px 12px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:.88rem;">
+                            <button type="button" onclick="buscarClienteFacturar()" class="btn btn-info btn-sm"><i class="fas fa-search"></i> Buscar</button>
+                        </div>
+                        <div id="resultados-cliente-fact" class="search-results-dropdown" style="display:none;"></div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>N° de cliente:</label>
+                            <input type="text" id="fact_n_cliente" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de identificación:</label>
+                            <select id="fact_tipo_identificacion">
+                                <option value="">Seleccionar Tipo</option>
+                                <option value="cedula_fisica">Cédula Física</option>
+                                <option value="cedula_juridica">Cédula Jurídica</option>
+                                <option value="dimex">DIMEX</option>
+                                <option value="nite">NITE</option>
+                                <option value="pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>N° de identificación:</label>
+                            <input type="text" id="fact_identificacion_cliente">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input type="text" id="fact_nombre_cliente">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono 1:</label>
+                            <input type="text" id="fact_telefono1">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono 2:</label>
+                            <input type="text" id="fact_telefono2">
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia:</label>
+                            <select id="fact_provincia"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantón:</label>
+                            <select id="fact_canton"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Distrito:</label>
+                            <select id="fact_distrito"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Barrio:</label>
+                            <input type="text" id="fact_barrio">
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección:</label>
+                            <input type="text" id="fact_direccion" placeholder="Dirección automática">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado Civil:</label>
+                            <select id="fact_estado_civil"><option value="">Seleccionar</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ocupación:</label>
+                            <input type="text" id="fact_ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo electrónico:</label>
+                            <input type="text" id="fact_correo_electronico">
+                        </div>
+                        <div class="form-group">
+                            <label>Nacionalidad:</label>
+                            <input type="text" id="fact_nacionalidad">
+                        </div>
+                    </div>
+                </section>
+                <!-- ======= DATOS CLIENTE INSCRIBIR ======= -->
+                <section id="inscribir" class="panel">
+                    <h2><i class="fas fa-address-card"></i> Datos del cliente a inscribir</h2>
+
+                    <!-- Búsqueda de cliente para inscribir -->
+                    <div style="background:#f8f7ff;border:1px solid #e5e0ff;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+                        <label style="font-weight:700;color:#4c1d95;font-size:.9rem;"><i class="fas fa-search"></i> Buscar cliente existente:</label>
+                        <div style="display:flex;gap:10px;margin-top:8px;">
+                            <input type="text" id="buscar-cliente-ins-input" placeholder="Nombre o cédula..."
+                                style="flex:1;padding:8px 12px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:.88rem;">
+                            <button type="button" onclick="buscarClienteInscribir()" class="btn btn-info btn-sm"><i class="fas fa-search"></i> Buscar</button>
+                        </div>
+                        <div id="resultados-cliente-ins" class="search-results-dropdown" style="display:none;"></div>
+                    </div>
+
+                    <div class="acciones" style="margin-bottom:14px;">
+                        <button id="btnCopiar"><i class="fas fa-copy"></i> Pasar información cliente facturar</button>
+                        <button id="btnLimpiar"><i class="fas fa-ban"></i> Limpiar información cliente</button>
+                    </div>
+
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>N° de cliente:</label>
+                            <input type="text" id="ins_n_cliente" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de identificación:</label>
+                            <select id="ins_tipo_identificacion">
+                                <option value="">Seleccionar Tipo</option>
+                                <option value="cedula_fisica">Cédula Física</option>
+                                <option value="cedula_juridica">Cédula Jurídica</option>
+                                <option value="dimex">DIMEX</option>
+                                <option value="nite">NITE</option>
+                                <option value="pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>N° de identificación:</label>
+                            <input type="text" id="ins_identificacion_cliente">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input type="text" id="ins_nombre_cliente">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono 1:</label>
+                            <input type="text" id="ins_telefono1">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono 2:</label>
+                            <input type="text" id="ins_telefono2">
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia:</label>
+                            <select id="ins_provincia"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantón:</label>
+                            <select id="ins_canton"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Distrito:</label>
+                            <select id="ins_distrito"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Barrio:</label>
+                            <input type="text" id="ins_barrio">
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección:</label>
+                            <input type="text" id="ins_direccion" placeholder="Dirección automática">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado Civil:</label>
+                            <select id="ins_estado_civil"><option value="">Seleccionar</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ocupación:</label>
+                            <input type="text" id="ins_ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo electrónico:</label>
+                            <input type="text" id="ins_correo_electronico">
+                        </div>
+                        <div class="form-group">
+                            <label>Nacionalidad:</label>
+                            <input type="text" id="ins_nacionalidad">
+                        </div>
+                    </div>
+                </section>
+                <!-- ======= VEHÍCULO VENDIDO ======= -->
+                <section id="vendido" class="panel">
+                    <h2><i class="fas fa-car"></i> Vehículo Vendido</h2>
+                    <div class="grid">
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>Buscar por placa:</label>
+                            <div class="search-container">
+                                <input type="text" id="buscar-placa-vendido" class="search-input"
+                                    placeholder="Escriba la placa..." autocomplete="off">
+                                <button type="button" class="btn btn-info btn-sm" onclick="buscarVehiculoVendido()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="resultados-vehiculos-vendido" class="search-results-dropdown" style="display:none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Marca:</label>
+                            <select id="vehiculo-vendido-marca"><option value="">Seleccionar Marca</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estilo:</label>
+                            <input type="text" id="vehiculo-vendido-estilo">
+                        </div>
+                        <div class="form-group">
+                            <label>Tracción:</label>
+                            <input type="text" id="vehiculo-vendido-traccion">
+                        </div>
+                        <div class="form-group">
+                            <label>Color:</label>
+                            <select id="vehiculo-vendido-color"><option value="">Seleccionar Color</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Modelo (Año):</label>
+                            <select id="vehiculo-vendido-modelo"><option value="">Seleccionar Año</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kilometraje Anterior:</label>
+                            <input type="number" id="vehiculo-vendido-km-anterior" step="0.01" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Kilometraje Actual:</label>
+                            <input type="number" id="vehiculo-vendido-km-actual" step="0.01" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Motor:</label>
+                            <input type="text" id="vehiculo-vendido-motor">
+                        </div>
+                        <div class="form-group">
+                            <label>C.C:</label>
+                            <input type="number" id="vehiculo-vendido-cc" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Cilindros:</label>
+                            <input type="number" id="vehiculo-vendido-cilindros" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Combustible:</label>
+                            <select id="vehiculo-vendido-combustible"><option value="">Seleccionar Combustible</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Transmisión:</label>
+                            <select id="vehiculo-vendido-transmision"><option value="">Seleccionar Transmisión</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>P.V:</label>
+                            <input type="text" id="vehiculo-vendido-pv">
+                        </div>
+                        <div class="form-group">
+                            <label>Chasis:</label>
+                            <input type="text" id="vehiculo-vendido-chasis">
+                        </div>
+                        <div class="form-group">
+                            <label>Carrocería:</label>
+                            <input type="text" id="vehiculo-vendido-carroceria">
+                        </div>
+                        <div class="form-group">
+                            <label>Monto de venta:</label>
+                            <input type="number" id="vehiculo-vendido-monto-venta">
+                        </div>
+                        <div class="form-group">
+                            <label>Monto Traspaso:</label>
+                            <input type="number" id="vehiculo-vendido-monto-traspaso">
+                        </div>
+                        <div class="form-group">
+                            <label>P.V. Purdi #:</label>
+                            <input type="text" id="vehiculo-vendido-pv-purdi">
+                        </div>
+                        <div class="form-group">
+                            <label>Extras:</label>
+                            <textarea type="text" id="vehiculo-vendido-extras"></textarea>
+                        </div>                        
+                      
+                        <!-- ID oculto del vehículo seleccionado -->
+                        <input type="hidden" id="vehiculo-vendido-id">
+                    </div>
+                </section>
+                <!-- ======= VEHÍCULO A RECIBIR ======= -->
+                <section id="recibir" class="panel">
+                    <h2><i class="fas fa-truck"></i> Vehículo a recibir</h2>
+                    <!-- Contenedor para todos los vehículos -->
+                    <div id="vehiculos-recibir-container">
+                        <!-- Aquí se insertarán dinámicamente los vehículos -->
+                    </div>
+                    <!-- Botón para agregar nuevo vehículo -->
+                    <div style="display: flex; justify-content: flex-start; margin: 20px 0;">
+                        <button type="button" id="btnAgregarVehiculoRecibir" class="btn-filter btn-filter-primary">
+                            <i class="fas fa-plus-circle"></i> Agregar otro vehículo a recibir
+                        </button>
+                        <span style="margin-left: 15px; color: #6b7280; font-size: 0.85rem; display: flex; align-items: center;">
+                            <i class="fas fa-info-circle"></i> Puede agregar hasta 3 vehículos de intercambio
+                        </span>
+                    </div>
+                    <!-- Resumen de totales de intercambio -->
+                    <div class="selected-person-card" style="background: linear-gradient(135deg,#1e40af,#3b82f6); margin-top: 10px;">
+                        <h4><i class="fas fa-calculator"></i> Resumen de Intercambios</h4>
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                            <p><strong>Total vehículos:</strong> <span id="total-vehiculos-recibir">0</span></p>
+                            <p><strong>Total Monto Recibido:</strong> <span id="total-monto-recibido">₡ 0.00</span></p>
+                            <p><strong>Total Monto Traspaso:</strong> <span id="total-monto-traspaso">₡ 0.00</span></p>
+                        </div>
+                    </div>                                       
+                </section>
+                <!-- ======= Plantilla para un vehículo a recibir ======= -->
+                <div id="vehiculo-recibir-template" style="display: none;">
+                    <div class="vehiculo-recibir-item" style="border: 1px solid #e5e0ff; border-radius: 10px; padding: 15px; margin-bottom: 20px; background: #fafafa; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; color: #4c1d95; font-size: 1rem;">
+                                <i class="fas fa-car"></i> Vehículo de Intercambio #<span class="vehiculo-numero">1</span>
+                            </h3>
+                            <button type="button" class="btn-eliminar-vehiculo" style="background: none; border: none; color: #dc2626; font-size: 1.2rem; cursor: pointer;" title="Eliminar vehículo">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid">
+                            <div class="form-group">
+                                <label>Placa:</label>
+                                <input type="text" class="vehiculo-recibir-placa">
+                            </div>
+                            <div class="form-group">
+                                <label>Marca:</label>
+                                <select class="vehiculo-recibir-marca"><option value="">Seleccionar Marca</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estilo:</label>
+                                <input type="text" class="vehiculo-recibir-estilo">
+                            </div>
+                            <div class="form-group">
+                                <label>Tracción:</label>
+                                <input type="text" class="vehiculo-recibir-traccion">
+                            </div>
+                            <div class="form-group">
+                                <label>Color:</label>
+                                <select class="vehiculo-recibir-color"><option value="">Seleccionar Color</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo (Año):</label>
+                                <select class="vehiculo-recibir-modelo"><option value="">Seleccionar Año</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometraje Anterior:</label>
+                                <input type="number" class="vehiculo-recibir-km-anterior" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometraje Actual:</label>
+                                <input type="number" class="vehiculo-recibir-km-actual" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Motor:</label>
+                                <input type="text" class="vehiculo-recibir-motor">
+                            </div>
+                            <div class="form-group">
+                                <label>C.C:</label>
+                                <input type="number" class="vehiculo-recibir-cc" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Cilindros:</label>
+                                <input type="number" class="vehiculo-recibir-cilindros" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Combustible:</label>
+                                <select class="vehiculo-recibir-combustible"><option value="">Seleccionar Combustible</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Transmisión:</label>
+                                <select class="vehiculo-recibir-transmision"><option value="">Seleccionar Transmisión</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>P.V:</label>
+                                <input type="text" class="vehiculo-recibir-pv">
+                            </div>
+                            <div class="form-group">
+                                <label>Chasis:</label>
+                                <input type="text" class="vehiculo-recibir-chasis">
+                            </div>
+                            <div class="form-group">
+                                <label>Carrocería:</label>
+                                <input type="text" class="vehiculo-recibir-carroceria">
+                            </div>
+                            <div class="form-group">
+                                <label>Monto Recibido:</label>
+                                <input type="number" class="vehiculo-recibir-monto-recibido" step="0.01" min="0" value="0" oninput="actualizarTotalesRecibir()">
+                            </div>
+                            <div class="form-group">
+                                <label>Monto Traspaso:</label>
+                                <input type="number" class="vehiculo-recibir-monto-traspaso" step="0.01" min="0" value="0" oninput="actualizarTotalesRecibir()">
+                            </div>
+                            <div class="form-group">
+                                <label>Extras:</label>
+                                <textarea class="vehiculo-recibir-extras"></textarea>
+                            </div>                                                
+                        </div>
+                    </div>
+                </div>        
+
+                <!-- ======= ANTICIPOS ======= -->
+                <section id="anticipos" class="panel">
+                    <h2><i class="fas fa-money-bill-wave"></i> Anticipos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Forma pago</th>
+                                <th>N° de documento</th>
+                                <th>Realizado por</th>
+                                <th>Monto Colones</th>
+                                <th>Tipo Cambio</th>
+                                <th>Monto Dólares</th>
+                                <th>Fecha Vencimiento</th>                                
+                                <th>Saldo Pendiente</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-anticipos">
+                            <tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="acciones">
+                        <button onclick="abrirModalAnticipo()"><i class="fas fa-plus"></i> Agregar Anticipo</button>
+                        <button onclick="eliminarAnticipoSeleccionado()"><i class="fas fa-trash"></i> Eliminar</button>
+                        <button onclick="modificarAnticipoSeleccionado()"><i class="fas fa-edit"></i> Modificar</button>
+                    </div>
+                    <div id="detalles-cuota-panel" style="display:none;"></div>
+                </section>
+                <!-- ======= FORMA DE PAGO ======= -->
+                <section id="pago" class="panel">
+                    <h2><i class="fas fa-credit-card"></i> Forma de Pago</h2>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>Tipo de Venta:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="tipo_venta" value="contado" checked> Contado</label>
+                                <label><input type="radio" name="tipo_venta" value="credito"> Crédito</label>
+                            </div>
+                        </div>
+
+                        <!-- CONTADO -->
+                        <div id="seccionContado" style="display:none; margin-top:10px; grid-column:span 2;">
+                            <div class="modal-columns">
+                                <div class="modal-section">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Fecha:</label>
+                                            <input type="date" id="fecha_pago">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Forma Pago:</label>
+                                            <select id="forma_pago_pago" class="form-control">
+                                                <option value="Efectivo">Efectivo</option>
+                                                <option value="Transferencia">Transferencia</option>
+                                                <option value="Tarjeta">Tarjeta</option>
+                                            </select>                            
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Monto Colones:</label>
+                                            <input type="number" id="monto_pago" value="0.00" step="0.01"
+                                                oninput="calcularDolares('monto_pago','tipo_cambio_pago','monto_dolar_pago')">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tipo Cambio:</label>
+                                            <input type="number" id="tipo_cambio_pago" value="500.00" step="0.01"
+                                                oninput="calcularDolares('monto_pago','tipo_cambio_pago','monto_dolar_pago')">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Monto Dólares:</label>
+                                            <input type="number" id="monto_dolar_pago" value="0.00" step="0.01"
+                                                readonly style="background:#f0f0f0;font-weight:bold;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-section">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label><strong>Efectivo:</strong></label>
+                                            <input type="number" id="contado-efectivo" value="0.00" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><strong>Transfer.:</strong></label>
+                                            <input type="number" id="contado-transferencia" value="0.00" step="0.01">
+                                        </div>
+                                        <div class="sub-group">
+                                            <div class="form-group">
+                                                <label># Transferencia:</label>
+                                                <input type="text" id="contado-num-transferencia">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Nom. Deposita:</label>
+                                                <input type="text" id="contado-nom-deposita">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Banco:</label>
+                                                <select id="contado-banco-select" class="form-control">
+                                                    <option value="">-- Seleccione banco --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label><strong>Tarjeta:</strong></label>
+                                            <input type="number" id="contado-tarjeta" value="0.00" step="0.01">
+                                        </div>
+                                        <div class="sub-group">
+                                            <div class="form-group">
+                                                <label>Num. Tarjeta:</label>
+                                                <input type="text" id="contado-num-tarjeta">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Tipo Tarjeta:</label>
+                                                <input type="text" id="contado-tipo-tarjeta">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CRÉDITO -->
+                        <div id="seccionCredito" style="display:none; margin-top:10px; grid-column:span 2;">
+                            <div class="modal-container">
+                                <div class="modal-contents">
+                                    <div class="content">
+                                        <div class="left-section">
+                                            <div class="section-titles"><i class="fas fa-calculator"></i> CÁLCULO DEL PRÉSTAMO</div>
+                                            <table class="calculation-table">
+                                                <tr>
+                                                    <td class="input-label">Valor del consumo (o del préstamo)</td>
+                                                    <td class="input-field currency-input">
+                                                        <input type="number" id="valor-consumo" value="3415000" min="0" step="1000">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Prima</td>
+                                                    <td class="input-field currency-input">
+                                                        <input type="number" id="prima" value="0" min="0" step="1000">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Honorarios</td>
+                                                    <td class="input-field currency-input">
+                                                        <input type="number" id="honorarios" value="0" min="0" step="1000">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Monto a financiar</td>
+                                                    <td class="input-field result-cell" id="monto-financiar">₡ 3,415,000.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Comisión</td>
+                                                    <td class="input-field currency-input">
+                                                        <input type="number" id="comision" value="0" min="0" step="1000">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Total</td>
+                                                    <td class="input-field result-cell" id="total">₡ 3,415,000.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Modo de ingreso de tasa:</td>
+                                                    <td class="input-field">
+                                                        <label style="display:block;margin-bottom:5px;">
+                                                            <input type="radio" name="modo-tasa" value="anual" checked onclick="cambiarModoTasa('anual')">
+                                                            Ingresar Tasa Anual
+                                                        </label>
+                                                        <label style="display:block;">
+                                                            <input type="radio" name="modo-tasa" value="mensual" onclick="cambiarModoTasa('mensual')">
+                                                            Ingresar Tasa Mensual Directa
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                                <tr id="fila-tasa-anual">
+                                                    <td class="input-label">Interés Nominal (anual):</td>
+                                                    <td class="input-field percentage-input">
+                                                        <input type="number" id="interes-nominal" value="79" min="0" max="1000" step="0.1">
+                                                    </td>
+                                                </tr>
+                                                <tr id="fila-tasa-mensual" style="display:none;">
+                                                    <td class="input-label">Tasa de interés mensual:</td>
+                                                    <td class="input-field percentage-input">
+                                                        <input type="number" id="tasa-interes-directa" value="5" min="0" max="100" step="0.1">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Interés Moratorio (mensual)</td>
+                                                    <td class="input-field percentage-input">
+                                                        <input type="number" id="interes-moratorio" value="0" min="0" max="100" step="0.1">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Intereses por adelantado</td>
+                                                    <td class="input-field currency-input">
+                                                        <input type="number" id="intereses-adelantado" value="0" min="0" step="1000">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Préstamo Total</td>
+                                                    <td class="input-field result-cell" id="prestamo-total">₡ 3,415,000.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Cuotas mensuales de plazo concedidas:</td>
+                                                    <td class="input-field">
+                                                        <input type="number" id="cuotas-mensuales" value="12" min="1" max="120">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Fecha del primer pago:</td>
+                                                    <td class="input-field">
+                                                        <input type="date" id="fecha-primer-pago">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Entidad Financiera:</td>
+                                                    <td class="input-field">
+                                                        <select id="entidad-financiera">
+                                                            <option>-- Seleccione --</option>
+                                                            <option value="AUTOS COLIN S.R.L">AUTOS COLIN S.R.L</option>
+                                                            <option value="M.A.S">M.A.S</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="input-label">Valor cuota mensual</td>
+                                                    <td class="input-field result-cell" id="valor-cuota">₡ 369,073.45</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                        <div class="right-section">
+                                            <div class="section-titles"><i class="fas fa-money-bill-wave"></i> DESEMBOLSO</div>
+                                            <table class="calculation-table">
+                                                <tr><td class="input-label">Desembolso</td><td class="input-field result-cell" id="desembolso-total">₡ 3,415,000.00</td></tr>
+                                                <tr><td class="input-label">Prima</td><td class="input-field result-cell" id="desembolso-prima">₡ 0.00</td></tr>
+                                                <tr><td class="input-label">Comisión</td><td class="input-field result-cell" id="desembolso-comision">₡ 0.00</td></tr>
+                                                <tr><td class="input-label">Intereses x adelantado</td><td class="input-field result-cell" id="desembolso-intereses">₡ 0.00</td></tr>
+                                                <tr><td class="input-label">Honorarios</td><td class="input-field result-cell" id="desembolso-honorarios">₡ 0.00</td></tr>
+                                                <tr><td class="input-label">Desembolso Neto</td><td class="input-field result-cell" id="desembolso-neto">₡ 3,415,000.00</td></tr>
+                                            </table>
+
+                                            <div class="section-titles" style="margin-top:30px;"><i class="fas fa-chart-line"></i> RESUMEN DEL PRÉSTAMO</div>
+                                            <table class="calculation-table">
+                                                <tr><td class="input-label">Interés Nominal Anual:</td><td class="input-field result-cell" id="resumen-interes-nominal">60.00</td></tr>
+                                                <tr><td class="input-label">Interés Efectivo Mensual:</td><td class="input-field result-cell" id="resumen-interes-mensual">5.00</td></tr>
+                                                <tr><td class="input-label">Interés Moratorio Mensual:</td><td class="input-field result-cell" id="resumen-interes-moratorio">2.00</td></tr>
+                                                <tr><td class="input-label">Total a Pagar:</td><td class="input-field result-cell" id="resumen-total-pagar">₡ 4,428,881.40</td></tr>
+                                                <tr><td class="input-label">Total Intereses:</td><td class="input-field result-cell" id="resumen-total-intereses">₡ 1,013,881.40</td></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botón transferir -->
+                                    <div class="transferencia-container">
+                                        <button class="btn-transferir" onclick="transferirAmortizacionAAnticipos()">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            <span>Transferir Cuotas a Anticipos y Guardar</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <div class="transferencia-ayuda">
+                                            <i class="fas fa-info-circle"></i>
+                                            Cada cuota se guardará en la base de datos como un anticipo independiente
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-tabl-container">
+                                        <div class="section-titles"><i class="fas fa-table"></i> TABLA DE AMORTIZACIÓN</div>
+                                        <table class="payment-tabl" id="tabla-amortizacion">
+                                            <thead>
+                                                <tr>
+                                                    <th>Cuota No</th>
+                                                    <th>Fecha de Pago</th>
+                                                    <th>Valor Cuota Mensual</th>
+                                                    <th>Abono a Capital</th>
+                                                    <th>Abono a Intereses</th>
+                                                    <th>Saldo (Capital)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabla-cuerpo"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="acciones" style="grid-column:span 2;">
+                            <button class="btn-guardar-plan" onclick="guardarPlanCompleto()"><i class="fas fa-save"></i> Grabar Plan</button>
+                            <button onclick="cancelarPlan()"><i class="fas fa-times"></i> Cancelar</button>
+                            <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- ======= MODAL ANTICIPO ======= -->
+        <div id="modalFormaPago" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>FORMA DE PAGO / ANTICIPO</h2>
+                    <button class="close-modal" onclick="cerrarModalAnticipo()"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="anticipo-editar-id">
+                    <div class="modal-columns">
+                        <div class="modal-section">
+                            <h3>ANTICIPO</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Fecha de pago:</label>
+                                    <input type="date" id="fecha_anticipo">
+                                </div>                                
+                                <div class="form-group">
+                                    <label>Fecha de vencimiento:</label>
+                                    <input type="date" id="fecha_vencimiento_anticipo">
+                                </div>
+                                <div class="form-group">
+                                    <label>Forma Pago:</label>
+                                    <select id="forma_pago_anticipo" class="form-control">
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Transferencia">Transferencia</option>
+                                        <option value="Tarjeta">Tarjeta</option>
+                                    </select>                    
+                                </div>
+                                <div class="form-group">
+                                    <label>Documento:</label>
+                                    <input type="text" id="documento_anticipo" placeholder="Número de documento">
+                                </div>
+                                <div class="form-group">
+                                    <label>Monto Colones:</label>
+                                    <input type="number" id="monto_anticipo" value="0.00" step="0.01"
+                                        oninput="calcularDolares('monto_anticipo','tipo_cambio_anticipo','monto_dolar_anticipo')">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo Cambio:</label>
+                                    <input type="number" id="tipo_cambio_anticipo" value="500.00" step="0.01"
+                                        oninput="calcularDolares('monto_anticipo','tipo_cambio_anticipo','monto_dolar_anticipo')">
+                                </div>
+                                <div class="form-group">
+                                    <label>Monto Dólares:</label>
+                                    <input type="number" id="monto_dolar_anticipo" value="0.00" step="0.01"
+                                        readonly style="background:#f0f0f0;font-weight:bold;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Realizado por:</label>
+                                    <input type="text" id="realizado_anticipo" placeholder="Nombre de quien realizó">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <h3>DETALLES DE PAGO</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><strong>Efectivo:</strong></label>
+                                    <input type="number" id="efectivo" value="0.00" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Transfer.:</strong></label>
+                                    <input type="number" id="transferencia" value="0.00" step="0.01">
+                                </div>
+                                <div class="sub-group">
+                                    <div class="form-group">
+                                        <label># Transferencia:</label>
+                                        <input type="text" id="num_transferencia" placeholder="Número de transferencia">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nom. Deposita:</label>
+                                        <input type="text" id="nom_deposita" placeholder="Nombre del depositante">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Banco:</label>
+                                        <select id="banco-select-anticipo" class="form-control">
+                                            <option value="">-- Seleccione banco --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Tarjeta:</strong></label>
+                                    <input type="number" id="tarjeta" value="0.00" step="0.01">
+                                </div>
+                                <div class="sub-group">
+                                    <div class="form-group">
+                                        <label>Num. Tarjeta:</label>
+                                        <input type="text" id="num_tarjeta" placeholder="Número de tarjeta">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tipo Tarjeta:</label>
+                                        <input type="text" id="tipo_tarjeta" placeholder="Tipo de tarjeta">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="modal-btn btn-grabar" onclick="grabarAnticipo()"><i class="fas fa-save"></i> Grabar</button>
+                        <button class="modal-btn btn-cancelar" onclick="cerrarModalAnticipo()"><i class="fas fa-times"></i> Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="cargar_usuario.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+    // URLs base de las APIs
+    const API_BASE_URL = (() => {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+            
+        // En producción 
+        if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+            return `${protocol}//${hostname}/api`;
+        }
+            
+        // En desarrollo local
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+            
+        // Fallback a ruta relativa
+        return '/api';
+    })();
+        
+    console.log('🌐 API Base URL:', API_BASE_URL); // Para depuración
+        
+    const API_ENDPOINTS = {
+        ventas:         `${API_BASE_URL}/ventas`,
+        anticipos:      `${API_BASE_URL}/anticipos`,
+        financiamientos: `${API_BASE_URL}/financiamientos`,
+        detallePagos:   `${API_BASE_URL}/detalle-pagos`,
+        personas:       `${API_BASE_URL}/personas`,
+        vendedores:     `${API_BASE_URL}/vendedores-activos`,
+        vehiculos:      `${API_BASE_URL}/vehiculos`,
+        catalogos: {
+            estadosCivil:  `${API_BASE_URL}/estados-civil`,
+            marcas:        `${API_BASE_URL}/marcas`,
+            colores:       `${API_BASE_URL}/colores`,
+            combustibles:  `${API_BASE_URL}/combustibles`,
+            transmisiones: `${API_BASE_URL}/transmisiones`,
+            bancos:        `${API_BASE_URL}/bancos`
+        },
+        ubicaciones: 'https://ubicaciones.paginasweb.cr'
+    };
+
+    //  ESTADO GLOBAL DE LA APLICACIÓN
+    let planActual = null;
+    let selectedVentaId = null;
+    let anticiposLocales = [];
+    let financiamientoActual = null;
+    let anticipo_fila_seleccionada = null;
+    let vehiculosRecibir = [];
+    const MAX_VEHICULOS = 3;    
+
+    let catalogoEstadosCivil = [];
+    let catalogoMarcas = [];
+    let catalogoColores = [];
+    let catalogoCombustibles = [];
+    let catalogoTransmisiones = [];
+    let catalogoBancos = [];
+
+    //  UTILIDADES
+    function mostrarLoading(show) {
+        document.getElementById('globalLoading').style.display = show ? 'flex' : 'none';
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        document.querySelectorAll('.notification').forEach(n => n.remove());
+        const iconos = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        const el = document.createElement('div');
+        el.className = `notification ${tipo}`;
+        el.innerHTML = `<i class="fas ${iconos[tipo] || iconos.info}"></i> ${mensaje}`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    async function apiFetch(url, opts = {}) {
+        try {
+            console.log(`🌐 API Fetch: ${opts.method || 'GET'} ${url}`);
+            
+            const res = await fetch(url, {
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                ...opts
+            });
+            
+            // Verificar si la respuesta es JSON
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await res.text();
+                console.error('❌ Respuesta no JSON:', text.substring(0, 200));
+                throw new Error(`Respuesta no válida del servidor: ${res.status} ${res.statusText}`);
+            }
+            
+            const data = await res.json();
+            
+            if (!res.ok) {
+                console.error('❌ Error en respuesta:', data);
+                throw new Error(data.error || data.message || `Error ${res.status}`);
+            }
+            
+            return data;
+        } catch (e) {
+            console.error('❌ Error en apiFetch:', e);
+            throw e;
+        }
+    }
+
+    function formatMoney(num) {
+        const n = Math.round(parseFloat(num) || 0);
+        const partes = n.toFixed(2).split('.');
+        const entero = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return '₡ ' + entero + ',' + partes[1];
+    }
+
+    function formatPct(num) {
+        return (parseFloat(num) || 0).toFixed(2) + '%';
+    }
+
+    function parseCurrencyStr(s) {
+        if (s === null || s === undefined || s === '') return 0;
+        let str = String(s).trim();
+        str = str.replace(/₡/g, '').trim();
+        if (str.includes(',')) {
+            str = str.replace(/\./g, '').replace(',', '.');
+        } else {
+            str = str.replace(/[^0-9.\-]/g, '');
+        }
+        return parseFloat(str) || 0;
+    }
+
+    function formatDate(fecha) {
+        return new Date(fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    }
+
+    function propagarMonedaYTipoCambio() {
+        const moneda = document.querySelector('input[name="moneda"]:checked')?.value || 'CRC';
+        const tc = parseFloat(document.getElementById('tipo_cambio').value) || 1;
+        const tcPago = document.getElementById('tipo_cambio_pago');
+        if (tcPago) tcPago.value = tc;
+        const tcAnticipo = document.getElementById('tipo_cambio_anticipo');
+        if (tcAnticipo) tcAnticipo.value = tc;
+    }
+
+    //  PESTAÑAS
+    function mostrar(id, event) {
+        // Validar si es la pestaña GENERAL
+        if (id === 'general') {
+            const valorNumPlan = document.getElementById('num_plan').value;
+            
+            // Verificar si hay un plan seleccionado O si es un plan nuevo
+            const esPlanExistente = selectedVentaId !== null && selectedVentaId !== undefined;
+            const esPlanNuevo = valorNumPlan === 'NUEVO';
+            
+            console.log('Validando acceso a GENERAL:', {
+                selectedVentaId,
+                valorNumPlan,
+                esPlanExistente,
+                esPlanNuevo
+            });
+            
+            if (!esPlanExistente && !esPlanNuevo) {
+                mostrarNotificacion('Debe seleccionar un plan existente (en ÍNDICE) o crear uno nuevo (botón NUEVO) para acceder a GENERAL', 'warning');
+                return; // No cambia de pestaña
+            }
+        }
+
+        // Ocultar todos los paneles
+        document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+        
+        // Mostrar el panel seleccionado
+        document.getElementById(id).style.display = 'block';
+        
+        // Actualizar clases activas de las pestañas
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+    }
+
+    //  MENÚ MÓVIL
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    });
+
+    document.getElementById('overlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+    });
+
+    //  INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', async () => {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_plan').value = hoy;
+        document.getElementById('fecha-primer-pago').value = hoy;
+        document.getElementById('fecha_pago').value = hoy;
+
+        mostrarLoading(true);
+        try {
+            await Promise.all([
+                cargarCatalogos(),
+                inicializarFiltros(),
+                cargarPlanesDesdeAPI()
+            ]);
+            inicializarVehiculosRecibir();
+            inicializarUbicaciones('fact');
+            inicializarUbicaciones('ins');
+            inicializarCalculadoraCredito();
+            configurarBusquedasEnTiempoReal();
+        } catch (e) {
+            mostrarNotificacion('Error al inicializar: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+
+        document.getElementById('btnCopiar').addEventListener('click', copiarDatosFacturarAInscribir);
+        document.getElementById('btnLimpiar').addEventListener('click', limpiarDatosInscribir);
+
+        document.querySelectorAll('input[name="tipo_venta"]').forEach(r => {
+            r.addEventListener('change', function () {
+                document.getElementById('seccionContado').style.display = this.value === 'contado' ? 'block' : 'none';
+                document.getElementById('seccionCredito').style.display = this.value === 'credito' ? 'block' : 'none';
+            });
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') cerrarModalAnticipo();
+        });
+
+        document.getElementById('modalFormaPago').addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalAnticipo();
+        });
+
+        document.querySelectorAll('textarea').forEach(ta => {
+            ta.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        document.getElementById('tipo_cambio').addEventListener('input', propagarMonedaYTipoCambio);
+        document.querySelectorAll('input[name="moneda"]').forEach(r =>
+            r.addEventListener('change', propagarMonedaYTipoCambio)
+        );
+    });
+
+    //  CATÁLOGOS
+    async function cargarCatalogos() {
+        try {
+            const [ec, marcas, colores, comb, trans, bancos] = await Promise.all([
+                apiFetch(API_ENDPOINTS.catalogos.estadosCivil),
+                apiFetch(API_ENDPOINTS.catalogos.marcas),
+                apiFetch(API_ENDPOINTS.catalogos.colores),
+                apiFetch(API_ENDPOINTS.catalogos.combustibles),
+                apiFetch(API_ENDPOINTS.catalogos.transmisiones),
+                apiFetch(API_ENDPOINTS.catalogos.bancos)
+            ]);
+            catalogoEstadosCivil = ec;
+            catalogoMarcas = marcas;
+            catalogoColores = colores;
+            catalogoCombustibles = comb;
+            catalogoTransmisiones = trans;
+            catalogoBancos = bancos;
+            llenarSelectsCatalogos();
+            ['banco-select-anticipo', 'contado-banco-select'].forEach(id => {
+                llenarSelect(id, catalogoBancos, 'ID_BANCO', 'NOMBRE');
+            });
+        } catch (e) {
+            console.error('Error catálogos:', e);
+        }
+    }
+
+    function filtrarActivos(arr) {
+        return (arr || []).filter(i => (i.ESTADO || i.estado) === 'ACTIVO');
+    }
+
+    function obtV(item, k1, k2) {
+        return item[k1] !== undefined ? item[k1] : item[k2];
+    }
+
+    function llenarSelect(selectId, datos, valKey, texKey) {
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        const current = sel.value;
+        const firstOpt = sel.options[0];
+        sel.innerHTML = '';
+        sel.appendChild(firstOpt);
+        filtrarActivos(datos).forEach(item => {
+            const opt = new Option(obtV(item, texKey, texKey.toLowerCase()), obtV(item, valKey, valKey.toLowerCase()));
+            sel.appendChild(opt);
+        });
+        if (current) sel.value = current;
+    }
+
+    function llenarSelectsCatalogos() {
+        ['fact_estado_civil', 'ins_estado_civil'].forEach(id => llenarSelect(id, catalogoEstadosCivil, 'ID_ESTADO_CIVIL', 'NOMBRE'));
+        ['vehiculo-vendido-marca', 'vehiculo-recibir-marca'].forEach(id => llenarSelect(id, catalogoMarcas, 'ID_MARCA', 'NOMBRE'));
+        ['vehiculo-vendido-color', 'vehiculo-recibir-color'].forEach(id => llenarSelect(id, catalogoColores, 'ID_COLOR', 'NOMBRE'));
+        ['vehiculo-vendido-combustible', 'vehiculo-recibir-combustible'].forEach(id => llenarSelect(id, catalogoCombustibles, 'ID_COMBUSTIBLE', 'NOMBRE'));
+        ['vehiculo-vendido-transmision', 'vehiculo-recibir-transmision'].forEach(id => llenarSelect(id, catalogoTransmisiones, 'ID_TRANSMISION', 'NOMBRE'));
+        
+        ['vehiculo-vendido-modelo', 'vehiculo-recibir-modelo'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const anioActual = new Date().getFullYear();
+            for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+                sel.appendChild(new Option(y, y));
+            }
+        });
+    }
+
+    //  UBICACIONES
+    const UBI_BASE = 'https://ubicaciones.paginasweb.cr';
+
+    function inicializarUbicaciones(pre) {
+        const prov = document.getElementById(`${pre}_provincia`);
+        const cant = document.getElementById(`${pre}_canton`);
+        const dist = document.getElementById(`${pre}_distrito`);
+        const barrio = document.getElementById(`${pre}_barrio`);
+
+        cargarProvincias(prov);
+
+        prov.addEventListener('change', () => {
+            cargarCantones(pre);
+            limpiarSel(cant);
+            limpiarSel(dist);
+            actualizarDir(pre);
+        });
+        cant.addEventListener('change', () => {
+            cargarDistritos(pre);
+            limpiarSel(dist);
+            actualizarDir(pre);
+        });
+        dist.addEventListener('change', () => actualizarDir(pre));
+        barrio.addEventListener('input', () => actualizarDir(pre));
+    }
+
+    function cargarProvincias(sel) {
+        fetch(`${UBI_BASE}/provincias.json`).then(r => r.json()).then(d => {
+            sel.innerHTML = '<option value="">Seleccione provincia</option>';
+            Object.entries(d).forEach(([id, n]) => sel.innerHTML += `<option value="${id}">${n}</option>`);
+        });
+    }
+
+    function cargarCantones(pre) {
+        const pv = document.getElementById(`${pre}_provincia`).value;
+        if (!pv) return;
+        const sel = document.getElementById(`${pre}_canton`);
+        fetch(`${UBI_BASE}/provincia/${pv}/cantones.json`).then(r => r.json()).then(d => {
+            sel.innerHTML = '<option value="">Seleccione cantón</option>';
+            Object.entries(d).forEach(([id, n]) => sel.innerHTML += `<option value="${id}">${n}</option>`);
+        });
+    }
+
+    function cargarDistritos(pre) {
+        const pv = document.getElementById(`${pre}_provincia`).value;
+        const ca = document.getElementById(`${pre}_canton`).value;
+        if (!pv || !ca) return;
+        const sel = document.getElementById(`${pre}_distrito`);
+        fetch(`${UBI_BASE}/provincia/${pv}/canton/${ca}/distritos.json`).then(r => r.json()).then(d => {
+            sel.innerHTML = '<option value="">Seleccione distrito</option>';
+            Object.entries(d).forEach(([id, n]) => sel.innerHTML += `<option value="${id}">${n}</option>`);
+        });
+    }
+
+    function actualizarDir(pre) {
+        const provSel = document.getElementById(`${pre}_provincia`);
+        const cantSel = document.getElementById(`${pre}_canton`);
+        const distSel = document.getElementById(`${pre}_distrito`);
+        const barrio = document.getElementById(`${pre}_barrio`).value.trim();
+        const partes = [
+            provSel.options[provSel.selectedIndex]?.text || '',
+            cantSel.options[cantSel.selectedIndex]?.text || '',
+            distSel.options[distSel.selectedIndex]?.text || '',
+            barrio ? `Barrio ${barrio}` : ''
+        ].filter(Boolean);
+        document.getElementById(`${pre}_direccion`).value = partes.join(', ');
+    }
+
+    function limpiarSel(sel) {
+        sel.innerHTML = '<option value="">Seleccione</option>';
+    }
+
+    //  FILTROS Y TABLA DE PLANES
+    function inicializarFiltros() {
+        const cont = document.getElementById('filtros-container');
+        cont.innerHTML = `
+            <div class="filter-container">
+                <div class="filter-header">
+                    <h3><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+                    <button class="btn-filter btn-filter-secondary" onclick="limpiarFiltros()"><i class="fas fa-times"></i> Limpiar</button>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group"><label>N° Plan</label><input type="text" id="f-num-plan" placeholder="Número de plan..." oninput="cargarPlanesDesdeAPI()"></div>
+                    <div class="filter-group"><label>Cédula</label><input type="text" id="f-cedula" placeholder="Cédula..." oninput="cargarPlanesDesdeAPI()"></div>
+                    <div class="filter-group"><label>Nombre</label><input type="text" id="f-nombre" placeholder="Nombre cliente..." oninput="cargarPlanesDesdeAPI()"></div>
+                    <div class="filter-group"><label>Placa</label><input type="text" id="f-placa" placeholder="Placa..." oninput="cargarPlanesDesdeAPI()"></div>
+                    <div class="filter-group">
+                        <label>Estado</label>
+                        <select id="f-estado" onchange="cargarPlanesDesdeAPI()">
+                            <option value="">Todos los estados</option>
+                            <option value="PENDIENTE DE FACTURAR">PENDIENTE DE FACTURAR</option>
+                            <option value="YA FUE FACTURADA">YA FUE FACTURADA</option>
+                            <option value="FACTURA ANULADA">FACTURA ANULADA</option>
+                            <option value="PLAN YA FUE ANULADO">PLAN ANULADO</option>
+                        </select>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function limpiarFiltros() {
+        ['f-num-plan', 'f-cedula', 'f-nombre', 'f-placa'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const es = document.getElementById('f-estado');
+        if (es) es.value = '';
+        cargarPlanesDesdeAPI();
+    }
+
+    async function cargarPlanesDesdeAPI() {
+        const tbody = document.getElementById('tbody-planes');
+        if (!tbody) return;
+
+        const numPlan = (document.getElementById('f-num-plan')?.value || '').trim();
+        const cedula = (document.getElementById('f-cedula')?.value || '').trim();
+        const nombre = (document.getElementById('f-nombre')?.value || '').trim();
+        const placa = (document.getElementById('f-placa')?.value || '').trim();
+        const estado = (document.getElementById('f-estado')?.value || '').trim();
+
+        try {
+            let url = `${API_ENDPOINTS.ventas}/pendientes`;
+            let ventas = await apiFetch(url);
+
+            if (numPlan) ventas = ventas.filter(v => (v.CODIGO_VENTA || '').toLowerCase().includes(numPlan.toLowerCase()));
+            if (cedula) ventas = ventas.filter(v => (v.CLIENTE_IDENTIFICACION || '').includes(cedula));
+            if (nombre) ventas = ventas.filter(v => (v.CLIENTE_NOMBRE || '').toLowerCase().includes(nombre.toLowerCase()));
+            if (placa) ventas = ventas.filter(v => (v.PLACA || '').toLowerCase().includes(placa.toLowerCase()));
+            if (estado) ventas = ventas.filter(v => (v.ESTADO_VENTA || '') === estado);
+
+            tbody.innerHTML = '';
+            if (ventas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:#9ca3af;">
+                    <i class="fas fa-search" style="font-size:2rem;margin-bottom:10px;display:block;"></i>
+                    No se encontraron planes</td></tr>`;
+                return;
+            }
+
+            ventas.forEach(v => {
+                const estadoClass = estadoBadgeClass(v.ESTADO_VENTA || '');
+                const tr = document.createElement('tr');
+                tr.dataset.ventaId = v.ID_VENTA;
+                tr.innerHTML = `
+                    <td>${v.CODIGO_VENTA || ''}</td>
+                    <td>${v.CLIENTE_IDENTIFICACION || ''}</td>
+                    <td>${v.CLIENTE_NOMBRE || ''}</td>
+                    <td>${v.PLACA || ''}</td>
+                    <td>${v.MARCA_NOMBRE || ''}</td>
+                    <td>${v.ESTILO || ''}</td>
+                    <td>${v.MODELO || ''}</td>
+                    <td><span class="estado-badge ${estadoClass}">${v.ESTADO_VENTA || ''}</span></td>`;
+                tr.addEventListener('click', () => seleccionarPlan(tr, v.ID_VENTA));
+                tbody.appendChild(tr);
+            });
+            document.dispatchEvent(new Event('planesCargados'));
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;">Error al cargar planes: ${e.message}</td></tr>`;
+        }
+    }
+
+    function estadoBadgeClass(estado) {
+        const e = (estado || '').toLowerCase();
+        if (e.includes('pendiente')) return 'estado-pendiente';
+        if (e.includes('facturada')) return 'estado-facturado';
+        if (e.includes('plan') && e.includes('anulad')) return 'estado-plan-anulado';
+        if (e.includes('anulad')) return 'estado-anulado';
+        return '';
+    }
+
+    //  SELECCIONAR PLAN — CARGAR TODA LA INFORMACIÓN
+    async function seleccionarPlan(tr, ventaId) {
+        document.querySelectorAll('#tbody-planes tr').forEach(r => r.classList.remove('selected-row'));
+        tr.classList.add('selected-row');
+        selectedVentaId = ventaId;
+        window.selectedVentaId = ventaId; 
+
+        mostrarLoading(true);
+        try {
+            const data = await apiFetch(`${API_ENDPOINTS.ventas}/${ventaId}/completo`);
+            planActual = data;
+            
+            console.log('Datos completos del plan:', data); // Para debugging
+
+            document.getElementById('num_plan').value = data.CODIGO_VENTA || '';
+            if (data.FECHA_VENTA) document.getElementById('fecha_plan').value = data.FECHA_VENTA.split('T')[0];
+            document.getElementById('notario').value = data.NOMBRE_NOTARIO || '';
+
+            // Cargar montos desde COSTOS (ahora es un objeto, no un array)
+            if (data.COSTOS) {
+                console.log('Costos del vehículo encontrados:', data.COSTOS);
+                
+                // PRECIO_PUBLICO = Monto de venta
+                if (data.COSTOS.PRECIO_PUBLICO !== undefined && data.COSTOS.PRECIO_PUBLICO !== null) {
+                    document.getElementById('vehiculo-vendido-monto-venta').value = data.COSTOS.PRECIO_PUBLICO;
+                }
+                
+                // MONTO_TRASPASO = Monto traspaso
+                if (data.COSTOS.MONTO_TRASPASO !== undefined && data.COSTOS.MONTO_TRASPASO !== null) {
+                    document.getElementById('vehiculo-vendido-monto-traspaso').value = data.COSTOS.MONTO_TRASPASO;
+                }
+                
+                // Moneda y tipo de cambio
+                if (data.COSTOS.MONEDA) {
+                    const radioMoneda = document.querySelector(`input[name="moneda"][value="${data.COSTOS.MONEDA}"]`);
+                    if (radioMoneda) radioMoneda.checked = true;
+                }
+                
+                if (data.COSTOS.TIPO_CAMBIO_COMPRA) {
+                    document.getElementById('tipo_cambio').value = data.COSTOS.TIPO_CAMBIO_COMPRA;
+                }
+            } else {
+                console.log('No se encontraron costos para el vehículo');
+            }
+
+            // Cargar VENDEDOR
+            if (data.VENDEDOR) {
+                document.getElementById('vendedor-id').value = data.VENDEDOR.ID_PERSONA;
+                document.getElementById('vendedor-nombre').textContent = data.VENDEDOR.NOMBRE_COMPLETO;
+                document.getElementById('vendedor-cedula').textContent = data.VENDEDOR.IDENTIFICACION;
+                document.getElementById('vendedor-email').textContent = data.VENDEDOR.EMAIL || 'N/A';
+                document.getElementById('vendedor-seleccionado-container').style.display = 'block';
+                document.getElementById('resultados-vendedor').style.display = 'none';
+            }
+
+            // Cargar APROBADOR - AHORA CORREGIDO
+            if (data.APROBADOR) {
+                console.log('Aprobador encontrado:', data.APROBADOR);
+                document.getElementById('aprobador-id').value = data.APROBADOR.ID_PERSONA;
+                document.getElementById('aprobador-nombre').textContent = data.APROBADOR.NOMBRE_COMPLETO;
+                document.getElementById('aprobador-cedula').textContent = data.APROBADOR.IDENTIFICACION;
+                document.getElementById('aprobador-seleccionado-container').style.display = 'block';
+                document.getElementById('resultados-aprobador').style.display = 'none';
+            } else {
+                console.log('No se encontró aprobador');
+                limpiarAprobador();
+            }
+
+            if (data.CLIENTE_FACTURACION) poblarCamposCliente('fact', data.CLIENTE_FACTURACION);
+            if (data.CLIENTE_INSCRIPCION) poblarCamposCliente('ins', data.CLIENTE_INSCRIPCION);
+            
+            // Cargar vehículo vendido - pasar los costos también
+            if (data.VEHICULO) {
+                // Si encontramos costos, adjuntarlos al vehículo
+                if (data.COSTOS) {
+                    data.VEHICULO.COSTOS = data.COSTOS;
+                }
+                poblarCamposVehiculo('vendido', data.VEHICULO);
+            }
+
+            // Cargar vehículo a recibir
+            if (data.VEHICULOS_RECIBIDOS && data.VEHICULOS_RECIBIDOS.length > 0) {
+                cargarVehiculosRecibirExistente(data.VEHICULOS_RECIBIDOS);
+            } else {
+                inicializarVehiculosRecibir();
+            }
+
+            // Cargar financiamiento si existe
+            if (data.FINANCIAMIENTO) {
+                financiamientoActual = data.FINANCIAMIENTO;
+                console.log('Financiamiento cargado:', financiamientoActual);
+                
+                const radioCredito = document.querySelector('input[name="tipo_venta"][value="credito"]');
+                if (radioCredito) {
+                    radioCredito.checked = true;
+                    radioCredito.dispatchEvent(new Event('change'));
+                }
+                
+                document.getElementById('valor-consumo').value = data.FINANCIAMIENTO.VALOR_CONSUMO || 0;
+                document.getElementById('prima').value = data.FINANCIAMIENTO.PRIMA || 0;
+                document.getElementById('honorarios').value = data.FINANCIAMIENTO.HONORARIOS || 0;
+                document.getElementById('comision').value = data.FINANCIAMIENTO.COMISION || 0;
+                document.getElementById('interes-nominal').value = data.FINANCIAMIENTO.TASA_NOMINAL || 0;
+                document.getElementById('interes-moratorio').value = data.FINANCIAMIENTO.INTERES_MORATORIO || 0;
+                document.getElementById('intereses-adelantado').value = data.FINANCIAMIENTO.INTERESXADELANTO || 0;
+                document.getElementById('cuotas-mensuales').value = data.FINANCIAMIENTO.PLAZO_MESES || 0;
+                document.getElementById('entidad-financiera').value = data.FINANCIAMIENTO.ENTIDAD_FINANCIERA || '';
+                if (data.FINANCIAMIENTO.FECHA_PRIMERPAGO) {
+                    document.getElementById('fecha-primer-pago').value = data.FINANCIAMIENTO.FECHA_PRIMERPAGO.split('T')[0];
+                }
+                
+                calcularPrestamo();
+            } else {
+                financiamientoActual = null;
+                console.log('Plan sin financiamiento');
+                
+                const radioContado = document.querySelector('input[name="tipo_venta"][value="contado"]');
+                if (radioContado) {
+                    radioContado.checked = true;
+                    radioContado.dispatchEvent(new Event('change'));
+                }
+            }
+
+            await cargarAnticiposDesdeAPI(ventaId);
+
+            mostrarNotificacion(`Plan ${data.CODIGO_VENTA} cargado correctamente`, 'success');
+        } catch (e) {
+            console.error('Error al cargar plan:', e);
+            mostrarNotificacion('Error al cargar el plan: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+
+    function poblarCamposCliente(pre, cliente) {
+        const m = {
+            n_cliente: cliente.ID_PERSONA,
+            tipo_identificacion: cliente.TIPO_DOCUMENTO,
+            identificacion_cliente: cliente.IDENTIFICACION,
+            nombre_cliente: cliente.NOMBRE_COMPLETO,
+            telefono1: cliente.TELEFONO_PRINCIPAL,
+            telefono2: cliente.TELEFONO_SECUNDARIO,
+            barrio: '',
+            estado_civil: cliente.ID_ESTADO_CIVIL,
+            ocupacion: cliente.OCUPACION,
+            correo_electronico: cliente.EMAIL,
+            nacionalidad: cliente.NACIONALIDAD
+        };
+        Object.entries(m).forEach(([campo, val]) => {
+            const el = document.getElementById(`${pre}_${campo}`);
+            if (!el) return;
+            if (el.tagName === 'SELECT') el.value = val || '';
+            else el.value = val || '';
+        });
+        if (cliente.DIRECCION) document.getElementById(`${pre}_direccion`).value = cliente.DIRECCION;
+    }
+
+    function poblarCamposVehiculo(tipo, v) {
+        const p = `vehiculo-${tipo}`;
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (el.tagName === 'SELECT') el.value = val || '';
+                else el.value = val || '';
+            }
+        };
+        
+        // Datos básicos
+        set(`${p}-id`, v.ID_VEHICULO);
+        set(`${p}-estilo`, v.ESTILO);
+        set(`${p}-traccion`, v.TRACCION);
+        set(`${p}-chasis`, v.CHASIS);
+        set(`${p}-motor`, v.MOTOR);
+        set(`${p}-carroceria`, v.CARROCERIA);
+        set(`${p}-cc`, v.C_C);
+        set(`${p}-cilindros`, v.CILINDROS);
+        set(`${p}-km-anterior`, v.KILOMETRAJE_ANTERIOR);
+        set(`${p}-km-actual`, v.KILOMETRAJE_ACTUAL);
+        set(`${p}-pv`, v.PV);
+        set(`${p}-extras`, v.OBSERVACIONES);
+        
+        // Cargar costos si existen
+        if (v.COSTOS) {
+            console.log('Cargando costos para vehículo:', v.COSTOS);
+            if (v.COSTOS.PRECIO_PUBLICO) {
+                set(`${p}-monto-venta`, v.COSTOS.PRECIO_PUBLICO);
+            }
+            if (v.COSTOS.MONTO_TRANSPASO) {
+                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRANSPASO);
+            }
+        }
+        
+        setTimeout(() => {
+            set(`${p}-marca`, v.ID_MARCA);
+            set(`${p}-color`, v.ID_COLOR);
+            set(`${p}-combustible`, v.ID_COMBUSTIBLE);
+            set(`${p}-transmision`, v.ID_TRANSMISION);
+            set(`${p}-modelo`, v.MODELO);
+        }, 200);
+        
+        const placa = document.getElementById(`buscar-placa-${tipo}`);
+        if (placa) placa.value = v.PLACA || '';
+    }
+
+    function poblarCamposVehiculoRecibido(v) {
+        if (!v) return;
+        
+        document.getElementById('vehiculo-recibir-placa').value = v.PLACA || '';
+        document.getElementById('vehiculo-recibir-estilo').value = v.ESTILO || '';
+        document.getElementById('vehiculo-recibir-traccion').value = v.TRACCION || '';
+        document.getElementById('vehiculo-recibir-chasis').value = v.CHASIS || '';
+        document.getElementById('vehiculo-recibir-motor').value = v.MOTOR || '';
+        document.getElementById('vehiculo-recibir-carroceria').value = v.CARROCERIA || '';
+        document.getElementById('vehiculo-recibir-cc').value = v.C_C || '';
+        document.getElementById('vehiculo-recibir-cilindros').value = v.CILINDROS || '';
+        document.getElementById('vehiculo-recibir-km-anterior').value = v.KILOMETRAJE_ANTERIOR || 0;
+        document.getElementById('vehiculo-recibir-km-actual').value = v.KILOMETRAJE_ACTUAL || 0;
+        document.getElementById('vehiculo-recibir-pv').value = v.PV || '';
+        document.getElementById('vehiculo-recibir-extras').value = v.OBSERVACIONES || '';
+        document.getElementById('vehiculo-recibir-monto-recibido').value = v.monto_recibido || 0;
+        document.getElementById('vehiculo-recibir-monto-traspaso').value = v.monto_traspaso || 0;
+        
+        setTimeout(() => {
+            if (v.ID_MARCA) document.getElementById('vehiculo-recibir-marca').value = v.ID_MARCA;
+            if (v.ID_COLOR) document.getElementById('vehiculo-recibir-color').value = v.ID_COLOR;
+            if (v.ID_COMBUSTIBLE) document.getElementById('vehiculo-recibir-combustible').value = v.ID_COMBUSTIBLE;
+            if (v.ID_TRANSMISION) document.getElementById('vehiculo-recibir-transmision').value = v.ID_TRANSMISION;
+            if (v.MODELO) document.getElementById('vehiculo-recibir-modelo').value = v.MODELO;
+        }, 300);
+    }
+
+    //  NUEVO PLAN
+    function nuevoplan() {
+        // Limpiar selección
+        selectedVentaId = null;
+        window.selectedVentaId = null;
+        planActual = null;
+        financiamientoActual = null;
+        anticiposLocales = [];
+        anticipo_fila_seleccionada = null;
+
+        // Limpiar todos los campos
+        document.querySelectorAll('.panel input:not([readonly]):not([type="radio"]):not([type="hidden"]), .panel select, .panel textarea').forEach(el => {
+            if (el.type === 'number') el.value = '0';
+            else if (el.type === 'date') el.value = '';
+            else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+        });
+        
+        // Establecer un valor claro para identificar que es NUEVO
+        document.getElementById('num_plan').value = 'NUEVO';
+        document.getElementById('fecha_plan').value = new Date().toISOString().split('T')[0];
+
+        limpiarVendedor();
+        limpiarAprobador();
+
+        // Limpiar anticipos
+        document.getElementById('tbody-anticipos').innerHTML =
+            '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
+
+        // Inicializar vehículos a recibir
+        inicializarVehiculosRecibir();
+
+        // Mostrar la pestaña GENERAL automáticamente después de crear nuevo plan
+        mostrar('general', null);
+        
+        // Actualizar clases de las pestañas manualmente
+        document.querySelectorAll('.tabs button').forEach((b, index) => {
+            b.classList.toggle('active', index === 1); // El botón GENERAL es el segundo (índice 1)
+        });
+        
+        mostrarNotificacion('Nuevo plan iniciado. Complete los datos en GENERAL.', 'success');
+    }
+
+    // Inicializar el primer vehículo al cargar la página
+    function inicializarVehiculosRecibir() {
+        const container = document.getElementById('vehiculos-recibir-container');
+        if (!container) return;
+        
+        // Limpiar contenedor
+        container.innerHTML = '';
+        vehiculosRecibir = [];
+        
+        // Agregar primer vehículo
+        agregarVehiculoRecibir();
+        
+        // Configurar event listener para el botón de agregar
+        document.getElementById('btnAgregarVehiculoRecibir').addEventListener('click', function(e) {
+            e.preventDefault();
+            agregarVehiculoRecibir();
+        });
+    }
+
+    // Función para agregar un nuevo vehículo
+    function agregarVehiculoRecibir() {
+        if (vehiculosRecibir.length >= MAX_VEHICULOS) {
+            mostrarNotificacion(`Solo puede agregar hasta ${MAX_VEHICULOS} vehículos de intercambio`, 'warning');
+            return;
+        }
+        
+        const template = document.getElementById('vehiculo-recibir-template');
+        const container = document.getElementById('vehiculos-recibir-container');
+        
+        // Clonar el template
+        const nuevoVehiculo = template.cloneNode(true);
+        nuevoVehiculo.style.display = 'block';
+        nuevoVehiculo.id = ''; // Remover ID para evitar duplicados
+        
+        // Asignar número de vehículo
+        const numero = vehiculosRecibir.length + 1;
+        nuevoVehiculo.querySelector('.vehiculo-numero').textContent = numero;
+        
+        // Configurar IDs únicos para los campos (opcional, pero útil para debugging)
+        const inputs = nuevoVehiculo.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            const clase = input.className;
+            if (clase) {
+                // Agregar data-vehiculo-index para identificar el vehículo
+                input.dataset.vehiculoIndex = numero - 1;
+            }
+        });
+        
+        // Agregar evento al botón de eliminar
+        const btnEliminar = nuevoVehiculo.querySelector('.btn-eliminar-vehiculo');
+        btnEliminar.addEventListener('click', function() {
+            eliminarVehiculoRecibir(this);
+        });
+        
+        // Agregar eventos para actualizar totales
+        const montos = nuevoVehiculo.querySelectorAll('.vehiculo-recibir-monto-recibido, .vehiculo-recibir-monto-traspaso');
+        montos.forEach(input => {
+            input.addEventListener('input', actualizarTotalesRecibir);
+        });
+        
+        // Agregar al contenedor
+        container.appendChild(nuevoVehiculo);
+        
+        // Actualizar array de vehículos
+        vehiculosRecibir.push({
+            index: numero - 1,
+            elemento: nuevoVehiculo
+        });
+        
+        actualizarTotalesRecibir();
+    }
+
+    // Función para eliminar un vehículo
+    function eliminarVehiculoRecibir(btnElement) {
+        const vehiculoItem = btnElement.closest('.vehiculo-recibir-item');
+        if (!vehiculoItem) return;
+        
+        if (vehiculosRecibir.length <= 1) {
+            mostrarNotificacion('Debe haber al menos un vehículo de intercambio', 'warning');
+            return;
+        }
+        
+        if (confirm('¿Está seguro de eliminar este vehículo de intercambio?')) {
+            vehiculoItem.remove();
+            
+            // Reconstruir array de vehículos y reenumerar
+            reconstruirArrayVehiculosRecibir();
+            
+            actualizarTotalesRecibir();
+        }
+    }
+
+    // Reconstruir el array después de eliminar
+    function reconstruirArrayVehiculosRecibir() {
+        const container = document.getElementById('vehiculos-recibir-container');
+        const items = container.querySelectorAll('.vehiculo-recibir-item');
+        
+        vehiculosRecibir = [];
+        
+        items.forEach((item, index) => {
+            // Actualizar número mostrado
+            item.querySelector('.vehiculo-numero').textContent = index + 1;
+            
+            // Actualizar data-index en inputs
+            item.querySelectorAll('input, select, textarea').forEach(input => {
+                input.dataset.vehiculoIndex = index;
+            });
+            
+            vehiculosRecibir.push({
+                index: index,
+                elemento: item
+            });
+        });
+    }
+
+    // Calcular y mostrar totales
+    function actualizarTotalesRecibir() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        let totalRecibido = 0;
+        let totalTraspaso = 0;
+        
+        items.forEach(item => {
+            const montoRecibido = parseFloat(item.querySelector('.vehiculo-recibir-monto-recibido')?.value) || 0;
+            const montoTraspaso = parseFloat(item.querySelector('.vehiculo-recibir-monto-traspaso')?.value) || 0;
+            
+            totalRecibido += montoRecibido;
+            totalTraspaso += montoTraspaso;
+        });
+        
+        document.getElementById('total-vehiculos-recibir').textContent = items.length;
+        document.getElementById('total-monto-recibido').textContent = formatMoney(totalRecibido);
+        document.getElementById('total-monto-traspaso').textContent = formatMoney(totalTraspaso);
+    }
+
+    // Función para obtener los datos de todos los vehículos a recibir (para guardar)
+    function obtenerVehiculosRecibirData() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        const vehiculos = [];
+        
+        items.forEach((item, index) => {
+            vehiculos.push({
+                placa: item.querySelector('.vehiculo-recibir-placa')?.value || '',
+                id_marca: item.querySelector('.vehiculo-recibir-marca')?.value || null,
+                estilo: item.querySelector('.vehiculo-recibir-estilo')?.value || '',
+                traccion: item.querySelector('.vehiculo-recibir-traccion')?.value || '',
+                id_color: item.querySelector('.vehiculo-recibir-color')?.value || null,
+                modelo: item.querySelector('.vehiculo-recibir-modelo')?.value || null,
+                kilometraje_anterior: parseFloat(item.querySelector('.vehiculo-recibir-km-anterior')?.value) || 0,
+                kilometraje_actual: parseFloat(item.querySelector('.vehiculo-recibir-km-actual')?.value) || 0,
+                motor: item.querySelector('.vehiculo-recibir-motor')?.value || '',
+                cc: parseFloat(item.querySelector('.vehiculo-recibir-cc')?.value) || null,
+                cilindros: parseInt(item.querySelector('.vehiculo-recibir-cilindros')?.value) || null,
+                id_combustible: item.querySelector('.vehiculo-recibir-combustible')?.value || null,
+                id_transmision: item.querySelector('.vehiculo-recibir-transmision')?.value || null,
+                pv: item.querySelector('.vehiculo-recibir-pv')?.value || '',
+                chasis: item.querySelector('.vehiculo-recibir-chasis')?.value || '',
+                carroceria: item.querySelector('.vehiculo-recibir-carroceria')?.value || '',
+                extras: item.querySelector('.vehiculo-recibir-extras')?.value || '',
+                observaciones: `VEHÍCULO ${index + 1} RECIBIDO A CAMBIO. ${item.querySelector('.vehiculo-recibir-extras')?.value || ''}`,
+                monto_recibido: parseFloat(item.querySelector('.vehiculo-recibir-monto-recibido')?.value) || 0,
+                monto_traspaso: parseFloat(item.querySelector('.vehiculo-recibir-monto-traspaso')?.value) || 0
+            });
+        });
+        
+        return vehiculos;
+    }
+
+    //  GUARDAR PLAN COMPLETO
+    async function guardarPlanCompleto() {
+        mostrarLoading(true);
+        try {
+            const moneda = document.querySelector('input[name="moneda"]:checked')?.value || 'CRC';
+            const tipoVenta = document.querySelector('input[name="tipo_venta"]:checked')?.value || 'contado';
+            
+            console.log('=== GUARDANDO PLAN ===');
+            console.log('Tipo de venta:', tipoVenta);
+
+            // Obtener valores de montos asegurando que sean números con 2 decimales
+            const montoVenta = parseFloat(document.getElementById('vehiculo-vendido-monto-venta').value) || 0;
+            const montoTraspaso = parseFloat(document.getElementById('vehiculo-vendido-monto-traspaso').value) || 0;
+            const tipoCambio = parseFloat(document.getElementById('tipo_cambio').value) || 1;
+            
+            console.log('Monto Venta:', montoVenta);
+            console.log('Monto Traspaso:', montoTraspaso);
+            console.log('Tipo Cambio:', tipoCambio);
+
+            // Obtener ID del vehículo
+            const vehiculoId = document.getElementById('vehiculo-vendido-id').value;
+
+            // Preparar payload
+            const payload = {
+                codigo_venta: document.getElementById('num_plan').value || generarCodigo(),
+                fecha_venta: document.getElementById('fecha_plan').value,
+                nombre_notario: document.getElementById('notario').value,
+                id_vendedor: parseInt(document.getElementById('vendedor-id').value) || null,
+                pv_purdi: document.getElementById('vehiculo-vendido-pv-purdi')?.value || null,
+                estado_venta: 'PENDIENTE DE FACTURAR',
+
+                cliente_facturar: {
+                    tipo_documento: document.getElementById('fact_tipo_identificacion').value,
+                    identificacion: document.getElementById('fact_identificacion_cliente').value,
+                    nombre_completo: document.getElementById('fact_nombre_cliente').value,
+                    telefono_principal: document.getElementById('fact_telefono1').value,
+                    telefono_secundario: document.getElementById('fact_telefono2').value,
+                    id_estado_civil: document.getElementById('fact_estado_civil').value || null,
+                    ocupacion: document.getElementById('fact_ocupacion').value,
+                    email: document.getElementById('fact_correo_electronico').value,
+                    nacionalidad: document.getElementById('fact_nacionalidad').value,
+                    direccion: document.getElementById('fact_direccion').value,
+                    id_persona_existente: document.getElementById('fact_n_cliente').value || null
+                },
+
+                cliente_inscribir: {
+                    tipo_documento: document.getElementById('ins_tipo_identificacion').value,
+                    identificacion: document.getElementById('ins_identificacion_cliente').value,
+                    nombre_completo: document.getElementById('ins_nombre_cliente').value,
+                    telefono_principal: document.getElementById('ins_telefono1').value,
+                    telefono_secundario: document.getElementById('ins_telefono2').value,
+                    id_estado_civil: document.getElementById('ins_estado_civil').value || null,
+                    ocupacion: document.getElementById('ins_ocupacion').value,
+                    email: document.getElementById('ins_correo_electronico').value,
+                    nacionalidad: document.getElementById('ins_nacionalidad').value,
+                    direccion: document.getElementById('ins_direccion').value,
+                    id_persona_existente: document.getElementById('ins_n_cliente').value || null
+                },
+
+                vehiculo: {
+                    id_vehiculo: vehiculoId || null,
+                    placa: document.getElementById('buscar-placa-vendido').value,
+                    id_marca: document.getElementById('vehiculo-vendido-marca').value || null,
+                    estilo: document.getElementById('vehiculo-vendido-estilo').value,
+                    traccion: document.getElementById('vehiculo-vendido-traccion').value,
+                    id_color: document.getElementById('vehiculo-vendido-color').value || null,
+                    modelo: document.getElementById('vehiculo-vendido-modelo').value || null,
+                    kilometraje_anterior: parseFloat(document.getElementById('vehiculo-vendido-km-anterior').value) || 0,
+                    kilometraje_actual: parseFloat(document.getElementById('vehiculo-vendido-km-actual').value) || 0,
+                    motor: document.getElementById('vehiculo-vendido-motor').value,
+                    cc: parseFloat(document.getElementById('vehiculo-vendido-cc').value) || null,
+                    cilindros: parseInt(document.getElementById('vehiculo-vendido-cilindros').value) || null,
+                    id_combustible: document.getElementById('vehiculo-vendido-combustible').value || null,
+                    id_transmision: document.getElementById('vehiculo-vendido-transmision').value || null,
+                    pv: document.getElementById('vehiculo-vendido-pv').value,
+                    chasis: document.getElementById('vehiculo-vendido-chasis').value,
+                    carroceria: document.getElementById('vehiculo-vendido-carroceria').value,
+                    observaciones: document.getElementById('vehiculo-vendido-extras').value
+                },
+
+                // COSTOS DEL VEHÍCULO - Aquí van los montos
+                costos_vehiculo: {
+                    precio_compra: montoVenta, // PRECIO_COMPRA en COSTOS_VEHICULO
+                    precio_publico: montoVenta, // PRECIO_PUBLICO en COSTOS_VEHICULO
+                    monto_traspaso: montoTraspaso, // MONTO_TRANSPASO en COSTOS_VEHICULO
+                    moneda: moneda,
+                    tipo_cambio_compra: tipoCambio,
+                    costo: montoVenta,
+                    precio_costo: montoVenta,
+                    saldo: montoVenta
+                },
+
+                vehiculos_recibir: obtenerVehiculosRecibirData(),
+
+                forma_pago: {
+                    tipo_venta: tipoVenta.toUpperCase(),
+                    moneda: moneda,
+                    tipo_cambio: tipoCambio,
+                    plazo_meses: tipoVenta === 'credito' ? parseInt(document.getElementById('cuotas-mensuales').value) : 0,
+                    entidad_financiera: tipoVenta === 'credito' ? document.getElementById('entidad-financiera').value : null,
+                    interes_nominal: tipoVenta === 'credito' ? parseFloat(document.getElementById('interes-nominal').value) : null,
+                    interes_moratorio: tipoVenta === 'credito' ? parseFloat(document.getElementById('interes-moratorio').value) : null,
+                    fecha_primer_pago: tipoVenta === 'credito' ? document.getElementById('fecha-primer-pago').value : null,
+                    prima: parseFloat(document.getElementById('prima').value) || 0,
+                    
+                    fecha_pago: document.getElementById('fecha_pago').value,
+                    forma_pago_pago: document.getElementById('forma_pago_pago').value,
+                    monto_total: parseFloat(document.getElementById('monto_pago').value) || 0,
+                    
+                    // Detalles del pago
+                    efectivo: parseFloat(document.getElementById('contado-efectivo').value) || 0,
+                    transferencia: parseFloat(document.getElementById('contado-transferencia').value) || 0,
+                    num_transferencia: document.getElementById('contado-num-transferencia').value,
+                    nom_deposita: document.getElementById('contado-nom-deposita').value,
+                    id_banco: document.getElementById('contado-banco-select').value,
+                    tarjeta: parseFloat(document.getElementById('contado-tarjeta').value) || 0,
+                    num_tarjeta: document.getElementById('contado-num-tarjeta').value,
+                    tipo_tarjeta: document.getElementById('contado-tipo-tarjeta').value
+                }
+            };
+
+            // Agregar datos de financiamiento si es crédito
+            if (tipoVenta === 'credito') {
+                const extraerNumero = (str) => {
+                    if (!str) return 0;
+                    if (typeof str === 'number') return str;
+                    const limpio = str.toString()
+                        .replace(/[₡$\s]/g, '')
+                        .replace(/\./g, '')
+                        .replace(',', '.');
+                    return parseFloat(limpio) || 0;
+                };
+
+                // Usar textContent para campos que muestran formato
+                const valorConsumo = extraerNumero(document.getElementById('valor-consumo').value) || 0;
+                const prima = extraerNumero(document.getElementById('prima').value) || 0;
+                const honorarios = extraerNumero(document.getElementById('honorarios').value) || 0;
+                const comision = extraerNumero(document.getElementById('comision').value) || 0;
+                const interesesAdelantado = extraerNumero(document.getElementById('intereses-adelantado').value) || 0;
+                
+                const montoFinanciar = valorConsumo - prima + honorarios;
+                const total = montoFinanciar + comision;
+                const prestamoTotal = total + interesesAdelantado;
+                
+                const valorCuotaText = document.getElementById('valor-cuota').textContent;
+                const cuotaMensual = extraerNumero(valorCuotaText);
+                
+                const interesesTotalText = document.getElementById('resumen-total-intereses').textContent;
+                const interesesTotal = extraerNumero(interesesTotalText);  // ✅ Guardamos esto
+
+                payload.financiamiento = {
+                    valor_consumo: valorConsumo,
+                    prima: prima,
+                    honorarios: honorarios,
+                    monto_financiar: montoFinanciar,
+                    comision: comision,
+                    total: total,
+                    tasa_nominal: parseFloat(document.getElementById('interes-nominal').value) || 0,
+                    tasa_mensual: parseFloat(document.getElementById('tasa-interes-directa').value) || 0,
+                    interes_moratorio: parseFloat(document.getElementById('interes-moratorio').value) || 0,
+                    intereses_adelantado: interesesAdelantado,
+                    prestamo_total: prestamoTotal,
+                    intereses_total: interesesTotal,
+                    plazo_meses: parseInt(document.getElementById('cuotas-mensuales').value) || 0,
+                    fecha_primer_pago: document.getElementById('fecha-primer-pago').value,
+                    entidad_financiera: document.getElementById('entidad-financiera').value,
+                    cuota_mensual: cuotaMensual,
+                    observaciones: null
+                };
+                
+                console.log('Financiamiento completo:', payload.financiamiento);
+            }
+
+            // Agregar anticipos (cuotas)
+            if (anticiposLocales.length > 0) {
+                payload.anticipos = anticiposLocales.map(a => {
+                    const { _es_cuota_amortizacion, ...limpio } = a;
+                    return {
+                        ...limpio,
+                        forma_pago: limpio.forma_pago || 'EFECTIVO',
+                        num_documento: limpio.num_documento || `CUOTA-${Date.now()}`,
+                        monto_colones: parseFloat(limpio.monto_colones) || 0,
+                        monto_dolares: parseFloat(limpio.monto_dolares) || 0,
+                        moneda: 'CRC',
+                        tipo_cambio: parseFloat(limpio.tipo_cambio) || 1,
+                        saldo_pendiente: parseFloat(limpio.saldo_pendiente) || 0,
+                        fecha_anticipo: limpio.fecha_anticipo || new Date().toISOString().split('T')[0],
+                        fecha_vencimiento: limpio.fecha_vencimiento || null,
+                        observaciones: limpio.observaciones || null,
+                        estado_anticipo: 'PENDIENTE'
+                    };
+                });
+                console.log('Anticipos a enviar:', payload.anticipos.length);
+            }
+
+            console.log('Payload completo:', JSON.stringify(payload, null, 2));
+
+            let resultado;
+            if (selectedVentaId) {
+                console.log('Actualizando plan existente:', selectedVentaId);
+                
+                resultado = await apiFetch(`${API_BASE_URL}/plan-ventas/${selectedVentaId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('Resultado de actualización:', resultado);
+                
+                if (resultado && resultado.id_financiamiento) {
+                    financiamientoActual = { ID_FINANCIAMIENTOS: resultado.id_financiamiento };
+                }
+                
+                await cargarAnticiposDesdeAPI(selectedVentaId);
+            } else {
+                console.log('Enviando a /plan-ventas...');
+                resultado = await apiFetch(`${API_BASE_URL}/plan-ventas`, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload) 
+                });
+                
+                console.log('Respuesta del servidor:', resultado);
+                
+                if (resultado && resultado.id_venta) {
+                    selectedVentaId = resultado.id_venta;
+                    const codEl = document.getElementById('num_plan');
+                    if (codEl && resultado.codigo_venta) codEl.value = resultado.codigo_venta;
+                    
+                    if (resultado.id_financiamiento) {
+                        financiamientoActual = { ID_FINANCIAMIENTOS: resultado.id_financiamiento };
+                    }
+                    
+                    await cargarAnticiposDesdeAPI(selectedVentaId);
+                }
+            }
+
+            await cargarPlanesDesdeAPI();
+            mostrarNotificacion('Plan guardado exitosamente ✓', 'success');
+        } catch (e) {
+            console.error('Error guardando plan:', e);
+            mostrarNotificacion('Error al guardar: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+    
+
+    // También necesitas cargar los catálogos en los selects de los nuevos vehículos
+    function llenarCatalogosVehiculosRecibir() {
+        const items = document.querySelectorAll('#vehiculos-recibir-container .vehiculo-recibir-item');
+        
+        items.forEach(item => {
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-marca'), catalogoMarcas, 'ID_MARCA', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-color'), catalogoColores, 'ID_COLOR', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-combustible'), catalogoCombustibles, 'ID_COMBUSTIBLE', 'NOMBRE');
+            llenarSelectMultiple(item.querySelector('.vehiculo-recibir-transmision'), catalogoTransmisiones, 'ID_TRANSMISION', 'NOMBRE');
+            
+            // Llenar años
+            const selectModelo = item.querySelector('.vehiculo-recibir-modelo');
+            if (selectModelo) {
+                const anioActual = new Date().getFullYear();
+                for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+                    selectModelo.appendChild(new Option(y, y));
+                }
+            }
+        });
+    }
+
+    // Versión de llenarSelect para elementos específicos
+    function llenarSelectMultiple(selectElement, datos, valKey, texKey) {
+        if (!selectElement) return;
+        const current = selectElement.value;
+        selectElement.innerHTML = '<option value="">Seleccionar</option>';
+        filtrarActivos(datos).forEach(item => {
+            const opt = new Option(obtV(item, texKey, texKey.toLowerCase()), obtV(item, valKey, valKey.toLowerCase()));
+            selectElement.appendChild(opt);
+        });
+        if (current) selectElement.value = current;
+    }
+
+    // Llamar a esta función después de agregar un vehículo
+    function actualizarCatalogosNuevoVehiculo(nuevoElemento) {
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-marca'), catalogoMarcas, 'ID_MARCA', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-color'), catalogoColores, 'ID_COLOR', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-combustible'), catalogoCombustibles, 'ID_COMBUSTIBLE', 'NOMBRE');
+        llenarSelectMultiple(nuevoElemento.querySelector('.vehiculo-recibir-transmision'), catalogoTransmisiones, 'ID_TRANSMISION', 'NOMBRE');
+        
+        const selectModelo = nuevoElemento.querySelector('.vehiculo-recibir-modelo');
+        if (selectModelo) {
+            const anioActual = new Date().getFullYear();
+            for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+                selectModelo.appendChild(new Option(y, y));
+            }
+        }
+    }
+
+    // Modificar agregarVehiculoRecibir para actualizar catálogos
+    function agregarVehiculoRecibir() {
+        if (vehiculosRecibir.length >= MAX_VEHICULOS) {
+            mostrarNotificacion(`Solo puede agregar hasta ${MAX_VEHICULOS} vehículos de intercambio`, 'warning');
+            return;
+        }
+        
+        const template = document.getElementById('vehiculo-recibir-template');
+        const container = document.getElementById('vehiculos-recibir-container');
+        
+        const nuevoVehiculo = template.cloneNode(true);
+        nuevoVehiculo.style.display = 'block';
+        nuevoVehiculo.id = '';
+        
+        const numero = vehiculosRecibir.length + 1;
+        nuevoVehiculo.querySelector('.vehiculo-numero').textContent = numero;
+        
+        const btnEliminar = nuevoVehiculo.querySelector('.btn-eliminar-vehiculo');
+        btnEliminar.addEventListener('click', function() {
+            eliminarVehiculoRecibir(this);
+        });
+        
+        const montos = nuevoVehiculo.querySelectorAll('.vehiculo-recibir-monto-recibido, .vehiculo-recibir-monto-traspaso');
+        montos.forEach(input => {
+            input.addEventListener('input', actualizarTotalesRecibir);
+        });
+        
+        container.appendChild(nuevoVehiculo);
+        
+        // Actualizar catálogos para este nuevo vehículo
+        actualizarCatalogosNuevoVehiculo(nuevoVehiculo);
+        
+        vehiculosRecibir.push({
+            index: numero - 1,
+            elemento: nuevoVehiculo
+        });
+        
+        actualizarTotalesRecibir();
+    }
+
+    // Función para cargar datos existentes (cuando se selecciona un plan)
+    function cargarVehiculosRecibirExistente(vehiculosData) {
+        if (!vehiculosData || vehiculosData.length === 0) return;
+        
+        const container = document.getElementById('vehiculos-recibir-container');
+        container.innerHTML = '';
+        vehiculosRecibir = [];
+        
+        vehiculosData.forEach((v, index) => {
+            agregarVehiculoRecibir();
+            
+            // Esperar un momento para que se creen los elementos
+            setTimeout(() => {
+                const items = container.querySelectorAll('.vehiculo-recibir-item');
+                const item = items[index];
+                if (!item) return;
+                
+                // Llenar datos
+                item.querySelector('.vehiculo-recibir-placa').value = v.PLACA || '';
+                item.querySelector('.vehiculo-recibir-estilo').value = v.ESTILO || '';
+                item.querySelector('.vehiculo-recibir-traccion').value = v.TRACCION || '';
+                item.querySelector('.vehiculo-recibir-chasis').value = v.CHASIS || '';
+                item.querySelector('.vehiculo-recibir-motor').value = v.MOTOR || '';
+                item.querySelector('.vehiculo-recibir-carroceria').value = v.CARROCERIA || '';
+                item.querySelector('.vehiculo-recibir-cc').value = v.C_C || '';
+                item.querySelector('.vehiculo-recibir-cilindros').value = v.CILINDROS || '';
+                item.querySelector('.vehiculo-recibir-km-anterior').value = v.KILOMETRAJE_ANTERIOR || 0;
+                item.querySelector('.vehiculo-recibir-km-actual').value = v.KILOMETRAJE_ACTUAL || 0;
+                item.querySelector('.vehiculo-recibir-pv').value = v.PV || '';
+                item.querySelector('.vehiculo-recibir-extras').value = v.OBSERVACIONES || '';
+                item.querySelector('.vehiculo-recibir-monto-recibido').value = v.monto_recibido || 0;
+                item.querySelector('.vehiculo-recibir-monto-traspaso').value = v.monto_traspaso || 0;
+                
+                // Seleccionar valores en selects (necesita setTimeout para que los catálogos estén listos)
+                setTimeout(() => {
+                    if (v.ID_MARCA) item.querySelector('.vehiculo-recibir-marca').value = v.ID_MARCA;
+                    if (v.ID_COLOR) item.querySelector('.vehiculo-recibir-color').value = v.ID_COLOR;
+                    if (v.ID_COMBUSTIBLE) item.querySelector('.vehiculo-recibir-combustible').value = v.ID_COMBUSTIBLE;
+                    if (v.ID_TRANSMISION) item.querySelector('.vehiculo-recibir-transmision').value = v.ID_TRANSMISION;
+                    if (v.MODELO) item.querySelector('.vehiculo-recibir-modelo').value = v.MODELO;
+                }, 300);
+            }, 100);
+        });
+        
+        actualizarTotalesRecibir();
+    }
+
+    function generarCodigo() {
+        return 'PV-' + Date.now().toString().slice(-6);
+    }
+
+    function cancelarPlan() {
+        if (confirm('¿Desea cancelar? Los cambios no guardados se perderán.')) {
+            nuevoplan();
+            mostrar('indice', null);
+            document.querySelectorAll('.tabs button')[0].classList.add('active');
+        }
+    }
+
+    //  ANULAR PLAN
+    async function anularPlanSeleccionado() {
+        if (!selectedVentaId) {
+            mostrarNotificacion('Seleccione un plan primero', 'warning');
+            return;
+        }
+        if (!confirm('¿Está seguro de anular este plan?')) return;
+        mostrarLoading(true);
+        try {
+            await apiFetch(`${API_ENDPOINTS.ventas}/${selectedVentaId}/rechazar`, {
+                method: 'PUT',
+                body: JSON.stringify({ estado: 'PLAN YA FUE ANULADO', motivo: 'Anulado por el usuario' })
+            });
+            selectedVentaId = null;
+            planActual = null;
+            financiamientoActual = null;
+            await cargarPlanesDesdeAPI();
+            mostrarNotificacion('Plan anulado correctamente', 'success');
+        } catch (e) {
+            mostrarNotificacion('Error al anular: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+
+    //  BÚSQUEDA DE PERSONAS
+    function configurarBusquedasEnTiempoReal() {
+        document.getElementById('buscar-vendedor-input').addEventListener('input', debounce(() => buscarVendedor(), 350));
+        document.getElementById('buscar-aprobador-input').addEventListener('input', debounce(() => buscarAprobador(), 350));
+        document.getElementById('buscar-cliente-fact-input').addEventListener('input', debounce(() => buscarClienteFacturar(), 350));
+        document.getElementById('buscar-cliente-ins-input').addEventListener('input', debounce(() => buscarClienteInscribir(), 350));
+        document.getElementById('buscar-placa-vendido').addEventListener('input', debounce(() => buscarVehiculoVendido(), 350));
+    }
+
+    function debounce(fn, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    async function buscarPersonas(query) {
+        if (!query || query.length < 2) return [];
+        try {
+            const url = `${API_ENDPOINTS.personas}?nombre=${encodeURIComponent(query)}&estado=ACTIVO`;
+            const data = await apiFetch(url);
+            return Array.isArray(data) ? data : (data.personas || []);
+        } catch {
+            return [];
+        }
+    }
+
+    function renderResultadoPersonas(containerEl, personas, onSelect) {
+        if (!containerEl) return;
+        if (personas.length === 0) {
+            containerEl.innerHTML = '<div style="padding:12px;color:#6b7280;font-size:.88rem;">No se encontraron personas</div>';
+            containerEl.style.display = 'block';
+            return;
+        }
+        containerEl.innerHTML = '';
+        personas.slice(0, 8).forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML = `
+                <div class="result-info">
+                    <strong>${p.NOMBRE_COMPLETO}</strong>
+                    <small>${p.IDENTIFICACION} &bull; ${p.EMAIL || 'Sin email'}</small>
+                </div>
+                <button class="btn-select-person">Seleccionar</button>`;
+            div.querySelector('button').addEventListener('click', () => onSelect(p));
+            containerEl.appendChild(div);
+        });
+        containerEl.style.display = 'block';
+    }
+
+    async function buscarVendedor() {
+        const q = document.getElementById('buscar-vendedor-input').value.trim();
+        const cont = document.getElementById('resultados-vendedor');
+        if (!q) {
+            cont.style.display = 'none';
+            return;
+        }
+        const personas = await buscarPersonas(q);
+        renderResultadoPersonas(cont, personas, (p) => {
+            document.getElementById('vendedor-id').value = p.ID_PERSONA;
+            document.getElementById('vendedor-nombre').textContent = p.NOMBRE_COMPLETO;
+            document.getElementById('vendedor-cedula').textContent = p.IDENTIFICACION;
+            document.getElementById('vendedor-email').textContent = p.EMAIL || 'N/A';
+            document.getElementById('vendedor-seleccionado-container').style.display = 'block';
+            cont.style.display = 'none';
+            document.getElementById('buscar-vendedor-input').value = '';
+        });
+    }
+
+    function limpiarVendedor() {
+        document.getElementById('vendedor-id').value = '';
+        document.getElementById('vendedor-seleccionado-container').style.display = 'none';
+        document.getElementById('buscar-vendedor-input').value = '';
+        document.getElementById('resultados-vendedor').style.display = 'none';
+    }
+
+    async function buscarAprobador() {
+        const q = document.getElementById('buscar-aprobador-input').value.trim();
+        const cont = document.getElementById('resultados-aprobador');
+        if (!q) {
+            cont.style.display = 'none';
+            return;
+        }
+        const personas = await buscarPersonas(q);
+        renderResultadoPersonas(cont, personas, (p) => {
+            document.getElementById('aprobador-id').value = p.ID_PERSONA;
+            document.getElementById('aprobador-nombre').textContent = p.NOMBRE_COMPLETO;
+            document.getElementById('aprobador-cedula').textContent = p.IDENTIFICACION;
+            document.getElementById('aprobador-seleccionado-container').style.display = 'block';
+            cont.style.display = 'none';
+            document.getElementById('buscar-aprobador-input').value = '';
+        });
+    }
+
+    function limpiarAprobador() {
+        document.getElementById('aprobador-id').value = '';
+        document.getElementById('aprobador-seleccionado-container').style.display = 'none';
+        document.getElementById('buscar-aprobador-input').value = '';
+        document.getElementById('resultados-aprobador').style.display = 'none';
+    }
+
+    async function buscarClienteFacturar() {
+        const q = document.getElementById('buscar-cliente-fact-input').value.trim();
+        const cont = document.getElementById('resultados-cliente-fact');
+        if (!q) {
+            cont.style.display = 'none';
+            return;
+        }
+        const personas = await buscarPersonas(q);
+        renderResultadoPersonas(cont, personas, (p) => {
+            poblarCamposCliente('fact', p);
+            cont.style.display = 'none';
+            document.getElementById('buscar-cliente-fact-input').value = '';
+            mostrarNotificacion('Cliente de facturación cargado', 'success');
+        });
+    }
+
+    async function buscarClienteInscribir() {
+        const q = document.getElementById('buscar-cliente-ins-input').value.trim();
+        const cont = document.getElementById('resultados-cliente-ins');
+        if (!q) {
+            cont.style.display = 'none';
+            return;
+        }
+        const personas = await buscarPersonas(q);
+        renderResultadoPersonas(cont, personas, (p) => {
+            poblarCamposCliente('ins', p);
+            cont.style.display = 'none';
+            document.getElementById('buscar-cliente-ins-input').value = '';
+            mostrarNotificacion('Cliente de inscripción cargado', 'success');
+        });
+    }
+
+    //  BÚSQUEDA DE VEHÍCULO POR PLACA
+    async function buscarVehiculoVendido() {
+        const placa = document.getElementById('buscar-placa-vendido').value.trim().toUpperCase();
+        const cont = document.getElementById('resultados-vehiculos-vendido');
+        
+        if (!placa || placa.length < 2) {
+            cont.style.display = 'none';
+            return;
+        }
+    
+        try {
+            // Usar el NUEVO endpoint específico con costos
+            const vehiculos = await apiFetch(`${API_BASE_URL}/vehiculos/buscar-con-costos?placa=${encodeURIComponent(placa)}`);
+            const lista = Array.isArray(vehiculos) ? vehiculos : [];
+    
+            if (lista.length === 0) {
+                cont.innerHTML = '<div style="padding:12px;color:#6b7280;font-size:.88rem;">No se encontraron vehículos con esa placa</div>';
+                cont.style.display = 'block';
+                return;
+            }
+            
+            cont.innerHTML = '';
+            lista.slice(0, 6).forEach(v => {
+                const marcaNombre = v.marca_nombre || '';
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                
+                // Mostrar montos si están disponibles
+                const montosInfo = (v.monto_venta || v.monto_traspaso) ? 
+                    `<br><small style="color:#059669;">💰 Monto venta: ${formatMoney(v.monto_venta || 0)} | Traspaso: ${formatMoney(v.monto_traspaso || 0)}</small>` : 
+                    '<br><small style="color:#9ca3af;">⏳ Sin costos registrados</small>';
+                
+                div.innerHTML = `
+                    <div class="result-info">
+                        <strong>${v.PLACA}</strong>
+                        <small>${marcaNombre} ${v.ESTILO || ''} ${v.MODELO || ''} &bull; Chasis: ${v.CHASIS || ''}</small>
+                        ${montosInfo}
+                    </div>
+                    <button class="btn-select-person">Seleccionar</button>`;
+                
+                div.querySelector('button').addEventListener('click', () => {
+                    // Poblar campos del vehículo
+                    poblarCamposVehiculo('vendido', v);
+                    
+                    // Asignar montos específicos
+                    if (v.monto_venta) {
+                        document.getElementById('vehiculo-vendido-monto-venta').value = v.monto_venta;
+                    }
+                    if (v.monto_traspaso) {
+                        document.getElementById('vehiculo-vendido-monto-traspaso').value = v.monto_traspaso;
+                    }
+                    
+                    // Actualizar moneda y tipo de cambio
+                    if (v.MONEDA) {
+                        const radio = document.querySelector(`input[name="moneda"][value="${v.MONEDA}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                    if (v.TIPO_CAMBIO_COMPRA) {
+                        document.getElementById('tipo_cambio').value = v.TIPO_CAMBIO_COMPRA;
+                        propagarMonedaYTipoCambio();
+                    }
+                    
+                    cont.style.display = 'none';
+                    mostrarNotificacion(`Vehículo ${v.PLACA} cargado con ${v.monto_venta ? 'costos' : 'datos básicos'}`, 'success');
+                });
+                
+                cont.appendChild(div);
+            });
+            cont.style.display = 'block';
+        } catch (e) {
+            console.error('Error en búsqueda:', e);
+            cont.innerHTML = `<div style="padding:12px;color:#dc2626;font-size:.88rem;">Error: ${e.message}</div>`;
+            cont.style.display = 'block';
+        }
+    }
+
+    //  COPIAR DATOS FACTURAR → INSCRIBIR
+    function copiarDatosFacturarAInscribir() {
+        const campos = ['n_cliente', 'tipo_identificacion', 'identificacion_cliente', 'nombre_cliente', 'telefono1', 'telefono2',
+            'barrio', 'direccion', 'estado_civil', 'ocupacion', 'correo_electronico', 'nacionalidad'];
+        campos.forEach(c => {
+            const orig = document.getElementById(`fact_${c}`);
+            const dest = document.getElementById(`ins_${c}`);
+            if (orig && dest) dest.value = orig.value;
+        });
+        ['provincia', 'canton', 'distrito'].forEach(c => {
+            const orig = document.getElementById(`fact_${c}`);
+            const dest = document.getElementById(`ins_${c}`);
+            if (orig && dest) dest.value = orig.value;
+        });
+        mostrarNotificacion('Datos copiados al cliente de inscripción', 'success');
+    }
+
+    function limpiarDatosInscribir() {
+        document.querySelectorAll('#inscribir input:not([readonly]), #inscribir select').forEach(el => el.value = '');
+    }
+
+    //  ANTICIPOS — CRUD CONTRA API
+    async function cargarAnticiposDesdeAPI(ventaId) {
+        const tbody = document.getElementById('tbody-anticipos');
+        if (!ventaId) return;
+        try {
+            console.log('Cargando anticipos para venta:', ventaId);
+            const data = await apiFetch(`${API_ENDPOINTS.anticipos}?id_venta=${ventaId}`);
+            console.log('Anticipos recibidos:', data);
+            anticiposLocales = Array.isArray(data) ? data : [];
+            renderTablaAnticipos();
+        } catch (e) {
+            console.error('Error anticipos:', e);
+            anticiposLocales = [];
+            renderTablaAnticipos();
+        }
+    }
+
+    function renderTablaAnticipos() {
+        const tbody = document.getElementById('tbody-anticipos');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (anticiposLocales.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
+            return;
+        }
+        anticiposLocales.forEach((a, idx) => {
+            const tr = document.createElement('tr');
+            tr.dataset.idx = idx;
+            const estadoClass = a.ESTADO_ANTICIPO === 'COMPLETADO' ? 'estado-pagado' : 
+                                a.ESTADO_ANTICIPO === 'PARCIAL' ? 'estado-parcial' : 'estado-pendiente';
+            tr.innerHTML = `
+                <td>${a.FORMA_PAGO || a.forma_pago || ''}</td>
+                <td>${a.NUM_DOCUMENTO || a.num_documento || a.documento || ''}</td>
+                <td>${a.REALIZADO_POR || a.realizado_por || ''}</td>
+                <td>${formatMoney(a.MONTO_COLONES || a.monto_colones || 0)}</td>
+                <td>${(parseFloat(a.TIPO_CAMBIO || a.tipo_cambio) || 0).toFixed(2)}</td>
+                <td>$ ${(parseFloat(a.MONTO_DOLARES || a.monto_dolares) || 0).toFixed(2)}</td>
+                <td>${a.FECHA_VENCIMIENTO || a.fecha_vencimiento || ''}</td>
+                <td><span class="estado-badge ${estadoClass}">${a.ESTADO_ANTICIPO || a.estado_anticipo || 'PENDIENTE'}</span></td>`;
+            tr.addEventListener('click', () => {
+                document.querySelectorAll('#tbody-anticipos tr').forEach(r => r.classList.remove('selected'));
+                tr.classList.add('selected');
+                anticipo_fila_seleccionada = idx;
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function abrirModalAnticipo(editarIdx = null) {
+        document.getElementById('anticipo-editar-id').value = editarIdx !== null ? editarIdx : '';
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_anticipo').value = hoy;
+
+        if (editarIdx !== null) {
+            const a = anticiposLocales[editarIdx];
+            document.getElementById('fecha_vencimiento_anticipo').value = a.FECHA_VENCIMIENTO || a.fecha_vencimiento;
+            document.getElementById('forma_pago_anticipo').value = a.FORMA_PAGO || a.forma_pago || '';
+            document.getElementById('documento_anticipo').value = a.NUM_DOCUMENTO || a.documento || '';
+            document.getElementById('monto_anticipo').value = a.MONTO_COLONES || a.monto_colones || 0;
+            document.getElementById('tipo_cambio_anticipo').value = a.TIPO_CAMBIO || a.tipo_cambio || 500;
+            document.getElementById('monto_dolar_anticipo').value = a.MONTO_DOLARES || a.monto_dolares || 0;
+            document.getElementById('realizado_anticipo').value = a.REALIZADO_POR || a.realizado_por || '';
+            document.getElementById('efectivo').value = 0;
+            document.getElementById('transferencia').value = 0;
+            document.getElementById('tarjeta').value = 0;
+        } else {
+            ['forma_pago_anticipo', 'documento_anticipo', 'realizado_anticipo', 'num_transferencia', 'nom_deposita', 'banco', 'num_tarjeta', 'tipo_tarjeta'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['monto_anticipo', 'monto_dolar_anticipo', 'efectivo', 'transferencia', 'tarjeta'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '0';
+            });
+            document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '1';
+        }
+
+        document.getElementById('modalFormaPago').style.display = 'flex';
+    }
+
+    function cerrarModalAnticipo() {
+        document.getElementById('modalFormaPago').style.display = 'none';
+    }
+
+    async function grabarAnticipo() {
+        const forma = document.getElementById('forma_pago_anticipo').value.trim();
+        const doc = document.getElementById('documento_anticipo').value.trim();
+        const realizado = document.getElementById('realizado_anticipo').value.trim();
+        const fecha = document.getElementById('fecha_anticipo').value;
+
+        if (!forma || !doc || !realizado || !fecha) {
+            mostrarNotificacion('Complete todos los campos requeridos', 'warning');
+            return;
+        }
+
+        const monto = parseFloat(document.getElementById('monto_anticipo').value) || 0;
+        const tc = parseFloat(document.getElementById('tipo_cambio_anticipo').value) || 1;
+        const dolar = parseFloat(document.getElementById('monto_dolar_anticipo').value) || 0;
+        const editarIdx = document.getElementById('anticipo-editar-id').value;
+
+        if (!financiamientoActual && !editarIdx && !selectedVentaId) {
+            mostrarNotificacion('Primero debe guardar el plan para poder agregar anticipos', 'warning');
+            return;
+        }
+
+        const payload = {
+            id_financiamiento: financiamientoActual?.ID_FINANCIAMIENTOS,
+            forma_pago: forma,
+            num_documento: doc,
+            monto_colones: monto,
+            monto_dolares: dolar,
+            moneda: 'CRC',
+            tipo_cambio: tc,
+            realizado_por: realizado,
+            fecha_anticipo: fecha,
+            fecha_vencimiento: document.getElementById('fecha_vencimiento_anticipo').value || null,
+            saldo_pendiente: monto,
+            estado_anticipo: 'PENDIENTE',
+            observaciones: `Anticipo creado por ${realizado}`
+        };
+
+        mostrarLoading(true);
+        try {
+            if (editarIdx !== '' && anticiposLocales[editarIdx]?.ID_ANTICIPO) {
+                await apiFetch(`${API_ENDPOINTS.anticipos}/${anticiposLocales[editarIdx].ID_ANTICIPO}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                mostrarNotificacion('Anticipo actualizado', 'success');
+            } else if (financiamientoActual) {
+                const nuevo = await apiFetch(API_ENDPOINTS.anticipos, { method: 'POST', body: JSON.stringify(payload) });
+                payload.ID_ANTICIPO = nuevo.id;
+                mostrarNotificacion('Anticipo guardado', 'success');
+            }
+
+            if (selectedVentaId) {
+                await cargarAnticiposDesdeAPI(selectedVentaId);
+            } else {
+                if (editarIdx !== '') anticiposLocales[parseInt(editarIdx)] = payload;
+                else anticiposLocales.push(payload);
+                renderTablaAnticipos();
+            }
+            cerrarModalAnticipo();
+        } catch (e) {
+            mostrarNotificacion('Error al grabar anticipo: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+
+    async function eliminarAnticipoSeleccionado() {
+        if (anticipo_fila_seleccionada === null) {
+            mostrarNotificacion('Seleccione un anticipo', 'warning');
+            return;
+        }
+        if (!confirm('¿Eliminar este anticipo?')) return;
+        const a = anticiposLocales[anticipo_fila_seleccionada];
+        mostrarLoading(true);
+        try {
+            if (a.ID_ANTICIPO) {
+                await apiFetch(`${API_ENDPOINTS.anticipos}/${a.ID_ANTICIPO}`, { method: 'DELETE' });
+            }
+            anticiposLocales.splice(anticipo_fila_seleccionada, 1);
+            anticipo_fila_seleccionada = null;
+            renderTablaAnticipos();
+            mostrarNotificacion('Anticipo eliminado', 'success');
+        } catch (e) {
+            mostrarNotificacion('Error al eliminar: ' + e.message, 'error');
+        } finally {
+            mostrarLoading(false);
+        }
+    }
+
+    function modificarAnticipoSeleccionado() {
+        if (anticipo_fila_seleccionada === null) {
+            mostrarNotificacion('Seleccione un anticipo', 'warning');
+            return;
+        }
+        abrirModalAnticipo(anticipo_fila_seleccionada);
+    }
+
+    //  CALCULAR DÓLARES
+    function calcularDolares(idColones, idTC, idDolar) {
+        const col = parseFloat(document.getElementById(idColones).value) || 0;
+        const tc = parseFloat(document.getElementById(idTC).value) || 1;
+        document.getElementById(idDolar).value = tc > 0 ? (col / tc).toFixed(2) : '0.00';
+    }
+
+    //  CALCULADORA DE CRÉDITO
+    function inicializarCalculadoraCredito() {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha-primer-pago').value = hoy;
+
+        const inputs = document.querySelectorAll('#seccionCredito input[type="number"], #seccionCredito input[type="date"], #seccionCredito select');
+        inputs.forEach(el => el.addEventListener('input', calcularPrestamo));
+        inputs.forEach(el => el.addEventListener('change', calcularPrestamo));
+        calcularPrestamo();
+    }
+
+    function cambiarModoTasa(modo) {
+        document.getElementById('fila-tasa-anual').style.display = modo === 'anual' ? '' : 'none';
+        document.getElementById('fila-tasa-mensual').style.display = modo === 'mensual' ? '' : 'none';
+        calcularPrestamo();
+    }
+
+    function pctDecimal(p) { return parseFloat(p) / 100; }
+    function tasaMensual(ta) { return Math.pow(1 + pctDecimal(ta), 1 / 12) - 1; }
+    function calcPMT(tasa, n, pv) {
+        if (tasa === 0) return pv / n;
+        const f = Math.pow(1 + tasa, n);
+        return pv * tasa * f / (f - 1);
+    }
+
+    function calcularPrestamo() {
+        const vc = parseFloat(document.getElementById('valor-consumo').value) || 0;
+        const pr = parseFloat(document.getElementById('prima').value) || 0;
+        const hon = parseFloat(document.getElementById('honorarios').value) || 0;
+        const com = parseFloat(document.getElementById('comision').value) || 0;
+        const mor = parseFloat(document.getElementById('interes-moratorio').value) || 0;
+        const n = parseInt(document.getElementById('cuotas-mensuales').value) || 1;
+        const iad = parseFloat(document.getElementById('intereses-adelantado').value) || 0;
+
+        const modoAnual = document.querySelector('input[name="modo-tasa"]:checked')?.value === 'anual';
+        let tm;
+        if (modoAnual) {
+            const ta = parseFloat(document.getElementById('interes-nominal').value) || 0;
+            tm = tasaMensual(ta);
+            const td = document.getElementById('tasa-interes-directa');
+            if (td) td.value = (tm * 100).toFixed(2);
+        } else {
+            const tdv = parseFloat(document.getElementById('tasa-interes-directa').value) || 0;
+            tm = pctDecimal(tdv);
+            const ta = (Math.pow(1 + tm, 12) - 1) * 100;
+            const in_ = document.getElementById('interes-nominal');
+            if (in_) in_.value = ta.toFixed(2);
+        }
+
+        const mf = vc - pr + hon;
+        const tot = mf + com;
+        const pt = tot + iad;
+        const vc2 = calcPMT(tm, n, pt);
+        const dn = pt - pr - com - iad - hon;
+        const tp = vc2 * n;
+        const ti = tp - pt;
+
+        document.getElementById('monto-financiar').textContent = formatMoney(mf);
+        document.getElementById('total').textContent = formatMoney(tot);
+        document.getElementById('prestamo-total').textContent = formatMoney(pt);
+        document.getElementById('valor-cuota').textContent = formatMoney(vc2);
+        document.getElementById('desembolso-total').textContent = formatMoney(pt);
+        document.getElementById('desembolso-prima').textContent = formatMoney(pr);
+        document.getElementById('desembolso-comision').textContent = formatMoney(com);
+        document.getElementById('desembolso-intereses').textContent = formatMoney(iad);
+        document.getElementById('desembolso-honorarios').textContent = formatMoney(hon);
+        document.getElementById('desembolso-neto').textContent = formatMoney(dn);
+
+        const ta2 = modoAnual ? parseFloat(document.getElementById('interes-nominal').value) || 0 : (Math.pow(1 + tm, 12) - 1) * 100;
+        document.getElementById('resumen-interes-nominal').textContent = formatPct(ta2);
+        document.getElementById('resumen-interes-mensual').textContent = formatPct(tm * 100);
+        document.getElementById('resumen-interes-moratorio').textContent = formatPct(mor);
+        document.getElementById('resumen-total-pagar').textContent = formatMoney(tp);
+        document.getElementById('resumen-total-intereses').textContent = formatMoney(ti);
+
+        generarTablaAmortizacion(n, vc2, tm, pt);
+    }
+
+    function generarTablaAmortizacion(cuotas, valorCuota, tasa, prestamo) {
+        const tbody = document.getElementById('tabla-cuerpo');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        let saldo = prestamo;
+        const fechaStr = document.getElementById('fecha-primer-pago').value;
+        let fecha = fechaStr ? new Date(fechaStr + 'T12:00:00') : new Date();
+
+        tbody.innerHTML = `<tr class="total-row"><td><strong>INICIO</strong></td><td><strong>${formatDate(new Date())}</strong></td><td>-</td><td>-</td><td>-</td><td><strong>${formatMoney(prestamo)}</strong></td></tr>`;
+
+        let totCap = 0, totInt = 0, totPag = 0;
+        for (let i = 1; i <= cuotas; i++) {
+            const intereses = Math.round(saldo * tasa);
+            let abono = Math.round(valorCuota - intereses);
+            let cuotaVal = valorCuota;
+            if (i === cuotas) {
+                abono = Math.round(saldo);
+                cuotaVal = Math.round(abono + intereses);
+            }
+            saldo = Math.round(saldo - abono);
+            totCap += abono;
+            totInt += intereses;
+            totPag += cuotaVal;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${i}</td><td>${formatDate(fecha)}</td><td>${formatMoney(cuotaVal)}</td><td>${formatMoney(abono)}</td><td>${formatMoney(intereses)}</td><td>${formatMoney(Math.max(saldo, 0))}</td>`;
+            tbody.appendChild(tr);
+            fecha.setMonth(fecha.getMonth() + 1);
+        }
+
+        const tfr = document.createElement('tr');
+        tfr.className = 'total-row';
+        tfr.innerHTML = `<td><strong>TOTALES</strong></td><td>-</td><td><strong>${formatMoney(totPag)}</strong></td><td><strong>${formatMoney(totCap)}</strong></td><td><strong>${formatMoney(totInt)}</strong></td><td>-</td>`;
+        tbody.appendChild(tfr);
+    }
+
+    //  TRANSFERIR AMORTIZACIÓN → ANTICIPOS
+    function transferirAmortizacionAAnticipos() {
+        const filas = document.querySelectorAll('#tabla-cuerpo tr:not(.total-row)');
+        if (filas.length === 0) {
+            mostrarNotificacion('No hay cuotas en la tabla de amortización', 'warning');
+            return;
+        }
+
+        // Verificar el tipo de venta
+        const tipoVenta = document.querySelector('input[name="tipo_venta"]:checked')?.value;
+        
+        if (tipoVenta !== 'credito') {
+            mostrarNotificacion('Debe seleccionar "Crédito" como tipo de venta para generar cuotas', 'warning');
+            return;
+        }
+
+        // Si no hay financiamientoActual, significa que es un plan existente sin crédito
+        // o un plan nuevo donde aún no se ha guardado el financiamiento
+        if (!financiamientoActual) {
+            console.log('No hay financiamiento actual - se creará al guardar el plan');
+            
+            // Verificar que los datos de crédito estén completos
+            const entidad = document.getElementById('entidad-financiera').value;
+            if (!entidad) {
+                mostrarNotificacion('Debe seleccionar una entidad financiera', 'warning');
+                return;
+            }
+
+            const cuotas = parseInt(document.getElementById('cuotas-mensuales').value);
+            if (!cuotas || cuotas <= 0) {
+                mostrarNotificacion('Debe especificar un número válido de cuotas', 'warning');
+                return;
+            }
+
+            // Proceder con la transferencia, el financiamiento se creará al guardar
+            const confirmacion = confirm(
+                `¿Transferir ${filas.length} cuotas a Anticipos?\n\n` +
+                `Estas cuotas se asociarán a un NUEVO financiamiento cuando guarde el plan.\n\n` +
+                `¿Desea continuar?`
+            );
+            
+            if (!confirmacion) return;
+            
+        } else {
+            // Ya existe financiamiento, verificar que tenga ID
+            if (!financiamientoActual.ID_FINANCIAMIENTOS && !financiamientoActual.id_financiamiento) {
+                console.error('Financiamiento sin ID:', financiamientoActual);
+                mostrarNotificacion('El financiamiento existente no tiene un ID válido', 'error');
+                return;
+            }
+        }
+
+        const entidad = document.getElementById('entidad-financiera').value || 'Entidad';
+        const tc = parseFloat(document.getElementById('tipo_cambio').value) || 500;
+        const hoy = new Date().toISOString().split('T')[0];
+
+        // Quitar cuotas de amortización previas para evitar duplicados
+        anticiposLocales = anticiposLocales.filter(a => !a._es_cuota_amortizacion);
+
+        let transferidas = 0;
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length < 6) return;
+
+            const numCuota = celdas[0].textContent.trim();
+            const fechaPago = celdas[1].textContent.trim();
+            const valorCuota = parseCurrencyStr(celdas[2].textContent);
+            const abonoCapital = parseCurrencyStr(celdas[3].textContent);
+            const intereses = parseCurrencyStr(celdas[4].textContent);
+            const saldo = parseCurrencyStr(celdas[5].textContent);
+            const dolar = tc > 0 ? valorCuota / tc : 0;
+
+            let fechaMySQL = null;
+            if (fechaPago) {
+                const partes = fechaPago.split('/');
+                if (partes.length === 3) {
+                    fechaMySQL = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                } else {
+                    fechaMySQL = hoy;
+                }
+            }
+
+            anticiposLocales.push({
+                forma_pago: `Crédito ${entidad}`,
+                num_documento: `CUOTA-${numCuota}-${fechaPago}`,
+                monto_colones: Math.round(valorCuota),
+                monto_dolares: Math.round(dolar),
+                tipo_cambio: tc,
+                realizado_por: entidad,
+                fecha_anticipo: hoy,
+                fecha_vencimiento: fechaMySQL,
+                saldo_pendiente: Math.round(saldo),
+                observaciones: `Cuota ${numCuota} | Vence: ${fechaPago} | Capital: ${formatMoney(abonoCapital)} | Intereses: ${formatMoney(intereses)}`,
+                _es_cuota_amortizacion: true
+            });
+            transferidas++;
+        });
+
+        renderTablaAnticipos();
+        mostrar('anticipos', null);
+        document.querySelectorAll('.tabs button').forEach((b, i) => {
+            b.classList.toggle('active', i === 6);
+        });
+
+        mostrarNotificacion(
+            `${transferidas} cuotas listas en Anticipos. Presione "Grabar Plan" para guardar en la base de datos.`,
+            'info'
+        );
+    }
+
+    // Cerrar dropdowns al hacer clic fuera
+    document.addEventListener('click', function (e) {
+        const dropdowns = ['resultados-vendedor', 'resultados-aprobador', 'resultados-cliente-fact', 'resultados-cliente-ins', 'resultados-vehiculos-vendido'];
+        dropdowns.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.contains(e.target)) el.style.display = 'none';
+        });
+    });
+
+    </script>
+    <script src="pdfplan_venta.js"></script>
+    
+</body>
+</html>
