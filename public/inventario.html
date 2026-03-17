@@ -850,9 +850,12 @@
                                 </div>
                                 <div class="price-item">
                                     <div class="price-label">Proveedor</div>
-                                    <select class="detail-input" id="modalProveedor">
-                                        <option value="">Seleccione proveedor</option>
-                                    </select>
+                                    <select class="detail-input" id="modalProveedor"></select>
+                                    <label style="display:flex; align-items:center; gap:6px; margin-top:6px; 
+                                                font-size:0.82rem; color:#7f8c8d; cursor:pointer;">
+                                        <input type="checkbox" id="incluirClientes" onchange="toggleIncluirClientes(this.checked)">
+                                        Buscar también en clientes
+                                    </label>
                                 </div>
                             </div>
                             
@@ -1240,6 +1243,65 @@
         document.getElementById('overlay').classList.toggle('active');
     }
 
+    // Llenar el select solo con proveedores (comportamiento por defecto)
+    function llenarSelectProveedores() {
+        const select = document.getElementById('modalProveedor');
+        select.innerHTML = '<option value="">Seleccione proveedor</option>';
+        proveedores.forEach(p => {
+            select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO}</option>`;
+        });
+    }
+
+    // Se llama cuando el usuario marca/desmarca el checkbox
+    async function toggleIncluirClientes(incluir) {
+        const select = document.getElementById('modalProveedor');
+        const valorActual = select.value; // conservar selección actual si ya había una
+
+        if (!incluir) {
+            // Volver a solo proveedores
+            llenarSelectProveedores();
+        } else {
+            // Cargar proveedores + clientes
+            try {
+                const res = await fetch(`${API_BASE_URL}/personas-proveedor-cliente`);
+                const todos = await res.json();
+                
+                const soloProveedores = todos.filter(p => p.es_proveedor && !p.es_cliente);
+                const soloClientes    = todos.filter(p => p.es_cliente  && !p.es_proveedor);
+                const ambos           = todos.filter(p => p.es_proveedor && p.es_cliente);
+
+                select.innerHTML = '<option value="">Seleccione proveedor / cliente</option>';
+
+                if (ambos.length > 0) {
+                    select.innerHTML += `<optgroup label="Proveedor y Cliente">`;
+                    ambos.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+                if (soloProveedores.length > 0) {
+                    select.innerHTML += `<optgroup label="Proveedores">`;
+                    soloProveedores.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+                if (soloClientes.length > 0) {
+                    select.innerHTML += `<optgroup label="Clientes">`;
+                    soloClientes.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+            } catch (error) {
+                mostrarAlerta('error', 'Error al cargar clientes');
+            }
+        }
+
+        // Restaurar la selección anterior si todavía existe en la nueva lista
+        if (valorActual) select.value = valorActual;
+    }    
+
     async function cargarCatalogos() {
         try {      
             // Cargar estados civiles
@@ -1293,11 +1355,7 @@
             // Cargar proveedores
             const provRes = await fetch(`${API_BASE_URL}/proveedores`);
             proveedores = await provRes.json();
-            const selectProv = document.getElementById('modalProveedor');
-            
-            proveedores.forEach(p => {
-                selectProv.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO}</option>`;
-            });
+            llenarSelectProveedores();
     
         } catch (error) {
             console.error('Error cargando catálogos:', error);
@@ -1668,6 +1726,9 @@
         document.getElementById('modalProvTelefono1').value = '';
         document.getElementById('modalProvTelefono2').value = '';
         document.getElementById('modalProvEmail').value = '';
+
+        document.getElementById('incluirClientes').checked = false;
+        llenarSelectProveedores();
         
         // Reiniciar observaciones
         observations = [{
@@ -1774,9 +1835,24 @@
                 `Monto intercambio: ₡${formatearNumero(v.MONTO_INTERCAMBIO || 0)}\n` +
                 (v.venta_origen ? `Venta origen: ${v.venta_origen.codigo_venta || ''}` : '');
         } else if (v.ID_PROVEEDOR) {
-            // Es un proveedor tradicional
-            document.getElementById('modalProveedor').value = v.ID_PROVEEDOR;
-            document.getElementById('modalProveedor').style.backgroundColor = '';
+            // Verificar si el proveedor ya está en el select
+            const selectProveedor = document.getElementById('modalProveedor');
+            let existeEnSelect = false;
+            for (let i = 0; i < selectProveedor.options.length; i++) {
+                if (selectProveedor.options[i].value == v.ID_PROVEEDOR) {
+                    existeEnSelect = true;
+                    break;
+                }
+            }
+            // Si no está, agregarlo manualmente
+            if (!existeEnSelect) {
+                const option = document.createElement('option');
+                option.value = v.ID_PROVEEDOR;
+                option.text = v.proveedor_nombre || `Proveedor #${v.ID_PROVEEDOR}`;
+                selectProveedor.appendChild(option);
+            }
+            selectProveedor.value = v.ID_PROVEEDOR;
+            selectProveedor.style.backgroundColor = '';
             cargarDatosProveedor();
         }
         
@@ -2033,7 +2109,7 @@
         
         // Cálculos en colones
         const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
-        const totalInversionCRC = comisionCRC + primaCRC + totalObservacionesCRC;
+        const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
         const saldoCRC = costoCompraCRC - primaCRC;
         const precioCostoCRC = comisionCRC + costoCompraCRC + totalObservacionesCRC;
         
@@ -2226,7 +2302,7 @@
 
             // Cálculos en colones
             const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
-            const totalInversionCRC = comisionCRC + primaCRC + totalObservacionesCRC;
+            const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
             const precioCostoCRC = comisionCRC + costoTotalCRC + totalObservacionesCRC;
             const saldoCRC = costoTotalCRC - primaCRC;
 
