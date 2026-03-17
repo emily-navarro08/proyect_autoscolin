@@ -371,7 +371,7 @@ input:disabled, select:disabled, textarea:disabled {
     cursor: not-allowed;
 }
 
-/* ── MODAL VER CLIENTE (version sobria) ── */
+/* ── MODAL VER CLIENTE ── */
 .ver-cliente-header {
     background: #2c3e50;
     color: white;
@@ -525,10 +525,9 @@ input:disabled, select:disabled, textarea:disabled {
     width: 100%; height: 100%;
     background: rgba(255,255,255,0.8);
     z-index: 9999;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    display: none;
 }
 
 .loading-spinner {
@@ -705,7 +704,9 @@ input:disabled, select:disabled, textarea:disabled {
         </div>
     </div>
 
-    <!-- MODAL AGREGAR / MODIFICAR CLIENTE -->
+    <!-- ══════════════════════════════════════════════════════════════
+         MODAL AGREGAR / MODIFICAR CLIENTE
+    ══════════════════════════════════════════════════════════════ -->
     <div class="modal" id="modal-cliente">
         <div class="modal-content">
             <div class="modal-header">
@@ -731,12 +732,10 @@ input:disabled, select:disabled, textarea:disabled {
                             <input type="text" id="cliente-identificacion" name="identificacion" required>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="cliente-nombre">Nombre Completo:</label>
                         <input type="text" id="cliente-nombre" name="nombre_completo" required>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="cliente-nacionalidad">Nacionalidad:</label>
@@ -749,7 +748,6 @@ input:disabled, select:disabled, textarea:disabled {
                             </select>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="cliente-ocupacion">Ocupación:</label>
@@ -760,7 +758,6 @@ input:disabled, select:disabled, textarea:disabled {
                             <input type="text" id="cliente-telefono" name="telefono_principal">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="cliente-telefono-sec">Teléfono Secundario:</label>
@@ -771,12 +768,10 @@ input:disabled, select:disabled, textarea:disabled {
                             <input type="email" id="cliente-email" name="email">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="cliente-direccion">Dirección:</label>
                         <textarea id="cliente-direccion" name="direccion"></textarea>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="cliente-tipo-rol">Tipo de Cliente:</label>
@@ -792,7 +787,6 @@ input:disabled, select:disabled, textarea:disabled {
                             <textarea id="cliente-observacion" name="observacion"></textarea>
                         </div>
                     </div>
-
                     <input type="hidden" id="cliente-id" name="id">
                     <input type="hidden" id="cliente-persona-rol-id" name="persona_rol_id">
                 </form>
@@ -804,7 +798,9 @@ input:disabled, select:disabled, textarea:disabled {
         </div>
     </div>
 
-    <!-- MODAL VER CLIENTE -->
+    <!-- ══════════════════════════════════════════════════════════════
+         MODAL VER CLIENTE
+    ══════════════════════════════════════════════════════════════ -->
     <div class="modal" id="modal-ver-cliente">
         <div class="modal-content" style="max-width:1100px;">
             <div class="ver-cliente-header">
@@ -883,6 +879,8 @@ input:disabled, select:disabled, textarea:disabled {
                                 <tr>
                                     <th>Plan Venta</th>
                                     <th>Vehículo</th>
+                                    <th>Placa</th>
+                                    <th>Vendedor</th>
                                     <th>Fecha</th>
                                 </tr>
                             </thead>
@@ -910,28 +908,68 @@ input:disabled, select:disabled, textarea:disabled {
         </div>
     </div>
 
-    <!-- MODAL INFORMACIÓN DE VENTA -->
+    <!-- ══════════════════════════════════════════════════════════════
+         MODAL INFORMACIÓN DE VENTA
+    ══════════════════════════════════════════════════════════════ -->
     <div class="modal" id="modal-info-venta">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:1000px;">
             <div class="modal-header">
                 <h2><i class="fas fa-car"></i> Información de Venta</h2>
                 <button class="close-btn" id="close-modal-info-venta">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Selector de venta (si hay múltiples) -->
+                <div id="selector-info-venta-container" style="display:none;margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+                    <label style="display:block;margin-bottom:10px;font-weight:600;color:#2d3748;">
+                        <i class="fas fa-car"></i> Seleccione la venta a consultar:
+                    </label>
+                    <div style="display:flex;gap:10px;">
+                        <select id="selector-info-venta" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:6px;"></select>
+                        <button onclick="cargarInfoVentaSeleccionada()" style="padding:10px 20px;background:#805ad5;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <i class="fas fa-search"></i> Ver
+                        </button>
+                    </div>
+                </div>
+
                 <div class="view-data">
+                    <!-- Datos de la Venta -->
+                    <div class="data-section">
+                        <h3><i class="fas fa-receipt"></i> Datos de la Venta</h3>
+                        <div class="data-grid">
+                            <div class="data-row"><div class="data-label">Código Venta:</div><div class="data-value" id="info-codigo-venta">—</div></div>
+                            <div class="data-row"><div class="data-label">Fecha Venta:</div><div class="data-value" id="info-fecha-venta">—</div></div>
+                            <div class="data-row"><div class="data-label">Estado:</div><div class="data-value" id="info-estado-venta">—</div></div>
+                            <div class="data-row"><div class="data-label">Vendedor:</div><div class="data-value" id="info-vendedor">—</div></div>
+                            <div class="data-row"><div class="data-label">Notario:</div><div class="data-value" id="info-notario">—</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Características del Vehículo -->
                     <div class="data-section">
                         <h3><i class="fas fa-car"></i> Características del Vehículo</h3>
                         <div class="data-grid">
                             <div class="data-row"><div class="data-label">Marca:</div><div class="data-value" id="info-marca">—</div></div>
                             <div class="data-row"><div class="data-label">Modelo:</div><div class="data-value" id="info-modelo">—</div></div>
+                            <div class="data-row"><div class="data-label">Estilo:</div><div class="data-value" id="info-estilo">—</div></div>
                             <div class="data-row"><div class="data-label">Color:</div><div class="data-value" id="info-color">—</div></div>
                             <div class="data-row"><div class="data-label">Placa:</div><div class="data-value" id="info-placa">—</div></div>
                             <div class="data-row"><div class="data-label">Chasis:</div><div class="data-value" id="info-chasis">—</div></div>
                             <div class="data-row"><div class="data-label">Motor:</div><div class="data-value" id="info-motor">—</div></div>
                             <div class="data-row"><div class="data-label">Combustible:</div><div class="data-value" id="info-combustible">—</div></div>
                             <div class="data-row"><div class="data-label">Transmisión:</div><div class="data-value" id="info-transmision">—</div></div>
+                            <div class="data-row"><div class="data-label">Tracción:</div><div class="data-value" id="info-traccion">—</div></div>
+                            <div class="data-row"><div class="data-label">Carrocería:</div><div class="data-value" id="info-carroceria">—</div></div>
+                            <div class="data-row"><div class="data-label">C.C.:</div><div class="data-value" id="info-cc">—</div></div>
+                            <div class="data-row"><div class="data-label">Cilindros:</div><div class="data-value" id="info-cilindros">—</div></div>
+                            <div class="data-row"><div class="data-label">Km Anterior:</div><div class="data-value" id="info-kmAnt">—</div></div>
+                            <div class="data-row"><div class="data-label">Km Actual:</div><div class="data-value" id="info-kmAct">—</div></div>
+                            <div class="data-row"><div class="data-label">Fecha Ingreso:</div><div class="data-value" id="info-fecIngre">—</div></div>
+                            <div class="data-row"><div class="data-label">Observaciones:</div><div class="data-value" id="info-observacion">—</div></div>
+                            <div class="data-row"><div class="data-label">Extras:</div><div class="data-value" id="info-extras">—</div></div>
                         </div>
                     </div>
+
+                    <!-- Información Financiera -->
                     <div class="data-section">
                         <h3><i class="fas fa-money-bill-wave"></i> Información Financiera</h3>
                         <div class="data-grid">
@@ -939,15 +977,16 @@ input:disabled, select:disabled, textarea:disabled {
                             <div class="data-row"><div class="data-label">Precio Venta:</div><div class="data-value" id="info-precio-venta">—</div></div>
                             <div class="data-row"><div class="data-label">Utilidad:</div><div class="data-value" id="info-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
                             <div class="data-row"><div class="data-label">% Utilidad:</div><div class="data-value" id="info-porcentaje-utilidad" style="color:#27ae60;font-weight:bold">—</div></div>
-                            <div class="data-row"><div class="data-label">Fecha Venta:</div><div class="data-value" id="info-fecha-venta">—</div></div>
-                            <div class="data-row"><div class="data-label">Vendedor:</div><div class="data-value" id="info-vendedor">—</div></div>
                         </div>
                     </div>
+
+                    <!-- Información del Cliente -->
                     <div class="data-section">
                         <h3><i class="fas fa-user"></i> Información del Cliente</h3>
                         <div class="data-grid">
                             <div class="data-row"><div class="data-label">Cliente Facturación:</div><div class="data-value" id="info-cliente-facturacion">—</div></div>
                             <div class="data-row"><div class="data-label">Cédula Fact.:</div><div class="data-value" id="info-cedula-facturacion">—</div></div>
+                            <div class="data-row"><div class="data-label">Tel. Facturación:</div><div class="data-value" id="info-tel-facturacion">—</div></div>
                             <div class="data-row"><div class="data-label">Cliente Inscripción:</div><div class="data-value" id="info-cliente-inscripcion">—</div></div>
                             <div class="data-row"><div class="data-label">Cédula Insc.:</div><div class="data-value" id="info-cedula-inscripcion">—</div></div>
                         </div>
@@ -955,12 +994,14 @@ input:disabled, select:disabled, textarea:disabled {
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="close-btn-info-venta">Cerrar</button>
+                <button class="btn btn-secondary" id="close-btn-info-venta"><i class="fas fa-times"></i> Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL COSTO Y VENTA -->
+    <!-- ══════════════════════════════════════════════════════════════
+         MODAL COSTO Y VENTA
+    ══════════════════════════════════════════════════════════════ -->
     <div class="modal" id="modal-costo-venta">
         <div class="modal-content" style="max-width: 1200px;">
             <div class="modal-header">
@@ -968,6 +1009,19 @@ input:disabled, select:disabled, textarea:disabled {
                 <button class="close-btn" id="close-modal-costo-venta">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Selector de venta (si hay múltiples) -->
+                <div id="selector-costo-container" style="display:none;margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+                    <label style="display:block;margin-bottom:10px;font-weight:600;color:#2d3748;">
+                        <i class="fas fa-car"></i> Seleccione la venta a consultar:
+                    </label>
+                    <div style="display:flex;gap:10px;">
+                        <select id="selector-costo-venta" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:6px;"></select>
+                        <button onclick="cargarCostoVentaSeleccionada()" style="padding:10px 20px;background:#3182ce;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <i class="fas fa-search"></i> Ver detalles
+                        </button>
+                    </div>
+                </div>
+
                 <div class="view-data">
                     <!-- Resumen de la venta -->
                     <div class="data-section">
@@ -975,7 +1029,7 @@ input:disabled, select:disabled, textarea:disabled {
                         <div class="data-grid" style="grid-template-columns: repeat(3, 1fr);">
                             <div class="data-row">
                                 <div class="data-label">Total Factura:</div>
-                                <div class="data-value" id="costo-total-factura" style="font-weight: bold; color: #2c3e50;">—</div>
+                                <div class="data-value" id="costo-total-factura" style="font-weight:bold;color:#2c3e50;">—</div>
                             </div>
                             <div class="data-row">
                                 <div class="data-label">Prima:</div>
@@ -983,7 +1037,7 @@ input:disabled, select:disabled, textarea:disabled {
                             </div>
                             <div class="data-row">
                                 <div class="data-label">Saldo Pendiente:</div>
-                                <div class="data-value" id="costo-saldo" style="font-weight: bold; color: #e53e3e;">—</div>
+                                <div class="data-value" id="costo-saldo" style="font-weight:bold;color:#e53e3e;">—</div>
                             </div>
                         </div>
                     </div>
@@ -993,113 +1047,59 @@ input:disabled, select:disabled, textarea:disabled {
                         <h3><i class="fas fa-money-bill-wave"></i> Detalle de Pagos</h3>
                         
                         <!-- Efectivo -->
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
-                                <i class="fas fa-money-bill" style="color: #38a169;"></i> Efectivo
+                        <div style="background:#f8fafc;padding:15px;border-radius:8px;margin-bottom:15px;">
+                            <h4 style="margin:0 0 10px 0;color:#2d3748;font-size:1rem;">
+                                <i class="fas fa-money-bill" style="color:#38a169;"></i> Efectivo
                             </h4>
-                            <div class="data-grid" style="grid-template-columns: repeat(1, 1fr);">
+                            <div class="data-grid" style="grid-template-columns:repeat(1,1fr);">
                                 <div class="data-row">
                                     <div class="data-label">Monto Efectivo:</div>
-                                    <div class="data-value" id="costo-efectivo" style="font-weight: bold; color: #38a169;">₡0</div>
+                                    <div class="data-value" id="costo-efectivo" style="font-weight:bold;color:#38a169;">₡0</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Transferencias -->
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
-                                <i class="fas fa-exchange-alt" style="color: #3182ce;"></i> Transferencias
+                        <div style="background:#f8fafc;padding:15px;border-radius:8px;margin-bottom:15px;">
+                            <h4 style="margin:0 0 10px 0;color:#2d3748;font-size:1rem;">
+                                <i class="fas fa-exchange-alt" style="color:#3182ce;"></i> Transferencias
                             </h4>
-                            <div class="data-grid" style="grid-template-columns: repeat(2, 1fr);">
-                                <div class="data-row">
-                                    <div class="data-label">Total Transferencias:</div>
-                                    <div class="data-value" id="costo-transferencia">₡0</div>
-                                </div>
-                                <div class="data-row">
-                                    <div class="data-label">N° Transferencia:</div>
-                                    <div class="data-value" id="costo-num-transferencia">—</div>
-                                </div>
-                                <div class="data-row">
-                                    <div class="data-label">Nombre Depositante:</div>
-                                    <div class="data-value" id="costo-nom-depositante">—</div>
-                                </div>
-                                <div class="data-row">
-                                    <div class="data-label">Banco:</div>
-                                    <div class="data-value" id="costo-banco">—</div>
-                                </div>
+                            <div class="data-grid" style="grid-template-columns:repeat(2,1fr);">
+                                <div class="data-row"><div class="data-label">Total Transferencias:</div><div class="data-value" id="costo-transferencia">₡0</div></div>
+                                <div class="data-row"><div class="data-label">N° Transferencia:</div><div class="data-value" id="costo-num-transferencia">—</div></div>
+                                <div class="data-row"><div class="data-label">Nombre Depositante:</div><div class="data-value" id="costo-nom-depositante">—</div></div>
+                                <div class="data-row"><div class="data-label">Banco:</div><div class="data-value" id="costo-banco">—</div></div>
                             </div>
                         </div>
 
                         <!-- Tarjetas -->
-                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <h4 style="margin: 0 0 10px 0; color: #2d3748; font-size: 1rem;">
-                                <i class="fas fa-credit-card" style="color: #805ad5;"></i> Tarjetas
+                        <div style="background:#f8fafc;padding:15px;border-radius:8px;margin-bottom:15px;">
+                            <h4 style="margin:0 0 10px 0;color:#2d3748;font-size:1rem;">
+                                <i class="fas fa-credit-card" style="color:#805ad5;"></i> Tarjetas
                             </h4>
-                            <div class="data-grid" style="grid-template-columns: repeat(2, 1fr);">
-                                <div class="data-row">
-                                    <div class="data-label">Total Tarjeta:</div>
-                                    <div class="data-value" id="costo-tarjeta">₡0</div>
-                                </div>
-                                <div class="data-row">
-                                    <div class="data-label">N° Tarjeta:</div>
-                                    <div class="data-value" id="costo-num-tarjeta">—</div>
-                                </div>
-                                <div class="data-row">
-                                    <div class="data-label">Tipo Tarjeta:</div>
-                                    <div class="data-value" id="costo-tipo-tarjeta">—</div>
-                                </div>
+                            <div class="data-grid" style="grid-template-columns:repeat(2,1fr);">
+                                <div class="data-row"><div class="data-label">Total Tarjeta:</div><div class="data-value" id="costo-tarjeta">₡0</div></div>
+                                <div class="data-row"><div class="data-label">N° Tarjeta:</div><div class="data-value" id="costo-num-tarjeta">—</div></div>
+                                <div class="data-row"><div class="data-label">Tipo Tarjeta:</div><div class="data-value" id="costo-tipo-tarjeta">—</div></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Información de Financiamiento (si aplica) -->
+                    <!-- Información de Financiamiento -->
                     <div class="data-section" id="seccion-financiamiento">
                         <h3><i class="fas fa-hand-holding-usd"></i> Información de Financiamiento</h3>
-                        <div class="data-grid" style="grid-template-columns: repeat(3, 1fr);">
-                            <div class="data-row">
-                                <div class="data-label">Tipo de Venta:</div>
-                                <div class="data-value" id="costo-tipo-venta" style="font-weight: bold;">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Plazo:</div>
-                                <div class="data-value" id="costo-plazo">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Fecha Primer Pago:</div>
-                                <div class="data-value" id="costo-primer-pago">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Entidad Financiera:</div>
-                                <div class="data-value" id="costo-entidad">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Interés Nominal:</div>
-                                <div class="data-value" id="costo-interes">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Interés Moratorio:</div>
-                                <div class="data-value" id="costo-interes-moratorio">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Cuota Mensual:</div>
-                                <div class="data-value" id="costo-cuota">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Monto a Financiar:</div>
-                                <div class="data-value" id="costo-monto-financiar">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Total Financiamiento:</div>
-                                <div class="data-value" id="costo-total-financiamiento" style="font-weight: bold; color: #2c3e50;">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Honorarios:</div>
-                                <div class="data-value" id="costo-honorarios">—</div>
-                            </div>
-                            <div class="data-row">
-                                <div class="data-label">Comisión:</div>
-                                <div class="data-value" id="costo-comision">—</div>
-                            </div>
+                        <div class="data-grid" style="grid-template-columns:repeat(3,1fr);">
+                            <div class="data-row"><div class="data-label">Tipo de Venta:</div><div class="data-value" id="costo-tipo-venta" style="font-weight:bold;">—</div></div>
+                            <div class="data-row"><div class="data-label">Plazo:</div><div class="data-value" id="costo-plazo">—</div></div>
+                            <div class="data-row"><div class="data-label">Fecha Primer Pago:</div><div class="data-value" id="costo-primer-pago">—</div></div>
+                            <div class="data-row"><div class="data-label">Entidad Financiera:</div><div class="data-value" id="costo-entidad">—</div></div>
+                            <div class="data-row"><div class="data-label">Interés Nominal:</div><div class="data-value" id="costo-interes">—</div></div>
+                            <div class="data-row"><div class="data-label">Interés Moratorio:</div><div class="data-value" id="costo-interes-moratorio">—</div></div>
+                            <div class="data-row"><div class="data-label">Cuota Mensual:</div><div class="data-value" id="costo-cuota">—</div></div>
+                            <div class="data-row"><div class="data-label">Monto a Financiar:</div><div class="data-value" id="costo-monto-financiar">—</div></div>
+                            <div class="data-row"><div class="data-label">Total Financiamiento:</div><div class="data-value" id="costo-total-financiamiento" style="font-weight:bold;color:#2c3e50;">—</div></div>
+                            <div class="data-row"><div class="data-label">Honorarios:</div><div class="data-value" id="costo-honorarios">—</div></div>
+                            <div class="data-row"><div class="data-label">Comisión:</div><div class="data-value" id="costo-comision">—</div></div>
                         </div>
                     </div>
 
@@ -1127,7 +1127,7 @@ input:disabled, select:disabled, textarea:disabled {
                     <!-- Observaciones -->
                     <div class="data-section">
                         <h3><i class="fas fa-sticky-note"></i> Observaciones</h3>
-                        <div class="obs-box" id="costo-observaciones" style="min-height: 60px;">—</div>
+                        <div class="obs-box" id="costo-observaciones" style="min-height:60px;">—</div>
                     </div>
                 </div>
             </div>
@@ -1139,10 +1139,11 @@ input:disabled, select:disabled, textarea:disabled {
 
     <script src="cargar_usuario.js"></script>
     <script>
+    // ══════════════════════════════════════════════════════════════
     //  CONFIGURACIÓN
+    // ══════════════════════════════════════════════════════════════
     const API_BASE = '';
 
-    // Roles que corresponden a clientes
     const ROLES_CLIENTE = [1, 2, 3];
     const NOMBRES_ROLES = {
         1: 'Cliente Facturación',
@@ -1150,13 +1151,16 @@ input:disabled, select:disabled, textarea:disabled {
         3: 'Cliente Ambos'
     };
 
-    // Cache de datos traídos de la API
+    // Cache
     let personasCache   = [];
     let rolesCache      = [];
     let estadosCivCache = [];
-    let ventasClienteActual = [];
+    let ventasClienteActual = [];   // para selector de venta (costo y venta)
+    let ventasInfoActual    = [];   // para selector de venta (inf.venta)
 
+    // ══════════════════════════════════════════════════════════════
     //  HELPERS
+    // ══════════════════════════════════════════════════════════════
     function showLoading(v) {
         document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
     }
@@ -1169,12 +1173,20 @@ input:disabled, select:disabled, textarea:disabled {
     }
 
     function fmtMoneda(v) {
-        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 0 }).format(v || 0);
+        return new Intl.NumberFormat('es-CR', {
+            style: 'currency', currency: 'CRC', minimumFractionDigits: 0
+        }).format(v || 0);
     }
 
     function fmtFecha(f) {
         if (!f) return '—';
-        return new Date(f).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        return new Date(f).toLocaleDateString('es-ES', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+    }
+
+    function dash(v) {
+        return (v !== null && v !== undefined && v !== '') ? v : '—';
     }
 
     async function apiFetch(url, options = {}) {
@@ -1187,7 +1199,9 @@ input:disabled, select:disabled, textarea:disabled {
         return data;
     }
 
+    // ══════════════════════════════════════════════════════════════
     //  CARGA INICIAL DE DATOS
+    // ══════════════════════════════════════════════════════════════
     async function cargarDatosIniciales() {
         try {
             showLoading(true);
@@ -1201,7 +1215,7 @@ input:disabled, select:disabled, textarea:disabled {
             rolesCache      = roles;
             estadosCivCache = estadosCivil;
 
-            // Cargar estados civiles en el select
+            // Cargar estados civiles en el select del formulario
             const sel = document.getElementById('cliente-estado-civil');
             sel.innerHTML = '<option value="">Seleccionar</option>';
             estadosCivil.forEach(ec => {
@@ -1219,9 +1233,10 @@ input:disabled, select:disabled, textarea:disabled {
         }
     }
 
+    // ══════════════════════════════════════════════════════════════
     //  RENDER TABLA
+    // ══════════════════════════════════════════════════════════════
     function obtenerRolClienteDePersona(idPersona) {
-        // rolesCache es array de PERSONAS_ROLES con id_rol e id_persona
         const pr = rolesCache.find(r =>
             (r.ID_PERSONA === idPersona || r.id_persona === idPersona) &&
             ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
@@ -1234,7 +1249,6 @@ input:disabled, select:disabled, textarea:disabled {
     function renderTabla(filtros = {}) {
         const tbody = document.getElementById('tbody-clientes');
 
-        // IDs de personas que son clientes
         const clientesIds = new Set(
             rolesCache
                 .filter(r => ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol))
@@ -1243,7 +1257,6 @@ input:disabled, select:disabled, textarea:disabled {
 
         let clientes = personasCache.filter(p => clientesIds.has(p.ID_PERSONA || p.id_persona));
 
-        // Aplicar filtros
         if (filtros.identificacion) {
             const b = filtros.identificacion.toLowerCase();
             clientes = clientes.filter(p => (p.IDENTIFICACION || p.identificacion || '').toLowerCase().includes(b));
@@ -1304,7 +1317,6 @@ input:disabled, select:disabled, textarea:disabled {
             tbody.appendChild(tr);
         });
 
-        // Eventos de botones de fila
         tbody.querySelectorAll('.btn-ver').forEach(b =>
             b.addEventListener('click', () => verCliente(parseInt(b.dataset.id))));
         tbody.querySelectorAll('.btn-info-venta').forEach(b =>
@@ -1313,29 +1325,45 @@ input:disabled, select:disabled, textarea:disabled {
             b.addEventListener('click', () => mostrarCostoVenta(parseInt(b.dataset.id))));
     }
 
-    //  VER CLIENTE
+    // ══════════════════════════════════════════════════════════════
+    //  MODAL: VER CLIENTE
+    // ══════════════════════════════════════════════════════════════
     async function verCliente(id) {
         const c = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === id);
         if (!c) return;
 
         const idRol = obtenerRolClienteDePersona(id);
-        const ecObj = estadosCivCache.find(e => e.ID_ESTADO_CIVIL === (c.ID_ESTADO_CIVIL || c.id_estado_civil));
+        const ecObj = estadosCivCache.find(e =>
+            e.ID_ESTADO_CIVIL === (c.ID_ESTADO_CIVIL || c.id_estado_civil));
         const estado = c.ESTADO || c.estado || 'ACTIVO';
 
-        document.getElementById('ver-nombre-completo').textContent = c.NOMBRE_COMPLETO || c.nombre_completo || '—';
+        // Datos personales
+        document.getElementById('ver-nombre-completo').textContent =
+            dash(c.NOMBRE_COMPLETO || c.nombre_completo);
         document.getElementById('ver-sub-info').textContent =
             `${c.TIPO_DOCUMENTO || c.tipo_documento || ''} • Reg: ${fmtFecha(c.FECHA_REGISTRO || c.fecha_registro)}`;
-        document.getElementById('ver-tipo-documento').textContent = c.TIPO_DOCUMENTO   || c.tipo_documento   || '—';
-        document.getElementById('ver-identificacion').textContent = c.IDENTIFICACION   || c.identificacion   || '—';
-        document.getElementById('ver-nacionalidad').textContent   = c.NACIONALIDAD     || c.nacionalidad     || '—';
-        document.getElementById('ver-estado-civil').textContent   = ecObj ? ecObj.NOMBRE : '—';
-        document.getElementById('ver-ocupacion').textContent      = c.OCUPACION        || c.ocupacion        || '—';
-        document.getElementById('ver-tipo-cliente').textContent   = NOMBRES_ROLES[idRol] || '—';
-        document.getElementById('ver-telefono').textContent    = c.TELEFONO_PRINCIPAL  || c.telefono_principal  || '—';
-        document.getElementById('ver-telefono-sec').textContent = c.TELEFONO_SECUNDARIO || c.telefono_secundario || '—';
-        document.getElementById('ver-email').textContent       = c.EMAIL || c.email || '—';
-        document.getElementById('ver-direccion').textContent   = c.DIRECCION || c.direccion || '—';
-        document.getElementById('ver-observaciones').textContent = c.OBSERVACION || c.observacion || 'Sin observaciones';
+        document.getElementById('ver-tipo-documento').textContent =
+            dash(c.TIPO_DOCUMENTO || c.tipo_documento);
+        document.getElementById('ver-identificacion').textContent =
+            dash(c.IDENTIFICACION || c.identificacion);
+        document.getElementById('ver-nacionalidad').textContent =
+            dash(c.NACIONALIDAD || c.nacionalidad);
+        document.getElementById('ver-estado-civil').textContent  =
+            ecObj ? ecObj.NOMBRE : '—';
+        document.getElementById('ver-ocupacion').textContent =
+            dash(c.OCUPACION || c.ocupacion);
+        document.getElementById('ver-tipo-cliente').textContent =
+            NOMBRES_ROLES[idRol] || '—';
+        document.getElementById('ver-telefono').textContent =
+            dash(c.TELEFONO_PRINCIPAL || c.telefono_principal);
+        document.getElementById('ver-telefono-sec').textContent =
+            dash(c.TELEFONO_SECUNDARIO || c.telefono_secundario);
+        document.getElementById('ver-email').textContent =
+            dash(c.EMAIL || c.email);
+        document.getElementById('ver-direccion').textContent =
+            dash(c.DIRECCION || c.direccion);
+        document.getElementById('ver-observaciones').textContent =
+            c.OBSERVACION || c.observacion || 'Sin observaciones';
 
         const badgeCls = estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo';
         document.getElementById('ver-estado-cliente').innerHTML =
@@ -1344,34 +1372,39 @@ input:disabled, select:disabled, textarea:disabled {
         document.getElementById('fechaConsultaCliente').textContent =
             new Date().toLocaleString('es-ES');
 
-        // CORREGIDO: Obtener historial de compras
+        // Historial de compras — ahora incluye vendedor y placa
         try {
             const ventas = await apiFetch(`/api/vehiculos/vendidos/cliente/${id}`);
-            const compras = [];
+            const tbody  = document.getElementById('ver-historial-compras');
 
-            for (const v of ventas) {
-                compras.push({
-                    codigo: v.CODIGO_VENTA || '—',
-                    vehiculo: `${v.marca_nombre || ''} ${v.MODELO || ''}`.trim() || 'Vehículo',
-                    fecha: v.FECHA_VENTA,
-                });
-            }
+            if (ventas && ventas.length > 0) {
+                // Para cada venta obtenemos el detalle completo (vendedor)
+                const filas = await Promise.all(ventas.map(async v => {
+                    let vendedorNombre = '—';
+                    try {
+                        // El endpoint /api/ventas/:id/completo devuelve VENDEDOR
+                        const detalle = await apiFetch(`/api/ventas/${v.ID_VENTA}/completo`);
+                        vendedorNombre = detalle.VENDEDOR
+                            ? dash(detalle.VENDEDOR.NOMBRE_COMPLETO)
+                            : '—';
+                    } catch(_) {}
 
-            const tbody = document.getElementById('ver-historial-compras');
-            if (compras.length > 0) {
-                tbody.innerHTML = compras.map(cp => `
-                    <tr>
-                        <td>${cp.codigo}</td>
-                        <td>${cp.vehiculo}</td>
-                        <td>${fmtFecha(cp.fecha)}</td>
-                    </tr>
-                `).join('');
+                    return `
+                        <tr>
+                            <td>${dash(v.CODIGO_VENTA)}</td>
+                            <td>${dash(v.marca_nombre)} ${dash(v.MODELO)}</td>
+                            <td>${dash(v.PLACA)}</td>
+                            <td>${vendedorNombre}</td>
+                            <td>${fmtFecha(v.FECHA_VENTA)}</td>
+                        </tr>`;
+                }));
+                tbody.innerHTML = filas.join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Sin compras registradas</td></tr>`;
             }
         } catch (_) {
-            document.getElementById('ver-historial-compras').innerHTML = 
-                `<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Error al cargar historial</td></tr>`;
+            document.getElementById('ver-historial-compras').innerHTML =
+                `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Error al cargar historial</td></tr>`;
         }
 
         document.getElementById('modal-ver-cliente').classList.add('active');
@@ -1381,292 +1414,302 @@ input:disabled, select:disabled, textarea:disabled {
         document.getElementById('modal-ver-cliente').classList.remove('active');
     }
 
-    // INFORMACIÓN DE VENTA
+    // ══════════════════════════════════════════════════════════════
+    //  MODAL: INFORMACIÓN DE VENTA
+    // ══════════════════════════════════════════════════════════════
     async function mostrarInfoVenta(idCliente) {
         try {
             showLoading(true);
-            
-            // Usar el endpoint que YA EXISTE para obtener vehículos vendidos del cliente
-            const vehiculosVendidos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
-            
-            if (!vehiculosVendidos || vehiculosVendidos.length === 0) {
+            const ventas = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
+
+            if (!ventas || ventas.length === 0) {
                 showToast('Este cliente no tiene vehículos comprados registrados.', 'error');
                 return;
             }
 
-            // Tomar el primer vehículo vendido
-            const vehiculo = vehiculosVendidos[0];
-            
-            // Obtener costos del vehículo (endpoint que ya existe)
-            const costos = await apiFetch(`/api/vehiculos/${vehiculo.ID_VEHICULO}/costos`).catch(() => []);
-            
-            // Calcular utilidad
-            let precioCosto = 0;
-            let precioVenta = 0;
-            let utilidad = 0;
-            let porcentajeUtilidad = 0;
-            
-            if (costos && costos.length > 0) {
-                const costo = costos[0];
-                precioCosto = parseFloat(costo.PRECIO_COSTO || 0);
-                precioVenta = parseFloat(costo.PRECIO_PUBLICO || 0);
-                utilidad = precioVenta - precioCosto;
-                porcentajeUtilidad = precioCosto > 0 ? (utilidad / precioCosto * 100).toFixed(1) : '0.0';
+            ventasInfoActual = ventas;
+
+            if (ventas.length === 1) {
+                await _renderInfoVenta(ventas[0]);
+            } else {
+                // Mostrar selector
+                const sel = document.getElementById('selector-info-venta');
+                sel.innerHTML = ventas.map((v, i) =>
+                    `<option value="${i}">${dash(v.marca_nombre)} ${dash(v.MODELO)} - ${dash(v.PLACA)} (${fmtFecha(v.FECHA_VENTA)})</option>`
+                ).join('');
+                document.getElementById('selector-info-venta-container').style.display = 'block';
+                await _renderInfoVenta(ventas[0]);
             }
-
-            // Actualizar campos del vehículo con los datos que tenemos
-            document.getElementById('info-marca').textContent = vehiculo.marca_nombre || '—';
-            document.getElementById('info-modelo').textContent = vehiculo.MODELO || '—';
-            document.getElementById('info-color').textContent = vehiculo.color_nombre || '—';
-            document.getElementById('info-placa').textContent = vehiculo.PLACA || '—';
-            document.getElementById('info-chasis').textContent = vehiculo.CHASIS || '—';
-            document.getElementById('info-motor').textContent = vehiculo.MOTOR || '—';
-            document.getElementById('info-combustible').textContent = vehiculo.combustible_nombre || '—';
-            document.getElementById('info-transmision').textContent = vehiculo.transmision_nombre || '—';
-            
-            // Actualizar información financiera
-            document.getElementById('info-precio-costo').textContent = fmtMoneda(precioCosto);
-            document.getElementById('info-precio-venta').textContent = fmtMoneda(precioVenta);
-            document.getElementById('info-utilidad').textContent = fmtMoneda(utilidad);
-            document.getElementById('info-porcentaje-utilidad').textContent = `${porcentajeUtilidad}%`;
-            document.getElementById('info-fecha-venta').textContent = fmtFecha(vehiculo.FECHA_VENTA);
-
-            // Información del vendedor (si está disponible en el endpoint)
-            document.getElementById('info-vendedor').textContent = vehiculo.vendedor_nombre || '—';
-
-            // Información del cliente (el mismo cliente)
-            const cliente = personasCache.find(p => (p.ID_PERSONA || p.id_persona) === idCliente);
-            document.getElementById('info-cliente-facturacion').textContent = cliente ? (cliente.NOMBRE_COMPLETO || cliente.nombre_completo) : '—';
-            document.getElementById('info-cedula-facturacion').textContent = cliente ? (cliente.IDENTIFICACION || cliente.identificacion) : '—';
-            document.getElementById('info-cliente-inscripcion').textContent = 'Mismo que facturación';
-            document.getElementById('info-cedula-inscripcion').textContent = '—';
 
             document.getElementById('modal-info-venta').classList.add('active');
         } catch (err) {
             showToast('Error al cargar información de venta: ' + err.message, 'error');
-            console.error(err);
         } finally {
             showLoading(false);
         }
     }
 
-    //  COSTO Y VENTA
+    async function cargarInfoVentaSeleccionada() {
+        const idx = parseInt(document.getElementById('selector-info-venta').value || '0');
+        if (ventasInfoActual[idx]) {
+            showLoading(true);
+            try { await _renderInfoVenta(ventasInfoActual[idx]); }
+            finally { showLoading(false); }
+        }
+    }
+
+    async function _renderInfoVenta(venta) {
+        // Obtener el detalle COMPLETO de la venta (incluye vehiculo, vendedor, clientes, costos, extras)
+        const idVenta = venta.ID_VENTA;
+        if (!idVenta) {
+            showToast('No se encontró ID de venta para este vehículo.', 'error');
+            return;
+        }
+
+        const detalle = await apiFetch(`/api/ventas/${idVenta}/completo`);
+
+        const v   = detalle.VEHICULO  || {};
+        const cf  = detalle.CLIENTE_FACTURACION || {};
+        const ci  = detalle.CLIENTE_INSCRIPCION || null;
+        const vend = detalle.VENDEDOR || {};
+        const costos = detalle.COSTOS || {};
+        const extras = detalle.EXTRAS || [];
+
+        // Datos de la venta
+        document.getElementById('info-codigo-venta').textContent  = dash(detalle.CODIGO_VENTA);
+        document.getElementById('info-fecha-venta').textContent   = fmtFecha(detalle.FECHA_VENTA);
+        document.getElementById('info-estado-venta').textContent  = dash(detalle.ESTADO_VENTA);
+        document.getElementById('info-vendedor').textContent      = dash(vend.NOMBRE_COMPLETO);
+        document.getElementById('info-notario').textContent       = dash(detalle.NOMBRE_NOTARIO);
+
+        // Datos del vehículo
+        document.getElementById('info-marca').textContent        = dash(v.marca_nombre);
+        document.getElementById('info-modelo').textContent       = dash(v.MODELO);
+        document.getElementById('info-estilo').textContent       = dash(v.ESTILO);
+        document.getElementById('info-color').textContent        = dash(v.color_nombre);
+        document.getElementById('info-placa').textContent        = dash(v.PLACA);
+        document.getElementById('info-chasis').textContent       = dash(v.CHASIS);
+        document.getElementById('info-motor').textContent        = dash(v.MOTOR);
+        document.getElementById('info-combustible').textContent  = dash(v.combustible_nombre);
+        document.getElementById('info-transmision').textContent  = dash(v.transmision_nombre);
+        document.getElementById('info-traccion').textContent     = dash(v.TRACCION);
+        document.getElementById('info-carroceria').textContent   = dash(v.CARROCERIA);
+        document.getElementById('info-cc').textContent           = dash(v.C_C);
+        document.getElementById('info-cilindros').textContent    = dash(v.CILINDROS);
+        document.getElementById('info-kmAnt').textContent        = dash(v.KILOMETRAJE_ANTERIOR);
+        document.getElementById('info-kmAct').textContent        = dash(v.KILOMETRAJE_ACTUAL);
+        document.getElementById('info-fecIngre').textContent     = fmtFecha(v.FECHA_INGRESO);
+        document.getElementById('info-observacion').textContent  = dash(v.OBSERVACIONES);
+
+        // Extras del vehículo
+        if (extras.length > 0) {
+            document.getElementById('info-extras').textContent =
+                extras.map(e => `${dash(e.ARREGLO)}${e.EXTRAS_DETALLE ? ': ' + e.EXTRAS_DETALLE : ''} (${fmtMoneda(e.PRECIO)})`).join(' | ');
+        } else {
+            document.getElementById('info-extras').textContent = '—';
+        }
+
+        // Información financiera
+        const precioCosto  = parseFloat(costos.TOTAL_INVERSION || costos.PRECIO_COSTO || 0);
+        const precioVenta  = parseFloat(costos.PRECIO_PUBLICO  || 0);
+        const utilidad     = precioVenta - precioCosto;
+        const pctUtilidad  = precioCosto > 0 ? (utilidad / precioCosto * 100).toFixed(1) : '0.0';
+
+        document.getElementById('info-precio-costo').textContent            = fmtMoneda(precioCosto);
+        document.getElementById('info-precio-venta').textContent            = fmtMoneda(precioVenta);
+        document.getElementById('info-utilidad').textContent                = fmtMoneda(utilidad);
+        document.getElementById('info-porcentaje-utilidad').textContent     = `${pctUtilidad}%`;
+
+        // Clientes
+        document.getElementById('info-cliente-facturacion').textContent  = dash(cf.NOMBRE_COMPLETO);
+        document.getElementById('info-cedula-facturacion').textContent   = dash(cf.IDENTIFICACION);
+        document.getElementById('info-tel-facturacion').textContent      = dash(cf.TELEFONO_PRINCIPAL);
+
+        if (ci) {
+            document.getElementById('info-cliente-inscripcion').textContent = dash(ci.NOMBRE_COMPLETO);
+            document.getElementById('info-cedula-inscripcion').textContent  = dash(ci.IDENTIFICACION);
+        } else {
+            document.getElementById('info-cliente-inscripcion').textContent = 'Mismo que facturación';
+            document.getElementById('info-cedula-inscripcion').textContent  = '—';
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  MODAL: COSTO Y VENTA
+    // ══════════════════════════════════════════════════════════════
     async function mostrarCostoVenta(idCliente) {
         try {
             showLoading(true);
-            
-            // Obtener vehículos vendidos del cliente
-            const vehiculos = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
-            
-            if (!vehiculos || vehiculos.length === 0) {
+            const ventas = await apiFetch(`/api/vehiculos/vendidos/cliente/${idCliente}`);
+
+            if (!ventas || ventas.length === 0) {
                 showToast('Este cliente no tiene vehículos comprados registrados.', 'error');
                 return;
             }
-            
-            // Guardar las ventas en variable global
-            ventasClienteActual = vehiculos;
-            
-            if (vehiculos.length === 1) {
-                // Si solo hay una venta, mostrarla directamente
-                cargarDetallesVenta(vehiculos[0]);
+
+            ventasClienteActual = ventas;
+
+            if (ventas.length === 1) {
+                await _renderCostoVenta(ventas[0]);
             } else {
-                // Si hay múltiples ventas, mostrar selector
-                mostrarSelectorVentas(vehiculos);
+                const sel = document.getElementById('selector-costo-venta');
+                sel.innerHTML = ventas.map((v, i) =>
+                    `<option value="${i}">${dash(v.marca_nombre)} ${dash(v.MODELO)} - ${dash(v.PLACA)} (${fmtFecha(v.FECHA_VENTA)})</option>`
+                ).join('');
+                document.getElementById('selector-costo-container').style.display = 'block';
+                await _renderCostoVenta(ventas[0]);
             }
-            
+
+            document.getElementById('modal-costo-venta').classList.add('active');
         } catch (err) {
             showToast('Error al cargar información: ' + err.message, 'error');
-            console.error(err);
         } finally {
             showLoading(false);
         }
     }
 
-    // Función para mostrar el selector de ventas cuando hay múltiples vehículos vendidos
-    function mostrarSelectorVentas(ventas) {
-        // Guardar las ventas en variable global
-        ventasClienteActual = ventas;
-        
-        // Crear el selector
-        const selectorHTML = `
-            <div id="selector-venta-container" style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #2d3748;">
-                    <i class="fas fa-car"></i> Seleccione la venta a consultar:
-                </label>
-                <div style="display: flex; gap: 10px;">
-                    <select id="selector-venta" style="flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;">
-                        ${ventas.map((v, index) => `
-                            <option value="${index}">
-                                ${v.marca_nombre} ${v.MODELO} - ${v.PLACA || 'Sin placa'} (${fmtFecha(v.FECHA_VENTA)})
-                            </option>
-                        `).join('')}
-                    </select>
-                    <button onclick="cargarVentaSeleccionada()" 
-                            style="padding: 10px 20px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                        <i class="fas fa-search"></i> Ver detalles
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        // Insertar el selector al principio del modal
-        const modalBody = document.querySelector('#modal-costo-venta .modal-body');
-        const existingSelector = document.getElementById('selector-venta-container');
-        
-        if (existingSelector) {
-            existingSelector.remove();
-        }
-        
-        modalBody.insertAdjacentHTML('afterbegin', selectorHTML);
-        
-        // Mostrar el modal
-        document.getElementById('modal-costo-venta').classList.add('active');
-    }
-
-    function cargarVentaSeleccionada() {
-        const select = document.getElementById('selector-venta');
-        if (select) {
-            const index = select.value;
-            cargarDetallesVenta(ventasClienteActual[index]);
-        }
-    }
-
-    async function cargarDetallesVenta(ventaSeleccionada) {
-        try {
+    async function cargarCostoVentaSeleccionada() {
+        const idx = parseInt(document.getElementById('selector-costo-venta').value || '0');
+        if (ventasClienteActual[idx]) {
             showLoading(true);
-            
-            console.log('Venta seleccionada:', ventaSeleccionada);
-            
-            const idVenta = ventaSeleccionada.ID_VENTA;
-            
-            if (!idVenta) {
-                showToast('No se encontró información de venta para este vehículo.', 'error');
-                return;
-            }
-            
-            console.log('Cargando detalles para ID_VENTA:', idVenta);
-            
-            // Obtener información completa de la venta
-            const ventaCompleta = await apiFetch(`/api/ventas/completa/${idVenta}`);
-            
-            // Obtener costos del vehículo
-            const costos = await apiFetch(`/api/vehiculos/${ventaSeleccionada.ID_VEHICULO}/costos`).catch(() => []);
-            const costo = (costos && costos.length > 0) ? costos[0] : {};
-            
-            // Calcular totales
-            const totalFactura = parseFloat(ventaSeleccionada.costo?.PRECIO_PUBLICO || 0);
-            const prima = parseFloat(ventaCompleta.financiamiento?.PRIMA || costo.PRIMA_FINANCIAMIENTO || 0);
-            
-            // Calcular pagos por tipo
-            let totalEfectivo = 0;
-            let totalTransferencia = 0;
-            let totalTarjeta = 0;
-            let transferencias = [];
-            let tarjetas = [];
-            
-            if (ventaCompleta.detallesPago && ventaCompleta.detallesPago.length > 0) {
-                ventaCompleta.detallesPago.forEach(pago => {
-                    if (pago.EFECTIVO) totalEfectivo += parseFloat(pago.EFECTIVO);
-                    if (pago.TRANSFERENCIA) {
-                        totalTransferencia += parseFloat(pago.TRANSFERENCIA);
-                        transferencias.push({
-                            numero: pago.NUM_TRANSFERENCIA,
-                            depositante: pago.NOM_DEPOSITANTE,
-                            banco: pago.NOMBRE_BANCO || 'No especificado'
-                        });
-                    }
-                    if (pago.TARJETA) {
-                        totalTarjeta += parseFloat(pago.TARJETA);
-                        tarjetas.push({
-                            numero: pago.NUMERO_TARJETA,
-                            tipo: pago.TIPO_TARJETA
-                        });
-                    }
+            try { await _renderCostoVenta(ventasClienteActual[idx]); }
+            finally { showLoading(false); }
+        }
+    }
+
+    async function _renderCostoVenta(ventaItem) {
+        const idVenta = ventaItem.ID_VENTA;
+        if (!idVenta) {
+            showToast('No se encontró ID de venta para este vehículo.', 'error');
+            return;
+        }
+
+        // Usamos el endpoint /api/ventas/completa/:id  (el que ya devuelve detallesPago, financiamiento, anticipos)
+        const ventaCompleta = await apiFetch(`/api/ventas/completa/${idVenta}`);
+
+        const costos   = await apiFetch(`/api/vehiculos/${ventaItem.ID_VEHICULO}/costos`).catch(() => []);
+        const costo    = (costos && costos.length > 0) ? costos[0] : {};
+
+        // ── Totales de pago ──────────────────────────────────────
+        let totalEfectivo     = 0;
+        let totalTransferencia = 0;
+        let totalTarjeta      = 0;
+        const transferencias  = [];
+        const tarjetas        = [];
+
+        const pagos = ventaCompleta.detallesPago || [];
+        pagos.forEach(p => {
+            const ef = parseFloat(p.EFECTIVO     || 0);
+            const tr = parseFloat(p.TRANSFERENCIA || 0);
+            const ta = parseFloat(p.TARJETA       || 0);
+
+            totalEfectivo      += ef;
+            totalTransferencia += tr;
+            totalTarjeta       += ta;
+
+            if (tr > 0) {
+                transferencias.push({
+                    numero:      p.NUM_TRANSFERENCIA || '—',
+                    depositante: p.NOM_DEPOSITANTE   || '—',
+                    banco:       p.NOMBRE_BANCO       || '—'
                 });
             }
-            
-            const totalPagado = totalEfectivo + totalTransferencia + totalTarjeta;
-            const saldoPendiente = totalFactura - totalPagado;
-
-            // ACTUALIZAR los valores en el modal existente (NO reemplazar el HTML)
-            document.getElementById('costo-total-factura').textContent = fmtMoneda(totalFactura);
-            document.getElementById('costo-prima').textContent = fmtMoneda(prima);
-            document.getElementById('costo-saldo').textContent = fmtMoneda(saldoPendiente);
-            
-            // Efectivo
-            document.getElementById('costo-efectivo').textContent = fmtMoneda(totalEfectivo);
-            
-            // Transferencias
-            document.getElementById('costo-transferencia').textContent = fmtMoneda(totalTransferencia);
-            document.getElementById('costo-num-transferencia').textContent = transferencias.map(t => t.numero).filter(Boolean).join(', ') || '—';
-            document.getElementById('costo-nom-depositante').textContent = transferencias.map(t => t.depositante).filter(Boolean).join(', ') || '—';
-            document.getElementById('costo-banco').textContent = transferencias.map(t => t.banco).filter(Boolean).join(', ') || '—';
-            
-            // Tarjetas
-            document.getElementById('costo-tarjeta').textContent = fmtMoneda(totalTarjeta);
-            document.getElementById('costo-num-tarjeta').textContent = tarjetas.map(t => t.numero).filter(Boolean).join(', ') || '—';
-            document.getElementById('costo-tipo-tarjeta').textContent = tarjetas.map(t => t.tipo).filter(Boolean).join(', ') || '—';
-            
-            // Información del financiamiento
-            if (ventaCompleta.financiamiento) {
-                const f = ventaCompleta.financiamiento;
-                document.getElementById('costo-tipo-venta').textContent = 'CRÉDITO';
-                document.getElementById('costo-plazo').textContent = f.PLAZO_MESES ? `${f.PLAZO_MESES} meses` : '—';
-                document.getElementById('costo-primer-pago').textContent = fmtFecha(f.FECHA_PRIMERPAGO) || '—';
-                document.getElementById('costo-entidad').textContent = f.ENTIDAD_FINANCIERA || '—';
-                document.getElementById('costo-interes').textContent = f.TASA_NOMINAL ? `${f.TASA_NOMINAL}%` : '—';
-                document.getElementById('costo-interes-moratorio').textContent = f.INTERES_MORATORIO ? `${f.INTERES_MORATORIO}%` : '—';
-                document.getElementById('costo-cuota').textContent = fmtMoneda(f.CUOTA_MENSUAL || 0);
-                document.getElementById('costo-total-financiamiento').textContent = fmtMoneda(f.PRESTAMO_TOTAL || 0);
-                document.getElementById('costo-monto-financiar').textContent = fmtMoneda(f.MONTO_FINANCIAR || 0);
-                document.getElementById('costo-honorarios').textContent = fmtMoneda(f.HONORARIOS || 0);
-                document.getElementById('costo-comision').textContent = fmtMoneda(f.COMISION || 0);
-            } else {
-                document.getElementById('costo-tipo-venta').textContent = 'CONTADO';
-                document.getElementById('costo-plazo').textContent = 'Contado';
-                document.getElementById('costo-primer-pago').textContent = '—';
-                document.getElementById('costo-entidad').textContent = '—';
-                document.getElementById('costo-interes').textContent = '—';
-                document.getElementById('costo-interes-moratorio').textContent = '—';
-                document.getElementById('costo-cuota').textContent = '—';
-                document.getElementById('costo-total-financiamiento').textContent = '—';
-                document.getElementById('costo-monto-financiar').textContent = '—';
-                document.getElementById('costo-honorarios').textContent = '—';
-                document.getElementById('costo-comision').textContent = fmtMoneda(costo.COMISION || 0);
+            if (ta > 0) {
+                tarjetas.push({
+                    numero: p.NUMERO_TARJETA || '—',
+                    tipo:   p.TIPO_TARJETA   || '—'
+                });
             }
-            
-            document.getElementById('costo-observaciones').textContent = ventaSeleccionada.OBSERVACIONES_VENTA || costo.OBSERVACION || '—';
+        });
 
-            // Actualizar tabla de anticipos
-            const tbodyPagos = document.getElementById('tbody-detalle-pagos');
-            if (ventaCompleta.anticipos && ventaCompleta.anticipos.length > 0) {
-                tbodyPagos.innerHTML = ventaCompleta.anticipos.map(a => `
-                    <tr>
-                        <td>${fmtFecha(a.FECHA_ANTICIPO)}</td>
-                        <td>${fmtMoneda(a.MONTO_COLONES)}</td>
-                        <td>${a.FORMA_PAGO || '—'}</td>
-                        <td>${a.NUM_DOCUMENTO || '—'}</td>
-                        <td>${a.SALDO_PENDIENTE ? fmtMoneda(a.SALDO_PENDIENTE) : '—'}</td>
-                    </tr>
-                `).join('');
-            } else {
-                tbodyPagos.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#718096;">Sin anticipos registrados</td></tr>`;
-            }
+        const totalPagado     = totalEfectivo + totalTransferencia + totalTarjeta;
+        const fin             = ventaCompleta.financiamiento;
+        const totalFactura    = parseFloat(fin ? (fin.VALOR_CONSUMO || 0) : (costo.PRECIO_PUBLICO || 0));
+        const prima           = parseFloat(fin ? (fin.PRIMA || 0) : 0);
+        const saldoPendiente  = totalFactura - totalPagado;
 
-            // Asegurar que el modal esté visible
-            document.getElementById('modal-costo-venta').classList.add('active');
-            
-        } catch (error) {
-            showToast('Error al cargar detalles de la venta: ' + error.message, 'error');
-            console.error(error);
-        } finally {
-            showLoading(false);
+        // ── Resumen ──────────────────────────────────────────────
+        document.getElementById('costo-total-factura').textContent  = fmtMoneda(totalFactura);
+        document.getElementById('costo-prima').textContent          = fmtMoneda(prima);
+        document.getElementById('costo-saldo').textContent          = fmtMoneda(Math.max(0, saldoPendiente));
+
+        // ── Efectivo ─────────────────────────────────────────────
+        document.getElementById('costo-efectivo').textContent       = fmtMoneda(totalEfectivo);
+
+        // ── Transferencias ───────────────────────────────────────
+        document.getElementById('costo-transferencia').textContent    = fmtMoneda(totalTransferencia);
+        document.getElementById('costo-num-transferencia').textContent =
+            transferencias.length ? transferencias.map(t => t.numero).join(', ')      : '—';
+        document.getElementById('costo-nom-depositante').textContent  =
+            transferencias.length ? transferencias.map(t => t.depositante).join(', ') : '—';
+        document.getElementById('costo-banco').textContent            =
+            transferencias.length ? transferencias.map(t => t.banco).join(', ')       : '—';
+
+        // ── Tarjetas ─────────────────────────────────────────────
+        document.getElementById('costo-tarjeta').textContent          = fmtMoneda(totalTarjeta);
+        document.getElementById('costo-num-tarjeta').textContent      =
+            tarjetas.length ? tarjetas.map(t => t.numero).join(', ') : '—';
+        document.getElementById('costo-tipo-tarjeta').textContent     =
+            tarjetas.length ? tarjetas.map(t => t.tipo).join(', ')   : '—';
+
+        // ── Financiamiento ───────────────────────────────────────
+        if (fin) {
+            document.getElementById('costo-tipo-venta').textContent           = 'CRÉDITO';
+            document.getElementById('costo-plazo').textContent                =
+                fin.PLAZO_MESES ? `${fin.PLAZO_MESES} meses` : '—';
+            document.getElementById('costo-primer-pago').textContent          = fmtFecha(fin.FECHA_PRIMERPAGO);
+            document.getElementById('costo-entidad').textContent              = dash(fin.ENTIDAD_FINANCIERA);
+            document.getElementById('costo-interes').textContent              =
+                fin.TASA_NOMINAL        ? `${fin.TASA_NOMINAL}%`        : '—';
+            document.getElementById('costo-interes-moratorio').textContent    =
+                fin.INTERES_MORATORIO   ? `${fin.INTERES_MORATORIO}%`   : '—';
+            document.getElementById('costo-cuota').textContent                = fmtMoneda(fin.CUOTA_MENSUAL);
+            document.getElementById('costo-monto-financiar').textContent      = fmtMoneda(fin.MONTO_FINANCIAR);
+            document.getElementById('costo-total-financiamiento').textContent = fmtMoneda(fin.PRESTAMO_TOTAL || fin.TOTAL);
+            document.getElementById('costo-honorarios').textContent           = fmtMoneda(fin.HONORARIOS);
+            document.getElementById('costo-comision').textContent             = fmtMoneda(fin.COMISION || costo.COMISION);
+        } else {
+            document.getElementById('costo-tipo-venta').textContent           = 'CONTADO';
+            document.getElementById('costo-plazo').textContent                = '—';
+            document.getElementById('costo-primer-pago').textContent          = '—';
+            document.getElementById('costo-entidad').textContent              = '—';
+            document.getElementById('costo-interes').textContent              = '—';
+            document.getElementById('costo-interes-moratorio').textContent    = '—';
+            document.getElementById('costo-cuota').textContent                = '—';
+            document.getElementById('costo-monto-financiar').textContent      = '—';
+            document.getElementById('costo-total-financiamiento').textContent = '—';
+            document.getElementById('costo-honorarios').textContent           = '—';
+            document.getElementById('costo-comision').textContent             = fmtMoneda(costo.COMISION);
+        }
+
+        document.getElementById('costo-observaciones').textContent =
+            ventaItem.OBSERVACIONES_VENTA || costo.OBSERVACION || '—';
+
+        // ── Tabla de anticipos ───────────────────────────────────
+        const tbodyPagos = document.getElementById('tbody-detalle-pagos');
+        const anticipos  = ventaCompleta.anticipos || [];
+
+        if (anticipos.length > 0) {
+            tbodyPagos.innerHTML = anticipos.map(a => `
+                <tr>
+                    <td>${fmtFecha(a.FECHA_ANTICIPO)}</td>
+                    <td>${fmtMoneda(a.MONTO_COLONES)}</td>
+                    <td>${dash(a.FORMA_PAGO)}</td>
+                    <td>${dash(a.NUM_DOCUMENTO)}</td>
+                    <td>${a.SALDO_PENDIENTE != null ? fmtMoneda(a.SALDO_PENDIENTE) : '—'}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbodyPagos.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#718096;">Sin anticipos registrados</td></tr>`;
         }
     }
 
-    //  CRUD — AGREGAR
+    // ══════════════════════════════════════════════════════════════
+    //  CRUD — AGREGAR CLIENTE
+    // ══════════════════════════════════════════════════════════════
     function mostrarAgregarCliente() {
-        document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-user-plus"></i> Nuevo Cliente`;
+        document.getElementById('modal-title-cliente').innerHTML =
+            `<i class="fas fa-user-plus"></i> Nuevo Cliente`;
         document.getElementById('form-cliente').reset();
         document.getElementById('cliente-id').value = '';
         document.getElementById('cliente-persona-rol-id').value = '';
@@ -1689,14 +1732,14 @@ input:disabled, select:disabled, textarea:disabled {
             TIPO_DOCUMENTO:      tipoDocumento,
             IDENTIFICACION:      identificacion,
             NOMBRE_COMPLETO:     nombreCompleto,
-            NACIONALIDAD:        document.getElementById('cliente-nacionalidad').value.trim() || null,
-            ID_ESTADO_CIVIL:     document.getElementById('cliente-estado-civil').value || null,
-            OCUPACION:           document.getElementById('cliente-ocupacion').value.trim()   || null,
-            DIRECCION:           document.getElementById('cliente-direccion').value.trim()   || null,
-            TELEFONO_PRINCIPAL:  document.getElementById('cliente-telefono').value.trim()    || null,
-            TELEFONO_SECUNDARIO: document.getElementById('cliente-telefono-sec').value.trim()|| null,
-            EMAIL:               document.getElementById('cliente-email').value.trim()       || null,
-            OBSERVACION:         document.getElementById('cliente-observacion').value.trim() || null,
+            NACIONALIDAD:        document.getElementById('cliente-nacionalidad').value.trim()  || null,
+            ID_ESTADO_CIVIL:     document.getElementById('cliente-estado-civil').value         || null,
+            OCUPACION:           document.getElementById('cliente-ocupacion').value.trim()     || null,
+            DIRECCION:           document.getElementById('cliente-direccion').value.trim()     || null,
+            TELEFONO_PRINCIPAL:  document.getElementById('cliente-telefono').value.trim()      || null,
+            TELEFONO_SECUNDARIO: document.getElementById('cliente-telefono-sec').value.trim()  || null,
+            EMAIL:               document.getElementById('cliente-email').value.trim()         || null,
+            OBSERVACION:         document.getElementById('cliente-observacion').value.trim()   || null,
             ESTADO: 'ACTIVO'
         };
 
@@ -1705,22 +1748,17 @@ input:disabled, select:disabled, textarea:disabled {
             let idPersona;
 
             if (!id) {
-                // Crear persona
                 const resPersona = await apiFetch('/api/personas', { method: 'POST', body: JSON.stringify(body) });
                 idPersona = resPersona.id;
-
-                // Asignar rol de cliente
                 await apiFetch('/api/personas-roles', {
                     method: 'POST',
                     body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: parseInt(tipoCliente), ESTADO: 'ACTIVO' })
                 });
                 showToast('Cliente creado correctamente.', 'success');
             } else {
-                // Actualizar persona
                 await apiFetch(`/api/personas/${id}`, { method: 'PUT', body: JSON.stringify(body) });
                 idPersona = parseInt(id);
 
-                // Actualizar rol: buscar el persona_rol existente y actualizar
                 const rolActual = rolesCache.find(r =>
                     (r.ID_PERSONA || r.id_persona) === idPersona &&
                     ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol) &&
@@ -1728,23 +1766,18 @@ input:disabled, select:disabled, textarea:disabled {
                 );
 
                 if (rolActual) {
-                    const prId = rolActual.ID_PERSONA_ROL || rolActual.id_persona_rol;
+                    const prId  = rolActual.ID_PERSONA_ROL || rolActual.id_persona_rol;
                     const rolId = parseInt(tipoCliente);
                     if ((rolActual.ID_ROL || rolActual.id_rol) !== rolId) {
-                        // Desactivar el rol anterior
                         await apiFetch(`/api/personas-roles/${prId}`, {
-                            method: 'PUT',
-                            body: JSON.stringify({ ESTADO: 'INACTIVO' })
+                            method: 'PUT', body: JSON.stringify({ ESTADO: 'INACTIVO' })
                         });
-                        // Crear el nuevo rol
                         await apiFetch('/api/personas-roles', {
                             method: 'POST',
                             body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: rolId, ESTADO: 'ACTIVO' })
                         }).catch(async () => {
-                            // Si ya existe desactivado, reactivarlo
                             await apiFetch(`/api/personas-roles/${prId}`, {
-                                method: 'PUT',
-                                body: JSON.stringify({ ESTADO: 'ACTIVO' })
+                                method: 'PUT', body: JSON.stringify({ ESTADO: 'ACTIVO' })
                             });
                         });
                     }
@@ -1761,7 +1794,9 @@ input:disabled, select:disabled, textarea:disabled {
         }
     }
 
-    //  CRUD — ANULAR
+    // ══════════════════════════════════════════════════════════════
+    //  CRUD — ANULAR CLIENTE
+    // ══════════════════════════════════════════════════════════════
     async function anularCliente() {
         const identificacion = prompt('Ingrese la identificación del cliente a anular:');
         if (!identificacion) return;
@@ -1769,10 +1804,7 @@ input:disabled, select:disabled, textarea:disabled {
         const cliente = personasCache.find(p =>
             (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
 
-        if (!cliente) {
-            showToast('Cliente no encontrado.', 'error');
-            return;
-        }
+        if (!cliente) { showToast('Cliente no encontrado.', 'error'); return; }
 
         const nombre = cliente.NOMBRE_COMPLETO || cliente.nombre_completo;
         if (!confirm(`¿Está seguro de anular al cliente ${nombre}?`)) return;
@@ -1782,7 +1814,6 @@ input:disabled, select:disabled, textarea:disabled {
             const id = cliente.ID_PERSONA || cliente.id_persona;
             await apiFetch(`/api/personas/${id}/desactivar`, { method: 'PUT' });
 
-            // Desactivar sus roles de cliente
             const rolesCliente = rolesCache.filter(r =>
                 (r.ID_PERSONA || r.id_persona) === id &&
                 ROLES_CLIENTE.includes(r.ID_ROL || r.id_rol)
@@ -1801,7 +1832,9 @@ input:disabled, select:disabled, textarea:disabled {
         }
     }
 
-    //  CRUD — MODIFICAR
+    // ══════════════════════════════════════════════════════════════
+    //  CRUD — MODIFICAR CLIENTE
+    // ══════════════════════════════════════════════════════════════
     async function modificarCliente() {
         const identificacion = prompt('Ingrese la identificación del cliente a modificar:');
         if (!identificacion) return;
@@ -1809,21 +1842,19 @@ input:disabled, select:disabled, textarea:disabled {
         const cliente = personasCache.find(p =>
             (p.IDENTIFICACION || p.identificacion) === identificacion.trim());
 
-        if (!cliente) {
-            showToast('Cliente no encontrado.', 'error');
-            return;
-        }
+        if (!cliente) { showToast('Cliente no encontrado.', 'error'); return; }
 
         const id    = cliente.ID_PERSONA || cliente.id_persona;
         const idRol = obtenerRolClienteDePersona(id);
 
-        document.getElementById('modal-title-cliente').innerHTML = `<i class="fas fa-edit"></i> Modificar Cliente`;
+        document.getElementById('modal-title-cliente').innerHTML =
+            `<i class="fas fa-edit"></i> Modificar Cliente`;
         document.getElementById('cliente-id').value              = id;
         document.getElementById('cliente-tipo-documento').value  = cliente.TIPO_DOCUMENTO || cliente.tipo_documento || '';
         document.getElementById('cliente-identificacion').value  = cliente.IDENTIFICACION || cliente.identificacion || '';
         document.getElementById('cliente-nombre').value          = cliente.NOMBRE_COMPLETO || cliente.nombre_completo || '';
         document.getElementById('cliente-nacionalidad').value    = cliente.NACIONALIDAD  || cliente.nacionalidad  || '';
-        document.getElementById('cliente-estado-civil').value   = cliente.ID_ESTADO_CIVIL || cliente.id_estado_civil || '';
+        document.getElementById('cliente-estado-civil').value    = cliente.ID_ESTADO_CIVIL || cliente.id_estado_civil || '';
         document.getElementById('cliente-ocupacion').value       = cliente.OCUPACION     || cliente.ocupacion     || '';
         document.getElementById('cliente-direccion').value       = cliente.DIRECCION     || cliente.direccion     || '';
         document.getElementById('cliente-telefono').value        = cliente.TELEFONO_PRINCIPAL   || cliente.telefono_principal   || '';
@@ -1835,7 +1866,9 @@ input:disabled, select:disabled, textarea:disabled {
         document.getElementById('modal-cliente').classList.add('active');
     }
 
+    // ══════════════════════════════════════════════════════════════
     //  FILTROS
+    // ══════════════════════════════════════════════════════════════
     function aplicarFiltros() {
         renderTabla({
             identificacion: document.getElementById('filter-identificacion').value,
@@ -1845,18 +1878,20 @@ input:disabled, select:disabled, textarea:disabled {
         });
     }
 
+    // ══════════════════════════════════════════════════════════════
     //  EVENTOS Y CARGA INICIAL
+    // ══════════════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', async () => {
         // Menú móvil
         const menuToggle = document.getElementById('menuToggle');
         const sidebar    = document.getElementById('sidebar');
         const overlay    = document.getElementById('overlay');
 
-        menuToggle.addEventListener('click', () => {
+        menuToggle?.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
         });
-        overlay.addEventListener('click', () => {
+        overlay?.addEventListener('click', () => {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
         });
@@ -1865,7 +1900,8 @@ input:disabled, select:disabled, textarea:disabled {
         document.getElementById('btn-agregar').addEventListener('click', mostrarAgregarCliente);
         document.getElementById('btn-anular').addEventListener('click', anularCliente);
         document.getElementById('btn-modificar').addEventListener('click', modificarCliente);
-        document.getElementById('btn-pasarj').addEventListener('click', () => showToast('Función "Pasar J" — En desarrollo', 'success'));
+        document.getElementById('btn-pasarj').addEventListener('click', () =>
+            showToast('Función "Pasar J" — En desarrollo', 'success'));
         document.getElementById('btn-listar').addEventListener('click', async () => {
             await cargarDatosIniciales();
             showToast('Lista actualizada.', 'success');
@@ -1878,12 +1914,14 @@ input:disabled, select:disabled, textarea:disabled {
             document.getElementById(id).addEventListener('change', aplicarFiltros));
 
         document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
-            ['filter-identificacion', 'filter-nombre'].forEach(id => document.getElementById(id).value = '');
-            ['filter-tipo', 'filter-estado'].forEach(id => document.getElementById(id).value = '');
+            ['filter-identificacion', 'filter-nombre'].forEach(id =>
+                document.getElementById(id).value = '');
+            ['filter-tipo', 'filter-estado'].forEach(id =>
+                document.getElementById(id).value = '');
             renderTabla();
         });
 
-        // Modal cliente
+        // Modal cliente (agregar/modificar)
         document.getElementById('close-modal-cliente').addEventListener('click', () =>
             document.getElementById('modal-cliente').classList.remove('active'));
         document.getElementById('cancel-btn-cliente').addEventListener('click', () =>
@@ -1897,45 +1935,56 @@ input:disabled, select:disabled, textarea:disabled {
         });
 
         // Modal info venta
-        document.getElementById('close-modal-info-venta').addEventListener('click', () =>
-            document.getElementById('modal-info-venta').classList.remove('active'));
-        document.getElementById('close-btn-info-venta').addEventListener('click', () =>
-            document.getElementById('modal-info-venta').classList.remove('active'));
+        document.getElementById('close-modal-info-venta').addEventListener('click', () => {
+            document.getElementById('modal-info-venta').classList.remove('active');
+            document.getElementById('selector-info-venta-container').style.display = 'none';
+        });
+        document.getElementById('close-btn-info-venta').addEventListener('click', () => {
+            document.getElementById('modal-info-venta').classList.remove('active');
+            document.getElementById('selector-info-venta-container').style.display = 'none';
+        });
 
         // Modal costo venta
-        document.getElementById('close-modal-costo-venta').addEventListener('click', () =>
-            document.getElementById('modal-costo-venta').classList.remove('active'));
-        document.getElementById('close-btn-costo-venta').addEventListener('click', () =>
-            document.getElementById('modal-costo-venta').classList.remove('active'));
+        document.getElementById('close-modal-costo-venta').addEventListener('click', () => {
+            document.getElementById('modal-costo-venta').classList.remove('active');
+            document.getElementById('selector-costo-container').style.display = 'none';
+        });
+        document.getElementById('close-btn-costo-venta').addEventListener('click', () => {
+            document.getElementById('modal-costo-venta').classList.remove('active');
+            document.getElementById('selector-costo-container').style.display = 'none';
+        });
 
         // Cerrar modales al hacer clic fuera
         document.querySelectorAll('.modal').forEach(m =>
-            m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+            m.addEventListener('click', e => {
+                if (e.target === m) {
+                    m.classList.remove('active');
+                    // Ocultar selectores si aplica
+                    const sInfo  = document.getElementById('selector-info-venta-container');
+                    const sCosto = document.getElementById('selector-costo-container');
+                    if (sInfo)  sInfo.style.display  = 'none';
+                    if (sCosto) sCosto.style.display = 'none';
+                }
+            }));
 
-        // Sidebar buttons active state
+        // Sidebar active state
         document.querySelectorAll('.sidebar-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
-                if (!href || href === '#') {
-                    e.preventDefault();
-                }
+                if (!href || href === '#') e.preventDefault();
                 document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 if (window.innerWidth <= 992) {
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                 }
-                if (href && href !== '#') {
-                    window.location.href = href;
-                }
+                if (href && href !== '#') window.location.href = href;
             });
         });
+
         // Cargar datos
         await cargarDatosIniciales();
     });
     </script>
 </body>
-
 </html>
-
-
