@@ -3922,6 +3922,38 @@ app.get('/api/personas-con-roles', async (req, res) => {
     }
 });
 
+// Obtener proveedores Y clientes
+app.get('/api/personas-proveedor-cliente', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(`
+            SELECT DISTINCT
+                p.ID_PERSONA,
+                p.NOMBRE_COMPLETO,
+                p.IDENTIFICACION,
+                p.TELEFONO_PRINCIPAL,
+                p.EMAIL,
+                GROUP_CONCAT(DISTINCT r.NOMBRE ORDER BY r.NOMBRE SEPARATOR ', ') as roles,
+                MAX(CASE WHEN pr.ID_ROL = 4 THEN 1 ELSE 0 END) as es_proveedor,
+                MAX(CASE WHEN pr.ID_ROL IN (1,2,3) THEN 1 ELSE 0 END) as es_cliente
+            FROM PERSONAS p
+            INNER JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA
+            INNER JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
+            WHERE pr.ESTADO = 'ACTIVO'
+              AND p.ESTADO = 'ACTIVO'
+              AND pr.ID_ROL IN (1, 2, 3, 4)
+            GROUP BY p.ID_PERSONA, p.NOMBRE_COMPLETO, p.IDENTIFICACION,
+                     p.TELEFONO_PRINCIPAL, p.EMAIL
+            ORDER BY p.NOMBRE_COMPLETO
+        `);
+        await connection.end();
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al obtener personas proveedor/cliente:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
 // APIS PARA USUARIOS 
 // Obtener todos los usuarios
 app.get('/api/usuarios', async (req, res) => {
