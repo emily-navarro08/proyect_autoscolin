@@ -929,10 +929,13 @@
             exonerarCheckbox.disabled = true;
         }
         
-        const impuestosRow = document.querySelector('tr:has(td:contains("Impuestos"))');
-        if (impuestosRow) {
-            impuestosRow.style.display = 'none';
-        }
+        // Reemplaza el querySelector inválido por esto:
+        const filas = document.querySelectorAll('#detalleItems tfoot tr');
+        filas.forEach(fila => {
+            if (fila.textContent.includes('Impuestos')) {
+                fila.style.display = 'none';
+            }
+        });
     }
 
     // ===== CARGA DE CATÁLOGOS =====
