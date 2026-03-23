@@ -5410,11 +5410,14 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
         try {
             // PRIMERO: Obtener información completa de la venta
             const [ventaInfo] = await connection.execute(
-                `SELECT v.ID_VEHICULO, v.ES_INTERCAMBIO, v.ID_VENTA_ORIGEN,
+                `SELECT v.ID_VEHICULO, 
+                        veh.ES_INTERCAMBIO, 
+                        veh.ID_VENTA_ORIGEN,
                         v2.ID_VEHICULO AS VEHICULO_RECIBIDO_ID
-                 FROM VENTAS v
-                 LEFT JOIN VEHICULOS v2 ON v2.ID_VENTA_ORIGEN = v.ID_VENTA
-                 WHERE v.ID_VENTA = ?`,
+                FROM VENTAS v
+                INNER JOIN VEHICULOS veh ON v.ID_VEHICULO = veh.ID_VEHICULO
+                LEFT JOIN VEHICULOS v2 ON v2.ID_VENTA_ORIGEN = v.ID_VENTA
+                WHERE v.ID_VENTA = ?`,
                 [req.params.id]
             );
             
@@ -5481,11 +5484,9 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
             }
             
             // CUARTO: Si hay un vehículo recibido por intercambio, NO cambiar su estado
-            // Se mantiene como COMPRADO porque ahora es parte del inventario
             if (esIntercambio && idVehiculoRecibido) {
                 console.log(`Vehículo recibido por intercambio ${idVehiculoRecibido} se mantiene como COMPRADO`);
                 
-                // Opcional: Actualizar algún campo adicional si es necesario
                 await connection.execute(
                     `UPDATE VEHICULOS 
                      SET OBSERVACIONES = CONCAT(COALESCE(OBSERVACIONES, ''), 
@@ -5548,7 +5549,22 @@ app.put('/api/ventas/:id/rechazar', async (req, res) => {
     try {
         const { estado, motivo } = req.body;
         const connection = await mysql.createConnection(dbConfig);
-        
+        await connection.beginTransaction();
+
+        // 1. Obtener el vehículo asociado
+        const [ventaInfo] = await connection.execute(
+            `SELECT v.ID_VEHICULO 
+             FROM VENTAS v 
+             WHERE v.ID_VENTA = ?`,
+            [req.params.id]
+        );
+
+        if (ventaInfo.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Venta no encontrada' });
+        }
+
+        // 2. Actualizar estado de la venta
         const [result] = await connection.execute(
             `UPDATE VENTAS 
              SET ESTADO_PAGO = ?, 
@@ -5556,23 +5572,29 @@ app.put('/api/ventas/:id/rechazar', async (req, res) => {
              WHERE ID_VENTA = ?`,
             [estado || 'PLAN YA FUE ANULADO', motivo || 'Rechazada en facturación', req.params.id]
         );
-        
-        if (result.affectedRows === 0) {
-            await connection.end();
-            return res.status(404).json({ error: 'Venta no encontrada' });
-        }
-        
-        // Registrar en auditoría
+
+        // 3. Devolver el vehículo a COMPRADO
+        await connection.execute(
+            `UPDATE VEHICULOS 
+             SET ESTADO = 'COMPRADO'
+             WHERE ID_VEHICULO = ?`,
+            [ventaInfo[0].ID_VEHICULO]
+        );
+
+        // 4. Auditoría
         await connection.execute(
             `INSERT INTO AUDITORIA (ID_PERSONA, ACCION, DESCRIPCIÓN) 
              VALUES (?, 'RECHAZAR_VENTA', ?)`,
-            [req.user?.id || 1, `Venta ${req.params.id} rechazada. Motivo: ${motivo || 'No especificado'}`]
+            [1, `Venta ${req.params.id} rechazada. Motivo: ${motivo || 'No especificado'}`]
         );
-        
+
+        await connection.commit();
         await connection.end();
         res.json({ message: 'Venta rechazada exitosamente' });
-        
+
     } catch (err) {
+        await connection.rollback();
+        await connection.end();
         console.error('Error al rechazar venta:', err);
         res.status(500).json({ error: 'Error en el servidor', detalles: err.message });
     }
@@ -7510,7 +7532,6 @@ app.get('/api/financiero/meses-disponibles', async (req, res) => {
 });
 
 //  GET /api/financiero/gastos-plantilla
-//  Devuelve la lista de conceptos de gasto predefinidos
 app.get('/api/financiero/gastos-plantilla', async (req, res) => {
     res.json([
         { id: 1,  descripcion: 'ALQUILER',      tipo: 'ALQUILER'  },
