@@ -278,7 +278,7 @@
                         <a href="#" class="sidebar-btn"><i class="fas fa-clipboard-list"></i><span>Facturación</span></a>
                         <a href="#" class="sidebar-btn"><i class="fas fa-cash-register"></i><span>Recibos</span></a>
                         <a href="inventario_colab.html" class="sidebar-btn"><i class="fas fa-car"></i><span>Inventario</span></a>
-                        <a href="#clientes.html" class="sidebar-btn"><i class="fas fa-users"></i><span>Clientes</span></a>
+                        <a href="#" class="sidebar-btn"><i class="fas fa-users"></i><span>Clientes</span></a>
                         <a href="certificado_garantiacolab.html" class="sidebar-btn"><i class="fas fa-award"></i><span>Certificado</span></a>
                         <a href="plan_ventacolab.html" class="sidebar-btn active"><i class="fas fa-calendar-alt"></i><span>Plan Venta</span></a>
                         <a href="#" class="sidebar-btn"><i class="fas fa-hand-holding-usd"></i><span>Cuentas x Cobrar</span></a>
@@ -1342,38 +1342,10 @@
 
     //  PESTAÑAS
     function mostrar(id, event) {
-        // Validar si es la pestaña GENERAL
-        if (id === 'general') {
-            const valorNumPlan = document.getElementById('num_plan').value;
-            
-            // Verificar si hay un plan seleccionado O si es un plan nuevo
-            const esPlanExistente = selectedVentaId !== null && selectedVentaId !== undefined;
-            const esPlanNuevo = valorNumPlan === 'NUEVO';
-            
-            console.log('Validando acceso a GENERAL:', {
-                selectedVentaId,
-                valorNumPlan,
-                esPlanExistente,
-                esPlanNuevo
-            });
-            
-            if (!esPlanExistente && !esPlanNuevo) {
-                mostrarNotificacion('Debe seleccionar un plan existente (en ÍNDICE) o crear uno nuevo (botón NUEVO) para acceder a GENERAL', 'warning');
-                return; // No cambia de pestaña
-            }
-        }
-
-        // Ocultar todos los paneles
         document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-        
-        // Mostrar el panel seleccionado
         document.getElementById(id).style.display = 'block';
-        
-        // Actualizar clases activas de las pestañas
         document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        if (event && event.target) {
-            event.target.classList.add('active');
-        }
+        if (event && event.target) event.target.classList.add('active');
     }
 
     //  MENÚ MÓVIL
@@ -1910,7 +1882,6 @@
 
     //  NUEVO PLAN
     function nuevoplan() {
-        // Limpiar selección
         selectedVentaId = null;
         window.selectedVentaId = null;
         planActual = null;
@@ -1918,37 +1889,24 @@
         anticiposLocales = [];
         anticipo_fila_seleccionada = null;
 
-        // Limpiar todos los campos
-        document.querySelectorAll('.panel input:not([readonly]):not([type="radio"]):not([type="hidden"]), .panel select, .panel textarea').forEach(el => {
+        document.querySelectorAll('.panel input:not([readonly]):not([type="radio"]), .panel select, .panel textarea').forEach(el => {
             if (el.type === 'number') el.value = '0';
             else if (el.type === 'date') el.value = '';
-            else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
-        
-        // Establecer un valor claro para identificar que es NUEVO
         document.getElementById('num_plan').value = 'NUEVO';
         document.getElementById('fecha_plan').value = new Date().toISOString().split('T')[0];
 
         limpiarVendedor();
         limpiarAprobador();
 
-        // Limpiar anticipos
         document.getElementById('tbody-anticipos').innerHTML =
-            '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
+            '<tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
 
-        // Inicializar vehículos a recibir
-        inicializarVehiculosRecibir();
-
-        // Mostrar la pestaña GENERAL automáticamente después de crear nuevo plan
         mostrar('general', null);
-        
-        // Actualizar clases de las pestañas manualmente
-        document.querySelectorAll('.tabs button').forEach((b, index) => {
-            b.classList.toggle('active', index === 1); // El botón GENERAL es el segundo (índice 1)
-        });
-        
-        mostrarNotificacion('Nuevo plan iniciado. Complete los datos en GENERAL.', 'success');
+        document.querySelectorAll('.tabs button')[1].classList.add('active');
+        document.querySelectorAll('.tabs button')[0].classList.remove('active');
+        mostrarNotificacion('Nuevo plan iniciado', 'info');
     }
 
     // Inicializar el primer vehículo al cargar la página
@@ -2823,7 +2781,7 @@
 
         if (editarIdx !== null) {
             const a = anticiposLocales[editarIdx];
-            document.getElementById('fecha_vencimiento_anticipo').value = a.FECHA_VENCIMIENTO || a.fecha_vencimiento;
+            document.getElementById('fecha_vencimiento_anticipo').value = a.FECHA_VENCIMIENTO || a.fecha_vencimiento || '';
             document.getElementById('forma_pago_anticipo').value = a.FORMA_PAGO || a.forma_pago || '';
             document.getElementById('documento_anticipo').value = a.NUM_DOCUMENTO || a.documento || '';
             document.getElementById('monto_anticipo').value = a.MONTO_COLONES || a.monto_colones || 0;
@@ -2834,15 +2792,20 @@
             document.getElementById('transferencia').value = 0;
             document.getElementById('tarjeta').value = 0;
         } else {
+            // Limpiar campos pero mantener valores por defecto
             ['forma_pago_anticipo', 'documento_anticipo', 'realizado_anticipo', 'num_transferencia', 'nom_deposita', 'banco', 'num_tarjeta', 'tipo_tarjeta'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
+            
+            // Para números, poner 0
             ['monto_anticipo', 'monto_dolar_anticipo', 'efectivo', 'transferencia', 'tarjeta'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '0';
             });
-            document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '1';
+            
+            document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '500';
+            // La fecha ya se asignó al inicio de la función
         }
 
         document.getElementById('modalFormaPago').style.display = 'flex';
@@ -2856,10 +2819,15 @@
         const forma = document.getElementById('forma_pago_anticipo').value.trim();
         const doc = document.getElementById('documento_anticipo').value.trim();
         const realizado = document.getElementById('realizado_anticipo').value.trim();
-        const fecha = document.getElementById('fecha_anticipo').value;
+        let fecha = document.getElementById('fecha_anticipo').value;
+        
+        if (!fecha) {
+            fecha = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_anticipo').value = fecha;
+        }
 
-        if (!forma || !doc || !realizado || !fecha) {
-            mostrarNotificacion('Complete todos los campos requeridos', 'warning');
+        if (!forma) {
+            mostrarNotificacion('Debe seleccionar una forma de pago', 'warning');
             return;
         }
 
@@ -2876,17 +2844,17 @@
         const payload = {
             id_financiamiento: financiamientoActual?.ID_FINANCIAMIENTOS,
             forma_pago: forma,
-            num_documento: doc,
+            num_documento: doc || `ANT-${Date.now()}`, 
             monto_colones: monto,
             monto_dolares: dolar,
             moneda: 'CRC',
             tipo_cambio: tc,
-            realizado_por: realizado,
+            realizado_por: realizado || 'Sistema',
             fecha_anticipo: fecha,
             fecha_vencimiento: document.getElementById('fecha_vencimiento_anticipo').value || null,
             saldo_pendiente: monto,
             estado_anticipo: 'PENDIENTE',
-            observaciones: `Anticipo creado por ${realizado}`
+            observaciones: `Anticipo creado por ${realizado || 'Sistema'}`
         };
 
         mostrarLoading(true);
