@@ -2823,7 +2823,7 @@
 
         if (editarIdx !== null) {
             const a = anticiposLocales[editarIdx];
-            document.getElementById('fecha_vencimiento_anticipo').value = a.FECHA_VENCIMIENTO || a.fecha_vencimiento;
+            document.getElementById('fecha_vencimiento_anticipo').value = a.FECHA_VENCIMIENTO || a.fecha_vencimiento || '';
             document.getElementById('forma_pago_anticipo').value = a.FORMA_PAGO || a.forma_pago || '';
             document.getElementById('documento_anticipo').value = a.NUM_DOCUMENTO || a.documento || '';
             document.getElementById('monto_anticipo').value = a.MONTO_COLONES || a.monto_colones || 0;
@@ -2838,11 +2838,13 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
+            
             ['monto_anticipo', 'monto_dolar_anticipo', 'efectivo', 'transferencia', 'tarjeta'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '0';
             });
-            document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '1';
+            
+            document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '500';
         }
 
         document.getElementById('modalFormaPago').style.display = 'flex';
@@ -2856,10 +2858,16 @@
         const forma = document.getElementById('forma_pago_anticipo').value.trim();
         const doc = document.getElementById('documento_anticipo').value.trim();
         const realizado = document.getElementById('realizado_anticipo').value.trim();
-        const fecha = document.getElementById('fecha_anticipo').value;
+        let fecha = document.getElementById('fecha_anticipo').value;
+        
+        // Si no hay fecha, usar la fecha actual
+        if (!fecha) {
+            fecha = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_anticipo').value = fecha;
+        }
 
-        if (!forma || !doc || !realizado || !fecha) {
-            mostrarNotificacion('Complete todos los campos requeridos', 'warning');
+        if (!forma) {
+            mostrarNotificacion('Debe seleccionar una forma de pago', 'warning');
             return;
         }
 
@@ -2876,17 +2884,17 @@
         const payload = {
             id_financiamiento: financiamientoActual?.ID_FINANCIAMIENTOS,
             forma_pago: forma,
-            num_documento: doc,
+            num_documento: doc || `ANT-${Date.now()}`,
             monto_colones: monto,
             monto_dolares: dolar,
             moneda: 'CRC',
             tipo_cambio: tc,
-            realizado_por: realizado,
+            realizado_por: realizado || 'Sistema',
             fecha_anticipo: fecha,
             fecha_vencimiento: document.getElementById('fecha_vencimiento_anticipo').value || null,
             saldo_pendiente: monto,
             estado_anticipo: 'PENDIENTE',
-            observaciones: `Anticipo creado por ${realizado}`
+            observaciones: `Anticipo creado por ${realizado || 'Sistema'}`
         };
 
         mostrarLoading(true);
