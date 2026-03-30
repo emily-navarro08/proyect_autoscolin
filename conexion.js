@@ -5954,10 +5954,10 @@ app.post('/api/plan-ventas', async (req, res) => {
             }
         }
 
-        // ─── 8. Actualizar estado del vehículo a VENDIDO ──────────
+        // ─── 8. Mantener el estado del vehículo a COMPRADO ──────────
         if (idVehiculo) {
             await connection.execute(
-                'UPDATE VEHICULOS SET ESTADO = "VENDIDO" WHERE ID_VEHICULO = ?',
+                'UPDATE VEHICULOS SET ESTADO = "COMPRADO" WHERE ID_VEHICULO = ?',
                 [idVehiculo]
             );
         }
