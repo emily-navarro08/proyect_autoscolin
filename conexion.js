@@ -5868,28 +5868,29 @@ app.post('/api/plan-ventas', async (req, res) => {
                         INTERESXADELANTO, PRESTAMO_TOTAL, PLAZO_MESES, FECHA_PRIMERPAGO,
                         ENTIDAD_FINANCIERA, CUOTA_MENSUAL, OBSERVACIONES, INTERESES_TOTAL
                     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                [
-                    idVenta,
-                    financiamiento.valor_consumo || 0,
-                    financiamiento.prima || 0,
-                    financiamiento.honorarios || 0,
-                    financiamiento.monto_financiar || 0,
-                    financiamiento.comision || 0,
-                    financiamiento.total || 0,
-                    financiamiento.tasa_nominal || 0,
-                    financiamiento.tasa_mensual || 0,
-                    financiamiento.interes_moratorio || 0,
-                    financiamiento.intereses_adelantado || 0,
-                    financiamiento.prestamo_total || 0,
-                    financiamiento.plazo_meses || 0,
-                    financiamiento.fecha_primer_pago || null,
-                    financiamiento.entidad_financiera || null,
-                    financiamiento.cuota_mensual || 0,
-                    financiamiento.observaciones || null,
-                    financiamiento.intereses_total || 0
-                ]
-            )};
-            idFinanciamiento = rf.insertId;
+                    [
+                        idVenta,
+                        financiamiento.valor_consumo || 0,
+                        financiamiento.prima || 0,
+                        financiamiento.honorarios || 0,
+                        financiamiento.monto_financiar || 0,
+                        financiamiento.comision || 0,
+                        financiamiento.total || 0,
+                        financiamiento.tasa_nominal || 0,
+                        financiamiento.tasa_mensual || 0,
+                        financiamiento.interes_moratorio || 0,
+                        financiamiento.intereses_adelantado || 0,
+                        financiamiento.prestamo_total || 0,
+                        financiamiento.plazo_meses || 0,
+                        financiamiento.fecha_primer_pago || null,
+                        financiamiento.entidad_financiera || null,
+                        financiamiento.cuota_mensual || 0,
+                        financiamiento.observaciones || null,
+                        financiamiento.intereses_total || 0
+                    ]
+                );
+                idFinanciamiento = rf.insertId;
+            }
         }
 
         // ─── 6. ANTICIPOS (cuotas del crédito) ────────────────────
