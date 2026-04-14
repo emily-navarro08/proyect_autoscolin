@@ -797,7 +797,7 @@
                                         <th>Código</th>
                                         <th>Descripción</th>
                                         <th>Cantidad</th>
-                                        <th>Precio</th>
+                                        <th>Precio Público</th>
                                         <th>% Descuento</th>
                                         <th>Total</th>
                                     </tr>
@@ -1210,11 +1210,11 @@
                 document.getElementById('intercambioBadge').style.display = 'none';
             }
             
-            // ===== PRECIOS Y COSTOS (ahora van en Detalles Adicionales) =====
+            // ===== PRECIOS Y COSTOS =====
             const costos = data.COSTOS || {};
             console.log('Costos:', costos);
             
-            // ===== EXTRAS (también van en Detalles Adicionales) =====
+            // ===== EXTRAS =====
             const extras = data.EXTRAS || [];
             console.log('Extras:', extras);
             
@@ -1241,6 +1241,17 @@
                         monto: parseFloat(costos.PRECIO_TRANSPASO) || 0
                     });
                 }
+
+                if (costos.TRASPASO_PAGADO !== undefined && costos.TRASPASO_PAGADO !== null) {
+                    todosLosDetalles.push({
+                        descripcion: 'Gastos de Traspaso',
+                        monto: 0,
+                        textoExtra: costos.TRASPASO_PAGADO == 1 ? 'Pagado por Autos Colín' : 'Pagado por Cliente',
+                        esTexto: true,
+                        icono: costos.TRASPASO_PAGADO == 1 ? 'fa-building' : 'fa-user',
+                        color: costos.TRASPASO_PAGADO == 1 ? '#4caf50' : '#ff9800'
+                    });
+                }                
                 
                 if (costos.COSTO > 0) {
                     todosLosDetalles.push({
@@ -1380,8 +1391,8 @@
                     extrasContainer.innerHTML = '<p style="color: #7f8c8d; text-align: center; padding: 20px;">No hay detalles adicionales</p>';
                 } else {
                     todosLosDetalles.forEach(detalle => {
-                        // Si el monto es 0 pero hay descripción (como la tasa), mostrar de otra forma
-                        if (detalle.monto === 0 && detalle.descripcion.includes('%')) {
+                        // Si es un elemento de texto (sin monto)
+                        if (detalle.esTexto) {
                             const detalleDiv = document.createElement('div');
                             detalleDiv.style.cssText = `
                                 display: flex;
@@ -1389,17 +1400,24 @@
                                 align-items: center;
                                 padding: 12px 15px;
                                 border-bottom: 1px solid #e0e0e0;
-                                background-color: #f0f2f5;
+                                background-color: #f8f9fa;
+                                border-left: 4px solid ${detalle.color || '#3498db'};
+                                margin-bottom: 5px;
+                                border-radius: 4px;
                             `;
                             detalleDiv.innerHTML = `
                                 <div>
-                                    <i class="fas fa-percent" style="color: #f39c12; margin-right: 10px;"></i>
-                                    ${detalle.descripcion}
+                                    <i class="fas ${detalle.icono || 'fa-info-circle'}" style="color: ${detalle.color || '#3498db'}; margin-right: 10px;"></i>
+                                    <strong>${detalle.descripcion}</strong>
                                 </div>
-                                <div style="font-weight: 600; color: #f39c12;"></div>
+                                <div style="font-weight: 600; color: ${detalle.color || '#2c3e50'};">
+                                    ${detalle.textoExtra}
+                                </div>
                             `;
                             extrasContainer.appendChild(detalleDiv);
-                        } else if (detalle.monto > 0) {
+                        } 
+                        // Si es un detalle con monto
+                        else if (detalle.monto > 0) {
                             const detalleDiv = document.createElement('div');
                             detalleDiv.style.cssText = `
                                 display: flex;
@@ -1422,6 +1440,9 @@
                             } else if (detalle.descripcion.includes('Cuota')) {
                                 icono = 'fa-calendar-alt';
                                 colorIcono = '#f39c12';
+                            } else if (detalle.descripcion.includes('Traspaso')) {
+                                icono = 'fa-file-signature';
+                                colorIcono = '#9b59b6';
                             }
                             
                             detalleDiv.innerHTML = `
@@ -1430,6 +1451,26 @@
                                     ${detalle.descripcion}
                                 </div>
                                 <div style="font-weight: 600;">₡${formatearNumero(detalle.monto)}</div>
+                            `;
+                            extrasContainer.appendChild(detalleDiv);
+                        }
+                        // Si es porcentaje
+                        else if (detalle.monto === 0 && detalle.descripcion.includes('%')) {
+                            const detalleDiv = document.createElement('div');
+                            detalleDiv.style.cssText = `
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 12px 15px;
+                                border-bottom: 1px solid #e0e0e0;
+                                background-color: #f0f2f5;
+                            `;
+                            detalleDiv.innerHTML = `
+                                <div>
+                                    <i class="fas fa-percent" style="color: #f39c12; margin-right: 10px;"></i>
+                                    ${detalle.descripcion}
+                                </div>
+                                <div style="font-weight: 600; color: #f39c12;"></div>
                             `;
                             extrasContainer.appendChild(detalleDiv);
                         }
