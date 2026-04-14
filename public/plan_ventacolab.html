@@ -266,7 +266,7 @@
             <div class="sidebar-content">
                 <h2>Autos Colín</h2>
                 <ul class="menu-items">
-                    <li><a href="menu_colaborador.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
                     <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
                     <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
                     <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
@@ -305,6 +305,10 @@
                     <h2><i class="fas fa-list-ol"></i> Índice de Planes</h2>
                     <!-- Filtros se insertan aquí dinámicamente -->
                     <div id="filtros-container"></div>
+                    <div class="acciones">
+                        <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                        <button id="btn-anular-plan" onclick="anularPlanSeleccionado()"><i class="fas fa-ban"></i> Anular</button>
+                    </div>
                     <table id="tabla-planes">
                         <thead>
                             <tr>
@@ -322,10 +326,6 @@
                             <tr><td colspan="8" style="text-align:center;padding:30px;color:#9ca3af;"><i class="fas fa-spinner fa-spin"></i> Cargando planes...</td></tr>
                         </tbody>
                     </table>
-                    <div class="acciones">
-                        <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
-                        <button id="btn-anular-plan" onclick="anularPlanSeleccionado()"><i class="fas fa-ban"></i> Anular</button>
-                    </div>
                 </section>
                 <!-- ======= GENERAL ======= -->
                 <section id="general" class="panel">
@@ -660,6 +660,19 @@
                             <label>Monto Traspaso:</label>
                             <input type="number" id="vehiculo-vendido-monto-traspaso">
                         </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>¿Quién paga el traspaso?</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="traspaso_pagado" value="0" checked>
+                                    Cliente paga
+                                </label>
+                                <label>
+                                    <input type="radio" name="traspaso_pagado" value="1">
+                                    Autos Colín paga
+                                </label>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>P.V. Purdi #:</label>
                             <input type="text" id="vehiculo-vendido-pv-purdi">
@@ -667,7 +680,7 @@
                         <div class="form-group">
                             <label>Extras:</label>
                             <textarea type="text" id="vehiculo-vendido-extras"></textarea>
-                        </div>                        
+                        </div>                       
                       
                         <!-- ID oculto del vehículo seleccionado -->
                         <input type="hidden" id="vehiculo-vendido-id">
@@ -1076,9 +1089,15 @@
                         </div>
 
                         <div class="acciones" style="grid-column:span 2;">
-                            <button class="btn-guardar-plan" onclick="guardarPlanCompleto()"><i class="fas fa-save"></i> Grabar Plan</button>
-                            <button onclick="cancelarPlan()"><i class="fas fa-times"></i> Cancelar</button>
-                            <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                            <button class="btn-guardar-plan" onclick="confirmarGuardarPlan(event)">
+                                <i class="fas fa-save"></i> Grabar Plan
+                            </button>
+                            <button onclick="confirmarCancelarPlan(event)">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button onclick="confirmarNuevoPlan(event)">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -1342,11 +1361,74 @@
 
     //  PESTAÑAS
     function mostrar(id, event) {
+        // Validar si es la pestaña GENERAL
+        if (id === 'general') {
+            const valorNumPlan = document.getElementById('num_plan').value;
+            
+            // Verificar si hay un plan seleccionado O si es un plan nuevo
+            const esPlanExistente = selectedVentaId !== null && selectedVentaId !== undefined;
+            const esPlanNuevo = valorNumPlan === 'NUEVO';
+            
+            console.log('Validando acceso a GENERAL:', {
+                selectedVentaId,
+                valorNumPlan,
+                esPlanExistente,
+                esPlanNuevo
+            });
+            
+            if (!esPlanExistente && !esPlanNuevo) {
+                mostrarNotificacion('Debe seleccionar un plan existente (en ÍNDICE) o crear uno nuevo (botón NUEVO) para acceder a GENERAL', 'warning');
+                return; // No cambia de pestaña
+            }
+        }
+
+        // Ocultar todos los paneles
         document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+        
+        // Mostrar el panel seleccionado
         document.getElementById(id).style.display = 'block';
+        
+        // Actualizar clases activas de las pestañas
         document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        if (event && event.target) event.target.classList.add('active');
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
     }
+
+    // Confirmación para GUARDAR PLAN
+    function confirmarGuardarPlan(event) {
+        event.preventDefault();
+        
+        const numPlan = document.getElementById('num_plan').value;
+        const esNuevo = numPlan === 'NUEVO' || !selectedVentaId;
+        const mensaje = esNuevo 
+            ? '¿Está seguro de guardar el NUEVO plan de venta?'
+            : '¿Está seguro de guardar los cambios en este plan?';
+        
+        if (confirm(mensaje)) {
+            guardarPlanCompleto();
+        }
+    }
+
+    // Confirmación para CANCELAR
+    function confirmarCancelarPlan(event) {
+        event.preventDefault();
+        
+        if (confirm('¿Está seguro de cancelar? Los cambios no guardados se perderán.')) {
+            cancelarPlan();
+        }
+    }
+
+    // Confirmación para NUEVO PLAN
+    function confirmarNuevoPlan(event) {
+        event.preventDefault();
+        
+        let mensaje = '¿Está seguro de crear un nuevo plan?';
+        
+        if (confirm(mensaje)) {
+            nuevoplan();
+        }
+    } 
 
     //  MENÚ MÓVIL
     document.getElementById('menuToggle').addEventListener('click', () => {
@@ -1667,7 +1749,7 @@
             if (data.FECHA_VENTA) document.getElementById('fecha_plan').value = data.FECHA_VENTA.split('T')[0];
             document.getElementById('notario').value = data.NOMBRE_NOTARIO || '';
 
-            // Cargar montos desde COSTOS (ahora es un objeto, no un array)
+            // Cargar montos desde COSTOS
             if (data.COSTOS) {
                 console.log('Costos del vehículo encontrados:', data.COSTOS);
                 
@@ -1725,6 +1807,12 @@
                 // Si encontramos costos, adjuntarlos al vehículo
                 if (data.COSTOS) {
                     data.VEHICULO.COSTOS = data.COSTOS;
+
+                    const traspasoPagadoVal = data.COSTOS.TRASPASO_PAGADO ?? 0;
+                    const radioTraspasoLoad = document.querySelector(
+                        `input[name="traspaso_pagado"][value="${traspasoPagadoVal}"]`
+                    );
+                    if (radioTraspasoLoad) radioTraspasoLoad.checked = true;                
                 }
                 poblarCamposVehiculo('vendido', data.VEHICULO);
             }
@@ -1836,9 +1924,15 @@
             if (v.COSTOS.PRECIO_PUBLICO) {
                 set(`${p}-monto-venta`, v.COSTOS.PRECIO_PUBLICO);
             }
-            if (v.COSTOS.MONTO_TRANSPASO) {
-                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRANSPASO);
+            if (v.COSTOS.MONTO_TRASPASO) {
+                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRASPASO);
             }
+            // Cargar radio button traspaso
+            const traspasoPagado = v.COSTOS.TRASPASO_PAGADO ?? 0;
+            const radioTraspaso = document.querySelector(
+                `input[name="traspaso_pagado"][value="${traspasoPagado}"]`
+            );
+            if (radioTraspaso) radioTraspaso.checked = true;
         }
         
         setTimeout(() => {
@@ -1882,6 +1976,7 @@
 
     //  NUEVO PLAN
     function nuevoplan() {
+        // Limpiar selección
         selectedVentaId = null;
         window.selectedVentaId = null;
         planActual = null;
@@ -1889,24 +1984,37 @@
         anticiposLocales = [];
         anticipo_fila_seleccionada = null;
 
-        document.querySelectorAll('.panel input:not([readonly]):not([type="radio"]), .panel select, .panel textarea').forEach(el => {
+        // Limpiar todos los campos
+        document.querySelectorAll('.panel input:not([readonly]):not([type="radio"]):not([type="hidden"]), .panel select, .panel textarea').forEach(el => {
             if (el.type === 'number') el.value = '0';
             else if (el.type === 'date') el.value = '';
+            else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
+        
+        // Establecer un valor claro para identificar que es NUEVO
         document.getElementById('num_plan').value = 'NUEVO';
         document.getElementById('fecha_plan').value = new Date().toISOString().split('T')[0];
 
         limpiarVendedor();
         limpiarAprobador();
 
+        // Limpiar anticipos
         document.getElementById('tbody-anticipos').innerHTML =
-            '<tr><td colspan="7" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
+            '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No hay anticipos registrados</td></tr>';
 
+        // Inicializar vehículos a recibir
+        inicializarVehiculosRecibir();
+
+        // Mostrar la pestaña GENERAL automáticamente después de crear nuevo plan
         mostrar('general', null);
-        document.querySelectorAll('.tabs button')[1].classList.add('active');
-        document.querySelectorAll('.tabs button')[0].classList.remove('active');
-        mostrarNotificacion('Nuevo plan iniciado', 'info');
+        
+        // Actualizar clases de las pestañas manualmente
+        document.querySelectorAll('.tabs button').forEach((b, index) => {
+            b.classList.toggle('active', index === 1); // El botón GENERAL es el segundo (índice 1)
+        });
+        
+        mostrarNotificacion('Nuevo plan iniciado. Complete los datos en GENERAL.', 'success');
     }
 
     // Inicializar el primer vehículo al cargar la página
@@ -2158,9 +2266,12 @@
 
                 // COSTOS DEL VEHÍCULO - Aquí van los montos
                 costos_vehiculo: {
-                    precio_compra: montoVenta, // PRECIO_COMPRA en COSTOS_VEHICULO
-                    precio_publico: montoVenta, // PRECIO_PUBLICO en COSTOS_VEHICULO
-                    monto_traspaso: montoTraspaso, // MONTO_TRANSPASO en COSTOS_VEHICULO
+                    precio_compra: montoVenta,
+                    precio_publico: montoVenta,
+                    monto_traspaso: montoTraspaso,
+                    traspaso_pagado: parseInt(
+                        document.querySelector('input[name="traspaso_pagado"]:checked')?.value ?? 0
+                    ),
                     moneda: moneda,
                     tipo_cambio_compra: tipoCambio,
                     costo: montoVenta,
@@ -2680,6 +2791,13 @@
                     if (v.monto_traspaso) {
                         document.getElementById('vehiculo-vendido-monto-traspaso').value = v.monto_traspaso;
                     }
+
+                    // Cargar radio traspaso desde búsqueda
+                    const traspasoPagadoBusq = v.TRASPASO_PAGADO ?? 0;
+                    const radioTrasB = document.querySelector(
+                        `input[name="traspaso_pagado"][value="${traspasoPagadoBusq}"]`
+                    );
+                    if (radioTrasB) radioTrasB.checked = true;                    
                     
                     // Actualizar moneda y tipo de cambio
                     if (v.MONEDA) {
@@ -2792,20 +2910,17 @@
             document.getElementById('transferencia').value = 0;
             document.getElementById('tarjeta').value = 0;
         } else {
-            // Limpiar campos pero mantener valores por defecto
             ['forma_pago_anticipo', 'documento_anticipo', 'realizado_anticipo', 'num_transferencia', 'nom_deposita', 'banco', 'num_tarjeta', 'tipo_tarjeta'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
             
-            // Para números, poner 0
             ['monto_anticipo', 'monto_dolar_anticipo', 'efectivo', 'transferencia', 'tarjeta'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '0';
             });
             
             document.getElementById('tipo_cambio_anticipo').value = document.getElementById('tipo_cambio').value || '500';
-            // La fecha ya se asignó al inicio de la función
         }
 
         document.getElementById('modalFormaPago').style.display = 'flex';
@@ -2821,6 +2936,7 @@
         const realizado = document.getElementById('realizado_anticipo').value.trim();
         let fecha = document.getElementById('fecha_anticipo').value;
         
+        // Si no hay fecha, usar la fecha actual
         if (!fecha) {
             fecha = new Date().toISOString().split('T')[0];
             document.getElementById('fecha_anticipo').value = fecha;
@@ -2844,7 +2960,7 @@
         const payload = {
             id_financiamiento: financiamientoActual?.ID_FINANCIAMIENTOS,
             forma_pago: forma,
-            num_documento: doc || `ANT-${Date.now()}`, 
+            num_documento: doc || `ANT-${Date.now()}`,
             monto_colones: monto,
             monto_dolares: dolar,
             moneda: 'CRC',
