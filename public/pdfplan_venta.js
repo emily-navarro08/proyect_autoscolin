@@ -465,7 +465,8 @@ async function generarPDFPlanVenta() {
         doc.setLineWidth(0.3);
         doc.rect(60, checkboxY-2, 4, 4); // Movido más a la derecha
 
-        const clienteMarcado = data.PAGADO_POR_CLIENTE || false;
+        const traspasoPagado = data.COSTOS?.TRASPASO_PAGADO ?? 0;
+        const clienteMarcado = traspasoPagado === 0;
         if (clienteMarcado) {
             doc.setLineWidth(0.5);
             doc.line(60, checkboxY-2, 64, checkboxY+2);
@@ -478,7 +479,7 @@ async function generarPDFPlanVenta() {
         // Checkbox 2: Autos Colin
         doc.rect(100, checkboxY-2, 4, 4);
 
-        const autosColinMarcado = data.PAGADO_POR_AUTOSCOLIN || false;
+        const autosColinMarcado = traspasoPagado === 1;
         if (autosColinMarcado) {
             doc.setLineWidth(0.5);
             doc.line(100, checkboxY-2, 104, checkboxY+2);
