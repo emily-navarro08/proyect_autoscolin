@@ -305,6 +305,10 @@
                     <h2><i class="fas fa-list-ol"></i> Índice de Planes</h2>
                     <!-- Filtros se insertan aquí dinámicamente -->
                     <div id="filtros-container"></div>
+                    <div class="acciones">
+                        <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                        <button id="btn-anular-plan" onclick="anularPlanSeleccionado()"><i class="fas fa-ban"></i> Anular</button>
+                    </div>
                     <table id="tabla-planes">
                         <thead>
                             <tr>
@@ -322,10 +326,6 @@
                             <tr><td colspan="8" style="text-align:center;padding:30px;color:#9ca3af;"><i class="fas fa-spinner fa-spin"></i> Cargando planes...</td></tr>
                         </tbody>
                     </table>
-                    <div class="acciones">
-                        <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
-                        <button id="btn-anular-plan" onclick="anularPlanSeleccionado()"><i class="fas fa-ban"></i> Anular</button>
-                    </div>
                 </section>
                 <!-- ======= GENERAL ======= -->
                 <section id="general" class="panel">
@@ -660,6 +660,19 @@
                             <label>Monto Traspaso:</label>
                             <input type="number" id="vehiculo-vendido-monto-traspaso">
                         </div>
+                        <div class="form-group" style="grid-column:span 2;">
+                            <label>¿Quién paga el traspaso?</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="traspaso_pagado" value="0" checked>
+                                    Cliente paga
+                                </label>
+                                <label>
+                                    <input type="radio" name="traspaso_pagado" value="1">
+                                    Autos Colín paga
+                                </label>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>P.V. Purdi #:</label>
                             <input type="text" id="vehiculo-vendido-pv-purdi">
@@ -667,7 +680,7 @@
                         <div class="form-group">
                             <label>Extras:</label>
                             <textarea type="text" id="vehiculo-vendido-extras"></textarea>
-                        </div>                        
+                        </div>                       
                       
                         <!-- ID oculto del vehículo seleccionado -->
                         <input type="hidden" id="vehiculo-vendido-id">
@@ -1076,9 +1089,15 @@
                         </div>
 
                         <div class="acciones" style="grid-column:span 2;">
-                            <button class="btn-guardar-plan" onclick="guardarPlanCompleto()"><i class="fas fa-save"></i> Grabar Plan</button>
-                            <button onclick="cancelarPlan()"><i class="fas fa-times"></i> Cancelar</button>
-                            <button onclick="nuevoplan()"><i class="fas fa-plus"></i> Nuevo</button>
+                            <button class="btn-guardar-plan" onclick="confirmarGuardarPlan(event)">
+                                <i class="fas fa-save"></i> Grabar Plan
+                            </button>
+                            <button onclick="confirmarCancelarPlan(event)">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button onclick="confirmarNuevoPlan(event)">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -1375,6 +1394,41 @@
             event.target.classList.add('active');
         }
     }
+
+    // Confirmación para GUARDAR PLAN
+    function confirmarGuardarPlan(event) {
+        event.preventDefault();
+        
+        const numPlan = document.getElementById('num_plan').value;
+        const esNuevo = numPlan === 'NUEVO' || !selectedVentaId;
+        const mensaje = esNuevo 
+            ? '¿Está seguro de guardar el NUEVO plan de venta?'
+            : '¿Está seguro de guardar los cambios en este plan?';
+        
+        if (confirm(mensaje)) {
+            guardarPlanCompleto();
+        }
+    }
+
+    // Confirmación para CANCELAR
+    function confirmarCancelarPlan(event) {
+        event.preventDefault();
+        
+        if (confirm('¿Está seguro de cancelar? Los cambios no guardados se perderán.')) {
+            cancelarPlan();
+        }
+    }
+
+    // Confirmación para NUEVO PLAN
+    function confirmarNuevoPlan(event) {
+        event.preventDefault();
+        
+        let mensaje = '¿Está seguro de crear un nuevo plan?';
+        
+        if (confirm(mensaje)) {
+            nuevoplan();
+        }
+    } 
 
     //  MENÚ MÓVIL
     document.getElementById('menuToggle').addEventListener('click', () => {
@@ -1695,7 +1749,7 @@
             if (data.FECHA_VENTA) document.getElementById('fecha_plan').value = data.FECHA_VENTA.split('T')[0];
             document.getElementById('notario').value = data.NOMBRE_NOTARIO || '';
 
-            // Cargar montos desde COSTOS (ahora es un objeto, no un array)
+            // Cargar montos desde COSTOS
             if (data.COSTOS) {
                 console.log('Costos del vehículo encontrados:', data.COSTOS);
                 
@@ -1753,6 +1807,12 @@
                 // Si encontramos costos, adjuntarlos al vehículo
                 if (data.COSTOS) {
                     data.VEHICULO.COSTOS = data.COSTOS;
+
+                    const traspasoPagadoVal = data.COSTOS.TRASPASO_PAGADO ?? 0;
+                    const radioTraspasoLoad = document.querySelector(
+                        `input[name="traspaso_pagado"][value="${traspasoPagadoVal}"]`
+                    );
+                    if (radioTraspasoLoad) radioTraspasoLoad.checked = true;                
                 }
                 poblarCamposVehiculo('vendido', data.VEHICULO);
             }
@@ -1864,9 +1924,15 @@
             if (v.COSTOS.PRECIO_PUBLICO) {
                 set(`${p}-monto-venta`, v.COSTOS.PRECIO_PUBLICO);
             }
-            if (v.COSTOS.MONTO_TRANSPASO) {
-                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRANSPASO);
+            if (v.COSTOS.MONTO_TRASPASO) {
+                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRASPASO);
             }
+            // Cargar radio button traspaso
+            const traspasoPagado = v.COSTOS.TRASPASO_PAGADO ?? 0;
+            const radioTraspaso = document.querySelector(
+                `input[name="traspaso_pagado"][value="${traspasoPagado}"]`
+            );
+            if (radioTraspaso) radioTraspaso.checked = true;
         }
         
         setTimeout(() => {
@@ -2200,9 +2266,12 @@
 
                 // COSTOS DEL VEHÍCULO - Aquí van los montos
                 costos_vehiculo: {
-                    precio_compra: montoVenta, // PRECIO_COMPRA en COSTOS_VEHICULO
-                    precio_publico: montoVenta, // PRECIO_PUBLICO en COSTOS_VEHICULO
-                    monto_traspaso: montoTraspaso, // MONTO_TRANSPASO en COSTOS_VEHICULO
+                    precio_compra: montoVenta,
+                    precio_publico: montoVenta,
+                    monto_traspaso: montoTraspaso,
+                    traspaso_pagado: parseInt(
+                        document.querySelector('input[name="traspaso_pagado"]:checked')?.value ?? 0
+                    ),
                     moneda: moneda,
                     tipo_cambio_compra: tipoCambio,
                     costo: montoVenta,
@@ -2722,6 +2791,13 @@
                     if (v.monto_traspaso) {
                         document.getElementById('vehiculo-vendido-monto-traspaso').value = v.monto_traspaso;
                     }
+
+                    // Cargar radio traspaso desde búsqueda
+                    const traspasoPagadoBusq = v.TRASPASO_PAGADO ?? 0;
+                    const radioTrasB = document.querySelector(
+                        `input[name="traspaso_pagado"][value="${traspasoPagadoBusq}"]`
+                    );
+                    if (radioTrasB) radioTrasB.checked = true;                    
                     
                     // Actualizar moneda y tipo de cambio
                     if (v.MONEDA) {
@@ -3202,4 +3278,4 @@
     <script src="pdfplan_venta.js"></script>
     
 </body>
-</html>s
+</html>
