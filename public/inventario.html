@@ -884,7 +884,9 @@
                                         </tr>
                                         <tr>
                                             <td class="input-cell">Modelo
-                                                <input type="text" class="vehicle-input" id="modalModelo">
+                                                <select class="vehicle-input" id="modalModelo">
+                                                    <option value="">Seleccione año</option>
+                                                </select>
                                             </td>
                                         </tr>
                                         <tr>
@@ -1121,6 +1123,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         cargarCatalogos();
         cargarVehiculos();
+        llenarSelectAnos();
         
         // Configurar menú móvil
         document.getElementById('menuToggle').addEventListener('click', toggleMenu);
@@ -1185,6 +1188,26 @@
             });
         });
     });
+
+    // Función para llenar el select de años (modelo)
+    function llenarSelectAnos() {
+        const selectAnos = document.getElementById('modalModelo');
+        if (!selectAnos) return;
+        
+        const anioActual = new Date().getFullYear();
+        // Limpiar opciones existentes (excepto la primera)
+        while (selectAnos.options.length > 1) {
+            selectAnos.remove(1);
+        }
+        
+        // Agregar años desde el actual + 1 hasta 40 años atrás
+        for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+            const option = document.createElement('option');
+            option.value = y;
+            option.textContent = y;
+            selectAnos.appendChild(option);
+        }
+    }
 
     // ===== FUNCIÓN PARA OBTENER TIPO DE CAMBIO ACTUAL =====
     async function obtenerTipoCambioActual() {
@@ -1748,7 +1771,11 @@
         document.getElementById('modalDescripcion').value = `${v.marca_nombre || ''} ${v.ESTILO || ''} ${v.MODELO || ''}`;
         document.getElementById('modalEstilo').value = v.ESTILO || '';
         document.getElementById('modalTraccion').value = v.TRACCION || '';
-        document.getElementById('modalModelo').value = v.MODELO || '';
+        if (v.MODELO) {
+            document.getElementById('modalModelo').value = v.MODELO;
+        } else {
+            document.getElementById('modalModelo').value = '';
+        }
         document.getElementById('modalPV').value = v.PV || '';
         document.getElementById('modalMotor').value = v.MOTOR || '';
         document.getElementById('modalCC').value = v.C_C || '';
@@ -1917,6 +1944,7 @@
         document.getElementById('modalSaldoDolar').value = formatearNumero(saldoCRC / tipoCambio);
         
         // Otros campos en colones
+        document.getElementById('modalMontoTraspaso').value = formatearNumero(parseFloat(c.MONTO_TRASPASO) || 0);
         document.getElementById('modalPCDescuento').value = formatearNumero(c.PRECIO_DESCUENTO || 0);
         document.getElementById('modalPrimaFinanc').value = formatearNumero(c.PRIMA_FINANCIAMIENTO || 0);
         document.getElementById('modalCuotaFinanc').value = formatearNumero(c.CUOTA_FINANCIAMIENTO || 0);
@@ -2109,7 +2137,7 @@
         
         // Cálculos en colones
         const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
-        const totalInversionCRC = comisionCRC + primaCRC + totalObservacionesCRC;
+        const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
         const saldoCRC = costoCompraCRC - primaCRC;
         const precioCostoCRC = comisionCRC + costoCompraCRC + totalObservacionesCRC;
         
@@ -2302,7 +2330,7 @@
 
             // Cálculos en colones
             const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
-            const totalInversionCRC = comisionCRC + primaCRC + totalObservacionesCRC;
+            const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
             const precioCostoCRC = comisionCRC + costoTotalCRC + totalObservacionesCRC;
             const saldoCRC = costoTotalCRC - primaCRC;
 
@@ -2316,6 +2344,7 @@
                 COMISION: comisionCRC,
                 TOTAL_INVERSION: totalInversionCRC,
                 PRECIO_COSTO: precioCostoCRC,
+                MONTO_TRASPASO: parsearNumero(document.getElementById('modalMontoTraspaso').value),
                 PRECIO_PUBLICO: parsearNumero(document.getElementById('modalPPrecio').value),
                 PRECIO_DESCUENTO: parsearNumero(document.getElementById('modalPCDescuento').value),
                 PRIMA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalPrimaFinanc').value),
