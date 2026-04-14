@@ -1,0 +1,2719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventario Vehículos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style_componentes.css">
+  <link rel="stylesheet" href="css/style_modalinventario.css">
+  <style>
+    /* Leyenda de estados */
+    .status-legend {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .status-legend-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-legend-title i {
+        color: #3498db;
+        font-size: 1.1rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 12px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .legend-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .legend-color.com-prado {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+    }
+
+    .legend-color.vendido {
+        background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
+        box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+    }
+
+    .legend-color.devuelto {
+        background: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+    }
+
+    .legend-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .legend-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 5px;
+    }
+
+    .legend-badge.com-prado {
+        background: #27ae60;
+        color: white;
+    }
+
+    .legend-badge.vendido {
+        background: #3498db;
+        color: white;
+    }
+
+    .legend-badge.devuelto {
+        background: #e74c3c;
+        color: white;
+    }
+
+    /* Animación para la leyenda */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .status-legend {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* Tooltip para la leyenda */
+    .legend-item {
+        position: relative;
+    }
+
+    .legend-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2c3e50;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        margin-bottom: 5px;
+    }
+
+    .legend-item:hover::after {
+        opacity: 1;
+    }
+
+    /* Estilos para diferenciar vehículos por estado */
+    tbody tr.estado-comprado {
+        border-left: 5px solid #27ae60;
+        background-color: #00ff4818;
+    }
+
+    tbody tr.estado-comprado:hover {
+        background-color: #e0f8e8;
+    }
+
+    tbody tr.estado-vendido {
+        border-left: 5px solid #3498db;
+        background-color: #0084ff17;
+    }
+
+    tbody tr.estado-vendido:hover {
+        background-color: #d9edf7;
+    }
+
+    tbody tr.estado-devuelto {
+        border-left: 5px solid #e74c3c;
+        background-color: #ff00001a;
+    }
+
+    tbody tr.estado-devuelto:hover {
+        background-color: #ffe4e4;
+    }
+
+    /* Etiquetas de estado en la tabla */
+    .estado-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .estado-badge.com-prado {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .estado-badge.vendido {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .estado-badge.devuelto {
+        background-color: #e74c3c;
+        color: white;
+    }    
+    /* Estilos para la fila de totales */
+    .totals-row {
+        background: #2c3e50;
+        color: white;
+        font-weight: bold;
+        border-top: 2px solid #34495e;
+    }
+
+    .totals-row td {
+        color: white !important;
+        font-weight: bold !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .totals-row .currency-usd {
+        color: #fff !important;
+    }
+
+    .totals-row .currency-crc {
+        color: #fff !important;
+    }
+
+    /* Hover effect para la fila de totales (deshabilitado) */
+    .totals-row:hover {
+        background: #2c3e50 !important;
+        transform: none !important;
+        box-shadow: none !important;
+        cursor: default !important;
+    }
+
+    /* Separador visual */
+    .totals-row td:first-child {
+        border-radius: 0 0 0 8px;
+    }
+
+    .totals-row td:last-child {
+        border-radius: 0 0 8px 0;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow-x: auto;
+      margin-bottom: 30px;
+      width: 100%;
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+    }
+
+    thead {
+      background: linear-gradient(to right, #2c3e50, #34495e);
+      color: white;
+    }
+
+    th {
+      padding: 18px 15px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.87rem;
+      letter-spacing: 0.5px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th:last-child {
+      border-right: none;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #eef1f7;
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafd;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+    }
+
+    td {
+      padding: 16px 15px;
+      text-align: center;
+      color: #4a5568;
+      font-weight: 400;
+    }
+
+    .price-input[readonly] {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+        border-color: #e2e8f0;
+    }
+
+    .placa {
+      font-weight: 600;
+      color: #2c3e50;
+      background-color: #f1f8ff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .currency {
+      font-weight: 600;
+    }
+
+    .currency-usd {
+      color: #27ae60;
+    }
+
+    .currency-crc {
+      color: #2980b9;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      animation: fadeIn 0.3s ease-out;
+      overflow-y: auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 40px auto;
+      width: 95%;
+      max-width: 1500px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.4s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      background: linear-gradient(to right, #2c3e50, #4a6491);
+      color: white;
+      padding: 25px 30px;
+      position: relative;
+    }
+
+    .modal-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title h2 {
+      font-size: 1.8rem;
+      font-weight: 500;
+    }
+
+    .modal-title .badge {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .close {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      font-size: 28px;
+      font-weight: 300;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .close:hover {
+      color: #ecf0f1;
+      transform: scale(1.1);
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section h3 {
+      color: #2c3e50;
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eaeff5;
+      display: flex;
+      align-items: center;
+    }
+
+    .section h3 i {
+      margin-right: 10px;
+      color: #3498db;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .modal-footer {
+      padding: 25px 30px;
+      background-color: #f8fafc;
+      border-top: 1px solid #eaeff5;
+      text-align: right;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-left: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #27ae60, #2ecc71);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(to right, #219653, #27ae60);
+      box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background-color: #cbd5e0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .table-container {
+        overflow-x: auto;
+      }
+      
+      table {
+        min-width: 900px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 98%;
+        margin: 20px auto;
+      }
+      
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal-body {
+        padding: 20px;
+      }
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Filtros de búsqueda */
+    .filters-container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      align-items: end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      grid-column: span 2;
+    }
+
+    .btn-filter {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-filter-primary {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-filter-primary:hover {
+      background: #2980b9;
+    }
+
+    .btn-filter-success {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-filter-success:hover {
+      background: #229954;
+    }
+
+    .btn-filter-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .btn-filter-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .btn-icon.edit {
+      background: #3498db;
+    }
+
+    .btn-icon.view {
+      background: #2ecc71;
+    }
+
+    .btn-icon.delete {
+      background: #e74c3c;
+    }
+
+    .btn-icon:hover {
+      transform: scale(1.1);
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #7f8c8d;
+    }
+
+    .loading i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #3498db;
+    }
+
+    /* Alerta */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .alert-success {
+      background: #27ae60;
+    }
+
+    .alert-error {
+      background: #e74c3c;
+    }
+
+    .alert-warning {
+      background: #f39c12;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+    <!-- Botón para menú móvil -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Header principal -->
+    <header class="main-header">
+        <img src="/img/icon-192.png" alt="Logo Autos Colin">
+        <div class="usuario" id="usuarioInfo"> 🖥️ Nombre persona - GERENTE</div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar / Menú -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Autos Colín</h2>
+                <ul class="menu-items">
+                    <li><a href="menu_admi.html"><i class="fas fa-th"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-folder"></i> Archivos</a></li>
+                    <li><a href="#"><i class="fas fa-lock"></i> Cierres</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li><a href="#"><i class="fas fa-chart-pie"></i> Estadísticas</a></li>
+                    <li class="active"><a href="#"><i class="fas fa-history"></i> Historial</a></li>
+                </ul>
+                <!-- Botones del Panel -->
+                <div class="sidebar-buttons-section">
+                    <h3><i class="fas fa-th-large"></i> Panel de Control</h3>
+                    <div class="sidebar-buttons">
+                        <a href="facturación.html" class="sidebar-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Facturación</span>
+                        </a>
+                        <a href="recibos.html" class="sidebar-btn">
+                            <i class="fas fa-cash-register"></i>
+                            <span>Recibos</span>
+                        </a>
+                        <a href="inventario.html" class="sidebar-btn">
+                            <i class="fas fa-car"></i>
+                            <span>Inventario</span>
+                        </a>
+                        <a href="clientes.html" class="sidebar-btn">
+                            <i class="fas fa-users"></i>
+                            <span>Clientes</span>
+                        </a>
+                        <a href="certificado_garantia.html" class="sidebar-btn">
+                            <i class="fas fa-award"></i>
+                            <span>Certificado</span>
+                        </a>
+                        <a href="plan_venta.html" class="sidebar-btn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Plan Venta</span>
+                        </a>
+                        <a href="cuentasxcobrar.html" class="sidebar-btn">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Cuentas x Cobrar</span>
+                        </a>
+                        <a href="index.html" class="sidebar-salirbtn">
+                            <i class="fas fa-sign-out"></i>
+                            <span>Salir</span>
+                        </a>
+                    </div>
+                </div>
+            </div>         
+        </div>
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-car"></i> Historial de Vehículos</h1>
+            </div>
+            <!-- Leyenda de estados -->
+            <div class="status-legend">
+                <div class="status-legend-title">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Estado del vehículo:</span>
+                </div>
+                <div class="legend-item" data-tooltip="Vehículos disponibles en inventario" onclick="aplicarFiltroPorEstado('COMPRADO')">
+                    <div class="legend-color com-prado"></div>
+                    <div class="legend-text">
+                        COMPRADO
+                        <span class="legend-badge com-prado">Disponible</span>
+                    </div>
+                </div>
+                <div class="legend-item" data-tooltip="Vehículos ya vendidos" onclick="aplicarFiltroPorEstado('VENDIDO')">
+                    <div class="legend-color vendido"></div>
+                    <div class="legend-text">
+                        VENDIDO
+                        <span class="legend-badge vendido">Vendido</span>
+                    </div>
+                </div>
+                <div class="legend-item" data-tooltip="Vehículos devueltos" onclick="aplicarFiltroPorEstado('DEVUELTO')">
+                    <div class="legend-color devuelto"></div>
+                    <div class="legend-text">
+                        DEVUELTO
+                        <span class="legend-badge devuelto">Devuelto</span>
+                    </div>
+                </div>
+                <div class="legend-item" onclick="limpiarFiltros()" style="background: #e2e8f0;">
+                    <i class="fas fa-eye" style="color: #4a5568;"></i>
+                    <div class="legend-text" style="color: #4a5568;">
+                        Ver todos
+                    </div>
+                </div>
+            </div>
+            <!-- Filtros de búsqueda -->
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> Placa</label>
+                    <input type="text" id="filtroPlaca" placeholder="Buscar por placa...">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Marca</label>
+                    <select id="filtroMarca">
+                        <option value="">Todas las marcas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> Modelo</label>
+                    <input type="text" id="filtroModelo" placeholder="Año...">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-chart-line"></i> Estado</label>
+                    <select id="filtroEstado">
+                        <option value="">Todos</option>
+                        <option value="COMPRADO">COMPRADO</option>
+                        <option value="VENDIDO">VENDIDO</option>
+                        <option value="DEVUELTO">DEVUELTO</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-filter btn-filter-primary" onclick="aplicarFiltros()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <button class="btn-filter btn-filter-secondary" onclick="limpiarFiltros()">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+            <!-- Tabla de vehículos -->
+            <div class="table-container">
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-key"></i> Placa</th>
+                            <th><i class="fas fa-trademark"></i> Marca</th>
+                            <th><i class="fas fa-car-side"></i> Estilo</th>
+                            <th><i class="fas fa-cogs"></i> Tracción</th>
+                            <th><i class="fas fa-calendar-alt"></i> Modelo</th>
+                            <th><i class="fas fa-dollar-sign"></i> Costo USD</th>
+                            <th><i class="fas fa-dollar-sign"></i> Invertido USD</th>
+                            <th><i class="fas fa-colon-sign"></i> Costo CRC</th>
+                            <th><i class="fas fa-colon-sign"></i> Invertido CRC</th>
+                            <th><i class="fas fa-dollar-sign"></i> Saldo USD</th>
+                            <th><i class="fas fa-colon-sign"></i> Saldo CRC</th>
+                            <th><i class="fas fa-calendar-times"></i> Fec. Cancelación</th>
+                            <th><i class="fas fa-calendar-check"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <tr>
+                            <td colspan="13" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Cargando vehículos...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para vehículo -->
+    <div id="vehiculoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <h2 id="modalTitle"><i class="fas fa-car"></i> <span id="modalTitleText">Nuevo Vehículo</span></h2>
+                    <span class="badge" id="modalPlacaBadge"></span>
+                </div>
+                <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-container">
+                    <div class="header">
+                        <h1 class="header-title">INVENTARIO DE VEHÍCULO</h1>
+                        <!-- Header Info Grid -->
+                        <div class="header-info-grid">
+                            <div class="info-item">
+                                <div class="info-label">PLACA</div>
+                                <input type="text" class="info-value" id="modalPlaca" value="">
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">DESCRIPCIÓN</div>
+                                <input type="text" class="info-value" style="width: 100%;" id="modalDescripcion" value="">
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">COSTO $</div>
+                                <input type="text" class="info-value price-input" id="modalCostoDolar" value="0.00" readonly>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">COSTO ₡</div>
+                                <input type="text" class="info-value price-input" id="modalCostoColones" value="0.00" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Exchange Rate -->
+                        <div class="exchange-rate-container">
+                            <div class="exchange-box">
+                                <div class="info-label">Tipo de cambio</div>
+                                <div class="price-input-wrapper">
+                                    <span class="currency-symbol">$</span>
+                                    <input type="text" class="price-input price-dolar" id="modalTipoCambio" value="500.00" data-currency="CRC">
+                                </div>
+                            </div>
+                            <div class="exchange-box">
+                                <div class="info-label">Tipo de cambio fecha</div>
+                                <div style="display: flex; gap: 5px;">
+                                    <div class="price-input-wrapper" style="flex: 1;">
+                                        <span class="currency-symbol">$</span>
+                                        <input type="text" class="price-input price-dolar" id="modalTipoCambioProv" value="500.00" data-currency="CRC">
+                                    </div>
+                                    <button type="button" onclick="obtenerTipoCambioActual()" 
+                                            style="background: #3498db; color: white; border: none; border-radius: 4px; padding: 0 10px; cursor: pointer;"
+                                            title="Consultar tipo de cambio actual">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LAYOUT DE TRES COLUMNAS -->
+                    <div class="three-column-layout">
+                        <!-- PRIMERA COLUMNA: PRECIOS Y OBSERVACIONES -->
+                        <div class="column">
+                            <div class="section-title">PRECIOS Y COSTOS</div>
+                            
+                            <div class="pricing-section">
+                                <div class="price-item">
+                                    <div class="price-label">Precio Compra</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalPrecioCompraDolar" value="0.00" data-currency="USD">
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPrecioCompraColon" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="price-item">
+                                    <div class="price-label">Precio Traspaso</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalPrecioTraspasoDolar" value="0.00" data-currency="USD">
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPrecioTraspasoColon" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="price-item">
+                                    <div class="price-label">Costo</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalCostoDolar2" value="0.00" data-currency="USD" readonly>
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalCostoColones2" value="0.00" data-currency="CRC" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="price-item">
+                                    <div class="price-label">Prima</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalPrimaDolar" value="0.00" data-currency="USD">
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPrimaColon" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="price-item">
+                                    <div class="price-label">Comisión</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalComisionDolar" value="0.00" data-currency="USD">
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalComisionColon" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="observations-section">
+                                <div class="card">
+                                    <div class="card-title">Detalles Adicionales</div>
+                                    <div class="observations-list" id="observations-list">
+                                        <!-- Las observaciones se cargarán aquí dinámicamente -->
+                                    </div>
+                                    <button class="add-observation-btn" id="add-observation-btn" type="button">
+                                        + Agregar detalle
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="investment-total">
+                                <div>Total Inversión</div>
+                                <div class="price-input-group">
+                                    <div class="price-input-wrapper">
+                                        <span class="currency-symbol">$</span>
+                                        <input type="text" class="price-input price-dolar" id="modalTotalInversionDolar" value="0.00" data-currency="USD" readonly>
+                                    </div>
+                                    <div class="price-input-wrapper">
+                                        <span class="currency-symbol">₡</span>
+                                        <input type="text" class="price-input price-colon" id="modalTotalInversionColon" value="0.00" data-currency="CRC" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="investment-total">
+                                <div>Precio Costo</div>
+                                <div class="price-input-group">
+                                    <div class="price-input-wrapper">
+                                        <span class="currency-symbol">$</span>
+                                        <input type="text" class="price-input price-dolar" id="modalPrecioCostoDolar" value="0.00" data-currency="USD" readonly>
+                                    </div>
+                                    <div class="price-input-wrapper">
+                                        <span class="currency-symbol">₡</span>
+                                        <input type="text" class="price-input price-colon" id="modalPrecioCostoColon" value="0.00" data-currency="CRC" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title">Información Adicional</div>
+                                <div class="detail-item" style="margin-bottom: 10px;">
+                                    <div class="detail-label">Extras</div>
+                                    <textarea type="text" class="detail-input" id="modalExtras"></textarea>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Observaciones</div>
+                                    <textarea type="text" class="detail-input" id="modalObservaciones"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SEGUNDA COLUMNA: DETALLES DEL VEHÍCULO -->
+                        <div class="column">
+                            <div class="section-title">DETALLES DEL VEHÍCULO</div>
+                            
+                            <div class="card">
+                                <div class="card-title">Saldo y Proveedor</div>
+                                <div class="price-item">
+                                    <div class="price-label">Saldo</div>
+                                    <div class="price-input-group">
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="text" class="price-input price-dolar" id="modalSaldoDolar" value="0.00" data-currency="USD" readonly>
+                                        </div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalSaldoColon" value="0.00" data-currency="CRC" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="price-item">
+                                    <div class="price-label">Proveedor</div>
+                                    <select class="detail-input" id="modalProveedor"></select>
+                                    <label style="display:flex; align-items:center; gap:6px; margin-top:6px; 
+                                                font-size:0.82rem; color:#7f8c8d; cursor:pointer;">
+                                        <input type="checkbox" id="incluirClientes" onchange="toggleIncluirClientes(this.checked)">
+                                        Buscar también en clientes
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title">Especificaciones Técnicas</div>
+                                
+                                <div class="two-tables-container">
+                                    <!-- TABLA IZQUIERDA -->
+                                    <table class="vehicle-details-left">
+                                        <tr>
+                                            <td class="input-cell"> Marca
+                                                <select class="vehicle-input" id="modalMarca">
+                                                    <option value="">Seleccione marca</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Estilo
+                                                <input type="text" class="vehicle-input" id="modalEstilo">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Tracción
+                                                <input type="text" class="vehicle-input" id="modalTraccion">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Modelo
+                                                <select class="vehicle-input" id="modalModelo">
+                                                    <option value="">Seleccione año</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">PV#
+                                                <input type="text" class="vehicle-input" id="modalPV">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"># Motor
+                                                <input type="text" class="vehicle-input" id="modalMotor">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"># Chasis
+                                                <input type="text" class="vehicle-input" id="modalChasis">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Carrocería
+                                                <input type="text" class="vehicle-input" id="modalCarroceria">
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- TABLA DERECHA -->
+                                    <table class="vehicle-details-right">
+                                        <tr>
+                                            <td class="input-cell">Kilometraje Ant
+                                                <input type="text" class="vehicle-input" id="modalKmAnterior" value="0">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Kilometraje Act
+                                                <input type="text" class="vehicle-input" id="modalKmActual" value="0">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Color
+                                                <select class="vehicle-input" id="modalColor">
+                                                    <option value="">Seleccione color</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell"> Transmisión
+                                                <select class="vehicle-input" id="modalTransmision">
+                                                    <option value="">Seleccione transmisión</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Combustible
+                                                <select class="vehicle-input" id="modalCombustible">
+                                                    <option value="">Seleccione combustible</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">C.C
+                                                <input type="text" class="vehicle-input" id="modalCC">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Cilindros
+                                                <input type="text" class="vehicle-input" id="modalCilindros">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Estado
+                                                <select class="vehicle-input" id="modalEstado">
+                                                    <option value="COMPRADO">COMPRADO</option>
+                                                    <option value="VENDIDO">VENDIDO</option>
+                                                    <option value="DEVUELTO">DEVUELTO</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="input-cell">Fec. Ingreso
+                                                <input type="date" class="vehicle-input" id="modalFechaIngreso">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title">Información de Transacción</div>
+                                <div class="detail-grids">
+                                    <div class="detail-field">
+                                        <div class="detail-label">Fec. Cancelación</div>
+                                        <input type="date" class="detail-input" id="modalFechaCancelacion">
+                                    </div>
+                                    <div class="detail-field full-width">
+                                        <div class="detail-label">Monto Traspaso</div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalMontoTraspaso" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                    <div class="detail-field">
+                                        <div class="detail-label">P-Público</div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPPrecio" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                    <div class="detail-field">
+                                        <div class="detail-label">P.C/Descuento</div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPCDescuento" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                    <div class="detail-field">
+                                        <div class="detail-label">Prima Financ.</div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalPrimaFinanc" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                    <div class="detail-field">
+                                        <div class="detail-label">Cuota Financ.</div>
+                                        <div class="price-input-wrapper">
+                                            <span class="currency-symbol">₡</span>
+                                            <input type="text" class="price-input price-colon" id="modalCuotaFinanc" value="0.00" data-currency="CRC">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TERCERA COLUMNA: DATOS DEL PROVEEDOR -->
+                        <div class="column">
+                            <div class="section-title">DATOS DEL PROVEEDOR</div>
+                            
+                            <div class="supplier-details">
+                                <div class="card-title">Información General</div>
+                                
+                                <div class="detail-grid" id="proveedorInfo">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Nombre</div>
+                                        <input type="text" class="detail-input" id="modalProvNombre" value="" readonly>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Cédula</div>
+                                        <input type="text" class="detail-input" id="modalProvCedula" value="" readonly>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Estado Civil</div>
+                                        <select  class="detail-input" id="modalProvEstadoCivil"><option value="">Seleccionar</option></select>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Ocupación</div>
+                                        <input type="text" class="detail-input" id="modalProvOcupacion" value="" readonly>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Dirección</div>
+                                        <textarea type="text" class="detail-input" id="modalProvDireccion" readonly></textarea>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Teléfono Principal</div>
+                                        <input type="text" class="detail-input" id="modalProvTelefono1" value="" readonly>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Teléfono Secundario</div>
+                                        <input type="text" class="detail-input" id="modalProvTelefono2" value="" readonly>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Correo Electrónico</div>
+                                        <input type="text" class="detail-input" id="modalProvEmail" value="" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- BOTONES DE ACCIÓN -->
+                    <div class="buttons">
+                        <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                        <button class="btn btn-confirm" id="btnGuardarVehiculo" onclick="guardarVehiculo()">Guardar Vehículo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="cargar_usuario.js"></script>
+    <script src="pdfdatos_vehiculo.js"></script>
+
+  <script>
+    // URLs base de las APIs
+    const API_BASE_URL = (() => {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+            
+        // En producción 
+        if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+            return `${protocol}//${hostname}/api`;
+        }
+            
+        // En desarrollo local
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+            
+        // Fallback a ruta relativa
+        return '/api';
+    })();
+        
+    console.log('🌐 API Base URL:', API_BASE_URL); // Para depuración
+    
+    // ===== VARIABLES GLOBALES =====
+    let vehiculos = [];
+    let marcas = [];
+    let colores = [];
+    let combustibles = [];
+    let transmisiones = [];
+    let proveedores = [];
+    let estadosCivil = [];
+    let vehiculoActual = null;
+    let observations = [];
+    let observationCounter = 1;
+
+    // ===== INICIALIZACIÓN =====
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarCatalogos();
+        cargarVehiculos();
+        llenarSelectAnos();
+        
+        // Configurar menú móvil
+        document.getElementById('menuToggle').addEventListener('click', toggleMenu);
+        document.getElementById('overlay').addEventListener('click', toggleMenu);
+        
+        // Configurar botón agregar observación
+        document.getElementById('add-observation-btn').addEventListener('click', function() {
+            addNewObservation();
+        });
+        
+        // EVENTOS: Cuando cambian COLONES (convertir a dólares específicos)
+        document.getElementById('modalPrecioCompraColon').addEventListener('input', convertirColonesADolares);
+        document.getElementById('modalPrecioTraspasoColon').addEventListener('input', convertirColonesADolares);
+        document.getElementById('modalPrimaColon').addEventListener('input', convertirColonesADolares);
+        document.getElementById('modalComisionColon').addEventListener('input', convertirColonesADolares);
+
+        // EVENTOS: Cuando cambian DÓLARES (convertir a colones específicos)
+        document.getElementById('modalPrecioCompraDolar').addEventListener('input', convertirDolaresAColones);
+        document.getElementById('modalPrecioTraspasoDolar').addEventListener('input', convertirDolaresAColones);
+        document.getElementById('modalPrimaDolar').addEventListener('input', convertirDolaresAColones);
+        document.getElementById('modalComisionDolar').addEventListener('input', convertirDolaresAColones);
+        
+        // Cuando cambia tipo de cambio (recalcular todos los dólares desde colones)
+        document.getElementById('modalTipoCambio').addEventListener('input', recalcularTodosLosDolares);
+        
+        // Formatear números al perder el foco
+        const camposPrecio = [
+            'modalPrecioCompraDolar', 'modalPrecioCompraColon',
+            'modalPrimaDolar', 'modalPrimaColon',
+            'modalComisionDolar', 'modalComisionColon',
+            'modalPrecioTraspasoDolar', 'modalPrecioTraspasoColon',
+            'modalPPrecio', 'modalPCDescuento', 'modalPrimaFinanc', 'modalCuotaFinanc'
+        ];
+        
+        camposPrecio.forEach(id => {
+            const campo = document.getElementById(id);
+            if (campo) {
+                campo.addEventListener('focus', function() {
+                    if (parsearNumero(this.value) === 0) this.value = '';
+                });
+                campo.addEventListener('blur', function() {
+                    const valor = parsearNumero(this.value);
+                    this.value = formatearNumero(valor);
+                });
+            }
+        });
+        
+        // Cambio de proveedor
+        document.getElementById('modalProveedor').addEventListener('change', cargarDatosProveedor);
+
+        // ENTER para pasar al siguiente campo
+        document.querySelectorAll('.modal-body input, .modal-body select').forEach(el => {
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const focusables = [...document.querySelectorAll(
+                        '#vehiculoModal input:not([disabled]), #vehiculoModal select:not([disabled])'
+                    )];
+                    const idx = focusables.indexOf(this);
+                    if (idx > -1 && idx < focusables.length - 1) focusables[idx + 1].focus();
+                }
+            });
+        });
+    });
+
+    // Función para llenar el select de años (modelo)
+    function llenarSelectAnos() {
+        const selectAnos = document.getElementById('modalModelo');
+        if (!selectAnos) return;
+        
+        const anioActual = new Date().getFullYear();
+        // Limpiar opciones existentes (excepto la primera)
+        while (selectAnos.options.length > 1) {
+            selectAnos.remove(1);
+        }
+        
+        // Agregar años desde el actual + 1 hasta 40 años atrás
+        for (let y = anioActual + 1; y >= anioActual - 40; y--) {
+            const option = document.createElement('option');
+            option.value = y;
+            option.textContent = y;
+            selectAnos.appendChild(option);
+        }
+    }    
+
+    // ===== FUNCIÓN PARA OBTENER TIPO DE CAMBIO ACTUAL =====
+    async function obtenerTipoCambioActual() {
+        try {
+            const campo = document.getElementById('modalTipoCambioProv');
+            campo.style.backgroundColor = '#fff3cd';
+            campo.value = 'Consultando...';
+            
+            // API de Hacienda
+            const response = await fetch('https://api.hacienda.go.cr/indicadores/tc/dolar');
+            const data = await response.json();
+            
+            if (data && data.venta) {
+                const tipoCambio = parseFloat(data.venta.valor);
+                // Actualizar campos 
+                document.getElementById('modalTipoCambioProv').value = tipoCambio.toFixed(2);
+                // Recalcular todo usando el nuevo tipo de cambio
+                recalcularTodosLosDolares();
+                campo.style.backgroundColor = '#d4edda';
+                setTimeout(() => campo.style.backgroundColor = '', 1000);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('modalTipoCambioProv').value = 'Error';
+            setTimeout(() => {
+                document.getElementById('modalTipoCambioProv').value = '500.00';
+            }, 2000);
+        }
+    }
+
+    // Función para actualizar ambos campos con el mismo valor
+    function actualizarTipoCambio(valor) {
+        if (valor && !isNaN(valor)) {
+            document.getElementById('modalTipoCambio').value = valor.toFixed(2);
+            document.getElementById('modalTipoCambioProv').value = valor.toFixed(2);
+            convertirColonesADolares(); // Recalcular todo
+        }
+    }    
+
+    // ===== FUNCIÓN PARA ACTUALIZAR OBSERVACIONES CON NUEVO TIPO DE CAMBIO =====
+    function actualizarObservacionesPorTipoCambio() {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+        
+        observations.forEach(obs => {
+            // Convertir de colones a dólares usando el nuevo tipo de cambio
+            const valorCRC = parsearNumero(obs.amountCRC);
+            obs.amountUSD = formatearNumero(valorCRC / tipoCambio);
+        });
+        
+        // Recargar las observaciones para mostrar los nuevos valores
+        loadObservations();
+    }    
+
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    // Llenar el select solo con proveedores (comportamiento por defecto)
+    function llenarSelectProveedores() {
+        const select = document.getElementById('modalProveedor');
+        select.innerHTML = '<option value="">Seleccione proveedor</option>';
+        proveedores.forEach(p => {
+            select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO}</option>`;
+        });
+    }
+
+    // Se llama cuando el usuario marca/desmarca el checkbox
+    async function toggleIncluirClientes(incluir) {
+        const select = document.getElementById('modalProveedor');
+        const valorActual = select.value; // conservar selección actual si ya había una
+
+        if (!incluir) {
+            // Volver a solo proveedores
+            llenarSelectProveedores();
+        } else {
+            // Cargar proveedores + clientes
+            try {
+                const res = await fetch(`${API_BASE_URL}/personas-proveedor-cliente`);
+                const todos = await res.json();
+                
+                const soloProveedores = todos.filter(p => p.es_proveedor && !p.es_cliente);
+                const soloClientes    = todos.filter(p => p.es_cliente  && !p.es_proveedor);
+                const ambos           = todos.filter(p => p.es_proveedor && p.es_cliente);
+
+                select.innerHTML = '<option value="">Seleccione proveedor / cliente</option>';
+
+                if (ambos.length > 0) {
+                    select.innerHTML += `<optgroup label="Proveedor y Cliente">`;
+                    ambos.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+                if (soloProveedores.length > 0) {
+                    select.innerHTML += `<optgroup label="Proveedores">`;
+                    soloProveedores.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+                if (soloClientes.length > 0) {
+                    select.innerHTML += `<optgroup label="Clientes">`;
+                    soloClientes.forEach(p => {
+                        select.innerHTML += `<option value="${p.ID_PERSONA}">${p.NOMBRE_COMPLETO} (${p.IDENTIFICACION})</option>`;
+                    });
+                    select.innerHTML += `</optgroup>`;
+                }
+            } catch (error) {
+                mostrarAlerta('error', 'Error al cargar clientes');
+            }
+        }
+
+        // Restaurar la selección anterior si todavía existe en la nueva lista
+        if (valorActual) select.value = valorActual;
+    }    
+
+    async function cargarCatalogos() {
+        try {      
+            // Cargar estados civiles
+            const ecRes = await fetch(`${API_BASE_URL}/estados-civil`);
+            estadosCivil = await ecRes.json();
+            const selectEstadoCivil = document.getElementById('modalProvEstadoCivil');
+            
+            // Limpiar opciones existentes
+            selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>';
+            
+            // Agregar opciones
+            estadosCivil.forEach(ec => {
+                selectEstadoCivil.innerHTML += `<option value="${ec.ID_ESTADO_CIVIL}">${ec.NOMBRE}</option>`;
+            });       
+            
+            // Cargar marcas
+            const marcasRes = await fetch(`${API_BASE_URL}/marcas`);
+            marcas = await marcasRes.json();
+            const selectMarca = document.getElementById('modalMarca');
+            const filtroMarca = document.getElementById('filtroMarca');
+            
+            marcas.forEach(m => {
+                selectMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
+                filtroMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
+            });
+    
+            // Cargar colores
+            const coloresRes = await fetch(`${API_BASE_URL}/colores`);
+            colores = await coloresRes.json();
+            const selectColor = document.getElementById('modalColor');
+            colores.forEach(c => {
+                selectColor.innerHTML += `<option value="${c.ID_COLOR}">${c.NOMBRE}</option>`;
+            });
+    
+            // Cargar combustibles
+            const combRes = await fetch(`${API_BASE_URL}/combustibles`);
+            combustibles = await combRes.json();
+            const selectComb = document.getElementById('modalCombustible');
+            combustibles.forEach(c => {
+                selectComb.innerHTML += `<option value="${c.ID_COMBUSTIBLE}">${c.NOMBRE}</option>`;
+            });
+    
+            // Cargar transmisiones
+            const transRes = await fetch(`${API_BASE_URL}/transmisiones`);
+            transmisiones = await transRes.json();
+            const selectTrans = document.getElementById('modalTransmision');
+            transmisiones.forEach(t => {
+                selectTrans.innerHTML += `<option value="${t.ID_TRANSMISION}">${t.NOMBRE}</option>`;
+            });
+    
+            // Cargar proveedores
+            const provRes = await fetch(`${API_BASE_URL}/proveedores`);
+            proveedores = await provRes.json();
+            llenarSelectProveedores();
+    
+        } catch (error) {
+            console.error('Error cargando catálogos:', error);
+            mostrarAlerta('error', 'Error cargando catálogos');
+        }
+    }
+
+    // Función para formatear fecha de YYYY-MM-DD a DD/MM/YYYY para mostrar
+    function formatearFechaParaMostrar(fecha) {
+        if (!fecha) return '-';
+        
+        try {
+            // Si viene como objeto Date o string ISO
+            let fechaStr = fecha;
+            if (fecha instanceof Date) {
+                fechaStr = fecha.toISOString().split('T')[0];
+            } else if (typeof fecha === 'string' && fecha.includes('T')) {
+                fechaStr = fecha.split('T')[0];
+            }
+            
+            // Validar formato YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+                const [year, month, day] = fechaStr.split('-');
+                return `${day}/${month}/${year}`;
+            }
+            
+            return fechaStr;
+        } catch (error) {
+            console.error('Error formateando fecha:', error);
+            return '-';
+        }
+    }    
+
+    async function cargarVehiculos() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/historial-vehiculos`);
+            vehiculos = await response.json();
+            actualizarTabla(vehiculos);
+        } catch (error) {
+            console.error('Error cargando vehículos:', error);
+            document.getElementById('inventoryTableBody').innerHTML = `
+                <tr>
+                    <td colspan="12" style="text-align: center; padding: 50px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c;"></i>
+                        <p>Error al cargar vehículos</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // ===== FUNCIÓN PARA CALCULAR TOTALES DE LA TABLA =====
+    function calcularTotalesTabla(vehiculosList) {
+        if (!vehiculosList || vehiculosList.length === 0) {
+            return {
+                totalUSD: 0,
+                totalCRC: 0,
+                totalInversionUSD: 0,
+                totalInversionCRC: 0,
+                totalSaldoUSD: 0,
+                totalSaldoCRC: 0,
+                cantidad: 0
+            };
+        }
+
+        let totalCostoUSD = 0;
+        let totalCostoCRC = 0;
+        let totalInversionUSD = 0;
+        let totalInversionCRC = 0;
+        let totalSaldoUSD = 0;
+        let totalSaldoCRC = 0;
+
+        vehiculosList.forEach(v => {
+            totalCostoUSD += parseFloat(v.PRECIO_COMPRA_USD) || 0;
+            totalCostoCRC += parseFloat(v.PRECIO_COMPRA_CRC) || 0;
+            totalInversionUSD += parseFloat(v.INVERSION_USD) || 0;
+            totalInversionCRC += parseFloat(v.INVERSION_CRC) || 0;
+            totalSaldoUSD += parseFloat(v.SALDO_USD) || 0;
+            totalSaldoCRC += parseFloat(v.SALDO_CRC) || 0;
+        });
+
+        return {
+            totalCostoUSD,
+            totalCostoCRC,
+            totalInversionUSD,
+            totalInversionCRC,
+            totalSaldoUSD,
+            totalSaldoCRC,
+            cantidad: vehiculosList.length
+        };
+    }
+
+    function actualizarTabla(vehiculosList) {
+        const tbody = document.getElementById('inventoryTableBody');
+        
+        if (!vehiculosList || vehiculosList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="13" style="text-align: center; padding: 50px;">
+                        <i class="fas fa-car" style="font-size: 3rem; color: #bdc3c7;"></i>
+                        <p>No hay vehículos registrados</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Calcular totales
+        const totales = calcularTotalesTabla(vehiculosList);
+
+        // Generar filas de vehículos
+        const filasVehiculos = vehiculosList.map(v => {
+            const fechaCancelacion = v.FECHA_CANCELACION ? formatearFechaParaMostrar(v.FECHA_CANCELACION) : '-';
+            
+            // Determinar clase según estado
+            let estadoClass = '';
+            let estadoBadgeClass = '';
+            let estadoTexto = v.ESTADO || 'COMPRADO';
+            
+            switch(estadoTexto) {
+                case 'COMPRADO':
+                    estadoClass = 'estado-comprado';
+                    estadoBadgeClass = 'com-prado';
+                    break;
+                case 'VENDIDO':
+                    estadoClass = 'estado-vendido';
+                    estadoBadgeClass = 'vendido';
+                    break;
+                case 'DEVUELTO':
+                    estadoClass = 'estado-devuelto';
+                    estadoBadgeClass = 'devuelto';
+                    break;
+                default:
+                    estadoClass = '';
+                    estadoBadgeClass = '';
+            }
+            
+            // Crear badge de estado
+            const estadoBadge = `<span class="estado-badge ${estadoBadgeClass}">${estadoTexto}</span>`;
+            
+            return `
+                <tr class="${estadoClass}" onclick="editarVehiculo(${v.ID_VEHICULO})" style="cursor: pointer;">
+                    <td><span class="placa">${v.PLACA || 'S/N'}</span></td>
+                    <td>${v.marca_nombre || '-'}</td>
+                    <td>${v.ESTILO || '-'}</td>
+                    <td>${v.TRACCION || '-'}</td>
+                    <td>${v.MODELO || '-'}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.PRECIO_COMPRA_USD || 0)}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.INVERSION_USD || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.PRECIO_COMPRA_CRC || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.INVERSION_CRC || 0)}</td>
+                    <td class="currency currency-usd">$${formatearNumero(v.SALDO_USD || 0)}</td>
+                    <td class="currency currency-crc">₡${formatearNumero(v.SALDO_CRC || 0)}</td>
+                    <td>${fechaCancelacion}</td>
+                    <td>
+                        <div class="action-buttons" onclick="event.stopPropagation()">
+                            <button class="btn-icon view" onclick="verVehiculo(${v.ID_VEHICULO})" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon edit" onclick="editarVehiculo(${v.ID_VEHICULO})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" style="background: #f39c12;" onclick="generarPDFVehiculo(${v.ID_VEHICULO})" title="Descargar PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-icon delete" onclick="eliminarVehiculo(${v.ID_VEHICULO})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Generar fila de totales
+        const filaTotales = `
+            <tr class="totals-row" style="background: #2c3e50; color: white; font-weight: bold; border-top: 2px solid #34495e;">
+                <td colspan="5" style="text-align: right; font-size: 1rem; background: #34495e;">TOTALES (${totales.cantidad} vehículos):</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalCostoUSD)}</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalInversionUSD)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalCostoCRC)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalInversionCRC)}</td>
+                <td class="currency currency-usd" style="background: #34495e; color: #fff; font-weight: bold;">$${formatearNumero(totales.totalSaldoUSD)}</td>
+                <td class="currency currency-crc" style="background: #34495e; color: #fff; font-weight: bold;">₡${formatearNumero(totales.totalSaldoCRC)}</td>
+                <td colspan="2" style="background: #34495e;"></td>
+            </tr>
+        `;
+
+        tbody.innerHTML = filasVehiculos + filaTotales;
+    }
+
+    function parsearNumero(str) {
+        if (!str) return 0;
+        
+        if (typeof str === 'string') {
+            // Limpiar el string: eliminar espacios y el símbolo de moneda si existe
+            let limpio = str.toString()
+                .replace(/[₡$€\s]/g, '')
+                .replace(/\./g, '')   
+                .replace(',', '.'); 
+            const numero = parseFloat(limpio);
+            return isNaN(numero) ? 0 : numero;
+        }
+        return isNaN(str) ? 0 : parseFloat(str);
+    }
+
+    function formatearNumero(num) {
+        if (num === null || num === undefined || isNaN(num)) {
+            return '0,00';
+        }
+        const numero = Number(num);
+        // Formato costarricense: puntos para miles, coma para decimales
+        return numero.toFixed(2)
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // ===== FUNCIONES DE FILTROS =====
+    function aplicarFiltros() {
+        const placa = document.getElementById('filtroPlaca').value.toLowerCase();
+        const marca = document.getElementById('filtroMarca').value;
+        const modelo = document.getElementById('filtroModelo').value;
+        const estado = document.getElementById('filtroEstado').value;
+
+        const filtrados = vehiculos.filter(v => {
+            return (!placa || (v.PLACA && v.PLACA.toLowerCase().includes(placa))) &&
+                   (!marca || v.ID_MARCA == marca) &&
+                   (!modelo || (v.MODELO && v.MODELO.toString().includes(modelo))) &&
+                   (!estado || v.ESTADO == estado);
+        });
+
+        actualizarTabla(filtrados);
+    }
+
+    function limpiarFiltros() {
+        document.getElementById('filtroPlaca').value = '';
+        document.getElementById('filtroMarca').value = '';
+        document.getElementById('filtroModelo').value = '';
+        document.getElementById('filtroEstado').value = '';
+        actualizarTabla(vehiculos);
+    }
+
+    function aplicarFiltroPorEstado(estado) {
+        document.getElementById('filtroEstado').value = estado;
+        aplicarFiltros();
+        
+        mostrarAlerta('success', `Mostrando vehículos con estado: ${estado}`);
+        
+        const legendItem = event.currentTarget;
+        legendItem.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            legendItem.style.transform = '';
+        }, 200);
+    }    
+
+    // ===== FUNCIONES DEL MODAL =====
+    function abrirModalNuevo() {
+        vehiculoActual = null;
+        document.getElementById('modalTitleText').textContent = 'Nuevo Vehículo';
+        document.getElementById('modalPlacaBadge').textContent = '';
+        limpiarFormulario();
+        document.getElementById('vehiculoModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    async function editarVehiculo(id) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/vehiculos/${id}/completo`);
+            const data = await response.json();
+            
+            vehiculoActual = data.vehiculo;
+            document.getElementById('modalTitleText').textContent = `Editar ${data.vehiculo.PLACA || 'Vehículo'}`;
+            document.getElementById('modalPlacaBadge').textContent = data.vehiculo.PLACA || 'SIN PLACA';
+            
+            // Cargar datos en el formulario
+            cargarDatosVehiculo(data);
+            
+            // Cargar costos
+            if (data.costos) {
+                cargarCostos(data.costos);
+            }
+            
+            // Cargar observaciones (extras)
+            if (data.extras && data.extras.length > 0) {
+                const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+                
+                observations = data.extras.map((extra, index) => {
+                    const valorCRC = parseFloat(extra.PRECIO) || 0;
+                    return {
+                        id: index + 1,
+                        id_extra: extra.ID_EXTRA,
+                        description: extra.EXTRAS_DETALLE || 'Extra',
+                        amountCRC: formatearNumero(valorCRC),
+                        amountUSD: formatearNumero(valorCRC / tipoCambio)
+                    };
+                });
+            } else {
+                observations = [{
+                    id: observationCounter++,
+                    description: "",
+                    amountCRC: "",
+                    amountUSD: "0.00"
+                }];
+            }
+            
+            observationCounter = observations.length + 1;
+            loadObservations();
+            
+            // Recalcular totales
+            calcularTotales();
+            
+            document.getElementById('vehiculoModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+        } catch (error) {
+            console.error('Error cargando vehículo:', error);
+            mostrarAlerta('error', 'Error al cargar datos del vehículo');
+        }
+    }
+
+    async function verVehiculo(id) {
+        await editarVehiculo(id);
+        // Deshabilitar edición
+        document.querySelectorAll('#vehiculoModal input, #vehiculoModal select, #vehiculoModal textarea').forEach(el => {
+            el.disabled = true;
+        });
+        document.getElementById('btnGuardarVehiculo').style.display = 'none';
+        document.getElementById('add-observation-btn').disabled = true;
+    }
+
+    function cerrarModal() {
+        document.getElementById('vehiculoModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Habilitar campos
+        document.querySelectorAll('#vehiculoModal input, #vehiculoModal select, #vehiculoModal textarea').forEach(el => {
+            el.disabled = false;
+        });
+        document.getElementById('btnGuardarVehiculo').style.display = 'inline-block';
+        document.getElementById('add-observation-btn').disabled = false;
+    }
+
+    function limpiarFormulario() {
+
+        const badge = document.getElementById('modalPlacaBadge');
+        badge.innerHTML = '';
+        badge.style.backgroundColor = '';
+
+        // Limpiar todos los campos
+        document.getElementById('modalPlaca').value = '';
+        document.getElementById('modalDescripcion').value = '';
+        document.getElementById('modalCostoDolar').value = '0.00';
+        document.getElementById('modalCostoColones').value = '0.00';
+        document.getElementById('modalTipoCambio').value = '500.00';
+        document.getElementById('modalTipoCambioProv').value = '500.00';
+        document.getElementById('modalPrecioCompraDolar').value = '0.00';
+        document.getElementById('modalPrecioCompraColon').value = '0.00';
+        document.getElementById('modalPrecioTraspasoDolar').value = '0.00';
+        document.getElementById('modalPrecioTraspasoColon').value = '0.00';
+        document.getElementById('modalCostoDolar2').value = '0.00';
+        document.getElementById('modalCostoColones2').value = '0.00';
+        document.getElementById('modalPrimaDolar').value = '0.00';
+        document.getElementById('modalPrimaColon').value = '0.00';
+        document.getElementById('modalComisionDolar').value = '0.00';
+        document.getElementById('modalComisionColon').value = '0.00';
+        document.getElementById('modalTotalInversionDolar').value = '0.00';
+        document.getElementById('modalTotalInversionColon').value = '0.00';
+        document.getElementById('modalPrecioCostoDolar').value = '0.00';
+        document.getElementById('modalPrecioCostoColon').value = '0.00';
+        document.getElementById('modalExtras').value = '';
+        document.getElementById('modalObservaciones').value = '';
+        document.getElementById('modalSaldoDolar').value = '0.00';
+        document.getElementById('modalSaldoColon').value = '0.00';
+        document.getElementById('modalKmAnterior').value = '0';
+        document.getElementById('modalKmActual').value = '0';
+        document.getElementById('modalEstilo').value = '';
+        document.getElementById('modalTraccion').value = '';
+        document.getElementById('modalModelo').value = '';
+        document.getElementById('modalPV').value = '';
+        document.getElementById('modalMotor').value = '';
+        document.getElementById('modalCC').value = '';
+        document.getElementById('modalChasis').value = '';
+        document.getElementById('modalCilindros').value = '';
+        document.getElementById('modalCarroceria').value = '';
+        document.getElementById('modalEstado').value = 'COMPRADO';
+        document.getElementById('modalFechaIngreso').value = new Date().toISOString().split('T')[0];
+        document.getElementById('modalFechaCancelacion').value = '';
+        document.getElementById('modalMontoTraspaso').value = '0.00';
+        document.getElementById('modalPPrecio').value = '0.00';
+        document.getElementById('modalPCDescuento').value = '0.00';
+        document.getElementById('modalPrimaFinanc').value = '0.00';
+        document.getElementById('modalCuotaFinanc').value = '0.00';
+        
+        // Limpiar selects
+        document.getElementById('modalProveedor').value = '';
+        document.getElementById('modalMarca').value = '';
+        document.getElementById('modalColor').value = '';
+        document.getElementById('modalCombustible').value = '';
+        document.getElementById('modalTransmision').value = '';
+        
+        // Limpiar datos del proveedor
+        document.getElementById('modalProvNombre').value = '';
+        document.getElementById('modalProvCedula').value = '';
+        document.getElementById('modalProvEstadoCivil').value = '';
+        document.getElementById('modalProvOcupacion').value = '';
+        document.getElementById('modalProvDireccion').value = '';
+        document.getElementById('modalProvTelefono1').value = '';
+        document.getElementById('modalProvTelefono2').value = '';
+        document.getElementById('modalProvEmail').value = '';
+
+        document.getElementById('incluirClientes').checked = false;
+        llenarSelectProveedores();
+        
+        // Reiniciar observaciones
+        observations = [{
+            id: observationCounter++,
+            description: "",
+            amountUSD: "",
+            amountCRC: ""
+        }];
+        loadObservations();
+    }
+
+    function cargarDatosVehiculo(data) {
+        const v = data.vehiculo;
+        
+        // Información básica del vehículo
+        document.getElementById('modalPlaca').value = v.PLACA || '';
+        document.getElementById('modalDescripcion').value = `${v.marca_nombre || ''} ${v.ESTILO || ''} ${v.MODELO || ''}`;
+        document.getElementById('modalEstilo').value = v.ESTILO || '';
+        document.getElementById('modalTraccion').value = v.TRACCION || '';
+        if (v.MODELO) {
+            document.getElementById('modalModelo').value = v.MODELO;
+        } else {
+            document.getElementById('modalModelo').value = '';
+        }        
+        document.getElementById('modalPV').value = v.PV || '';
+        document.getElementById('modalMotor').value = v.MOTOR || '';
+        document.getElementById('modalCC').value = v.C_C || '';
+        document.getElementById('modalChasis').value = v.CHASIS || '';
+        document.getElementById('modalCilindros').value = v.CILINDROS || '';
+        document.getElementById('modalCarroceria').value = v.CARROCERIA || '';
+        document.getElementById('modalKmAnterior').value = v.KILOMETRAJE_ANTERIOR || 0;
+        document.getElementById('modalKmActual').value = v.KILOMETRAJE_ACTUAL || 0;
+        document.getElementById('modalEstado').value = v.ESTADO || 'COMPRADO';
+        document.getElementById('modalFechaIngreso').value = v.FECHA_INGRESO || new Date().toISOString().split('T')[0];
+        document.getElementById('modalObservaciones').value = v.OBSERVACIONES || '';
+        
+        // Seleccionar valores en selects (catálogos)
+        if (v.ID_MARCA) document.getElementById('modalMarca').value = v.ID_MARCA;
+        if (v.ID_COLOR) document.getElementById('modalColor').value = v.ID_COLOR;
+        if (v.ID_COMBUSTIBLE) document.getElementById('modalCombustible').value = v.ID_COMBUSTIBLE;
+        if (v.ID_TRANSMISION) document.getElementById('modalTransmision').value = v.ID_TRANSMISION;
+        
+        // Fecha de Ingreso - Asegurar formato correcto
+        if (v.FECHA_INGRESO) {
+            // Si viene como objeto Date o string ISO, formatear para input date
+            let fechaIngreso = v.FECHA_INGRESO;
+            if (fechaIngreso instanceof Date) {
+                fechaIngreso = fechaIngreso.toISOString().split('T')[0];
+            } else if (typeof fechaIngreso === 'string' && fechaIngreso.includes('T')) {
+                fechaIngreso = fechaIngreso.split('T')[0];
+            }
+            document.getElementById('modalFechaIngreso').value = fechaIngreso;
+        }
+        
+        // Fecha de Cancelación - Si existe en los costos o en el vehículo
+        if (data.costos && data.costos.FECHA_CANCELACION) {
+            let fechaCancelacion = data.costos.FECHA_CANCELACION;
+            if (fechaCancelacion instanceof Date) {
+                fechaCancelacion = fechaCancelacion.toISOString().split('T')[0];
+            } else if (typeof fechaCancelacion === 'string' && fechaCancelacion.includes('T')) {
+                fechaCancelacion = fechaCancelacion.split('T')[0];
+            }
+            document.getElementById('modalFechaCancelacion').value = fechaCancelacion;
+        }
+
+        // ===== MANEJO DE PROVEEDOR/CLIENTE INTERCAMBIO =====
+        if (v.ES_INTERCAMBIO && v.ID_CLIENTE_ORIGEN) {
+            // Es un intercambio - mostrar datos del cliente origen
+            console.log('Vehículo de intercambio, cliente origen:', v.cliente_origen_nombre);
+            
+            // Mostrar badge de intercambio
+            const badge = document.getElementById('modalPlacaBadge');
+            badge.innerHTML = `🔄 INTERCAMBIO ${v.PLACA || ''}`;
+            badge.style.backgroundColor = '#f39c12';
+            
+            // Seleccionar el cliente en el select de proveedor
+            const selectProveedor = document.getElementById('modalProveedor');
+            
+            // Verificar si el cliente ya está en el select
+            let optionExists = false;
+            for (let i = 0; i < selectProveedor.options.length; i++) {
+                if (selectProveedor.options[i].value == v.ID_CLIENTE_ORIGEN) {
+                    selectProveedor.selectedIndex = i;
+                    optionExists = true;
+                    break;
+                }
+            }
+            
+            // Si no existe, crearlo
+            if (!optionExists) {
+                const option = document.createElement('option');
+                option.value = v.ID_CLIENTE_ORIGEN;
+                option.text = v.cliente_origen_nombre || 'Cliente Origen';
+                option.selected = true;
+                selectProveedor.appendChild(option);
+            }
+            
+            // AHORA CARGAR LOS DATOS DEL CLIENTE (esto llamará a cargarDatosProveedor)
+            // Disparar el evento change manualmente
+            const event = new Event('change', { bubbles: true });
+            selectProveedor.dispatchEvent(event);
+            
+            // También guardar en el campo de extras la información del intercambio
+            document.getElementById('modalExtras').value = 
+                `🔄 VEHÍCULO RECIBIDO POR INTERCAMBIO\n` +
+                `Cliente: ${v.cliente_origen_nombre || ''}\n` +
+                `Cédula: ${v.cliente_origen_identificacion || ''}\n` +
+                `Monto intercambio: ₡${formatearNumero(v.MONTO_INTERCAMBIO || 0)}\n` +
+                (v.venta_origen ? `Venta origen: ${v.venta_origen.codigo_venta || ''}` : '');
+        } else if (v.ID_PROVEEDOR) {
+            // Verificar si el proveedor ya está en el select
+            const selectProveedor = document.getElementById('modalProveedor');
+            let existeEnSelect = false;
+            for (let i = 0; i < selectProveedor.options.length; i++) {
+                if (selectProveedor.options[i].value == v.ID_PROVEEDOR) {
+                    existeEnSelect = true;
+                    break;
+                }
+            }
+            // Si no está, agregarlo manualmente
+            if (!existeEnSelect) {
+                const option = document.createElement('option');
+                option.value = v.ID_PROVEEDOR;
+                option.text = v.proveedor_nombre || `Proveedor #${v.ID_PROVEEDOR}`;
+                selectProveedor.appendChild(option);
+            }
+            selectProveedor.value = v.ID_PROVEEDOR;
+            selectProveedor.style.backgroundColor = '';
+            cargarDatosProveedor();
+        }
+        
+        // Información de intercambio adicional
+        if (v.es_intercambio) {
+            // Mostrar fecha de recepción si existe
+            if (v.FECHA_RECEPCION) {
+                document.getElementById('modalFechaIngreso').value = v.FECHA_RECEPCION;
+            }
+            
+            // Mostrar información en extras
+            const extrasField = document.getElementById('modalExtras');
+            extrasField.value = `Vehículo recibido por intercambio\nMonto intercambio: ₡${formatearNumero(v.MONTO_INTERCAMBIO || 0)}\n` + 
+                            (v.venta_origen ? `Venta original: ${v.venta_origen.codigo_venta}` : '');
+        }
+    }
+
+    function cargarCostos(c) {
+        if (!c) return;
+        
+        console.log('Costos recibidos:', c); // Para debugging
+        
+        // Obtener el tipo de cambio de los costos o usar valor por defecto
+        const tipoCambio = parseFloat(c.TIPO_CAMBIO_COMPRA) || 515;
+        
+        document.getElementById('modalTipoCambio').value = tipoCambio.toFixed(2);
+        document.getElementById('modalTipoCambioProv').value = tipoCambio.toFixed(2);
+        
+        // Cargar TODOS los valores DIRECTAMENTE en COLONES
+        const precioCompraCRC = parseFloat(c.PRECIO_COMPRA) || 0;
+        const precioTraspasoCRC = parseFloat(c.PRECIO_TRANSPASO) || 0;
+        const primaCRC = parseFloat(c.PRIMA) || 0;
+        const comisionCRC = parseFloat(c.COMISION) || 0;
+        const totalInversionCRC = parseFloat(c.TOTAL_INVERSION) || 0;
+        const saldoCRC = parseFloat(c.SALDO) || 0;
+        const precioPublicoCRC = parseFloat(c.PRECIO_PUBLICO) || 0;
+        
+        // Calcular costo total (precio compra + precio traspaso)
+        const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
+        
+        // Cargar valores en COLONES
+        document.getElementById('modalPrecioCompraColon').value = formatearNumero(precioCompraCRC);
+        document.getElementById('modalPrecioTraspasoColon').value = formatearNumero(precioTraspasoCRC);
+        document.getElementById('modalPrimaColon').value = formatearNumero(primaCRC);
+        document.getElementById('modalComisionColon').value = formatearNumero(comisionCRC);
+        document.getElementById('modalCostoColones').value = formatearNumero(costoTotalCRC);
+        document.getElementById('modalCostoColones2').value = formatearNumero(costoTotalCRC);
+        document.getElementById('modalTotalInversionColon').value = formatearNumero(totalInversionCRC);
+        document.getElementById('modalPrecioCostoColon').value = formatearNumero(totalInversionCRC);
+        document.getElementById('modalSaldoColon').value = formatearNumero(saldoCRC);
+        document.getElementById('modalPPrecio').value = formatearNumero(precioPublicoCRC);
+        
+        // Calcular y cargar valores en DÓLARES (usando el tipo de cambio)
+        document.getElementById('modalPrecioCompraDolar').value = formatearNumero(precioCompraCRC / tipoCambio);
+        document.getElementById('modalPrecioTraspasoDolar').value = formatearNumero(precioTraspasoCRC / tipoCambio);
+        document.getElementById('modalPrimaDolar').value = formatearNumero(primaCRC / tipoCambio);
+        document.getElementById('modalComisionDolar').value = formatearNumero(comisionCRC / tipoCambio);
+        document.getElementById('modalCostoDolar').value = formatearNumero(costoTotalCRC / tipoCambio);
+        document.getElementById('modalCostoDolar2').value = formatearNumero(costoTotalCRC / tipoCambio);
+        document.getElementById('modalTotalInversionDolar').value = formatearNumero(totalInversionCRC / tipoCambio);
+        document.getElementById('modalPrecioCostoDolar').value = formatearNumero(totalInversionCRC / tipoCambio);
+        document.getElementById('modalSaldoDolar').value = formatearNumero(saldoCRC / tipoCambio);
+        
+        // Otros campos en colones
+        document.getElementById('modalMontoTraspaso').value = formatearNumero(parseFloat(c.MONTO_TRASPASO) || 0);
+        document.getElementById('modalPCDescuento').value = formatearNumero(c.PRECIO_DESCUENTO || 0);
+        document.getElementById('modalPrimaFinanc').value = formatearNumero(c.PRIMA_FINANCIAMIENTO || 0);
+        document.getElementById('modalCuotaFinanc').value = formatearNumero(c.CUOTA_FINANCIAMIENTO || 0);
+        
+        console.log('Costos cargados:', {
+            colones: {
+                precioCompra: formatearNumero(precioCompraCRC),
+                costo: formatearNumero(costoTotalCRC),
+                totalInversion: formatearNumero(totalInversionCRC)
+            },
+            dolares: {
+                precioCompra: formatearNumero(precioCompraCRC / tipoCambio),
+                costo: formatearNumero(costoTotalCRC / tipoCambio)
+            },
+            tipoCambio: tipoCambio
+        });
+    }
+
+    // Agregar esta función para recalcular todos los dólares cuando cambia el tipo de cambio
+    function recalcularTodosLosDolares() {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+        
+        // Obtener todos los valores en colones
+        const preciosEnColones = {
+            'modalPrecioCompraColon': 'modalPrecioCompraDolar',
+            'modalPrecioTraspasoColon': 'modalPrecioTraspasoDolar',
+            'modalPrimaColon': 'modalPrimaDolar',
+            'modalComisionColon': 'modalComisionDolar'
+        };
+        
+        // Recalcular cada campo de dólares
+        Object.keys(preciosEnColones).forEach(colonId => {
+            const dolarId = preciosEnColones[colonId];
+            const valorColon = parsearNumero(document.getElementById(colonId).value);
+            const valorDolar = valorColon / tipoCambio;
+            document.getElementById(dolarId).value = formatearNumero(valorDolar);
+        });
+        
+        // ACTUALIZAR OBSERVACIONES
+        actualizarObservacionesPorTipoCambio();
+        
+        // Recalcular totales
+        calcularTotales();
+    }
+
+    async function cargarDatosProveedor() {
+        const proveedorId = document.getElementById('modalProveedor').value;
+        if (!proveedorId) {
+            // Limpiar campos si no hay proveedor seleccionado
+            document.getElementById('modalProvNombre').value = '';
+            document.getElementById('modalProvCedula').value = '';
+            document.getElementById('modalProvEstadoCivil').value = '';
+            document.getElementById('modalProvOcupacion').value = '';
+            document.getElementById('modalProvDireccion').value = '';
+            document.getElementById('modalProvTelefono1').value = '';
+            document.getElementById('modalProvTelefono2').value = '';
+            document.getElementById('modalProvEmail').value = '';
+            return;
+        }
+        
+        try {
+            // Mostrar indicador de carga
+            document.getElementById('modalProvNombre').value = 'Cargando...';
+            
+            // Buscar la persona (puede ser proveedor o cliente)
+            const response = await fetch(`${API_BASE_URL}/personas/${proveedorId}`);
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la información');
+            }
+            
+            const persona = await response.json();
+            
+            if (persona) {
+                // Información básica
+                document.getElementById('modalProvNombre').value = persona.NOMBRE_COMPLETO || '';
+                document.getElementById('modalProvCedula').value = persona.IDENTIFICACION || '';
+                
+                // Estado civil (SELECT)
+                if (persona.ID_ESTADO_CIVIL) {
+                    document.getElementById('modalProvEstadoCivil').value = persona.ID_ESTADO_CIVIL;
+                } else {
+                    document.getElementById('modalProvEstadoCivil').value = '';
+                }
+                
+                // Ocupación
+                document.getElementById('modalProvOcupacion').value = persona.OCUPACION || '';
+                
+                // Dirección
+                document.getElementById('modalProvDireccion').value = persona.DIRECCION || '';
+                
+                // Teléfonos
+                document.getElementById('modalProvTelefono1').value = persona.TELEFONO_PRINCIPAL || '';
+                document.getElementById('modalProvTelefono2').value = persona.TELEFONO_SECUNDARIO || '';
+                
+                // Email
+                document.getElementById('modalProvEmail').value = persona.EMAIL || '';
+                
+                // Determinar el tipo de persona (para debugging o visual)
+                const esProveedor = proveedores.some(p => p.ID_PERSONA == proveedorId);
+                console.log('Tipo de persona:', esProveedor ? 'PROVEEDOR' : 'CLIENTE', persona);
+                
+                // Opcional: Cambiar color de fondo según el tipo
+                const proveedorSection = document.querySelector('.supplier-details');
+                if (proveedorSection) {
+                    if (esProveedor) {
+                        proveedorSection.style.borderLeft = '4px solid #3498db'; 
+                    } else {
+                        proveedorSection.style.borderLeft = '4px solid #f39c12';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando datos de la persona:', error);
+            
+            // Mostrar mensaje de error en los campos
+            document.getElementById('modalProvNombre').value = 'Error al cargar';
+            document.getElementById('modalProvCedula').value = '';
+            document.getElementById('modalProvEstadoCivil').value = '';
+            document.getElementById('modalProvOcupacion').value = '';
+            document.getElementById('modalProvDireccion').value = '';
+            document.getElementById('modalProvTelefono1').value = '';
+            document.getElementById('modalProvTelefono2').value = '';
+            document.getElementById('modalProvEmail').value = '';
+            
+            mostrarAlerta('error', 'Error al cargar datos de la persona');
+        }
+    }
+
+    // Función para calcular todos los totales
+    function convertirColonesADolares(event) {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+        const inputId = event.target.id;
+        
+        const mapping = {
+            'modalPrecioCompraColon': 'modalPrecioCompraDolar',
+            'modalPrecioTraspasoColon': 'modalPrecioTraspasoDolar',
+            'modalPrimaColon': 'modalPrimaDolar',
+            'modalComisionColon': 'modalComisionDolar'
+        };
+        
+        const dolarFieldId = mapping[inputId];
+        if (dolarFieldId) {
+            const valorColones = parsearNumero(event.target.value);
+            const valorDolares = valorColones / tipoCambio;
+            document.getElementById(dolarFieldId).value = formatearNumero(valorDolares);
+        }
+        
+        calcularTotales();
+    }
+
+    // ===== FUNCIÓN PARA CONVERTIR DÓLARES A COLONES POR SECCIÓN =====
+    function convertirDolaresAColones(event) {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 500;
+        const inputId = event.target.id;
+        
+        // Mapeo de campos de dólares a sus correspondientes colones
+        const mapping = {
+            'modalPrecioCompraDolar': 'modalPrecioCompraColon',
+            'modalPrecioTraspasoDolar': 'modalPrecioTraspasoColon',
+            'modalPrimaDolar': 'modalPrimaColon',
+            'modalComisionDolar': 'modalComisionColon'
+        };
+        
+        const colonFieldId = mapping[inputId];
+        if (colonFieldId) {
+            const valorDolares = parsearNumero(event.target.value);
+            const valorColones = valorDolares * tipoCambio;
+            document.getElementById(colonFieldId).value = formatearNumero(valorColones);
+        }
+        
+        // Siempre recalcular totales después de cualquier cambio
+        calcularTotales();
+    }
+
+    // ===== FUNCIÓN PARA CALCULAR TOTALES =====
+    function calcularTotales() {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+        
+        // Leer valores en colones
+        const precioCompraCRC = parsearNumero(document.getElementById('modalPrecioCompraColon').value);
+        const precioTraspasoCRC = parsearNumero(document.getElementById('modalPrecioTraspasoColon').value);
+        const primaCRC = parsearNumero(document.getElementById('modalPrimaColon').value);
+        const comisionCRC = parsearNumero(document.getElementById('modalComisionColon').value);
+        
+        // Sumar observaciones
+        let totalObservacionesCRC = 0;
+        observations.forEach(obs => {
+            totalObservacionesCRC += parsearNumero(obs.amountCRC);
+        });
+        
+        // Cálculos en colones
+        const costoCompraCRC = precioCompraCRC + precioTraspasoCRC;
+        const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
+        const saldoCRC = costoCompraCRC - primaCRC;
+        const precioCostoCRC = comisionCRC + costoCompraCRC + totalObservacionesCRC;
+        
+        // Actualizar campos en COLONES
+        document.getElementById('modalCostoColones2').value = formatearNumero(costoCompraCRC);
+        document.getElementById('modalCostoColones').value = formatearNumero(costoCompraCRC);
+        document.getElementById('modalTotalInversionColon').value = formatearNumero(totalInversionCRC);
+        document.getElementById('modalPrecioCostoColon').value = formatearNumero(precioCostoCRC);
+        document.getElementById('modalSaldoColon').value = formatearNumero(saldoCRC);
+        
+        // Actualizar campos en DÓLARES
+        document.getElementById('modalCostoDolar2').value = formatearNumero(costoCompraCRC / tipoCambio);
+        document.getElementById('modalCostoDolar').value = formatearNumero(costoCompraCRC / tipoCambio);
+        document.getElementById('modalTotalInversionDolar').value = formatearNumero(totalInversionCRC / tipoCambio);
+        document.getElementById('modalPrecioCostoDolar').value = formatearNumero(precioCostoCRC / tipoCambio);
+        document.getElementById('modalSaldoDolar').value = formatearNumero(saldoCRC / tipoCambio);
+    }
+    
+    // ===== FUNCIÓN PARA CALCULAR TOTALES =====
+    function loadObservations() {
+        const container = document.getElementById('observations-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        observations.forEach(obs => {
+            const div = document.createElement('div');
+            div.className = 'observation-item';
+            div.dataset.idExtra = obs.id_extra || '';
+            div.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                padding: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                background: #f9f9f9;
+            `;
+            
+            div.innerHTML = `
+                <div style="display: flex; gap: 10px; margin-right: auto; margin-bottom: 5px;">
+                    <input type="text" class="observation-input" value="${obs.description}" 
+                        data-id="${obs.id}" placeholder="Descripción del extra"
+                        style="width: 50px; border: 1px solid #ddd; border-radius: 4px; padding: 8px;">                       
+                    <button class="delete-btn" data-id="${obs.id}" 
+                            style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <div class="price-input-wrapper">                        
+                            <span class="currency-symbol">$</span>
+                            <input type="text" class="price-input price-dolar observation-usd" value="${obs.amountUSD}" 
+                                data-id="${obs.id}" data-currency="USD"
+                                style="width: 100%; padding: 10px 10px 10px 25px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>                    
+                    <div style="flex: 1;">
+                        <div class="price-input-wrapper">
+                            <span class="currency-symbol">₡</span>
+                            <input type="text" class="price-input price-colon observation-crc" value="${obs.amountCRC}" 
+                                data-id="${obs.id}" data-currency="CRC"
+                                style="width: 100%; padding: 10px 10px 10px 25px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        // Agregar eventos
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = parseInt(this.dataset.id);
+                observations = observations.filter(o => o.id !== id);
+                loadObservations();
+                calcularTotales();
+            });
+        });
+        
+        document.querySelectorAll('.observation-crc').forEach(input => {
+            input.addEventListener('input', function() {
+                const id = parseInt(this.dataset.id);
+                const obs = observations.find(o => o.id === id);
+                if (obs) {
+                    const valorCRC = parsearNumero(this.value);
+                    obs.amountCRC = formatearNumero(valorCRC);
+                    
+                    // USAR EL TIPO DE CAMBIO ACTUAL
+                    const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+                    obs.amountUSD = formatearNumero(valorCRC / tipoCambio);
+                    
+                    // Actualizar el campo USD
+                    const usdField = this.closest('.observation-item').querySelector('.observation-usd');
+                    if (usdField) {
+                        usdField.value = obs.amountUSD;
+                    }
+                    
+                    // Recalcular totales en tiempo real
+                    calcularTotales();
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                this.value = formatearNumero(parsearNumero(this.value));
+                calcularTotales();
+            });
+        });
+        
+        document.querySelectorAll('.observation-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const id = parseInt(this.dataset.id);
+                const obs = observations.find(o => o.id === id);
+                if (obs) {
+                    obs.description = this.value;
+                }
+            });
+        });
+    }
+
+    // ===== FUNCIÓN addNewObservation =====
+    function addNewObservation() {
+        const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
+        
+        observations.push({
+            id: observationCounter++,
+            description: "",
+            amountUSD: "",
+            amountCRC: ""
+        });
+        
+        loadObservations();
+    }
+
+    // ===== FUNCIÓN PARA GUARDAR =====
+    async function guardarVehiculo() {
+        try {
+            // Validar campos requeridos
+            if (!document.getElementById('modalChasis').value) {
+                mostrarAlerta('error', 'El chasis es requerido');
+                return;
+            }
+            if (!document.getElementById('modalMarca').value) {
+                mostrarAlerta('error', 'La marca es requerida');
+                return;
+            }
+            if (!document.getElementById('modalModelo').value) {
+                mostrarAlerta('error', 'El modelo es requerido');
+                return;
+            }
+
+            const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 500;
+
+            // Datos del vehículo (igual)
+            const vehiculoData = {
+                ID_PROVEEDOR: document.getElementById('modalProveedor').value || null,
+                CHASIS: document.getElementById('modalChasis').value,
+                MOTOR: document.getElementById('modalMotor').value || null,
+                PLACA: document.getElementById('modalPlaca').value || null,
+                ID_MARCA: document.getElementById('modalMarca').value,
+                MODELO: document.getElementById('modalModelo').value,
+                ID_COLOR: document.getElementById('modalColor').value || null,
+                ID_COMBUSTIBLE: document.getElementById('modalCombustible').value || null,
+                ID_TRANSMISION: document.getElementById('modalTransmision').value || null,
+                ESTILO: document.getElementById('modalEstilo').value || null,
+                TRACCION: document.getElementById('modalTraccion').value || null,
+                CARROCERIA: document.getElementById('modalCarroceria').value || null,
+                C_C: document.getElementById('modalCC').value || null,
+                CILINDROS: document.getElementById('modalCilindros').value || null,
+                KILOMETRAJE_ACTUAL: parseFloat(document.getElementById('modalKmActual').value) || 0,
+                KILOMETRAJE_ANTERIOR: parseFloat(document.getElementById('modalKmAnterior').value) || 0,
+                FECHA_INGRESO: document.getElementById('modalFechaIngreso').value || new Date().toISOString().split('T')[0],
+                PV: document.getElementById('modalPV').value || null,
+                ESTADO: document.getElementById('modalEstado').value,
+                OBSERVACIONES: document.getElementById('modalObservaciones').value || null
+            };
+
+            // Leer valores en COLONES (moneda principal)
+            const precioCompraCRC = parsearNumero(document.getElementById('modalPrecioCompraColon').value);
+            const precioTraspasoCRC = parsearNumero(document.getElementById('modalPrecioTraspasoColon').value);
+            const primaCRC = parsearNumero(document.getElementById('modalPrimaColon').value);
+            const comisionCRC = parsearNumero(document.getElementById('modalComisionColon').value);
+            
+            // Sumar observaciones (en colones)
+            let totalObservacionesCRC = 0;
+            observations.forEach(obs => {
+                totalObservacionesCRC += parsearNumero(obs.amountCRC);
+            });
+
+            // Cálculos en colones
+            const costoTotalCRC = precioCompraCRC + precioTraspasoCRC;
+            const totalInversionCRC = comisionCRC + primaCRC + precioTraspasoCRC + totalObservacionesCRC;
+            const precioCostoCRC = comisionCRC + costoTotalCRC + totalObservacionesCRC;
+            const saldoCRC = costoTotalCRC - primaCRC;
+
+            // Costos del vehículo
+            const costosData = {
+                // TODOS los valores en COLONES (moneda principal)
+                PRECIO_COMPRA: precioCompraCRC,
+                PRECIO_TRANSPASO: precioTraspasoCRC,
+                COSTO: costoTotalCRC,
+                PRIMA: primaCRC,
+                COMISION: comisionCRC,
+                TOTAL_INVERSION: totalInversionCRC,
+                PRECIO_COSTO: precioCostoCRC,
+                MONTO_TRASPASO: parsearNumero(document.getElementById('modalMontoTraspaso').value),
+                PRECIO_PUBLICO: parsearNumero(document.getElementById('modalPPrecio').value),
+                PRECIO_DESCUENTO: parsearNumero(document.getElementById('modalPCDescuento').value),
+                PRIMA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalPrimaFinanc').value),
+                CUOTA_FINANCIAMIENTO: parsearNumero(document.getElementById('modalCuotaFinanc').value),
+                SALDO: saldoCRC,
+                MONEDA: 'CRC',
+                TIPO_CAMBIO_COMPRA: tipoCambio,
+                OBSERVACION: document.getElementById('modalObservaciones').value || null,
+                FECHA_CANCELACION: document.getElementById('modalFechaCancelacion').value || null            
+            };
+
+            let vehiculoId = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
+            
+            if (vehiculoId) {
+              const res = await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(vehiculoData)
+              });
+              if (!res.ok) {
+                  const err = await res.json().catch(() => ({}));
+                  throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
+              }
+            } else {
+                const response = await fetch(`${API_BASE_URL}/vehiculos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(vehiculoData)
+                });
+                const result = await response.json();
+                vehiculoId = result.id;
+            }          
+
+            // Guardar costos
+            await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/costos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(costosData)
+            });
+
+            // Primero, eliminar los extras existentes si estamos editando
+            if (vehiculoActual) {
+                await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
+                    method: 'DELETE'
+                });
+            }
+
+            // Guardar extras (observaciones) - CADA UNA COMO REGISTRO SEPARADO
+            for (const obs of observations) {
+                // Solo guardar si tiene descripción o monto
+                if (obs.description.trim() !== '' && parsearNumero(obs.amountCRC) > 0) {
+                    const montoCRC = parsearNumero(obs.amountCRC);
+                    
+                    const extraData = {
+                        EXTRAS_DETALLE: obs.description,
+                        PRECIO: montoCRC, // Guardar en colones
+                        MONEDA: 'CRC', // Moneda principal
+                        TIPO_CAMBIO_COMPRA: tipoCambio,
+                        PRECIO_USD: montoCRC / tipoCambio // Opcional: guardar también en USD
+                    };
+                    
+                    await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(extraData)
+                    });
+                }
+            }
+
+            mostrarAlerta('success', 'Vehículo guardado exitosamente');
+            cerrarModal();
+            cargarVehiculos();
+            
+        } catch (error) {
+            console.error('Error guardando vehículo:', error);
+            mostrarAlerta('error', 'Error al guardar el vehículo');
+        }
+    }
+
+    async function eliminarVehiculo(id) {
+        if (!confirm('¿Está seguro de eliminar este vehículo?')) return;
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/vehiculos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                mostrarAlerta('success', 'Vehículo eliminado');
+                cargarVehiculos();
+            } else {
+                mostrarAlerta('error', 'Error al eliminar vehículo');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            mostrarAlerta('error', 'Error al eliminar vehículo');
+        }
+    }
+
+    // ===== FUNCIÓN DE ALERTA =====
+    function mostrarAlerta(tipo, mensaje) {
+        const alerta = document.createElement('div');
+        alerta.className = `alert alert-${tipo}`;
+        alerta.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${mensaje}`;
+        
+        document.body.appendChild(alerta);
+        
+        setTimeout(() => alerta.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
