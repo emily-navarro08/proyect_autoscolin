@@ -5809,100 +5809,6 @@ app.post('/api/plan-ventas', async (req, res) => {
             throw new Error('No se pudo determinar el vehículo');
         }
 
-        // ─── VEHÍCULO(S) A RECIBIR (INTERCAMBIO) ─────────────────────────
-        const listaVehiculos = (vehiculos_recibir && vehiculos_recibir.length > 0)
-            ? vehiculos_recibir
-            : (vehiculo_recibir ? [vehiculo_recibir] : []);
-
-        for (const vr of listaVehiculos) {
-            const tieneIntercambio = vr && (
-                (vr.placa && vr.placa.trim() !== '') ||
-                (vr.chasis && vr.chasis.trim() !== '')
-            );
-            if (!tieneIntercambio) continue;
-
-            console.log('Procesando intercambio - Vehículo recibido:', vr);
-
-            const idClienteOrigen = idClienteInscribir || idClienteFacturar;
-            if (!idClienteOrigen) throw new Error('Para un intercambio se requiere un cliente');
-
-            let idVehRecibir = null;
-
-            if (vr.chasis) {
-                const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', [vr.chasis]
-                );
-                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
-            }
-
-            if (!idVehRecibir && vr.placa) {
-                const [exVR] = await connection.execute(
-                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', [vr.placa]
-                );
-                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
-            }
-
-            if (!idVehRecibir) {
-                const [rVR] = await connection.execute(
-                    `INSERT INTO VEHICULOS (
-                        ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
-                        ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
-                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV,
-                        ESTADO, OBSERVACIONES,
-                        ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION
-                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                    [
-                        idClienteOrigen,
-                        vr.chasis||null, vr.motor||null, vr.placa||null,
-                        vr.id_marca||1, vr.modelo||new Date().getFullYear(),
-                        vr.id_color||null, vr.id_combustible||null, vr.id_transmision||null,
-                        vr.estilo||null, vr.traccion||null, vr.carroceria||null,
-                        vr.cc||null, vr.cilindros||null,
-                        vr.kilometraje_actual||0, vr.kilometraje_anterior||0,
-                        vr.pv||null, 'COMPRADO',
-                        vr.observaciones || 'Vehículo recibido en intercambio.',
-                        true, idClienteOrigen, new Date()
-                    ]
-                );
-                idVehRecibir = rVR.insertId;
-            } else {
-                await connection.execute(
-                    `UPDATE VEHICULOS SET
-                        ESTADO = 'COMPRADO', ES_INTERCAMBIO = TRUE,
-                        ID_CLIENTE_ORIGEN = ?, FECHA_RECEPCION = ?,
-                        KILOMETRAJE_ACTUAL = ?,
-                        OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
-                    WHERE ID_VEHICULO = ?`,
-                    [idClienteOrigen, new Date(), vr.kilometraje_actual||0, idVehRecibir]
-                );
-            }
-
-            if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
-                const [costoExistente] = await connection.execute(
-                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?', [idVehRecibir]
-                );
-                if (costoExistente.length === 0) {
-                    await connection.execute(
-                        `INSERT INTO COSTOS_VEHICULO (ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO)
-                         VALUES (?,?,?,?,?)`,
-                        [idVehRecibir, vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido]
-                    );
-                } else {
-                    await connection.execute(
-                        `UPDATE COSTOS_VEHICULO SET PRECIO_COMPRA=?, PRECIO_TRANSPASO=?, TOTAL_INVERSION=?, PRECIO_COSTO=?
-                         WHERE ID_VEHICULO=?`,
-                        [vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido, idVehRecibir]
-                    );
-                }
-            }
-
-            // Vincular vehículo recibido a esta venta
-            await connection.execute(
-                'UPDATE VEHICULOS SET ID_VENTA_ORIGEN = ? WHERE ID_VEHICULO = ?',
-                [idVenta, idVehRecibir]
-            );
-        }
-
         // ─── 4. CREAR VENTA ───────────────────────────────────────
         let codigoFinal = codigo_venta;
         if (!codigoFinal || codigoFinal === 'NUEVO') {
@@ -5929,6 +5835,101 @@ app.post('/api/plan-ventas', async (req, res) => {
             ]
         );
         const idVenta = rv.insertId;
+
+        // ─── VEHÍCULO(S) A RECIBIR (INTERCAMBIO) ─────────────────────────
+        const listaVehiculos = (vehiculos_recibir && vehiculos_recibir.length > 0)
+            ? vehiculos_recibir
+            : (vehiculo_recibir ? [vehiculo_recibir] : []);
+
+        for (const vr of listaVehiculos) {
+            const tieneIntercambio = vr && (
+                (vr.placa && vr.placa.trim() !== '') ||
+                (vr.chasis && vr.chasis.trim() !== '')
+            );
+            if (!tieneIntercambio) continue;
+
+            console.log('Procesando intercambio - Vehículo recibido:', vr);
+
+            const idClienteOrigen = idClienteInscribir || idClienteFacturar;
+            if (!idClienteOrigen) throw new Error('Para un intercambio se requiere un cliente');
+
+            let idVehRecibir = null;
+
+            // Buscar si ya existe por chasis o placa
+            if (vr.chasis) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE CHASIS = ?', [vr.chasis]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+
+            if (!idVehRecibir && vr.placa) {
+                const [exVR] = await connection.execute(
+                    'SELECT ID_VEHICULO FROM VEHICULOS WHERE PLACA = ?', [vr.placa]
+                );
+                if (exVR.length > 0) idVehRecibir = exVR[0].ID_VEHICULO;
+            }
+
+            if (!idVehRecibir) {
+                // Crear nuevo vehículo (ya incluye ID_VENTA_ORIGEN)
+                const [rVR] = await connection.execute(
+                    `INSERT INTO VEHICULOS (
+                        ID_PROVEEDOR, CHASIS, MOTOR, PLACA, ID_MARCA, MODELO,
+                        ID_COLOR, ID_COMBUSTIBLE, ID_TRANSMISION, ESTILO, TRACCION, CARROCERIA,
+                        C_C, CILINDROS, KILOMETRAJE_ACTUAL, KILOMETRAJE_ANTERIOR, PV,
+                        ESTADO, OBSERVACIONES,
+                        ES_INTERCAMBIO, ID_CLIENTE_ORIGEN, FECHA_RECEPCION, ID_VENTA_ORIGEN
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        null, // ID_PROVEEDOR (deberías usar un proveedor válido o NULL)
+                        vr.chasis||null, vr.motor||null, vr.placa||null,
+                        vr.id_marca||1, vr.modelo||new Date().getFullYear(),
+                        vr.id_color||null, vr.id_combustible||null, vr.id_transmision||null,
+                        vr.estilo||null, vr.traccion||null, vr.carroceria||null,
+                        vr.cc||null, vr.cilindros||null,
+                        vr.kilometraje_actual||0, vr.kilometraje_anterior||0,
+                        vr.pv||null, 'COMPRADO',
+                        vr.observaciones || 'Vehículo recibido en intercambio.',
+                        true, idClienteOrigen, new Date(), idVenta
+                    ]
+                );
+                idVehRecibir = rVR.insertId;
+            } else {
+                // Actualizar vehículo existente (incluyendo ID_VENTA_ORIGEN)
+                await connection.execute(
+                    `UPDATE VEHICULOS SET
+                        ESTADO = 'COMPRADO', 
+                        ES_INTERCAMBIO = TRUE,
+                        ID_CLIENTE_ORIGEN = ?, 
+                        FECHA_RECEPCION = ?,
+                        ID_VENTA_ORIGEN = ?,
+                        KILOMETRAJE_ACTUAL = ?,
+                        OBSERVACIONES = CONCAT(IFNULL(OBSERVACIONES,''), ' | Recibido en intercambio el ', CURDATE())
+                    WHERE ID_VEHICULO = ?`,
+                    [idClienteOrigen, new Date(), idVenta, vr.kilometraje_actual||0, idVehRecibir]
+                );
+            }
+
+            // Guardar costos del vehículo recibido
+            if (vr.monto_recibido && parseFloat(vr.monto_recibido) > 0) {
+                const [costoExistente] = await connection.execute(
+                    'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?', [idVehRecibir]
+                );
+                if (costoExistente.length === 0) {
+                    await connection.execute(
+                        `INSERT INTO COSTOS_VEHICULO (ID_VEHICULO, PRECIO_COMPRA, PRECIO_TRANSPASO, TOTAL_INVERSION, PRECIO_COSTO)
+                        VALUES (?,?,?,?,?)`,
+                        [idVehRecibir, vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido]
+                    );
+                } else {
+                    await connection.execute(
+                        `UPDATE COSTOS_VEHICULO SET PRECIO_COMPRA=?, PRECIO_TRANSPASO=?, TOTAL_INVERSION=?, PRECIO_COSTO=?
+                        WHERE ID_VEHICULO=?`,
+                        [vr.monto_recibido, vr.monto_traspaso||0, vr.monto_recibido, vr.monto_recibido, idVehRecibir]
+                    );
+                }
+            }
+        }
 
         // ─── 5. FINANCIAMIENTO (si es crédito) ────────────────────
         let idFinanciamiento = null;
