@@ -3852,6 +3852,7 @@ app.post('/api/personas', async (req, res) => {
             TELEFONO_PRINCIPAL,
             TELEFONO_SECUNDARIO,
             EMAIL,
+            EMAIL_SECUNDARIO,
             OBSERVACION,
             ESTADO
         } = req.body;
@@ -3863,13 +3864,13 @@ app.post('/api/personas', async (req, res) => {
             `INSERT INTO PERSONAS (
                 TIPO_DOCUMENTO, IDENTIFICACION, NOMBRE_COMPLETO, NACIONALIDAD,
                 ID_ESTADO_CIVIL, OCUPACION, DIRECCION, TELEFONO_PRINCIPAL,
-                TELEFONO_SECUNDARIO, EMAIL, OBSERVACION, ESTADO
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                TELEFONO_SECUNDARIO, EMAIL, EMAIL_SECUNDARIO, OBSERVACION, ESTADO
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                TIPO_DOCUMENTO, IDENTIFICACION, NOMBRE_COMPLETO, NACIONALIDAD,
+                TIPO_DOCUMENTO, IDENTIFICACION, NOMBRE_COMPLETO, NACIONALIDAD || null,
                 ID_ESTADO_CIVIL || null, OCUPACION || null, DIRECCION || null,
                 TELEFONO_PRINCIPAL || null, TELEFONO_SECUNDARIO || null,
-                EMAIL || null, OBSERVACION || null, ESTADO || 'ACTIVO'
+                EMAIL || null, EMAIL_SECUNDARIO || null, OBSERVACION || null, ESTADO || 'ACTIVO'
             ]
         );
         
@@ -3904,6 +3905,7 @@ app.put('/api/personas/:id', async (req, res) => {
             TELEFONO_PRINCIPAL,
             TELEFONO_SECUNDARIO,
             EMAIL,
+            EMAIL_SECUNDARIO,
             OBSERVACION,
             ESTADO
         } = req.body;
@@ -3922,14 +3924,15 @@ app.put('/api/personas/:id', async (req, res) => {
                 TELEFONO_PRINCIPAL = ?,
                 TELEFONO_SECUNDARIO = ?,
                 EMAIL = ?,
+                EMAIL_SECUNDARIO = ?,
                 OBSERVACION = ?,
                 ESTADO = ?
             WHERE ID_PERSONA = ?`,
             [
-                TIPO_DOCUMENTO, IDENTIFICACION, NOMBRE_COMPLETO, NACIONALIDAD,
+                TIPO_DOCUMENTO, IDENTIFICACION, NOMBRE_COMPLETO, NACIONALIDAD || null,
                 ID_ESTADO_CIVIL || null, OCUPACION || null, DIRECCION || null,
                 TELEFONO_PRINCIPAL || null, TELEFONO_SECUNDARIO || null,
-                EMAIL || null, OBSERVACION || null, ESTADO || 'ACTIVO',
+                EMAIL || null, EMAIL_SECUNDARIO || null, OBSERVACION || null, ESTADO || 'ACTIVO',
                 req.params.id
             ]
         );
