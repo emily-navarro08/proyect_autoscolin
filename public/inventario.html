@@ -856,7 +856,7 @@
                                         <input type="checkbox" id="incluirClientes" onchange="toggleIncluirClientes(this.checked)">
                                         Buscar también en clientes
                                     </label>
-                                </div>
+                                </div>                           
                             </div>
                             
                             <div class="card">
@@ -1025,46 +1025,105 @@
                             <div class="supplier-details">
                                 <div class="card-title">Información General</div>
                                 
+                                <!-- Selector de Rol -->
+                                <div style="margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <div style="font-size: 0.85rem; font-weight: 600; color: #2c3e50; margin-bottom: 10px;">
+                                        <i class="fas fa-tag"></i> Rol de la persona:
+                                    </div>
+                                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="rolProveedorCheck" value="proveedor" 
+                                                style="width: 18px; height: 18px;">
+                                            <span>Proveedor</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="rolClienteCheck" value="cliente"
+                                                style="width: 18px; height: 18px;">
+                                            <span>Cliente</span>
+                                        </label>
+                                    </div>
+                                    <div id="rolErrorMsg" style="display:none; font-size:0.75rem; color:#e74c3c; margin-top:8px;">
+                                        <i class="fas fa-exclamation-circle"></i> Selecciona al menos un rol (Proveedor o Cliente)
+                                    </div>
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <button type="button" id="btnLimpiarPersona" 
+                                            style="flex: 1; padding: 8px; background: #95a5a6; color: white; 
+                                                border: none; border-radius: 6px; cursor: pointer; display: flex;
+                                                align-items: center; justify-content: center; gap: 5px;">
+                                        <i class="fas fa-eraser"></i> Limpiar
+                                    </button>
+                                </div>
+                                
                                 <div class="detail-grid" id="proveedorInfo">
                                     <div class="detail-item">
-                                        <div class="detail-label">Nombre</div>
-                                        <input type="text" class="detail-input" id="modalProvNombre" value="" readonly>
+                                        <div class="detail-label">Tipo de documento *</div>
+                                        <select class="detail-input" id="modalProvTipoDoc">
+                                            <option value="">Seleccionar Tipo</option>
+                                            <option value="CEDULA_FISICA">Cédula Física</option>
+                                            <option value="CEDULA_JURIDICA">Cédula Jurídica</option>
+                                            <option value="DIMEX">DIMEX</option>
+                                            <option value="NITE">NITE</option>
+                                            <option value="PASAPORTE">Pasaporte</option>
+                                        </select>                    
                                     </div>
                                     
                                     <div class="detail-item">
-                                        <div class="detail-label">Cédula</div>
-                                        <input type="text" class="detail-input" id="modalProvCedula" value="" readonly>
+                                        <div class="detail-label">Identificación *</div>
+                                        <input type="text" class="detail-input" id="modalProvCedula" 
+                                            placeholder="1-2345-6789">
                                     </div>
                                     
                                     <div class="detail-item">
-                                        <div class="detail-label">Estado Civil</div>
-                                        <select  class="detail-input" id="modalProvEstadoCivil"><option value="">Seleccionar</option></select>
-                                    </div>
-                                    
-                                    <div class="detail-item">
-                                        <div class="detail-label">Ocupación</div>
-                                        <input type="text" class="detail-input" id="modalProvOcupacion" value="" readonly>
-                                    </div>
-                                    
-                                    <div class="detail-item">
-                                        <div class="detail-label">Dirección</div>
-                                        <textarea type="text" class="detail-input" id="modalProvDireccion" readonly></textarea>
+                                        <div class="detail-label">Nombre completo *</div>
+                                        <input type="text" class="detail-input" id="modalProvNombre" 
+                                            placeholder="Nombre completo">
                                     </div>
                                     
                                     <div class="detail-item">
                                         <div class="detail-label">Teléfono Principal</div>
-                                        <input type="text" class="detail-input" id="modalProvTelefono1" value="" readonly>
+                                        <input type="text" class="detail-input" id="modalProvTelefono1" 
+                                            placeholder="8888-8888">
                                     </div>
                                     
                                     <div class="detail-item">
                                         <div class="detail-label">Teléfono Secundario</div>
-                                        <input type="text" class="detail-input" id="modalProvTelefono2" value="" readonly>
+                                        <input type="text" class="detail-input" id="modalProvTelefono2" 
+                                            placeholder="Opcional">
                                     </div>
                                     
                                     <div class="detail-item">
                                         <div class="detail-label">Correo Electrónico</div>
-                                        <input type="text" class="detail-input" id="modalProvEmail" value="" readonly>
+                                        <input type="email" class="detail-input" id="modalProvEmail" 
+                                            placeholder="correo@ejemplo.com">
                                     </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Estado Civil</div>
+                                        <select class="detail-input" id="modalProvEstadoCivil">
+                                            <option value="">Seleccionar</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <div class="detail-label">Ocupación</div>
+                                        <input type="text" class="detail-input" id="modalProvOcupacion" 
+                                            placeholder="Ej: Comerciante">
+                                    </div>
+                                    
+                                    <div class="detail-item full-width">
+                                        <div class="detail-label">Dirección</div>
+                                        <textarea class="detail-input" id="modalProvDireccion" rows="2" 
+                                                placeholder="Dirección completa"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- Indicador de persona existente -->
+                                <div id="personaStatus" style="margin-top: 10px; font-size: 0.8rem; display: none;">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <span id="personaStatusText"></span>
                                 </div>
                             </div>
                         </div>
@@ -1118,6 +1177,7 @@
     let vehiculoActual = null;
     let observations = [];
     let observationCounter = 1;
+    let idPersonaSeleccionada = null;
 
     // ===== INICIALIZACIÓN =====
     document.addEventListener('DOMContentLoaded', function() {
@@ -1187,6 +1247,26 @@
                 }
             });
         });
+        
+        const btnLimpiarPersona = document.getElementById('btnLimpiarPersona');
+        if (btnLimpiarPersona) {
+            btnLimpiarPersona.addEventListener('click', limpiarFormularioPersona);
+        }
+        
+        // Validar que al menos un rol esté seleccionado antes de guardar
+        const btnGuardar = document.getElementById('btnGuardarVehiculo');
+        if (btnGuardar) {
+            btnGuardar.addEventListener('click', function(e) {
+                const esProveedor = document.getElementById('rolProveedorCheck').checked;
+                const esCliente = document.getElementById('rolClienteCheck').checked;
+                
+                if (!esProveedor && !esCliente) {
+                    e.preventDefault();
+                    document.getElementById('rolErrorMsg').style.display = 'block';
+                    mostrarAlerta('warning', 'Debe seleccionar al menos un rol (Proveedor o Cliente)');
+                }
+            });
+        }    
     });
 
     // Función para llenar el select de años (modelo)
@@ -1614,18 +1694,17 @@
             document.getElementById('modalTitleText').textContent = `Editar ${data.vehiculo.PLACA || 'Vehículo'}`;
             document.getElementById('modalPlacaBadge').textContent = data.vehiculo.PLACA || 'SIN PLACA';
             
-            // Cargar datos en el formulario
+            // Cargar datos del vehículo
             cargarDatosVehiculo(data);
             
-            // Cargar costos - AHORA DIRECTAMENTE EN COLONES
+            // Cargar costos
             if (data.costos) {
                 cargarCostos(data.costos);
             }
             
-            // Cargar observaciones (extras)
+            // Cargar observaciones
             if (data.extras && data.extras.length > 0) {
                 const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 515;
-                
                 observations = data.extras.map((extra, index) => {
                     const valorCRC = parseFloat(extra.PRECIO) || 0;
                     return {
@@ -1647,6 +1726,29 @@
             
             observationCounter = observations.length + 1;
             loadObservations();
+            
+            // ===== NUEVO: Cargar los datos de la persona asociada =====
+            if (data.vehiculo.ID_PROVEEDOR) {
+                try {
+                    const personaResponse = await fetch(`${API_BASE_URL}/personas/${data.vehiculo.ID_PROVEEDOR}`);
+                    const persona = await personaResponse.json();
+                    
+                    if (persona) {
+                        cargarDatosPersonaEnFormulario(persona);
+                        idPersonaSeleccionada = persona.ID_PERSONA;
+                        await cargarRolesPersona(persona.ID_PERSONA);
+                        
+                        // Mostrar estado
+                        const statusDiv = document.getElementById('personaStatus');
+                        statusDiv.style.display = 'block';
+                        document.getElementById('personaStatusText').innerHTML = 
+                            `Persona cargada - ID: ${persona.ID_PERSONA}`;
+                        statusDiv.style.color = '#3498db';
+                    }
+                } catch (error) {
+                    console.error('Error cargando persona asociada:', error);
+                }
+            }
             
             // Recalcular totales
             calcularTotales();
@@ -1680,6 +1782,8 @@
         });
         document.getElementById('btnGuardarVehiculo').style.display = 'inline-block';
         document.getElementById('add-observation-btn').disabled = false;
+
+        limpiarMensajeEstado();
     }
 
     function limpiarFormulario() {
@@ -1761,6 +1865,7 @@
             amountCRC: ""
         }];
         loadObservations();
+        limpiarMensajeEstado();
     }
 
     function cargarDatosVehiculo(data) {
@@ -1992,83 +2097,32 @@
 
     async function cargarDatosProveedor() {
         const proveedorId = document.getElementById('modalProveedor').value;
+        
         if (!proveedorId) {
-            // Limpiar campos si no hay proveedor seleccionado
-            document.getElementById('modalProvNombre').value = '';
-            document.getElementById('modalProvCedula').value = '';
-            document.getElementById('modalProvEstadoCivil').value = '';
-            document.getElementById('modalProvOcupacion').value = '';
-            document.getElementById('modalProvDireccion').value = '';
-            document.getElementById('modalProvTelefono1').value = '';
-            document.getElementById('modalProvTelefono2').value = '';
-            document.getElementById('modalProvEmail').value = '';
+            limpiarFormularioPersona();
+            idPersonaSeleccionada = null;
             return;
         }
         
         try {
-            // Mostrar indicador de carga
-            document.getElementById('modalProvNombre').value = 'Cargando...';
-            
-            // Buscar la persona (puede ser proveedor o cliente)
             const response = await fetch(`${API_BASE_URL}/personas/${proveedorId}`);
-            if (!response.ok) {
-                throw new Error('No se pudo cargar la información');
-            }
-            
             const persona = await response.json();
             
             if (persona) {
-                // Información básica
-                document.getElementById('modalProvNombre').value = persona.NOMBRE_COMPLETO || '';
-                document.getElementById('modalProvCedula').value = persona.IDENTIFICACION || '';
+                cargarDatosPersonaEnFormulario(persona);
+                idPersonaSeleccionada = persona.ID_PERSONA;
+                await cargarRolesPersona(persona.ID_PERSONA);
                 
-                // Estado civil (SELECT)
-                if (persona.ID_ESTADO_CIVIL) {
-                    document.getElementById('modalProvEstadoCivil').value = persona.ID_ESTADO_CIVIL;
-                } else {
-                    document.getElementById('modalProvEstadoCivil').value = '';
-                }
-                
-                // Ocupación
-                document.getElementById('modalProvOcupacion').value = persona.OCUPACION || '';
-                
-                // Dirección
-                document.getElementById('modalProvDireccion').value = persona.DIRECCION || '';
-                
-                // Teléfonos
-                document.getElementById('modalProvTelefono1').value = persona.TELEFONO_PRINCIPAL || '';
-                document.getElementById('modalProvTelefono2').value = persona.TELEFONO_SECUNDARIO || '';
-                
-                // Email
-                document.getElementById('modalProvEmail').value = persona.EMAIL || '';
-                
-                // Determinar el tipo de persona (para debugging o visual)
-                const esProveedor = proveedores.some(p => p.ID_PERSONA == proveedorId);
-                console.log('Tipo de persona:', esProveedor ? 'PROVEEDOR' : 'CLIENTE', persona);
-                
-                // Opcional: Cambiar color de fondo según el tipo
-                const proveedorSection = document.querySelector('.supplier-details');
-                if (proveedorSection) {
-                    if (esProveedor) {
-                        proveedorSection.style.borderLeft = '4px solid #3498db'; 
-                    } else {
-                        proveedorSection.style.borderLeft = '4px solid #f39c12';
-                    }
-                }
+                // Mostrar estado
+                const statusDiv = document.getElementById('personaStatus');
+                statusDiv.style.display = 'block';
+                document.getElementById('personaStatusText').innerHTML = 
+                    `Persona cargada - ID: ${persona.ID_PERSONA}`;
+                statusDiv.style.color = '#3498db';
             }
+            
         } catch (error) {
             console.error('Error cargando datos de la persona:', error);
-            
-            // Mostrar mensaje de error en los campos
-            document.getElementById('modalProvNombre').value = 'Error al cargar';
-            document.getElementById('modalProvCedula').value = '';
-            document.getElementById('modalProvEstadoCivil').value = '';
-            document.getElementById('modalProvOcupacion').value = '';
-            document.getElementById('modalProvDireccion').value = '';
-            document.getElementById('modalProvTelefono1').value = '';
-            document.getElementById('modalProvTelefono2').value = '';
-            document.getElementById('modalProvEmail').value = '';
-            
             mostrarAlerta('error', 'Error al cargar datos de la persona');
         }
     }
@@ -2276,7 +2330,7 @@
     // ===== FUNCIÓN PARA GUARDAR =====
     async function guardarVehiculo() {
         try {
-            // Validar campos requeridos
+            // Validar campos requeridos del vehículo
             if (!document.getElementById('modalChasis').value) {
                 mostrarAlerta('error', 'El chasis es requerido');
                 return;
@@ -2289,12 +2343,20 @@
                 mostrarAlerta('error', 'El modelo es requerido');
                 return;
             }
-
+            
+            // PRIMERO: Guardar o actualizar la persona desde los campos de la tercera columna
+            const idPersona = await guardarPersonaDesdeFormulario();
+            
+            if (!idPersona) {
+                // Si hay error con la persona, no continuar
+                return;
+            }
+            
             const tipoCambio = parseFloat(document.getElementById('modalTipoCambio').value) || 500;
-
-            // Datos del vehículo (igual)
+            
+            // Datos del vehículo
             const vehiculoData = {
-                ID_PROVEEDOR: document.getElementById('modalProveedor').value || null,
+                ID_PROVEEDOR: idPersona, // Usar el ID de la persona guardada
                 CHASIS: document.getElementById('modalChasis').value,
                 MOTOR: document.getElementById('modalMotor').value || null,
                 PLACA: document.getElementById('modalPlaca').value || null,
@@ -2336,7 +2398,6 @@
 
             // Costos del vehículo
             const costosData = {
-                // TODOS los valores en COLONES (moneda principal)
                 PRECIO_COMPRA: precioCompraCRC,
                 PRECIO_TRANSPASO: precioTraspasoCRC,
                 COSTO: costoTotalCRC,
@@ -2359,15 +2420,15 @@
             let vehiculoId = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
             
             if (vehiculoId) {
-              const res = await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(vehiculoData)
-              });
-              if (!res.ok) {
-                  const err = await res.json().catch(() => ({}));
-                  throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
-              }
+                const res = await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(vehiculoData)
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || `Error ${res.status} al actualizar vehículo`);
+                }
             } else {
                 const response = await fetch(`${API_BASE_URL}/vehiculos`, {
                     method: 'POST',
@@ -2385,25 +2446,24 @@
                 body: JSON.stringify(costosData)
             });
 
-            // Primero, eliminar los extras existentes si estamos editando
+            // Eliminar extras existentes si estamos editando
             if (vehiculoActual) {
                 await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
                     method: 'DELETE'
                 });
             }
 
-            // Guardar extras (observaciones) - CADA UNA COMO REGISTRO SEPARADO
+            // Guardar extras (observaciones)
             for (const obs of observations) {
-                // Solo guardar si tiene descripción o monto
                 if (obs.description.trim() !== '' && parsearNumero(obs.amountCRC) > 0) {
                     const montoCRC = parsearNumero(obs.amountCRC);
                     
                     const extraData = {
                         EXTRAS_DETALLE: obs.description,
-                        PRECIO: montoCRC, // Guardar en colones
-                        MONEDA: 'CRC', // Moneda principal
+                        PRECIO: montoCRC,
+                        MONEDA: 'CRC',
                         TIPO_CAMBIO_COMPRA: tipoCambio,
-                        PRECIO_USD: montoCRC / tipoCambio // Opcional: guardar también en USD
+                        PRECIO_USD: montoCRC / tipoCambio
                     };
                     
                     await fetch(`${API_BASE_URL}/vehiculos/${vehiculoId}/extras`, {
@@ -2453,6 +2513,355 @@
         document.body.appendChild(alerta);
         
         setTimeout(() => alerta.remove(), 3000);
+    }
+
+    // Función para cargar datos de persona en el formulario (ya existe, pero mejorémosla)
+    function cargarDatosPersonaEnFormulario(persona) {
+        console.log('Cargando datos de persona:', persona); // Debug
+        
+        document.getElementById('modalProvNombre').value = persona.NOMBRE_COMPLETO || '';
+        document.getElementById('modalProvCedula').value = persona.IDENTIFICACION || '';
+        document.getElementById('modalProvTelefono1').value = persona.TELEFONO_PRINCIPAL || '';
+        document.getElementById('modalProvTelefono2').value = persona.TELEFONO_SECUNDARIO || '';
+        document.getElementById('modalProvEmail').value = persona.EMAIL || '';
+        document.getElementById('modalProvOcupacion').value = persona.OCUPACION || '';
+        document.getElementById('modalProvDireccion').value = persona.DIRECCION || '';
+        
+        // ==== NORMALIZAR TIPO DE DOCUMENTO ====
+        const tipoDocSelect = document.getElementById('modalProvTipoDoc');
+        
+        if (persona.TIPO_DOCUMENTO) {
+            let tipoDocumento = persona.TIPO_DOCUMENTO.trim();
+            
+            console.log('🎯 Tipo documento original:', tipoDocumento);
+            
+            // Normalizar: eliminar tildes, convertir a mayúsculas, reemplazar espacios por _
+            const normalizar = (texto) => {
+                return texto
+                    .toUpperCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Eliminar tildes
+                    .replace(/\s+/g, '_')     // Reemplazar espacios por _
+                    .replace(/Ú/g, 'U')       // Reemplazar Ú por U
+                    .replace(/Í/g, 'I')       // Reemplazar Í por I
+                    .replace(/Ó/g, 'O')       // Reemplazar Ó por O
+                    .replace(/Á/g, 'A')       // Reemplazar Á por A
+                    .replace(/É/g, 'E');      // Reemplazar É por E
+            };
+            
+            let tipoNormalizado = normalizar(tipoDocumento);
+            
+            // Mapeo adicional para casos especiales
+            const mapeoEspecial = {
+                'CEDULA_FISICA': 'CEDULA_FISICA',
+                'CEDULA_JURIDICA': 'CEDULA_JURIDICA',
+                'CEDULA FISICA': 'CEDULA_FISICA',
+                'CEDULA_FISICA': 'CEDULA_FISICA',
+                'CEDULA_JURIDICA': 'CEDULA_JURIDICA'
+            };
+            
+            // Si el normalizado no coincide, intentar mapeo directo
+            if (!mapeoEspecial[tipoNormalizado] && tipoDocumento.includes('Física')) {
+                tipoNormalizado = 'CEDULA_FISICA';
+            } else if (!mapeoEspecial[tipoNormalizado] && tipoDocumento.includes('Jurídica')) {
+                tipoNormalizado = 'CEDULA_JURIDICA';
+            }
+            
+            console.log('📌 Tipo documento normalizado:', tipoNormalizado);
+            
+            // Verificar si el valor existe en el select
+            let optionExists = false;
+            for (let i = 0; i < tipoDocSelect.options.length; i++) {
+                if (tipoDocSelect.options[i].value === tipoNormalizado) {
+                    optionExists = true;
+                    break;
+                }
+            }
+            
+            if (optionExists) {
+                tipoDocSelect.value = tipoNormalizado;
+                console.log('✅ Tipo documento seleccionado:', tipoDocSelect.value);
+            } else {
+                console.warn('⚠️ Tipo de documento no encontrado:', tipoNormalizado);
+                tipoDocSelect.value = '';
+            }
+        } else {
+            console.warn('⚠️ La persona NO tiene campo TIPO_DOCUMENTO');
+            tipoDocSelect.value = '';
+        }
+        
+        // Cargar estado civil
+        if (persona.ID_ESTADO_CIVIL) {
+            const estadoCivilSelect = document.getElementById('modalProvEstadoCivil');
+            estadoCivilSelect.value = persona.ID_ESTADO_CIVIL;
+        }
+    }
+
+    // Función mejorada para cargar roles de persona
+    async function cargarRolesPersona(idPersona) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/personas/${idPersona}/roles`);
+            const roles = await response.json();
+            
+            console.log('Roles de la persona:', roles); // Debug
+            
+            // Resetear checkboxes
+            document.getElementById('rolProveedorCheck').checked = false;
+            document.getElementById('rolClienteCheck').checked = false;
+            
+            // Marcar roles existentes (según tu sistema de roles)
+            roles.forEach(rol => {
+                // Ajusta estos IDs según tu base de datos
+                if (rol.ID_ROL == 4) { // Proveedor
+                    document.getElementById('rolProveedorCheck').checked = true;
+                }
+                if (rol.ID_ROL == 1 || rol.ID_ROL == 2 || rol.ID_ROL == 3) { // Cliente (cualquier rol de cliente)
+                    document.getElementById('rolClienteCheck').checked = true;
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error cargando roles:', error);
+        }
+    }
+
+    // Función para guardar o actualizar persona (desde los campos de la tercera columna)
+    async function guardarPersonaDesdeFormulario() {
+        const nombre = document.getElementById('modalProvNombre').value.trim();
+        const identificacion = document.getElementById('modalProvCedula').value.trim();
+        const tipoDocumento = document.getElementById('modalProvTipoDoc').value;
+        
+        // Validaciones mejoradas
+        if (!nombre) {
+            mostrarAlerta('warning', 'El nombre es requerido');
+            document.getElementById('modalProvNombre').focus();
+            return null;
+        }
+        
+        if (!identificacion) {
+            mostrarAlerta('warning', 'La identificación es requerida');
+            document.getElementById('modalProvCedula').focus();
+            return null;
+        }
+        
+        // Validar tipo de documento
+        if (!tipoDocumento) {
+            mostrarAlerta('warning', 'El tipo de documento es requerido');
+            document.getElementById('modalProvTipoDoc').focus();
+            return null;
+        }
+        
+        // Verificar roles seleccionados
+        const esProveedor = document.getElementById('rolProveedorCheck').checked;
+        const esCliente = document.getElementById('rolClienteCheck').checked;
+        
+        if (!esProveedor && !esCliente) {
+            document.getElementById('rolErrorMsg').style.display = 'block';
+            mostrarAlerta('warning', 'Debe seleccionar al menos un rol (Proveedor o Cliente)');
+            return null;
+        }
+        document.getElementById('rolErrorMsg').style.display = 'none';
+        
+        try {
+            const personaData = {
+                TIPO_DOCUMENTO: tipoDocumento,
+                IDENTIFICACION: identificacion,
+                NOMBRE_COMPLETO: nombre,
+                TELEFONO_PRINCIPAL: document.getElementById('modalProvTelefono1').value.trim() || null,
+                TELEFONO_SECUNDARIO: document.getElementById('modalProvTelefono2').value.trim() || null,
+                OCUPACION: document.getElementById('modalProvOcupacion').value.trim() || null,
+                ID_ESTADO_CIVIL: document.getElementById('modalProvEstadoCivil').value || null,
+                EMAIL: document.getElementById('modalProvEmail').value.trim() || null,
+                DIRECCION: document.getElementById('modalProvDireccion').value.trim() || null,
+                ESTADO: 'ACTIVO'
+            };
+            
+            console.log('Guardando persona:', personaData); // Debug
+            
+            let idPersona;
+            
+            if (idPersonaSeleccionada) {
+                // Actualizar persona existente
+                const response = await fetch(`${API_BASE_URL}/personas/${idPersonaSeleccionada}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(personaData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al actualizar persona');
+                }
+                
+                idPersona = idPersonaSeleccionada;
+                mostrarAlerta('success', 'Persona actualizada correctamente');
+                
+            } else {
+                // Verificar si ya existe una persona con esa identificación
+                const checkResponse = await fetch(`${API_BASE_URL}/personas/identificacion/${identificacion}`);
+                const personaExistente = await checkResponse.json();
+                
+                if (personaExistente && personaExistente.ID_PERSONA) {
+                    // Ya existe, usar esa
+                    idPersona = personaExistente.ID_PERSONA;
+                    idPersonaSeleccionada = idPersona;
+                    
+                    // Actualizar datos
+                    const updateResponse = await fetch(`${API_BASE_URL}/personas/${idPersona}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(personaData)
+                    });
+                    
+                    if (!updateResponse.ok) throw new Error('Error al actualizar persona');
+                    
+                    mostrarAlerta('success', 'Persona actualizada correctamente');
+                } else {
+                    // Crear nueva persona
+                    const response = await fetch(`${API_BASE_URL}/personas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(personaData)
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Error al crear persona');
+                    }
+                    
+                    const result = await response.json();
+                    idPersona = result.id;
+                    mostrarAlerta('success', 'Persona creada correctamente');
+                }
+            }
+            
+            // Actualizar roles
+            await actualizarRolesPersona(idPersona, esProveedor, esCliente);
+            
+            // Actualizar el select de proveedor en la segunda columna
+            const nombreMostrar = nombre.length > 30 ? nombre.substring(0, 27) + '...' : nombre;
+            await actualizarSelectPersona(idPersona, `${nombreMostrar} (${identificacion})`);
+            
+            // Actualizar el ID de persona seleccionada
+            idPersonaSeleccionada = idPersona;
+            
+            // Actualizar estado
+            const statusDiv = document.getElementById('personaStatus');
+            statusDiv.style.display = 'block';
+            document.getElementById('personaStatusText').innerHTML = 
+                `✓ Persona ${idPersonaSeleccionada ? 'actualizada' : 'creada'} - ID: ${idPersona}`;
+            statusDiv.style.color = '#27ae60';
+            
+            return idPersona;
+            
+        } catch (error) {
+            console.error('Error guardando persona:', error);
+            mostrarAlerta('error', error.message || 'Error al guardar la persona');
+            return null;
+        }
+    }
+
+    // Función para actualizar los roles de una persona
+    async function actualizarRolesPersona(idPersona, esProveedor, esCliente) {
+        try {
+            // Obtener roles actuales
+            const response = await fetch(`${API_BASE_URL}/personas/${idPersona}/roles`);
+            const rolesActuales = await response.json();
+            
+            const rolesActualesIds = rolesActuales.map(r => r.ID_ROL);
+            const rolesDeseados = [];
+            
+            if (esProveedor) rolesDeseados.push(4);
+            if (esCliente) rolesDeseados.push(1);
+            
+            // Eliminar roles que ya no se desean
+            for (const rol of rolesActuales) {
+                if (!rolesDeseados.includes(rol.ID_ROL)) {
+                    await fetch(`${API_BASE_URL}/personas-roles/${idPersona}/${rol.ID_ROL}`, {
+                        method: 'DELETE'
+                    });
+                }
+            }
+            
+            // Agregar roles nuevos
+            for (const rolId of rolesDeseados) {
+                if (!rolesActualesIds.includes(rolId)) {
+                    await fetch(`${API_BASE_URL}/personas-roles`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ID_PERSONA: idPersona, ID_ROL: rolId, ESTADO: 'ACTIVO' })
+                    });
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error actualizando roles:', error);
+        }
+    }
+
+    // Función para actualizar el select de personas en la segunda columna
+    async function actualizarSelectPersona(idPersona, nombre) {
+        // Recargar lista de proveedores/clientes según el checkbox
+        const incluirClientes = document.getElementById('incluirClientes').checked;
+        
+        if (incluirClientes) {
+            await toggleIncluirClientes(true);
+        } else {
+            const resProvs = await fetch(`${API_BASE_URL}/proveedores`);
+            proveedores = await resProvs.json();
+            llenarSelectProveedores();
+        }
+        
+        const selectProv = document.getElementById('modalProveedor');
+        
+        // Verificar si la persona ya está en el select
+        let existe = false;
+        for (let i = 0; i < selectProv.options.length; i++) {
+            if (selectProv.options[i].value == idPersona) {
+                existe = true;
+                break;
+            }
+        }
+        
+        if (!existe) {
+            const option = document.createElement('option');
+            option.value = idPersona;
+            option.text = nombre;
+            selectProv.appendChild(option);
+        }
+        
+        selectProv.value = idPersona;
+    }
+
+    // Función auxiliar para limpiar el mensaje de estado
+    function limpiarMensajeEstado() {
+        const statusDiv = document.getElementById('personaStatus');
+        if (statusDiv) {
+            statusDiv.style.display = 'none';
+            document.getElementById('personaStatusText').innerHTML = '';
+        }
+        // También limpiar la variable global
+        idPersonaSeleccionada = null;
+    }
+
+    // Función para limpiar el formulario de persona
+    function limpiarFormularioPersona() {
+        document.getElementById('modalProvNombre').value = '';
+        document.getElementById('modalProvCedula').value = '';
+        document.getElementById('modalProvTelefono1').value = '';
+        document.getElementById('modalProvTelefono2').value = '';
+        document.getElementById('modalProvEmail').value = '';
+        document.getElementById('modalProvOcupacion').value = '';
+        document.getElementById('modalProvDireccion').value = '';
+        document.getElementById('modalProvTipoDoc').value = '';
+        document.getElementById('modalProvEstadoCivil').value = '';
+        document.getElementById('rolProveedorCheck').checked = false;
+        document.getElementById('rolClienteCheck').checked = false;
+        idPersonaSeleccionada = null;
+        
+        const statusDiv = document.getElementById('personaStatus');
+        statusDiv.style.display = 'none';
+            
+        limpiarMensajeEstado();
     }
   </script>
 </body>
