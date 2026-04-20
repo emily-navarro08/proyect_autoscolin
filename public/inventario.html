@@ -2697,7 +2697,7 @@
                 
             } else {
                 // Verificar si ya existe una persona con esa identificación
-                const checkResponse = await fetch(`${API_BASE_URL}/personas/identificacion/${identificacion}`);
+                const checkResponse = await fetch(`${API_BASE_URL}/validar/identificacion/${identificacion}`);
                 const personaExistente = await checkResponse.json();
                 
                 if (personaExistente && personaExistente.ID_PERSONA) {
