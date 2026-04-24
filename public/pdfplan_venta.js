@@ -69,8 +69,8 @@ async function generarPDFPlanVenta() {
         
         // Obtener moneda y tipo de cambio de COSTOS
         const costos = data.COSTOS || {};
-        const moneda = costos.MONEDA === 'CRC' ? 'COLONES' : 'DÓLARES';
-        const tipoCambio = costos.TIPO_CAMBIO_COMPRA || '1.00';
+        const moneda = data.MONEDA === 'CRC' ? 'COLONES' : 'DÓLARES';
+        const tipoCambio = data.TIPO_CAMBIO_VENTA || '1.00';
         const codigoVenta = data.CODIGO_VENTA || 'N/A';
         
         const inicioY = 30;
@@ -352,9 +352,9 @@ async function generarPDFPlanVenta() {
         const chasis = vehiculo.CHASIS || '';
         
         // Obtener precios de costos
-        const precioVenta = costos.PRECIO_PUBLICO || '0.00';
-        const montoVenta = costos.PRECIO_PUBLICO || '0.00';
-        const montoTraspaso = costos.MONTO_TRASPASO || '0.00';
+        const precioVenta = data.MONTO_VENTA || '0.00';
+        const montoVenta = data.MONTO_VENTA || '0.00';
+        const montoTraspaso = data.MONTO_TRASPASOVENTA || '0.00';
         
         // Primera fila - Datos principales
         doc.setFont('helvetica', 'bold');
@@ -465,7 +465,7 @@ async function generarPDFPlanVenta() {
         doc.setLineWidth(0.3);
         doc.rect(60, checkboxY-2, 4, 4); // Movido más a la derecha
 
-        const traspasoPagado = data.COSTOS?.TRASPASO_PAGADO ?? 0;
+        const traspasoPagado = data.TRASPASO_PAGADO ?? 0;
         const clienteMarcado = traspasoPagado === 0;
         if (clienteMarcado) {
             doc.setLineWidth(0.5);
