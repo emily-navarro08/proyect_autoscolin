@@ -1172,14 +1172,12 @@ app.get('/api/vehiculos', async (req, res) => {
 app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
     try {
         const { placa } = req.query;
-        console.log('🔍 Búsqueda de vehículo con placa:', placa);
         
         if (!placa || placa.length < 2) {
             return res.json([]);
         }
 
         const connection = await mysql.createConnection(dbConfig);
-        console.log('✅ Conectado a DB');
         
         const query = `
             SELECT 
@@ -1230,9 +1228,7 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
             LIMIT 10
         `;
         
-        console.log('📝 Ejecutando query con placa:', `%${placa}%`);
         const [rows] = await connection.execute(query, [`%${placa}%`]);
-        console.log(`📊 Resultados encontrados: ${rows.length}`);
         
         await connection.end();
         
@@ -1245,7 +1241,6 @@ app.get('/api/vehiculos/buscar-con-costos', async (req, res) => {
         });
         
         const vehiculosUnicos = Array.from(vehiculosMap.values());
-        console.log(`✅ Enviando ${vehiculosUnicos.length} vehículos únicos`);
         
         res.json(vehiculosUnicos);
         
@@ -3978,6 +3973,7 @@ app.put('/api/personas/:id/desactivar', async (req, res) => {
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
+
 // Obtener personas con roles
 app.get('/api/personas-con-roles', async (req, res) => {
     try {
@@ -5249,6 +5245,7 @@ app.get('/api/ventas/pendientes', async (req, res) => {
                 v.ID_CLIENTE_FACTURACION,
                 v.ID_VENDEDOR,
                 
+                
                 -- Datos del cliente
                 cf.NOMBRE_COMPLETO as CLIENTE_NOMBRE,
                 cf.IDENTIFICACION as CLIENTE_IDENTIFICACION,
@@ -5270,6 +5267,8 @@ app.get('/api/ventas/pendientes', async (req, res) => {
                 CASE WHEN f.ID_FINANCIAMIENTOS IS NOT NULL THEN 'CREDITO' ELSE 'CONTADO' END as TIPO_VENTA,
                 
                 -- Plazo en meses (si existe)
+                v.MONEDA,
+                v.TIPO_CAMBIO_VENTA,
                 f.PLAZO_MESES,
                 
                 -- Forma de pago desde detalle_pagos
@@ -5304,10 +5303,15 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
         const connection = await mysql.createConnection(dbConfig);
         const ventaId = req.params.id;
         
-        // Datos de la venta - INCLUIR ID_APROBADOR
+        // Datos de la venta
         const [ventas] = await connection.execute(`
-            SELECT v.*, 
-                   v.ID_APROBADOR
+            SELECT v.*,
+                   v.ID_APROBADOR,
+                   v.MONTO_VENTA,
+                   v.MONTO_TRASPASOVENTA,
+                   v.TRASPASO_PAGADO,
+                   v.MONEDA,
+                   v.TIPO_CAMBIO_VENTA
             FROM VENTAS v
             WHERE v.ID_VENTA = ?
         `, [ventaId]);
@@ -5352,26 +5356,32 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
         }
         
         // Datos del vehículo VENDIDO (el que se entrega al cliente)
-        const [vehiculos] = await connection.execute(
-            `SELECT v.*, 
-                    m.NOMBRE as marca_nombre,
-                    c.NOMBRE as color_nombre,
-                    comb.NOMBRE as combustible_nombre,
-                    t.NOMBRE as transmision_nombre
-             FROM VEHICULOS v
-             LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
-             LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
-             LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
-             LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
-             WHERE v.ID_VEHICULO = ?`,
-            [venta.ID_VEHICULO]
-        );
+        const [vehiculos] = await connection.execute(`
+            SELECT v.*, 
+                   m.NOMBRE as marca_nombre,
+                   c.NOMBRE as color_nombre,
+                   comb.NOMBRE as combustible_nombre,
+                   t.NOMBRE as transmision_nombre,
+                   -- IMPORTANTE: Los montos de VENTA y TRASPASO vienen de VENTAS, no de COSTOS
+                   ? as monto_venta_from_venta,
+                   ? as monto_traspaso_from_venta
+            FROM VEHICULOS v
+            LEFT JOIN CAT_MARCAS m ON v.ID_MARCA = m.ID_MARCA
+            LEFT JOIN CAT_COLORES c ON v.ID_COLOR = c.ID_COLOR
+            LEFT JOIN CAT_COMBUSTIBLES comb ON v.ID_COMBUSTIBLE = comb.ID_COMBUSTIBLE
+            LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
+            WHERE v.ID_VEHICULO = ?
+        `, [venta.MONTO_VENTA, venta.MONTO_TRASPASOVENTA, venta.ID_VEHICULO]);
         
-        // Buscar vehículo RECIBIDO en intercambio
-        let vehiculoRecibido = null;
+        // Añadir los montos directamente al objeto del vehículo
+        if (vehiculos[0]) {
+            vehiculos[0].MONTO_VENTA_VENTA = venta.MONTO_VENTA || 0;
+            vehiculos[0].MONTO_TRASPASO_VENTA = venta.MONTO_TRASPASOVENTA || 0;
+        }
         
-        const [vehiculosRecibidos] = await connection.execute(
-            `SELECT v.*, 
+        // Buscar vehículos RECIBIDOS en intercambio
+        const [vehiculosRecibidos] = await connection.execute(`
+            SELECT v.*, 
                     m.NOMBRE as marca_nombre,
                     c.NOMBRE as color_nombre,
                     comb.NOMBRE as combustible_nombre,
@@ -5385,13 +5395,8 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
              LEFT JOIN CAT_TRANSMISIONES t ON v.ID_TRANSMISION = t.ID_TRANSMISION
              LEFT JOIN COSTOS_VEHICULO cv ON v.ID_VEHICULO = cv.ID_VEHICULO
              WHERE v.ES_INTERCAMBIO = TRUE 
-             AND v.ID_VENTA_ORIGEN = ?`,
-            [ventaId]
-        );
-        
-        if (vehiculosRecibidos.length > 0) {
-            vehiculoRecibido = vehiculosRecibidos[0];
-        }
+             AND v.ID_VENTA_ORIGEN = ?
+        `, [ventaId]);
         
         // Obtener financiamiento si existe
         const [financiamientos] = await connection.execute(
@@ -5422,7 +5427,7 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
             [ventaId]
         );
         
-        // Costos del vehículo vendido
+        // Costos del vehículo vendido - Ya no se usan para los montos principales
         const [costos] = await connection.execute(
             'SELECT * FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ? ORDER BY FECHA_CALCULO DESC LIMIT 1',
             [venta.ID_VEHICULO]
@@ -5436,7 +5441,7 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
         
         await connection.end();
         
-        // Construir respuesta con todos los datos - INCLUIR APROBADOR
+        // Construir respuesta - Los montos principales vienen de VENTAS
         res.json({
             ID_VENTA: venta.ID_VENTA,
             CODIGO_VENTA: venta.CODIGO_VENTA,
@@ -5445,15 +5450,20 @@ app.get('/api/ventas/:id/completo', async (req, res) => {
             NOMBRE_NOTARIO: venta.NOMBRE_NOTARIO,
             PV_PURDI: venta.PV_PURDI,
             OBSERVACIONES_VENTA: venta.OBSERVACIONES_VENTA,
+            // Estos son los valores PRINCIPALES desde VENTAS
+            MONTO_VENTA: venta.MONTO_VENTA || 0,
+            MONTO_TRASPASOVENTA: venta.MONTO_TRASPASOVENTA || 0,
+            TRASPASO_PAGADO: venta.TRASPASO_PAGADO ?? 0,
+            MONEDA: venta.MONEDA || 'CRC',
+            TIPO_CAMBIO_VENTA: venta.TIPO_CAMBIO_VENTA || 500,
             CLIENTE_FACTURACION: clientesFact[0] || null,
             CLIENTE_INSCRIPCION: clienteInscripcion,
             VENDEDOR: vendedores[0] || null,
             APROBADOR: aprobador, 
             VEHICULO: vehiculos[0] || null,
             VEHICULOS_RECIBIDOS: vehiculosRecibidos,
-            VEHICULO_RECIBIDO: vehiculosRecibidos[0] || null,
             ES_INTERCAMBIO: vehiculosRecibidos.length > 0,
-            COSTOS: costos[0] || null, 
+            COSTOS: costos[0] || null,  // Solo para referencia
             EXTRAS: extras,
             FINANCIAMIENTO: financiamientos[0] || null,
             ANTICIPOS: anticipos,
@@ -5516,7 +5526,7 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
                 idVehiculoRecibido
             });
             
-            // SEGUNDO: Actualizar el estado de la venta
+            // SEGUNDO: Actualizar el estado de la venta (CORREGIDO - sin coma después de TOTAL)
             const [result] = await connection.execute(
                 `UPDATE VENTAS 
                  SET ESTADO_PAGO = ?, 
@@ -5525,8 +5535,7 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
                      ID_APROBADOR = ?,
                      SUB_TOTAL = ?,
                      DESCUENTO_GLOBAL = ?,
-                     TOTAL = ?,
-                     EXONERAR_IMP = ?
+                     TOTAL = ?
                  WHERE ID_VENTA = ?`,
                 [
                     estado || 'YA FUE FACTURADA', 
@@ -5535,7 +5544,6 @@ app.put('/api/ventas/:id/aprobar', async (req, res) => {
                     subtotal || 0,
                     descuento_global || 0,
                     total || 0,
-                    exonerar_imp || false,
                     req.params.id
                 ]
             );
@@ -5693,7 +5701,6 @@ app.post('/api/plan-ventas', async (req, res) => {
         vehiculo,
         vehiculo_recibir,
         vehiculos_recibir,
-        costos_vehiculo,
         forma_pago,
         financiamiento,
         anticipos,
@@ -5826,15 +5833,25 @@ app.post('/api/plan-ventas', async (req, res) => {
             codigoFinal = 'V' + String(nextNum).padStart(4, '0');
         }
         
+        const _monedaVenta     = (forma_pago?.moneda || 'CRC').toUpperCase();
+        const _tipoCambioVenta = parseFloat(forma_pago?.tipo_cambio) || 500;
+        const _montoVenta      = parseFloat(vehiculo?.monto_venta) || 0;
+        const _montoTraspasoV  = parseFloat(vehiculo?.monto_traspaso) || 0;
+        const _traspasoPagado  = parseInt(vehiculo?.traspaso_pagado) || 0;
+
         const [rv] = await connection.execute(
             `INSERT INTO VENTAS (
                 CODIGO_VENTA, ID_VEHICULO, ID_CLIENTE_FACTURACION, ID_CLIENTE_INSCRIPCION,
-                ID_VENDEDOR, NOMBRE_NOTARIO, FECHA_VENTA, PV_PURDI, ESTADO_PAGO
-            ) VALUES (?,?,?,?,?,?,?,?,?)`,
+                ID_VENDEDOR, NOMBRE_NOTARIO, FECHA_VENTA, PV_PURDI, ESTADO_PAGO,
+                MONTO_VENTA, MONTO_TRASPASOVENTA, TRASPASO_PAGADO,
+                MONEDA, TIPO_CAMBIO_VENTA
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 codigoFinal, idVehiculo, idClienteFacturar, idClienteInscribir||null,
                 id_vendedor, nombre_notario||null, fecha_venta||new Date(),
-                pv_purdi||null, estado_venta || 'PENDIENTE DE FACTURAR'
+                pv_purdi||null, estado_venta || 'PENDIENTE DE FACTURAR',
+                _montoVenta, _montoTraspasoV, _traspasoPagado,
+                _monedaVenta, _tipoCambioVenta
             ]
         );
         const idVenta = rv.insertId;
@@ -6041,58 +6058,6 @@ app.post('/api/plan-ventas', async (req, res) => {
                 'UPDATE VEHICULOS SET ESTADO = "COMPRADO" WHERE ID_VEHICULO = ?',
                 [idVehiculo]
             );
-        }
-
-        // ─── Guardar costos del vehículo vendido ─────────────────
-        if (req.body.costos_vehiculo && idVehiculo) {
-            const cv = req.body.costos_vehiculo;
-            const [existeCosto] = await connection.execute(
-                'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
-                [idVehiculo]
-            );
-            if (existeCosto.length > 0) {
-                await connection.execute(
-                    `UPDATE COSTOS_VEHICULO SET
-                        PRECIO_PUBLICO    = ?,
-                        MONTO_TRASPASO    = ?,
-                        PRECIO_COMPRA     = ?,
-                        PRECIO_COSTO      = ?,
-                        SALDO             = ?,
-                        MONEDA            = ?,
-                        TIPO_CAMBIO_COMPRA = ?,
-                        TRASPASO_PAGADO   = ?
-                    WHERE ID_VEHICULO = ?`,
-                    [
-                        cv.precio_publico     ?? 0,
-                        cv.monto_traspaso     ?? 0,
-                        cv.precio_compra      ?? 0,
-                        cv.precio_costo       ?? cv.precio_compra ?? 0,
-                        cv.saldo              ?? cv.precio_publico ?? 0,
-                        cv.moneda             ?? 'CRC',
-                        cv.tipo_cambio_compra ?? 1,
-                        cv.traspaso_pagado    ?? 0,
-                        idVehiculo
-                    ]
-                );
-            } else {
-                await connection.execute(
-                    `INSERT INTO COSTOS_VEHICULO
-                        (ID_VEHICULO, PRECIO_PUBLICO, MONTO_TRASPASO, PRECIO_COMPRA,
-                        PRECIO_COSTO, SALDO, MONEDA, TIPO_CAMBIO_COMPRA, TRASPASO_PAGADO)
-                    VALUES (?,?,?,?,?,?,?,?,?)`,
-                    [
-                        idVehiculo,
-                        cv.precio_publico     ?? 0,
-                        cv.monto_traspaso     ?? 0,
-                        cv.precio_compra      ?? 0,
-                        cv.precio_costo       ?? cv.precio_compra ?? 0,
-                        cv.saldo              ?? cv.precio_publico ?? 0,
-                        cv.moneda             ?? 'CRC',
-                        cv.tipo_cambio_compra ?? 1,
-                        cv.traspaso_pagado    ?? 0
-                    ]
-                );
-            }
         }
 
         // ─── 9. Auditoría ─────────────────────────────────────────
@@ -6326,14 +6291,27 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
         }
 
         // ─── 4. ACTUALIZAR DATOS DE LA VENTA ─────────────────────
+        const _upd_moneda     = (forma_pago?.moneda || 'CRC').toUpperCase();
+        const _upd_tipoCambio = parseFloat(forma_pago?.tipo_cambio) || 500;
+        const _upd_monto      = parseFloat(vehiculo?.monto_venta) || 0;
+        const _upd_traspaso   = parseFloat(vehiculo?.monto_traspaso) || 0;
+        const _upd_tPagado    = parseInt(vehiculo?.traspaso_pagado) || 0;
+
         await connection.execute(
             `UPDATE VENTAS SET
-                NOMBRE_NOTARIO = COALESCE(?, NOMBRE_NOTARIO),
-                PV_PURDI = COALESCE(?, PV_PURDI)
+                NOMBRE_NOTARIO      = COALESCE(?, NOMBRE_NOTARIO),
+                PV_PURDI            = COALESCE(?, PV_PURDI),
+                MONTO_VENTA         = ?,
+                MONTO_TRASPASOVENTA = ?,
+                TRASPASO_PAGADO     = ?,
+                MONEDA              = ?,
+                TIPO_CAMBIO_VENTA   = ?
             WHERE ID_VENTA = ?`,
             [
                 nombre_notario || null,
                 pv_purdi || null,
+                _upd_monto, _upd_traspaso, _upd_tPagado,
+                _upd_moneda, _upd_tipoCambio,
                 ventaId
             ]
         );
@@ -6561,58 +6539,6 @@ app.put('/api/plan-ventas/:id', async (req, res) => {
                         dp.fecha_pago || new Date().toISOString().split('T')[0],
                         'PENDIENTE',
                         dp.observaciones || null
-                    ]
-                );
-            }
-        }
-
-        // ─── Guardar costos del vehículo vendido ─────────────────
-        if (req.body.costos_vehiculo && idVehiculo) {
-            const cv = req.body.costos_vehiculo;
-            const [existeCosto] = await connection.execute(
-                'SELECT ID_COSTO FROM COSTOS_VEHICULO WHERE ID_VEHICULO = ?',
-                [idVehiculo]
-            );
-            if (existeCosto.length > 0) {
-                await connection.execute(
-                    `UPDATE COSTOS_VEHICULO SET
-                        PRECIO_PUBLICO    = ?,
-                        MONTO_TRASPASO    = ?,
-                        PRECIO_COMPRA     = ?,
-                        PRECIO_COSTO      = ?,
-                        SALDO             = ?,
-                        MONEDA            = ?,
-                        TIPO_CAMBIO_COMPRA = ?,
-                        TRASPASO_PAGADO   = ?
-                    WHERE ID_VEHICULO = ?`,
-                    [
-                        cv.precio_publico     ?? 0,
-                        cv.monto_traspaso     ?? 0,
-                        cv.precio_compra      ?? 0,
-                        cv.precio_costo       ?? cv.precio_compra ?? 0,
-                        cv.saldo              ?? cv.precio_publico ?? 0,
-                        cv.moneda             ?? 'CRC',
-                        cv.tipo_cambio_compra ?? 1,
-                        cv.traspaso_pagado    ?? 0,
-                        idVehiculo
-                    ]
-                );
-            } else {
-                await connection.execute(
-                    `INSERT INTO COSTOS_VEHICULO
-                        (ID_VEHICULO, PRECIO_PUBLICO, MONTO_TRASPASO, PRECIO_COMPRA,
-                        PRECIO_COSTO, SALDO, MONEDA, TIPO_CAMBIO_COMPRA, TRASPASO_PAGADO)
-                    VALUES (?,?,?,?,?,?,?,?,?)`,
-                    [
-                        idVehiculo,
-                        cv.precio_publico     ?? 0,
-                        cv.monto_traspaso     ?? 0,
-                        cv.precio_compra      ?? 0,
-                        cv.precio_costo       ?? cv.precio_compra ?? 0,
-                        cv.saldo              ?? cv.precio_publico ?? 0,
-                        cv.moneda             ?? 'CRC',
-                        cv.tipo_cambio_compra ?? 1,
-                        cv.traspaso_pagado    ?? 0
                     ]
                 );
             }
