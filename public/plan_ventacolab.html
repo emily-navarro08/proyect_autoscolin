@@ -1743,38 +1743,24 @@
             const data = await apiFetch(`${API_ENDPOINTS.ventas}/${ventaId}/completo`);
             planActual = data;
             
-            console.log('Datos completos del plan:', data); // Para debugging
+            console.log('Datos completos del plan:', data);
 
             document.getElementById('num_plan').value = data.CODIGO_VENTA || '';
             if (data.FECHA_VENTA) document.getElementById('fecha_plan').value = data.FECHA_VENTA.split('T')[0];
             document.getElementById('notario').value = data.NOMBRE_NOTARIO || '';
 
-            // Cargar montos desde COSTOS
-            if (data.COSTOS) {
-                console.log('Costos del vehículo encontrados:', data.COSTOS);
-                
-                // PRECIO_PUBLICO = Monto de venta
-                if (data.COSTOS.PRECIO_PUBLICO !== undefined && data.COSTOS.PRECIO_PUBLICO !== null) {
-                    document.getElementById('vehiculo-vendido-monto-venta').value = data.COSTOS.PRECIO_PUBLICO;
-                }
-                
-                // MONTO_TRASPASO = Monto traspaso
-                if (data.COSTOS.MONTO_TRASPASO !== undefined && data.COSTOS.MONTO_TRASPASO !== null) {
-                    document.getElementById('vehiculo-vendido-monto-traspaso').value = data.COSTOS.MONTO_TRASPASO;
-                }
-                
-                // Moneda y tipo de cambio
-                if (data.COSTOS.MONEDA) {
-                    const radioMoneda = document.querySelector(`input[name="moneda"][value="${data.COSTOS.MONEDA}"]`);
-                    if (radioMoneda) radioMoneda.checked = true;
-                }
-                
-                if (data.COSTOS.TIPO_CAMBIO_COMPRA) {
-                    document.getElementById('tipo_cambio').value = data.COSTOS.TIPO_CAMBIO_COMPRA;
-                }
-            } else {
-                console.log('No se encontraron costos para el vehículo');
-            }
+            // ✅ USAR LOS MONTOS DIRECTAMENTE DESDE data (que vienen de VENTAS)
+            const montoVentaFromVenta = data.MONTO_VENTA || 0;
+            const montoTraspasoFromVenta = data.MONTO_TRASPASOVENTA || 0;
+            
+            document.getElementById('vehiculo-vendido-monto-venta').value = montoVentaFromVenta;
+            document.getElementById('vehiculo-vendido-monto-traspaso').value = montoTraspasoFromVenta;
+
+            const traspasoPagadoVal = data.TRASPASO_PAGADO ?? 0;
+            const radioTraspaso = document.querySelector(
+                `input[name="traspaso_pagado"][value="${traspasoPagadoVal}"]`
+            );
+            if (radioTraspaso) radioTraspaso.checked = true;
 
             // Cargar VENDEDOR
             if (data.VENDEDOR) {
@@ -1786,7 +1772,7 @@
                 document.getElementById('resultados-vendedor').style.display = 'none';
             }
 
-            // Cargar APROBADOR - AHORA CORREGIDO
+            // Cargar APROBADOR
             if (data.APROBADOR) {
                 console.log('Aprobador encontrado:', data.APROBADOR);
                 document.getElementById('aprobador-id').value = data.APROBADOR.ID_PERSONA;
@@ -1802,20 +1788,29 @@
             if (data.CLIENTE_FACTURACION) poblarCamposCliente('fact', data.CLIENTE_FACTURACION);
             if (data.CLIENTE_INSCRIPCION) poblarCamposCliente('ins', data.CLIENTE_INSCRIPCION);
             
-            // Cargar vehículo vendido - pasar los costos también
+            // Cargar vehículo vendido - AHORA PASANDO LOS MONTOS EXPLÍCITAMENTE
             if (data.VEHICULO) {
-                // Si encontramos costos, adjuntarlos al vehículo
+                // Pasar los montos de VENTAS al vehículo
+                data.VEHICULO.MONTO_VENTA_EXTERNO = montoVentaFromVenta;
+                data.VEHICULO.MONTO_TRASPASO_EXTERNO = montoTraspasoFromVenta;
+                
                 if (data.COSTOS) {
                     data.VEHICULO.COSTOS = data.COSTOS;
-
-                    const traspasoPagadoVal = data.COSTOS.TRASPASO_PAGADO ?? 0;
-                    const radioTraspasoLoad = document.querySelector(
-                        `input[name="traspaso_pagado"][value="${traspasoPagadoVal}"]`
-                    );
-                    if (radioTraspasoLoad) radioTraspasoLoad.checked = true;                
                 }
                 poblarCamposVehiculo('vendido', data.VEHICULO);
             }
+
+            if (data.MONEDA) {
+                const radioMoneda = document.querySelector(
+                    `input[name="moneda"][value="${data.MONEDA}"]`
+                );
+                if (radioMoneda) radioMoneda.checked = true;
+            }
+
+            if (data.TIPO_CAMBIO_VENTA) {
+                document.getElementById('tipo_cambio').value = data.TIPO_CAMBIO_VENTA;
+                propagarMonedaYTipoCambio();
+            }            
 
             // Cargar vehículo a recibir
             if (data.VEHICULOS_RECIBIDOS && data.VEHICULOS_RECIBIDOS.length > 0) {
@@ -1918,21 +1913,23 @@
         set(`${p}-pv`, v.PV);
         set(`${p}-extras`, v.OBSERVACIONES);
         
-        // Cargar costos si existen
-        if (v.COSTOS) {
-            console.log('Cargando costos para vehículo:', v.COSTOS);
-            if (v.COSTOS.PRECIO_PUBLICO) {
-                set(`${p}-monto-venta`, v.COSTOS.PRECIO_PUBLICO);
-            }
-            if (v.COSTOS.MONTO_TRASPASO) {
-                set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRASPASO);
-            }
-            // Cargar radio button traspaso
-            const traspasoPagado = v.COSTOS.TRASPASO_PAGADO ?? 0;
-            const radioTraspaso = document.querySelector(
-                `input[name="traspaso_pagado"][value="${traspasoPagado}"]`
-            );
-            if (radioTraspaso) radioTraspaso.checked = true;
+        // ✅ PRIORIZAR MONTOS DESDE VENTAS (usando campos externos)
+        if (v.MONTO_VENTA_EXTERNO !== undefined) {
+            console.log('Usando monto venta desde VENTAS:', v.MONTO_VENTA_EXTERNO);
+            set(`${p}-monto-venta`, v.MONTO_VENTA_EXTERNO);
+        } 
+        else if (v.COSTOS && v.COSTOS.PRECIO_PUBLICO) {
+            console.log('Usando monto venta desde COSTOS (fallback):', v.COSTOS.PRECIO_PUBLICO);
+            set(`${p}-monto-venta`, v.COSTOS.PRECIO_PUBLICO);
+        }
+        
+        if (v.MONTO_TRASPASO_EXTERNO !== undefined) {
+            console.log('Usando monto traspaso desde VENTAS:', v.MONTO_TRASPASO_EXTERNO);
+            set(`${p}-monto-traspaso`, v.MONTO_TRASPASO_EXTERNO);
+        }
+        else if (v.COSTOS && v.COSTOS.MONTO_TRASPASO) {
+            console.log('Usando monto traspaso desde COSTOS (fallback):', v.COSTOS.MONTO_TRASPASO);
+            set(`${p}-monto-traspaso`, v.COSTOS.MONTO_TRASPASO);
         }
         
         setTimeout(() => {
@@ -2261,17 +2258,14 @@
                     pv: document.getElementById('vehiculo-vendido-pv').value,
                     chasis: document.getElementById('vehiculo-vendido-chasis').value,
                     carroceria: document.getElementById('vehiculo-vendido-carroceria').value,
-                    observaciones: document.getElementById('vehiculo-vendido-extras').value
+                    observaciones: document.getElementById('vehiculo-vendido-extras').value,
+                    monto_venta: parseFloat(document.getElementById('vehiculo-vendido-monto-venta').value) || 0,
+                    monto_traspaso: parseFloat(document.getElementById('vehiculo-vendido-monto-traspaso').value) || 0,
+                    traspaso_pagado: parseInt(document.querySelector('input[name="traspaso_pagado"]:checked')?.value) || 0                    
                 },
 
                 // COSTOS DEL VEHÍCULO - Aquí van los montos
                 costos_vehiculo: {
-                    precio_compra: montoVenta,
-                    precio_publico: montoVenta,
-                    monto_traspaso: montoTraspaso,
-                    traspaso_pagado: parseInt(
-                        document.querySelector('input[name="traspaso_pagado"]:checked')?.value ?? 0
-                    ),
                     moneda: moneda,
                     tipo_cambio_compra: tipoCambio,
                     costo: montoVenta,
