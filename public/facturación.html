@@ -701,16 +701,11 @@
                             </div>
                         </div>
                         
-                        <!-- Opciones de venta (se mantienen igual) -->
+                        <!-- Opciones de venta -->
                         <div class="venta-opciones">
-                            <!--<div class="opcion-item">
-                                <label>
-                                    <input type="checkbox" id="exonerarVenta" onchange="calcularTotales()"> Exonerar Venta (0% IVA)
-                                </label>
-                            </div> -->
                             <div class="opcion-item descuento-global">
                                 <label>Descuento Global:</label>
-                                <input type="number" id="descuentoGlobal" value="0" min="0" max="100" step="0.1" onchange="calcularTotales()">
+                                <input type="number" id="descuentoGlobal" value="0" min="0" max="100" step="0.1" onchange="aplicarDescuentoGlobal()">
                                 <span>%</span>
                             </div>
                         </div>
@@ -797,7 +792,7 @@
                                         <th>Código</th>
                                         <th>Descripción</th>
                                         <th>Cantidad</th>
-                                        <th>Precio Público</th>
+                                        <th>Precio Venta</th>
                                         <th>% Descuento</th>
                                         <th>Total</th>
                                     </tr>
@@ -813,10 +808,6 @@
                                     <tr>
                                         <td colspan="5" style="text-align: right;"><strong>Descuento Global:</strong></td>
                                         <td id="detalleDescuentoGlobal"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="5" style="text-align: right;"><strong>Impuestos (13%):</strong></td>
-                                        <td id="detalleImpuestos"></td>
                                     </tr>
                                     <tr>
                                         <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
@@ -887,7 +878,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         cargarCatalogos();
         cargarVentasPendientes();
-        inicializarExoneracion();
         
         // Activar el tab "Todas"
         document.querySelectorAll('.tab-venta').forEach(t => t.classList.remove('active'));
@@ -919,23 +909,6 @@
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
-    }
-
-    // ===== INICIALIZAR OPCIÓN DE EXONERACIÓN =====
-    function inicializarExoneracion() {
-        const exonerarCheckbox = document.getElementById('exonerarVenta');
-        if (exonerarCheckbox) {
-            exonerarCheckbox.checked = true;
-            exonerarCheckbox.disabled = true;
-        }
-        
-        // Reemplaza el querySelector inválido por esto:
-        const filas = document.querySelectorAll('#detalleItems tfoot tr');
-        filas.forEach(fila => {
-            if (fila.textContent.includes('Impuestos')) {
-                fila.style.display = 'none';
-            }
-        });
     }
 
     // ===== CARGA DE CATÁLOGOS =====
@@ -1224,257 +1197,268 @@
             if (extrasContainer) {
                 extrasContainer.innerHTML = ''; // Limpiar contenedor
                 
-                // Crear un array con todos los costos, extras y financiamiento
-                const todosLosDetalles = [];
-                
-                // ===== 1. COSTOS DEL VEHÍCULO =====
-                if (costos.PRECIO_COMPRA > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Precio de Compra',
-                        monto: parseFloat(costos.PRECIO_COMPRA) || 0
-                    });
-                }
-                
-                if (costos.PRECIO_TRANSPASO > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Precio de Traspaso',
-                        monto: parseFloat(costos.PRECIO_TRANSPASO) || 0
-                    });
-                }
-
-                if (costos.TRASPASO_PAGADO !== undefined && costos.TRASPASO_PAGADO !== null) {
-                    todosLosDetalles.push({
-                        descripcion: 'Gastos de Traspaso',
-                        monto: 0,
-                        textoExtra: costos.TRASPASO_PAGADO == 1 ? 'Pagado por Autos Colín' : 'Pagado por Cliente',
-                        esTexto: true,
-                        icono: costos.TRASPASO_PAGADO == 1 ? 'fa-building' : 'fa-user',
-                        color: costos.TRASPASO_PAGADO == 1 ? '#4caf50' : '#ff9800'
-                    });
-                }                
-                
-                if (costos.COSTO > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Costo Total',
-                        monto: parseFloat(costos.COSTO) || 0
-                    });
-                }
-                
-                if (costos.PRIMA > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Prima',
-                        monto: parseFloat(costos.PRIMA) || 0
-                    });
-                }
-                
-                if (costos.COMISION > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Comisión',
-                        monto: parseFloat(costos.COMISION) || 0
-                    });
-                }
-                
-                if (costos.TOTAL_INVERSION > 0) {
-                    todosLosDetalles.push({
-                        descripcion: 'Total Inversión',
-                        monto: parseFloat(costos.TOTAL_INVERSION) || 0
-                    });
-                }
-                
-                // ===== 2. EXTRAS DEL VEHÍCULO =====
+                // =================================================================
+                // SECCIÓN 1: TODOS LOS GASTOS (EXTRAS DEL VEHÍCULO VENDIDO)
+                // =================================================================
                 if (extras.length > 0) {
+                    const gastosSection = document.createElement('div');
+                    gastosSection.style.cssText = 'margin-bottom: 20px;';
+                    gastosSection.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #e74c3c;">
+                            <strong style="color: #e74c3c; font-size: 14px;">
+                                <i class="fas fa-receipt"></i> TODOS LOS GASTOS (EXTRAS DEL VEHÍCULO)
+                            </strong>
+                        </div>
+                        <div style="padding-left: 15px;">
+                    `;
+                    
+                    let totalExtras = 0;
                     extras.forEach(extra => {
                         const monto = parseFloat(extra.PRECIO) || 0;
-                        if (monto > 0) {
-                            todosLosDetalles.push({
-                                descripcion: extra.EXTRAS_DETALLE || extra.ARREGLO || 'Extra',
-                                monto: monto
-                            });
-                        }
-                    });
-                }
-                
-                // ===== 3. FINANCIAMIENTO (SI EXISTE) =====
-                const financiamiento = data.FINANCIAMIENTO;
-                if (financiamiento) {
-                    // Monto financiado
-                    if (financiamiento.MONTO_FINANCIAR > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Monto Financiado',
-                            monto: parseFloat(financiamiento.MONTO_FINANCIAR) || 0
-                        });
-                    }
-                    
-                    // Prima del financiamiento
-                    if (financiamiento.PRIMA > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Prima del Financiamiento',
-                            monto: parseFloat(financiamiento.PRIMA) || 0
-                        });
-                    }
-                    
-                    // Honorarios
-                    if (financiamiento.HONORARIOS > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Honorarios',
-                            monto: parseFloat(financiamiento.HONORARIOS) || 0
-                        });
-                    }
-                    
-                    // Comisión del financiamiento
-                    if (financiamiento.COMISION > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Comisión Financiamiento',
-                            monto: parseFloat(financiamiento.COMISION) || 0
-                        });
-                    }
-                    
-                    // Intereses totales
-                    if (financiamiento.INTERESES_TOTAL > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Intereses Totales',
-                            monto: parseFloat(financiamiento.INTERESES_TOTAL) || 0
-                        });
-                    }
-                    
-                    // Préstamo total (monto + intereses)
-                    if (financiamiento.PRESTAMO_TOTAL > 0) {
-                        todosLosDetalles.push({
-                            descripcion: 'Préstamo Total',
-                            monto: parseFloat(financiamiento.PRESTAMO_TOTAL) || 0
-                        });
-                    }
-                    
-                    // Cuota mensual
-                    if (financiamiento.CUOTA_MENSUAL > 0) {
-                        todosLosDetalles.push({
-                            descripcion: `Cuota Mensual (${financiamiento.PLAZO_MESES || '?'} meses)`,
-                            monto: parseFloat(financiamiento.CUOTA_MENSUAL) || 0
-                        });
-                    }
-                    
-                    // Tasa de interés
-                    if (financiamiento.TASA_MENSUAL > 0) {
-                        todosLosDetalles.push({
-                            descripcion: `Tasa Mensual: ${financiamiento.TASA_MENSUAL}%`,
-                            monto: 0  // No es un monto, es un porcentaje
-                        });
-                    }
-                    
-                    // Entidad financiera
-                    if (financiamiento.ENTIDAD_FINANCIERA) {
-                        // Agregar como un detalle especial sin monto
-                        const entidadDiv = document.createElement('div');
-                        entidadDiv.style.cssText = `
+                        totalExtras += monto;
+                        
+                        const extraDiv = document.createElement('div');
+                        extraDiv.style.cssText = `
                             display: flex;
                             justify-content: space-between;
                             align-items: center;
-                            padding: 12px 15px;
-                            border-bottom: 1px solid #e0e0e0;
-                            background-color: #e8f4f8;
+                            padding: 8px 0;
+                            border-bottom: 1px solid #f0f0f0;
                         `;
-                        entidadDiv.innerHTML = `
-                            <div>
-                                <i class="fas fa-university" style="color: #3498db; margin-right: 10px;"></i>
-                                <strong>Entidad Financiera:</strong> ${financiamiento.ENTIDAD_FINANCIERA}
+                        extraDiv.innerHTML = `
+                            <div style="font-size: 13px;">
+                                ${extra.EXTRAS_DETALLE || extra.ARREGLO || 'Extra'}
                             </div>
-                            <div style="font-weight: 600; color: #3498db;">
-                                Plazo: ${financiamiento.PLAZO_MESES || '?'} meses
-                            </div>
+                            <div style="font-weight: 600; font-size: 13px;">₡${formatearNumero(monto)}</div>
                         `;
-                        extrasContainer.appendChild(entidadDiv);
-                    }
+                        gastosSection.querySelector('div:last-child').appendChild(extraDiv);
+                    });
+                    
+                    // Total de gastos
+                    const totalGastosDiv = document.createElement('div');
+                    totalGastosDiv.style.cssText = `
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 10px 0;
+                        margin-top: 8px;
+                        background-color: #fff5f5;
+                        border-radius: 5px;
+                        font-weight: bold;
+                    `;
+                    totalGastosDiv.innerHTML = `
+                        <div> TOTAL GASTOS EXTRAS:</div>
+                        <div style="color: #e74c3c;">₡${formatearNumero(totalExtras)}</div>
+                    `;
+                    gastosSection.querySelector('div:last-child').appendChild(totalGastosDiv);
+                    gastosSection.querySelector('div:last-child').innerHTML += `</div>`;
+                    
+                    extrasContainer.appendChild(gastosSection);
                 }
                 
-                // ===== MOSTRAR TODOS LOS DETALLES =====
-                if (todosLosDetalles.length === 0) {
-                    extrasContainer.innerHTML = '<p style="color: #7f8c8d; text-align: center; padding: 20px;">No hay detalles adicionales</p>';
-                } else {
-                    todosLosDetalles.forEach(detalle => {
-                        // Si es un elemento de texto (sin monto)
-                        if (detalle.esTexto) {
-                            const detalleDiv = document.createElement('div');
-                            detalleDiv.style.cssText = `
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                padding: 12px 15px;
-                                border-bottom: 1px solid #e0e0e0;
-                                background-color: #f8f9fa;
-                                border-left: 4px solid ${detalle.color || '#3498db'};
-                                margin-bottom: 5px;
-                                border-radius: 4px;
-                            `;
-                            detalleDiv.innerHTML = `
-                                <div>
-                                    <i class="fas ${detalle.icono || 'fa-info-circle'}" style="color: ${detalle.color || '#3498db'}; margin-right: 10px;"></i>
-                                    <strong>${detalle.descripcion}</strong>
-                                </div>
-                                <div style="font-weight: 600; color: ${detalle.color || '#2c3e50'};">
-                                    ${detalle.textoExtra}
-                                </div>
-                            `;
-                            extrasContainer.appendChild(detalleDiv);
-                        } 
-                        // Si es un detalle con monto
-                        else if (detalle.monto > 0) {
-                            const detalleDiv = document.createElement('div');
-                            detalleDiv.style.cssText = `
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                padding: 12px 15px;
-                                border-bottom: 1px solid #e0e0e0;
-                            `;
-                            
-                            // Icono diferente para financiamiento
-                            let icono = 'fa-circle';
-                            let colorIcono = '#3498db';
-                            
-                            if (detalle.descripcion.includes('Financiado') || detalle.descripcion.includes('Préstamo')) {
-                                icono = 'fa-money-bill-wave';
-                                colorIcono = '#27ae60';
-                            } else if (detalle.descripcion.includes('Intereses')) {
-                                icono = 'fa-chart-line';
-                                colorIcono = '#e74c3c';
-                            } else if (detalle.descripcion.includes('Cuota')) {
-                                icono = 'fa-calendar-alt';
-                                colorIcono = '#f39c12';
-                            } else if (detalle.descripcion.includes('Traspaso')) {
-                                icono = 'fa-file-signature';
-                                colorIcono = '#9b59b6';
-                            }
-                            
-                            detalleDiv.innerHTML = `
-                                <div>
-                                    <i class="fas ${icono}" style="font-size: 8px; color: ${colorIcono}; margin-right: 10px;"></i>
-                                    ${detalle.descripcion}
-                                </div>
-                                <div style="font-weight: 600;">₡${formatearNumero(detalle.monto)}</div>
-                            `;
-                            extrasContainer.appendChild(detalleDiv);
-                        }
-                        // Si es porcentaje
-                        else if (detalle.monto === 0 && detalle.descripcion.includes('%')) {
-                            const detalleDiv = document.createElement('div');
-                            detalleDiv.style.cssText = `
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                padding: 12px 15px;
-                                border-bottom: 1px solid #e0e0e0;
-                                background-color: #f0f2f5;
-                            `;
-                            detalleDiv.innerHTML = `
-                                <div>
-                                    <i class="fas fa-percent" style="color: #f39c12; margin-right: 10px;"></i>
-                                    ${detalle.descripcion}
-                                </div>
-                                <div style="font-weight: 600; color: #f39c12;"></div>
-                            `;
-                            extrasContainer.appendChild(detalleDiv);
-                        }
+                // =================================================================
+                // SECCIÓN 2: COSTOS DEL VEHÍCULO (Traspaso, Comisión, Total inversión)
+                // =================================================================
+                const costosVehiculoSection = document.createElement('div');
+                costosVehiculoSection.style.cssText = 'margin-bottom: 20px;';
+                costosVehiculoSection.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #3498db;">
+                        <strong style="color: #3498db; font-size: 14px;">
+                            <i class="fas fa-chart-line"></i> COSTOS DEL VEHÍCULO
+                        </strong>
+                    </div>
+                    <div style="padding-left: 15px;">
+                `;
+                
+                // Precio Traspaso
+                if (costos.PRECIO_TRANSPASO && parseFloat(costos.PRECIO_TRANSPASO) > 0) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;';
+                    rowDiv.innerHTML = `
+                        <div style="font-size: 13px;">Traspaso de compra</div>
+                        <div style="font-weight: 600;">₡${formatearNumero(costos.PRECIO_TRANSPASO)}</div>
+                    `;
+                    costosVehiculoSection.querySelector('div:last-child').appendChild(rowDiv);
+                }
+                
+                // Comisión
+                if (costos.COMISION && parseFloat(costos.COMISION) > 0) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;';
+                    rowDiv.innerHTML = `
+                        <div style="font-size: 13px;">Comisión</div>
+                        <div style="font-weight: 600;">₡${formatearNumero(costos.COMISION)}</div>
+                    `;
+                    costosVehiculoSection.querySelector('div:last-child').appendChild(rowDiv);
+                }
+                
+                // Total Inversión
+                if (costos.TOTAL_INVERSION && parseFloat(costos.TOTAL_INVERSION) > 0) {
+                    const totalInvDiv = document.createElement('div');
+                    totalInvDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 10px 0; margin-top: 8px; background-color: #e8f4f8; border-radius: 5px; font-weight: bold;';
+                    totalInvDiv.innerHTML = `
+                        <div>TOTAL INVERSIÓN:</div>
+                        <div style="color: #3498db;">₡${formatearNumero(costos.TOTAL_INVERSION)}</div>
+                    `;
+                    costosVehiculoSection.querySelector('div:last-child').appendChild(totalInvDiv);
+                }
+                
+                costosVehiculoSection.querySelector('div:last-child').innerHTML += `</div>`;
+                extrasContainer.appendChild(costosVehiculoSection);
+                
+                // =================================================================
+                // SECCIÓN 3: PRECIO DE VENTA AL CLIENTE
+                // =================================================================
+                const montoVenta = parseFloat(data.MONTO_VENTA) || 0;
+                
+                const precioVentaSection = document.createElement('div');
+                precioVentaSection.style.cssText = 'margin-bottom: 20px;';
+                precioVentaSection.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #27ae60;">
+                        <strong style="color: #27ae60; font-size: 14px;">
+                            <i class="fas fa-tag"></i> PRECIO DE VENTA AL CLIENTE
+                        </strong>
+                    </div>
+                    <div style="padding-left: 15px;">
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background-color: #e8f8f0; border-radius: 5px; font-weight: bold;">
+                            <div> Monto total de venta:</div>
+                            <div style="color: #27ae60; font-size: 16px;">₡${formatearNumero(montoVenta)}</div>
+                        </div>
+                    </div>
+                `;
+                extrasContainer.appendChild(precioVentaSection);
+                
+                // =================================================================
+                // SECCIÓN 4: GANANCIA (Precio venta - Total inversión)
+                // =================================================================
+                const totalInversion = parseFloat(costos.TOTAL_INVERSION) || 0;
+                const ganancia = montoVenta - totalInversion;
+                const colorGanancia = ganancia >= 0 ? '#27ae60' : '#e74c3c';
+                const iconoGanancia = ganancia >= 0 ? 'fa-chart-line' : 'fa-chart-line-down';
+                
+                const gananciaSection = document.createElement('div');
+                gananciaSection.style.cssText = 'margin-bottom: 20px;';
+                gananciaSection.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid ${colorGanancia};">
+                        <strong style="color: ${colorGanancia}; font-size: 14px;">
+                            <i class="fas ${iconoGanancia}"></i> GANANCIA / MARGEN
+                        </strong>
+                    </div>
+                    <div style="padding-left: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: ${ganancia >= 0 ? '#f0fff4' : '#fff5f5'}; border-radius: 5px;">
+                            <div>
+                                <div style="font-size: 12px; color: #7f8c8d;">Precio venta: ₡${formatearNumero(montoVenta)}</div>
+                                <div style="font-size: 12px; color: #7f8c8d;">Total inversión: ₡${formatearNumero(totalInversion)}</div>
+                            </div>
+                            <div style="font-weight: bold; font-size: 18px; color: ${colorGanancia};">
+                                ₡${formatearNumero(ganancia)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                extrasContainer.appendChild(gananciaSection);
+                
+                // =================================================================
+                // SECCIÓN 5: MONTO DE TRASPASO DE LA VENTA
+                // =================================================================
+                const montoTraspasoVenta = parseFloat(data.MONTO_TRASPASOVENTA) || 0;
+                const traspasoPagado = data.TRASPASO_PAGADO; // 1 = Autos Colín, 0 = Cliente
+                
+                const traspasoVentaSection = document.createElement('div');
+                traspasoVentaSection.style.cssText = 'margin-bottom: 20px;';
+                traspasoVentaSection.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #9b59b6;">
+                        <strong style="color: #9b59b6; font-size: 14px;">
+                            MONTO DE TRASPASO DE LA VENTA
+                        </strong>
+                    </div>
+                    <div style="padding-left: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #f8f0ff; border-radius: 5px; margin-bottom: 10px;">
+                            <div> Monto de traspaso:</div>
+                            <div style="font-weight: bold; color: #9b59b6;">₡${formatearNumero(montoTraspasoVenta)}</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background-color: #f3e5f5; border-radius: 5px;">
+                            <div><i class="fas ${traspasoPagado == 1 ? 'fa-building' : 'fa-user'}"></i> Pagado por:</div>
+                            <div style="font-weight: 600; color: #9b59b6;">
+                                ${traspasoPagado == 1 ? 'Autos Colín' : 'Cliente'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                extrasContainer.appendChild(traspasoVentaSection);
+                
+                // =================================================================
+                // SECCIÓN 6: FINANCIAMIENTO (SI EXISTE)
+                // =================================================================
+                const financiamiento = data.FINANCIAMIENTO;
+                if (financiamiento) {
+                    const financiamientoSection = document.createElement('div');
+                    financiamientoSection.style.cssText = 'margin-bottom: 20px;';
+                    financiamientoSection.innerHTML = `
+                        <div style="background: #f8f9fa; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #f39c12;">
+                            <strong style="color: #f39c12; font-size: 14px;">
+                                <i class="fas fa-building"></i> FINANCIAMIENTO
+                            </strong>
+                        </div>
+                        <div style="padding-left: 15px;">
+                    `;
+                    
+                    const itemsFinanciamiento = [];
+                    
+                    if (parseFloat(financiamiento.MONTO_FINANCIAR) > 0) {
+                        itemsFinanciamiento.push({ label: 'Monto Financiado', value: financiamiento.MONTO_FINANCIAR });
+                    }
+                    if (parseFloat(financiamiento.PRIMA) > 0) {
+                        itemsFinanciamiento.push({ label: 'Prima', value: financiamiento.PRIMA });
+                    }
+                    if (parseFloat(financiamiento.HONORARIOS) > 0) {
+                        itemsFinanciamiento.push({ label: 'Honorarios', value: financiamiento.HONORARIOS });
+                    }
+                    if (parseFloat(financiamiento.COMISION) > 0) {
+                        itemsFinanciamiento.push({ label: 'Comisión', value: financiamiento.COMISION });
+                    }
+                    if (parseFloat(financiamiento.INTERESES_TOTAL) > 0) {
+                        itemsFinanciamiento.push({ label: 'Intereses Totales', value: financiamiento.INTERESES_TOTAL });
+                    }
+                    if (parseFloat(financiamiento.PRESTAMO_TOTAL) > 0) {
+                        itemsFinanciamiento.push({ label: 'Préstamo Total', value: financiamiento.PRESTAMO_TOTAL });
+                    }
+                    if (parseFloat(financiamiento.CUOTA_MENSUAL) > 0) {
+                        itemsFinanciamiento.push({ label: `Cuota Mensual (${financiamiento.PLAZO_MESES || '?'} meses)`, value: financiamiento.CUOTA_MENSUAL });
+                    }
+                    
+                    itemsFinanciamiento.forEach(item => {
+                        const rowDiv = document.createElement('div');
+                        rowDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;';
+                        rowDiv.innerHTML = `
+                            <div style="font-size: 13px;">${item.label}</div>
+                            <div style="font-weight: 600;">₡${formatearNumero(item.value)}</div>
+                        `;
+                        financiamientoSection.querySelector('div:last-child').appendChild(rowDiv);
                     });
+                    
+                    if (financiamiento.TASA_MENSUAL > 0) {
+                        const tasaDiv = document.createElement('div');
+                        tasaDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; background-color: #fef9e7;';
+                        tasaDiv.innerHTML = `
+                            <div style="font-size: 13px;"><i class="fas fa-percent"></i> Tasa Mensual</div>
+                            <div style="font-weight: 600; color: #f39c12;">${financiamiento.TASA_MENSUAL}%</div>
+                        `;
+                        financiamientoSection.querySelector('div:last-child').appendChild(tasaDiv);
+                    }
+                    
+                    if (financiamiento.ENTIDAD_FINANCIERA) {
+                        const entidadDiv = document.createElement('div');
+                        entidadDiv.style.cssText = 'display: flex; justify-content: space-between; padding: 8px 0; margin-top: 5px; background-color: #e8f4f8; border-radius: 5px;';
+                        entidadDiv.innerHTML = `
+                            <div style="font-size: 13px;"><i class="fas fa-university"></i> Entidad Financiera</div>
+                            <div style="font-weight: 600;">${financiamiento.ENTIDAD_FINANCIERA}</div>
+                        `;
+                        financiamientoSection.querySelector('div:last-child').appendChild(entidadDiv);
+                    }
+                    
+                    financiamientoSection.querySelector('div:last-child').innerHTML += `</div>`;
+                    extrasContainer.appendChild(financiamientoSection);
                 }
             }
             
@@ -1491,29 +1475,19 @@
             document.getElementById('espCilindros').textContent = vehiculo.CILINDROS || 'N/A';
             document.getElementById('espCC').textContent = vehiculo.C_C || 'N/A';
             document.getElementById('espKilometraje').textContent = vehiculo.KILOMETRAJE_ACTUAL ? `${vehiculo.KILOMETRAJE_ACTUAL} km` : 'N/A';
-            
-            // ===== FINANCIAMIENTO =====
-            const financiamiento = data.FINANCIAMIENTO;
-            if (financiamiento) {
-                console.log('Financiamiento:', financiamiento);
-            }
-            
-            // Resetear opciones
-            const exonerarVenta = document.getElementById('exonerarVenta');
-            if (exonerarVenta) exonerarVenta.checked = false;
 
             // ===== CREAR ITEMS (SOLO PRECIO PÚBLICO) =====
             const items = [];
 
-            // SOLO el precio público del vehículo
-            if (costos.PRECIO_PUBLICO > 0) {
+            // Monto de venta
+            if (parseFloat(data.MONTO_VENTA) > 0) {
                 items.push({
                     codigo: 'VEH-' + (vehiculo.ID_VEHICULO || ''),
                     descripcion: `Vehículo: ${vehiculo.marca_nombre || ''} ${vehiculo.ESTILO || ''} ${vehiculo.MODELO || ''}`.trim() || 'Vehículo',
                     cantidad: 1,
-                    precio: parseFloat(costos.PRECIO_PUBLICO) || 0,
+                    precio: parseFloat(data.MONTO_VENTA) || 0,
                     descuento: 0,
-                    total: parseFloat(costos.PRECIO_PUBLICO) || 0
+                    total: parseFloat(data.MONTO_VENTA) || 0
                 });
             }
 
@@ -1526,17 +1500,10 @@
             
             refrescarTablaItems();
 
-            // Forzar exoneración de impuestos
-            const exonerarCheckbox = document.getElementById('exonerarVenta');
-            if (exonerarCheckbox) {
-                exonerarCheckbox.checked = true;
-                exonerarCheckbox.disabled = true; // Opcional: deshabilitar
-            }
-
             const descuentoGlobal = document.getElementById('descuentoGlobal');
             if (descuentoGlobal) descuentoGlobal.value = 0;
 
-            // Recalcular totales con impuestos en 0
+            // Recalcular totales
             calcularTotales();            
             
         } catch (error) {
@@ -1572,6 +1539,21 @@
         refrescarTablaItems();
     }
 
+    function aplicarDescuentoGlobal() {
+        if (!ventaSeleccionada) return;
+        
+        const descuentoGlobalPorcentaje = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
+        
+        // Limitar a 100%
+        if (descuentoGlobalPorcentaje > 100) {
+            document.getElementById('descuentoGlobal').value = 100;
+            return;
+        }
+        
+        // Recalcular totales
+        calcularTotales();
+    }   
+
     function refrescarTablaItems() {
         const itemsBody = document.getElementById('detalleItems');
         itemsBody.innerHTML = '';
@@ -1583,12 +1565,20 @@
                 <td><input type="text" value="${item.descripcion}" placeholder="Descripción" onchange="actualizarItemCampo(${index}, 'descripcion', this.value)"></td>
                 <td><input type="number" value="${item.cantidad}" min="1" onchange="actualizarItem(${index}, 'cantidad', this.value)"></td>
                 <td><input type="number" value="${item.precio}" min="0" step="1000" onchange="actualizarItem(${index}, 'precio', this.value)"></td>
-                <td><input type="number" value="${item.descuento}" min="0" max="100" step="0.1" onchange="actualizarItem(${index}, 'descuento', this.value)"></td>
+                <td>
+                    <input type="number" 
+                        value="${item.descuento}" 
+                        min="0" 
+                        max="100" 
+                        step="0.1" 
+                        onchange="actualizarItem(${index}, 'descuento', this.value)">
+                </td>
                 <td id="itemTotal${index}">${formatearNumero(item.total)}</td>
             `;
             itemsBody.appendChild(row);
         });
-
+        
+        // Recalcular totales generales
         calcularTotales();
     }
 
@@ -1600,6 +1590,7 @@
     function actualizarItem(index, campo, valor) {
         if (!ventaSeleccionada) return;
         
+        // Actualizar el campo del item
         ventaSeleccionada.items[index][campo] = parseFloat(valor) || 0;
         
         // Recalcular total del item
@@ -1609,38 +1600,46 @@
         item.total = subtotalItem - descuentoItem;
         
         document.getElementById(`itemTotal${index}`).textContent = formatearNumero(item.total);
+        
+        // Recalcular totales generales (el descuento global se aplica automáticamente)
         calcularTotales();
     }
 
     function calcularTotales() {
         if (!ventaSeleccionada) return;
 
+        // Calcular subtotal (suma de todos los items SIN descuento global)
         let subtotal = 0;
         ventaSeleccionada.items.forEach(item => {
+            // Recalcular total del item basado en su precio y descuento individual
+            const subtotalItem = item.cantidad * item.precio;
+            const descuentoItem = subtotalItem * (item.descuento / 100);
+            item.total = subtotalItem - descuentoItem;
             subtotal += item.total;
         });
 
-        const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
-        const descuentoMonto = subtotal * (descuentoGlobal / 100);
-        const subtotalConDescuento = subtotal - descuentoMonto;
-
-        const impuestos = 0;
-        
-        const exonerarCheckbox = document.getElementById('exonerarVenta');
-        if (exonerarCheckbox) {
-            exonerarCheckbox.checked = true;
-            exonerarCheckbox.disabled = true;
-        }
-        
-        const total = subtotalConDescuento + impuestos;
+        // Aplicar descuento global SOLO al total final
+        const descuentoGlobalPorcentaje = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
+        const descuentoGlobalMonto = subtotal * (descuentoGlobalPorcentaje / 100);
+        const totalConDescuento = subtotal - descuentoGlobalMonto;
 
         // Mostrar con formato
         document.getElementById('detalleSubtotal').textContent = formatearNumero(subtotal);
-        document.getElementById('detalleDescuentoGlobal').textContent = formatearNumero(descuentoMonto);
-        document.getElementById('detalleImpuestos').textContent = formatearNumero(impuestos);
-        document.getElementById('detalleTotal').textContent = formatearNumero(total);
         
-        ventaSeleccionada.monto_total = total;
+        // Mostrar el descuento global con porcentaje y monto
+        if (descuentoGlobalPorcentaje > 0) {
+            document.getElementById('detalleDescuentoGlobal').textContent = `${descuentoGlobalPorcentaje}% (₡${formatearNumero(descuentoGlobalMonto)})`;
+        } else {
+            document.getElementById('detalleDescuentoGlobal').textContent = '0% (₡0,00)';
+        }
+        
+        document.getElementById('detalleTotal').textContent = formatearNumero(totalConDescuento);
+        
+        // Guardar el total final en la venta seleccionada
+        ventaSeleccionada.monto_total = totalConDescuento;
+        ventaSeleccionada.subtotal = subtotal;
+        ventaSeleccionada.descuento_global_porcentaje = descuentoGlobalPorcentaje;
+        ventaSeleccionada.descuento_global_monto = descuentoGlobalMonto;
     }
 
     function cerrarDetalle() {
@@ -1678,12 +1677,7 @@
         try {
             const subtotal = desformatearNumero(document.getElementById('detalleSubtotal').textContent);
             const descuentoMonto = desformatearNumero(document.getElementById('detalleDescuentoGlobal').textContent);
-            // Impuestos siempre 0
-            const impuestos = 0;
             const total = desformatearNumero(document.getElementById('detalleTotal').textContent);
-            
-            // Exonerar siempre true
-            const exonerar = true;
             const descuentoGlobal = parseFloat(document.getElementById('descuentoGlobal').value) || 0;
             
             const idPersona = sessionStorage.getItem('usuarioId');
@@ -1701,9 +1695,7 @@
                     observaciones: 'Venta aprobada desde facturación',
                     subtotal: subtotal,
                     descuento_global: descuentoMonto,
-                    impuestos: impuestos, // Siempre 0
                     total: total,
-                    exonerar_imp: exonerar, // Siempre true
                     items: ventaSeleccionada.items,
                     id_aprobador: idPersona
                 })
@@ -1878,6 +1870,4 @@
     document.head.appendChild(style);
 </script>
 </body>
-
 </html>
-
