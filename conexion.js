@@ -4683,22 +4683,213 @@ app.get('/api/buscar/personas', async (req, res) => {
 });
 
 // ==== APIS PARA VALIDACIONES =======
-// Verificar si identificación existe
-app.get('/api/validar/identificacion/:identificacion', async (req, res) => {
+// Validar si una placa ya existe (para vehículos)
+app.get('/api/validar/placa/:placa', async (req, res) => {
     try {
+        const { placa } = req.params;
+        const { id_vehiculo_excluir } = req.query; // Para edición, excluir el vehículo actual
+        
+        if (!placa || placa.trim() === '') {
+            return res.json({ existe: false, message: 'Placa vacía es válida' });
+        }
+        
         const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(
-            'SELECT ID_PERSONA, NOMBRE_COMPLETO FROM PERSONAS WHERE IDENTIFICACION = ?',
-            [req.params.identificacion]
-        );
+        
+        let query = 'SELECT ID_VEHICULO, PLACA FROM VEHICULOS WHERE PLACA = ?';
+        const params = [placa];
+        
+        if (id_vehiculo_excluir) {
+            query += ' AND ID_VEHICULO != ?';
+            params.push(id_vehiculo_excluir);
+        }
+        
+        const [rows] = await connection.execute(query, params);
         await connection.end();
         
-        res.json({
-            existe: rows.length > 0,
-            persona: rows.length > 0 ? rows[0] : null
-        });
+        if (rows.length > 0) {
+            res.json({ 
+                existe: true, 
+                message: `La placa "${placa}" ya está registrada en el vehículo ID: ${rows[0].ID_VEHICULO}`,
+                id_vehiculo: rows[0].ID_VEHICULO
+            });
+        } else {
+            res.json({ existe: false, message: 'Placa disponible' });
+        }
     } catch (err) {
-        console.error('Error al validar identificación:', err);
+        console.error('Error validando placa:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Validar si un chasis ya existe
+app.get('/api/validar/chasis/:chasis', async (req, res) => {
+    try {
+        const { chasis } = req.params;
+        const { id_vehiculo_excluir } = req.query;
+        
+        if (!chasis || chasis.trim() === '') {
+            return res.json({ existe: false, message: 'Chasis requerido' });
+        }
+        
+        const connection = await mysql.createConnection(dbConfig);
+        
+        let query = 'SELECT ID_VEHICULO, CHASIS, PLACA FROM VEHICULOS WHERE CHASIS = ?';
+        const params = [chasis];
+        
+        if (id_vehiculo_excluir) {
+            query += ' AND ID_VEHICULO != ?';
+            params.push(id_vehiculo_excluir);
+        }
+        
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+        
+        if (rows.length > 0) {
+            res.json({ 
+                existe: true, 
+                message: `El chasis "${chasis}" ya está registrado en el vehículo con placa: ${rows[0].PLACA || 'S/N'}`,
+                id_vehiculo: rows[0].ID_VEHICULO
+            });
+        } else {
+            res.json({ existe: false, message: 'Chasis disponible' });
+        }
+    } catch (err) {
+        console.error('Error validando chasis:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Validar identificación
+app.get('/api/validar/identificacion/:identificacion', async (req, res) => {
+    try {
+        const { identificacion } = req.params;
+        const { id_persona_excluir } = req.query;
+        
+        if (!identificacion || identificacion.trim() === '') {
+            return res.status(400).json({ 
+                existe: false, 
+                message: 'La identificación es requerida' 
+            });
+        }
+        
+        const connection = await mysql.createConnection(dbConfig);
+        
+        let query = `
+            SELECT 
+                p.ID_PERSONA, 
+                p.NOMBRE_COMPLETO, 
+                p.TELEFONO_PRINCIPAL,
+                p.EMAIL,
+                GROUP_CONCAT(DISTINCT r.NOMBRE SEPARATOR ', ') as roles
+            FROM PERSONAS p
+            LEFT JOIN PERSONAS_ROLES pr ON p.ID_PERSONA = pr.ID_PERSONA AND pr.ESTADO = 'ACTIVO'
+            LEFT JOIN ROLES r ON pr.ID_ROL = r.ID_ROL
+            WHERE p.IDENTIFICACION = ?
+        `;
+        const params = [identificacion];
+        
+        if (id_persona_excluir) {
+            query += ' AND p.ID_PERSONA != ?';
+            params.push(id_persona_excluir);
+        }
+        
+        query += ' GROUP BY p.ID_PERSONA';
+        
+        const [rows] = await connection.execute(query, params);
+        await connection.end();
+        
+        if (rows.length > 0) {
+            const persona = rows[0];
+            res.json({ 
+                existe: true, 
+                message: `Ya existe una persona registrada con identificación: ${identificacion}\n` +
+                        `Nombre: ${persona.NOMBRE_COMPLETO}\n` +
+                        `Teléfono: ${persona.TELEFONO_PRINCIPAL || 'N/A'}\n` +
+                        `Roles: ${persona.roles || 'Sin rol asignado'}`,
+                id_persona: persona.ID_PERSONA,
+                datos: {
+                    nombre: persona.NOMBRE_COMPLETO,
+                    telefono: persona.TELEFONO_PRINCIPAL,
+                    email: persona.EMAIL,
+                    roles: persona.roles
+                }
+            });
+        } else {
+            res.json({ 
+                existe: false, 
+                message: '✓ Identificación disponible para registrar' 
+            });
+        }
+    } catch (err) {
+        console.error('Error validando identificación:', err);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Validar múltiples campos a la vez (para vehículos)
+app.post('/api/validar/vehiculo', async (req, res) => {
+    try {
+        const { placa, chasis, motor, id_vehiculo_excluir } = req.body;
+        const errores = [];
+        
+        const connection = await mysql.createConnection(dbConfig);
+        
+        // Validar placa
+        if (placa && placa.trim() !== '') {
+            let query = 'SELECT ID_VEHICULO, PLACA FROM VEHICULOS WHERE PLACA = ?';
+            const params = [placa];
+            if (id_vehiculo_excluir) {
+                query += ' AND ID_VEHICULO != ?';
+                params.push(id_vehiculo_excluir);
+            }
+            const [rows] = await connection.execute(query, params);
+            if (rows.length > 0) {
+                errores.push(`La placa "${placa}" ya está registrada`);
+            }
+        }
+        
+        // Validar chasis (siempre requerido)
+        if (chasis && chasis.trim() !== '') {
+            let query = 'SELECT ID_VEHICULO, CHASIS FROM VEHICULOS WHERE CHASIS = ?';
+            const params = [chasis];
+            if (id_vehiculo_excluir) {
+                query += ' AND ID_VEHICULO != ?';
+                params.push(id_vehiculo_excluir);
+            }
+            const [rows] = await connection.execute(query, params);
+            if (rows.length > 0) {
+                errores.push(`El chasis "${chasis}" ya está registrado`);
+            }
+        }
+        
+        // Validar motor (si se proporciona)
+        if (motor && motor.trim() !== '') {
+            let query = 'SELECT ID_VEHICULO, MOTOR FROM VEHICULOS WHERE MOTOR = ? AND MOTOR IS NOT NULL';
+            const params = [motor];
+            if (id_vehiculo_excluir) {
+                query += ' AND ID_VEHICULO != ?';
+                params.push(id_vehiculo_excluir);
+            }
+            const [rows] = await connection.execute(query, params);
+            if (rows.length > 0) {
+                errores.push(`El número de motor "${motor}" ya está registrado`);
+            }
+        }
+        
+        await connection.end();
+        
+        if (errores.length > 0) {
+            res.status(400).json({ 
+                valido: false, 
+                errores: errores,
+                message: errores.join('. ')
+            });
+        } else {
+            res.json({ valido: true, message: 'Vehículo válido para registrar' });
+        }
+        
+    } catch (err) {
+        console.error('Error validando vehículo:', err);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
