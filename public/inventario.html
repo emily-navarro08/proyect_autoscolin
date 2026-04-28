@@ -459,13 +459,16 @@
 
     /* Alerta */
     .alert {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000 !important;
-        min-width: 300px;
-        max-width: 500px;
-        animation: slideInRight 0.3s ease;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+     z-index: 10000 !important; 
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
     .alert-success {
@@ -1408,11 +1411,7 @@
             const ecRes = await fetch(`${API_BASE_URL}/estados-civil`);
             estadosCivil = await ecRes.json();
             const selectEstadoCivil = document.getElementById('modalProvEstadoCivil');
-            
-            // Limpiar opciones existentes
-            selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>';
-            
-            // Agregar opciones
+            selectEstadoCivil.innerHTML = '<option value="">Seleccionar</option>'; 
             estadosCivil.forEach(ec => {
                 selectEstadoCivil.innerHTML += `<option value="${ec.ID_ESTADO_CIVIL}">${ec.NOMBRE}</option>`;
             });       
@@ -1422,41 +1421,45 @@
             marcas = await marcasRes.json();
             const selectMarca = document.getElementById('modalMarca');
             const filtroMarca = document.getElementById('filtroMarca');
-            
+            selectMarca.innerHTML = '<option value="">Seleccione marca</option>'; 
+            filtroMarca.innerHTML = '<option value="">Todas las marcas</option>'; 
             marcas.forEach(m => {
                 selectMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
                 filtroMarca.innerHTML += `<option value="${m.ID_MARCA}">${m.NOMBRE}</option>`;
             });
-    
+
             // Cargar colores
             const coloresRes = await fetch(`${API_BASE_URL}/colores`);
             colores = await coloresRes.json();
             const selectColor = document.getElementById('modalColor');
+            selectColor.innerHTML = '<option value="">Seleccione color</option>'; 
             colores.forEach(c => {
                 selectColor.innerHTML += `<option value="${c.ID_COLOR}">${c.NOMBRE}</option>`;
             });
-    
+
             // Cargar combustibles
             const combRes = await fetch(`${API_BASE_URL}/combustibles`);
             combustibles = await combRes.json();
             const selectComb = document.getElementById('modalCombustible');
+            selectComb.innerHTML = '<option value="">Seleccione combustible</option>'; 
             combustibles.forEach(c => {
                 selectComb.innerHTML += `<option value="${c.ID_COMBUSTIBLE}">${c.NOMBRE}</option>`;
             });
-    
+
             // Cargar transmisiones
             const transRes = await fetch(`${API_BASE_URL}/transmisiones`);
             transmisiones = await transRes.json();
             const selectTrans = document.getElementById('modalTransmision');
+            selectTrans.innerHTML = '<option value="">Seleccione transmisión</option>'; 
             transmisiones.forEach(t => {
                 selectTrans.innerHTML += `<option value="${t.ID_TRANSMISION}">${t.NOMBRE}</option>`;
             });
-    
+
             // Cargar proveedores
             const provRes = await fetch(`${API_BASE_URL}/proveedores`);
             proveedores = await provRes.json();
-            llenarSelectProveedores();
-    
+            llenarSelectProveedores(); // ya limpia internamente
+
         } catch (error) {
             console.error('Error cargando catálogos:', error);
             mostrarAlerta('error', 'Error cargando catálogos');
@@ -1673,17 +1676,22 @@
     }
 
     // ===== FUNCIONES DEL MODAL =====
-    function abrirModalNuevo() {
+    async function abrirModalNuevo() {
         vehiculoActual = null;
         document.getElementById('modalTitleText').textContent = 'Nuevo Vehículo';
         document.getElementById('modalPlacaBadge').textContent = '';
-        limpiarFormulario();
+        limpiarFormulario();       
         document.getElementById('vehiculoModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
+        iniciarRecargaCatalogos();
     }
+
 
     async function editarVehiculo(id) {
         try {
+
+            await cargarCatalogos();
+            
             const response = await fetch(`${API_BASE_URL}/vehiculos/${id}/completo`);
             const data = await response.json();
             
@@ -1772,6 +1780,8 @@
     function cerrarModal() {
         document.getElementById('vehiculoModal').style.display = 'none';
         document.body.style.overflow = 'auto';
+
+        detenerRecargaCatalogos();
         
         // Habilitar campos
         document.querySelectorAll('#vehiculoModal input, #vehiculoModal select, #vehiculoModal textarea').forEach(el => {
@@ -2324,14 +2334,80 @@
         loadObservations();
     }
 
+    async function validarPlaca(placa, idVehiculoActual = null) {
+        if (!placa || placa.trim() === '') return true;
+        
+        try {
+            let url = `${API_BASE_URL}/validar/placa/${encodeURIComponent(placa)}`;
+            if (idVehiculoActual) {
+                url += `?id_vehiculo_excluir=${idVehiculoActual}`;
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.existe) {
+                mostrarAlerta('error', data.message);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Error validando placa:', error);
+            return true; // En caso de error, permitir continuar
+        }
+    }
+    
+    async function validarChasis(chasis, idVehiculoActual = null) {
+        if (!chasis || chasis.trim() === '') {
+            mostrarAlerta('warning', 'El chasis es requerido');
+            return false;
+        }
+        
+        try {
+            let url = `${API_BASE_URL}/validar/chasis/${encodeURIComponent(chasis)}`;
+            if (idVehiculoActual) {
+                url += `?id_vehiculo_excluir=${idVehiculoActual}`;
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.existe) {
+                mostrarAlerta('error', data.message);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Error validando chasis:', error);
+            return true;
+        }
+    }    
+
     // ===== FUNCIÓN PARA GUARDAR =====
     async function guardarVehiculo() {
         try {
-            // Validar campos requeridos del vehículo
-            if (!document.getElementById('modalChasis').value) {
-                mostrarAlerta('error', 'El chasis es requerido');
+            // Validar chasis (obligatorio)
+            const chasis = document.getElementById('modalChasis').value.trim();
+            if (!chasis) {
+                mostrarAlerta('error', 'El chasis es obligatorio');
+                document.getElementById('modalChasis').focus();
                 return;
             }
+            
+            const idVehiculoActual = vehiculoActual ? vehiculoActual.ID_VEHICULO : null;
+            
+            // ✅ Validar chasis duplicado
+            const chasisValido = await validarChasis(chasis, idVehiculoActual);
+            if (!chasisValido) return;
+            
+            // ✅ Validar placa duplicada (si tiene placa)
+            const placa = document.getElementById('modalPlaca').value.trim();
+            if (placa) {
+                const placaValida = await validarPlaca(placa, idVehiculoActual);
+                if (!placaValida) return;
+            }
+            
+            // Validar marca y modelo
             if (!document.getElementById('modalMarca').value) {
                 mostrarAlerta('error', 'La marca es requerida');
                 return;
@@ -2860,6 +2936,60 @@
             
         limpiarMensajeEstado();
     }
+
+    // ===== RECARGA DE CATÁLOGOS EN SEGUNDO PLANO =====
+    let intervaloRecargaCatalogos = null;
+
+    async function actualizarCatalogoSilencioso(endpoint, selectId, idField, nombreField, opcionDefault) {
+        try {
+            const res = await fetch(endpoint);
+            const datos = await res.json();
+            const select = document.getElementById(selectId);
+            if (!select) return;
+
+            // IDs que ya están en el select actualmente
+            const idsExistentes = new Set(
+                [...select.options].map(o => o.value).filter(v => v !== '')
+            );
+
+            // Solo agregar los que NO existen todavía
+            datos.forEach(item => {
+                const id = String(item[idField]);
+                if (!idsExistentes.has(id)) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = item[nombreField];
+                    select.appendChild(option);
+                }
+            });
+
+        } catch (e) {
+            // Silencioso, no interrumpir al usuario
+        }
+    }
+
+    async function recargarCatalogosEnBackground() {
+        // Actualiza cada select sin borrar ni tocar la selección actual
+        await actualizarCatalogoSilencioso(`${API_BASE_URL}/marcas`,        'modalMarca',        'ID_MARCA',        'NOMBRE', 'Seleccione marca');
+        await actualizarCatalogoSilencioso(`${API_BASE_URL}/colores`,       'modalColor',        'ID_COLOR',        'NOMBRE', 'Seleccione color');
+        await actualizarCatalogoSilencioso(`${API_BASE_URL}/combustibles`,  'modalCombustible',  'ID_COMBUSTIBLE',  'NOMBRE', 'Seleccione combustible');
+        await actualizarCatalogoSilencioso(`${API_BASE_URL}/transmisiones`, 'modalTransmision',  'ID_TRANSMISION',  'NOMBRE', 'Seleccione transmisión');
+
+        // También actualizar el filtro de marcas de la tabla
+        await actualizarCatalogoSilencioso(`${API_BASE_URL}/marcas`, 'filtroMarca', 'ID_MARCA', 'NOMBRE', 'Todas las marcas');
+    }
+
+    function iniciarRecargaCatalogos() {
+        recargarCatalogosEnBackground(); // ejecutar de inmediato
+        intervaloRecargaCatalogos = setInterval(recargarCatalogosEnBackground, 10000); // luego cada 10 seg
+    }
+
+    function detenerRecargaCatalogos() {
+        if (intervaloRecargaCatalogos) {
+            clearInterval(intervaloRecargaCatalogos);
+            intervaloRecargaCatalogos = null;
+        }
+    }    
   </script>
 </body>
 </html>
